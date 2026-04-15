@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Scores Tennis + | Partidas ao vivo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="public-page">
+  <header class="topbar topbar-glass">
+    <div class="brand-wrap">
+      <div class="brand-icon">🎾</div>
+      <div>
+        <h1>Live Scores Tennis +</h1>
+        <p>Partidas ao vivo</p>
+      </div>
+    </div>
+
+    <nav class="topnav">
+      <a href="login.html" class="btn link">Admin</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero hero-glass">
+      <div class="hero-content">
+        <span class="section-kicker">Acompanhamento ao vivo</span>
+        <h2>Tenha uma visão rápida dos jogos do dia</h2>
+        <p>
+          Acompanhe partidas em andamento, programadas e finalizadas em uma interface limpa, moderna e responsiva.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#gamesGrid" class="btn primary">Ver partidas</a>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-card stat-scheduled">
+          <div class="stat-icon">🗓️</div>
+          <span>Jogos do dia</span>
+          <strong id="scheduledCount">0</strong>
+        </div>
+
+        <div class="stat-card stat-live">
+          <div class="stat-icon">⚡</div>
+          <span>Em andamento</span>
+          <strong id="liveCount">0</strong>
+        </div>
+
+        <div class="stat-card stat-finished">
+          <div class="stat-icon">🏁</div>
+          <span>Finalizados</span>
+          <strong id="finishedCount">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-3 public-grid mt-20" id="gamesGrid">
+      <div class="panel panel-glass column-panel">
+        <div class="dashboard-title">
+          <div class="title-with-icon">
+            <span class="section-icon">🗓️</span>
+            <h3>Jogos do dia</h3>
+          </div>
+          <span class="badge" id="countScheduled">0</span>
+        </div>
+        <div id="scheduledList" class="cards compact-cards"></div>
+      </div>
+
+      <div class="panel panel-glass column-panel">
+        <div class="dashboard-title">
+          <div class="title-with-icon">
+            <span class="section-icon live">⚡</span>
+            <h3>Jogos em andamento</h3>
+          </div>
+          <span class="badge" id="countLive">0</span>
+        </div>
+        <div id="liveList" class="cards compact-cards"></div>
+      </div>
+
+      <div class="panel panel-glass column-panel">
+        <div class="dashboard-title">
+          <div class="title-with-icon">
+            <span class="section-icon finished">🏁</span>
+            <h3>Jogos finalizados</h3>
+          </div>
+          <span class="badge" id="countFinished">0</span>
+        </div>
+        <div id="finishedList" class="cards compact-cards"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/public.js"></script>
+</body>
+</html>

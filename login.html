@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login Admin | Live Scores Tennis +</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <h1>Admin</h1>
+      <p class="muted">Entre para gerenciar as partidas.</p>
+
+      <form id="loginForm" class="form">
+        <label>E-mail
+          <input type="email" id="email" required />
+        </label>
+
+        <label>Senha
+          <input type="password" id="password" required />
+        </label>
+
+        <label class="check-row">
+          <input type="checkbox" id="rememberMe" />
+          Lembrar acesso
+        </label>
+
+        <button type="submit" class="btn primary">Entrar</button>
+      </form>
+
+      <p class="muted"><a href="index.html">Voltar à visualização</a></p>
+      <div id="loginMsg" class="msg"></div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

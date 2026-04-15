@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin | Live Scores Tennis +</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Painel Administrativo</h1>
+      <p>Cadastro e manutenção das partidas</p>
+    </div>
+    <nav class="topnav">
+      <a href="index.html">Visualização</a>
+      <button id="logoutBtn" class="btn link">Sair</button>
+    </nav>
+  </header>
+
+  <main class="container stack">
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h2 id="formTitle">Nova partida</h2>
+          <p class="muted">Cadastre e gerencie os jogos ao vivo</p>
+        </div>
+        <div class="actions">
+          <button id="newMatchBtn" class="btn">Nova partida</button>
+        </div>
+      </div>
+
+      <form id="matchForm" class="form grid-form">
+        <input type="hidden" id="docId" />
+
+        <label>Nome da categoria
+          <input type="text" id="categoryName" required />
+        </label>
+
+        <label>Formato da partida
+          <input type="text" id="matchFormat" placeholder="Ex: 2 sets com vantagem + supertiebreak de 10" required />
+        </label>
+
+        <label>Data e hora da partida
+          <input type="datetime-local" id="matchDateTime" required />
+        </label>
+
+        <label>Quadra
+          <input type="text" id="court" required />
+        </label>
+
+        <label>Fase do torneio
+          <input type="text" id="tournamentStage" required />
+        </label>
+
+        <label>Status inicial
+          <select id="status">
+            <option value="scheduled">Jogos do dia</option>
+            <option value="live">Em andamento</option>
+            <option value="finished">Finalizada</option>
+            <option value="wo">Finalizada por WO</option>
+          </select>
+        </label>
+
+        <label>Nome do jogador 1
+          <input type="text" id="player1" required />
+        </label>
+
+        <label>Nome do jogador 2
+          <input type="text" id="player2" required />
+        </label>
+
+        <label>WO (vencedor por WO)
+          <select id="winnerByWO">
+            <option value="">Nenhum</option>
+            <option value="player1">Jogador 1</option>
+            <option value="player2">Jogador 2</option>
+          </select>
+        </label>
+
+        <div class="actions full">
+          <button type="submit" class="btn primary">Salvar</button>
+          <button type="button" id="clearBtn" class="btn">Limpar</button>
+        </div>
+      </form>
+
+      <div id="adminMsg" class="msg"></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Partidas cadastradas</h2>
+          <p class="muted">Copie, detalhe, edite ou exclua partidas</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nº</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th>Opções</th>
+            </tr>
+          </thead>
+          <tbody id="matchesTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="detailsDialog" class="dialog">
+    <div class="dialog-head">
+      <h3>Detalhes da partida</h3>
+      <button id="closeDialogBtn" class="btn">Fechar</button>
+    </div>
+    <div id="detailsContent" class="details"></div>
+  </dialog>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
