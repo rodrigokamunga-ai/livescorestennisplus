@@ -4,18 +4,14 @@ const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const rememberMe = document.getElementById('rememberMe');
 
-function setMsg(text) {
-  msg.textContent = text || '';
-}
-
-function goAdmin() {
-  window.location.replace('admin.html');
-}
-
 const savedEmail = localStorage.getItem('rememberedEmail');
 if (savedEmail) {
   emailInput.value = savedEmail;
   rememberMe.checked = true;
+}
+
+function setMsg(text) {
+  msg.textContent = text || '';
 }
 
 __auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -23,13 +19,13 @@ __auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     __auth.onAuthStateChanged((user) => {
       if (user) {
         localStorage.setItem('lsts_admin_session', '1');
-        goAdmin();
+        window.location.replace('admin.html');
       }
     });
   })
   .catch((err) => {
     console.error(err);
-    setMsg('Erro ao configurar persistência de login.');
+    setMsg('Erro ao configurar login.');
   });
 
 form.addEventListener('submit', async (e) => {
@@ -49,7 +45,7 @@ form.addEventListener('submit', async (e) => {
     }
 
     localStorage.setItem('lsts_admin_session', '1');
-    goAdmin();
+    window.location.replace('admin.html');
   } catch (err) {
     console.error(err);
     setMsg(err.message);
