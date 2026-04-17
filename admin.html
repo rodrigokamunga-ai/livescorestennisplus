@@ -6,25 +6,33 @@
   <title>Admin | Live Scores Tennis +</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-  <header class="topbar">
-    <div>
-      <h1>Painel Administrativo</h1>
-      <p>Cadastro e manutenção das partidas</p>
-    </div>
-    <nav class="topnav">
-      <a href="index.html">Visualização</a>
-      <button id="logoutBtn" class="btn link">Sair</button>
-    </nav>
-  </header>
-
+<body class="admin-page">
   <main class="container stack">
-    <section class="panel">
+
+    <section class="panel panel-glass admin-panel">
+
+      <header class="topbar topbar-glass admin-topbar-inside">
+        <div class="brand-wrap">
+          <div class="brand-icon">🎾</div>
+          <div>
+            <h1>Painel Administrativo</h1>
+            <p>Cadastro e manutenção das partidas</p>
+          </div>
+        </div>
+
+        <nav class="topnav">
+          <a href="index.html" class="btn link">Visualização</a>
+          <button id="logoutBtn" class="btn link">Sair</button>
+        </nav>
+      </header>
+
       <div class="section-head">
         <div>
+          <span class="section-kicker">Gerenciamento</span>
           <h2 id="formTitle">Nova partida</h2>
           <p class="muted">Cadastre e gerencie os jogos ao vivo</p>
         </div>
+
         <div class="actions">
           <button id="newMatchBtn" class="btn">Nova partida</button>
         </div>
@@ -38,7 +46,22 @@
         </label>
 
         <label>Formato da partida
-          <input type="text" id="matchFormat" placeholder="Ex: 2 sets com vantagem + supertiebreak de 10" required />
+          <select id="matchFormat" required>
+            <option value="">Selecione...</option>
+            <option value="3 sets com vantagem">3 sets com vantagem</option>
+            <option value="3 sets sem vantagem">3 sets sem vantagem</option>
+            <option value="2 sets com vantagem + o 3º set um supertiebreak de 10 pontos">2 sets com vantagem + o 3º set um supertiebreak de 10 pontos</option>
+            <option value="2 sets sem vantagem + o 3º set um supertiebreak de 10 pontos">2 sets sem vantagem + o 3º set um supertiebreak de 10 pontos</option>
+            <option value="1 set com vantagem com supertiebreak de 10 pontos">1 set com vantagem com supertiebreak de 10 pontos</option>
+            <option value="1 set sem vantagem com um supertiebreak de 10 pontos">1 set sem vantagem com um supertiebreak de 10 pontos</option>
+            <option value="1 set com vantagem com um tiebreak de 7 pontos">1 set com vantagem com um tiebreak de 7 pontos</option>
+            <option value="1 set sem vantagem com um tiebreak de 7 pontos">1 set sem vantagem com um tiebreak de 7 pontos</option>
+            <option value="1 set pro de 8 games com vantagem com um tiebreak de 7 pontos">1 set pro de 8 games com vantagem com um tiebreak de 7 pontos</option>
+            <option value="1 set pro de 8 games sem vantagem com um tiebreak de 7 pontos">1 set pro de 8 games sem vantagem com um tiebreak de 7 pontos</option>
+            <option value="1 set pro de 8 games sem vantagem com um supertiebreak de 10 pontos">1 set pro de 8 games sem vantagem com um supertiebreak de 10 pontos</option>
+            <option value="2 sets de 4 games sem vantagem com um supertiebreak de 10 pontos">2 sets de 4 games sem vantagem com um supertiebreak de 10 pontos</option>
+            <option value="2 sets de 4 games com vantagem com um supertiebreak de 10 pontos">2 sets de 4 games com vantagem com um supertiebreak de 10 pontos</option>
+          </select>
         </label>
 
         <label>Data e hora da partida
@@ -50,7 +73,16 @@
         </label>
 
         <label>Fase do torneio
-          <input type="text" id="tournamentStage" required />
+          <select id="tournamentStage" required>
+            <option value="">Selecione...</option>
+            <option value="Primeira Rodada">Primeira Rodada</option>
+            <option value="Segunda Rodada">Segunda Rodada</option>
+            <option value="Terceira Rodada">Terceira Rodada</option>
+            <option value="Oitavas de Final">Oitavas de Final</option>
+            <option value="Quartas de Final">Quartas de Final</option>
+            <option value="Semifinais">Semifinais</option>
+            <option value="Final">Final</option>
+          </select>
         </label>
 
         <label>Status inicial
@@ -87,28 +119,50 @@
       <div id="adminMsg" class="msg"></div>
     </section>
 
-    <section class="panel">
+    <section class="panel panel-glass">
       <div class="section-head">
         <div>
+          <span class="section-kicker">Lista de partidas</span>
           <h2>Partidas cadastradas</h2>
-          <p class="muted">Copie, detalhe, edite ou exclua partidas</p>
+          <p class="muted">Filtre, pagine e gerencie as partidas</p>
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table>
+      <div class="filters-bar">
+        <input type="text" id="filterPlayers" placeholder="Pesquisar por jogador" />
+        <input type="text" id="filterCategory" placeholder="Pesquisar por categoria" />
+        <select id="filterStatus">
+          <option value="">Todos os status</option>
+          <option value="scheduled">Jogos do dia</option>
+          <option value="live">Em andamento</option>
+          <option value="finished">Finalizada</option>
+          <option value="wo">WO</option>
+        </select>
+      </div>
+
+      <div class="table-wrap desktop-table">
+        <table class="admin-table">
           <thead>
             <tr>
-              <th>Nº</th>
-              <th>Categoria</th>
-              <th>Status</th>
-              <th>Opções</th>
+              <th class="col-players">Jogadores</th>
+              <th class="col-category">Categoria</th>
+              <th class="col-status">Status</th>
+              <th class="col-actions">Opções</th>
             </tr>
           </thead>
           <tbody id="matchesTable"></tbody>
         </table>
       </div>
+
+      <div class="pagination-bar">
+        <button id="prevPageBtn" class="btn">Anterior</button>
+        <div class="pagination-info">
+          Página <strong id="pageInfo">1</strong> de <strong id="totalPages">1</strong>
+        </div>
+        <button id="nextPageBtn" class="btn">Próxima</button>
+      </div>
     </section>
+
   </main>
 
   <dialog id="detailsDialog" class="dialog">

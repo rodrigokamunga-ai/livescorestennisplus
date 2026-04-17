@@ -5,74 +5,136 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Jogador | Live Scores Tennis +</title>
   <link rel="stylesheet" href="css/style.css" />
-</head>
-<body class="player-page">
-  <header class="topbar">
-    <div>
-      <h1>Live Scores Tennis +</h1>
-      <p id="matchHeader">Carregando partida...</p>
-    </div>
-    <nav class="topnav">
-      <a href="index.html">Visualização</a>
-    </nav>
-  </header>
 
+  <style> /* VISUAL PREMIUM DOS JOGADORES */ .premium-score-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; margin-top:16px; } .premium-player-card{ background:linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:18px; min-height:300px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 12px 30px rgba(0,0,0,.22); } .premium-top-box{ position:relative; height:110px; border-radius:20px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); display:flex; align-items:center; justify-content:center; overflow:hidden; } .premium-status-dot{ position:absolute; left:50%; top:50%; transform:translate(-105px, -50%); width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 0 0 2px rgba(0,0,0,.25); z-index:2; } .premium-ball{ width:70px; height:70px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; background:rgba(144, 238, 144, 0.10); border:2px solid rgba(181, 255, 97, 0.22); box-shadow:0 0 0 6px rgba(181, 255, 97, 0.08); z-index:1; } .premium-player-name{ margin-top:14px; padding:16px 12px; border-radius:18px; text-align:center; font-size:26px; font-weight:800; color:#eaf1ff; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); } .premium-point-box{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top:18px; } .premium-point-btn{ width:56px; height:56px; border-radius:16px; border:1px solid rgba(181, 255, 97, 0.22); background:rgba(93, 108, 81, 0.45); color:#c8ff62; font-size:34px; font-weight:900; line-height:1; cursor:pointer; transition:transform .15s ease, background .15s ease; } .premium-point-btn:hover{ transform:translateY(-1px); background:rgba(93, 108, 81, 0.62); } .premium-point-value{ font-size:58px; line-height:1; font-weight:900; color:#c8ff62; letter-spacing:1px; min-width:70px; text-align:center; } .premium-card-footer{ margin-top:16px; display:flex; flex-direction:column; gap:12px; } .premium-secondary-block{ padding:14px; border-radius:16px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); } /* SAQUE */ .serve-box{ margin-bottom:12px; } .serve-option-inline{ display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; } .serve-option-inline input{ width:16px; height:16px; accent-color:#4da3ff; cursor:pointer; } .serve-visual{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); transition:all .2s ease; width:100%; } .serve-racket{ font-size:22px; transition:filter .2s ease, transform .2s ease; } .serve-option-inline.is-serving .serve-visual{ border-color:rgba(77,163,255,.65); background:rgba(77,163,255,.18); box-shadow:0 0 0 1px rgba(77,163,255,.25) inset; } .serve-option-inline.is-serving .serve-racket{ filter:hue-rotate(185deg) saturate(2.5) brightness(1.2); transform:scale(1.05); } /* BLOCO QUADRADO EM 2 COLUNAS */ .score-grid-2{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; } .square-box{ min-height:74px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(20, 28, 45, .55); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:10px; } .square-box span{ display:block; font-size:12px; color:#aab5c7; font-weight:700; margin-bottom:6px; } .square-box strong{ font-size:24px; color:#ffffff; font-weight:900; line-height:1; } /* MANUAL GAMES */ .manual-mini{ display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end; } .manual-mini label{ display:flex; flex-direction:column; gap:6px; font-size:12px; font-weight:700; color:#aab5c7; } .manual-mini input{ width:100%; min-width:120px; height:44px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:rgba(20, 28, 45, .65); color:#fff; padding:0 12px; font-size:15px; outline:none; } .mini-save{ height:44px; padding:0 14px; border-radius:12px; white-space:nowrap; } .premium-card-footer .premium-secondary-block{ margin-top:0; } .match-meta-top{ margin-top:8px; display:flex; flex-direction:column; gap:4px; } .match-meta-top .meta-line{ font-size:14px; color:#dbe6ff; font-weight:600; } .match-meta-top .meta-line strong{ color:#ffffff; font-weight:800; } .panel-actions-inline{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; } @media (max-width: 700px){ .premium-score-grid{ grid-template-columns:1fr; } .premium-player-card{ min-height:260px; } .premium-player-name{ font-size:22px; } .premium-point-value{ font-size:50px; } .score-grid-2{ grid-template-columns:1fr 1fr; } .manual-mini{ grid-template-columns:1fr; } .panel-actions-inline{ justify-content:space-between; width:100%; } } </style>
+</head>
+
+<body class="player-page">
   <main class="container stack">
-    <section class="player-hero panel">
+    <section class="player-hero panel panel-glass">
+
       <div class="player-hero-top">
         <div>
           <span class="section-kicker">Painel do Jogador</span>
           <h2 id="matchTitle">Partida</h2>
-          <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
-        </div>
-        <div class="player-status" id="playerStatus">NÃO INICIADA</div>
-      </div>
 
-      <div class="player-info-grid" id="matchInfo"></div>
+          <div class="match-meta-top">
+            <div class="meta-line">
+              Data e hora: <strong id="matchDateTimeTop">-</strong>
+            </div>
+            <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
+          </div>
+        </div>
+      </div>
 
       <div class="player-timer-bar">
         <div><span>Duração</span><strong id="duration">00:00:00</strong></div>
         <div><span>Status</span><strong id="statusLabel">NÃO INICIADA</strong></div>
       </div>
 
-      <div class="actions player-actions">
+      <div id="playerPanelBody">
+        <div class="premium-score-grid">
+          <!-- JOGADOR 1 -->
+          <section class="premium-player-card player-card">
+            
+
+            <div class="premium-player-name" id="player1Name">Jogador 1</div>
+
+            <div class="premium-point-box">
+              <button class="premium-point-btn" data-delta="-1" data-target="player1">-</button>
+              <button class="premium-point-btn" data-delta="1" data-target="player1">+</button>
+              <strong id="points1" class="premium-point-value">0</strong>
+            </div>
+
+            <div class="premium-card-footer">
+              <div class="premium-secondary-block">
+                <div class="serve-box">
+                  <label class="serve-option-inline" for="servePlayer1">
+                    <input type="radio" name="server" value="player1" id="servePlayer1" />
+                    <span class="serve-visual">
+                      <span class="serve-racket">🎾</span>
+                      <span>Jogador 1</span>
+                    </span>
+                  </label>
+                </div>
+
+                <div class="score-grid-2">
+                  <div class="square-box">
+                    <span>Games</span>
+                    <strong id="games1">0</strong>
+                  </div>
+                  <div class="square-box">
+                    <span>Sets</span>
+                    <strong id="sets1">0</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="premium-secondary-block">
+                <div class="manual-mini">
+                  <label>Games Jogador 1
+                    <input type="number" min="0" id="editGames1" />
+                  </label>
+                  <button class="btn mini-save" data-save="player1-games">Salvar Games</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- JOGADOR 2 -->
+          <section class="premium-player-card player-card">
+            
+
+            <div class="premium-player-name" id="player2Name">Jogador 2</div>
+
+            <div class="premium-point-box">
+              <button class="premium-point-btn" data-delta="-1" data-target="player2">-</button>
+              <button class="premium-point-btn" data-delta="1" data-target="player2">+</button>
+              <strong id="points2" class="premium-point-value">0</strong>
+            </div>
+
+            <div class="premium-card-footer">
+              <div class="premium-secondary-block">
+                <div class="serve-box">
+                  <label class="serve-option-inline" for="servePlayer2">
+                    <input type="radio" name="server" value="player2" id="servePlayer2" />
+                    <span class="serve-visual">
+                      <span class="serve-racket">🎾</span>
+                      <span>Jogador 2</span>
+                    </span>
+                  </label>
+                </div>
+
+                <div class="score-grid-2">
+                  <div class="square-box">
+                    <span>Games</span>
+                    <strong id="games2">0</strong>
+                  </div>
+                  <div class="square-box">
+                    <span>Sets</span>
+                    <strong id="sets2">0</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="premium-secondary-block">
+                <div class="manual-mini">
+                  <label>Games Jogador 2
+                    <input type="number" min="0" id="editGames2" />
+                  </label>
+                  <button class="btn mini-save" data-save="player2-games">Salvar Games</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="player-footer-actions panel-actions-inline">
+        <a href="index.html" class="btn link">Visualização</a>
         <button id="startBtn" class="btn primary">Iniciar partida</button>
         <button id="finishBtn" class="btn danger">Finalizar partida</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="section-head">
-        <div>
-          <h2>Placar</h2>
-          <p class="muted">Controle de pontos e edição manual</p>
-        </div>
-      </div>
-
-      <div class="score-grid">
-        <div class="score-card player-card">
-          <div class="player-badge">JOGADOR 1</div>
-          <h3 id="player1Name">Jogador 1</h3>
-          <div class="score-value" id="score1">0</div>
-          <div class="score-controls">
-            <button class="btn" data-delta="1" data-target="player1">+</button>
-            <button class="btn" data-delta="-1" data-target="player1">-</button>
-            <input type="number" min="0" id="editScore1" />
-            <button class="btn" data-save="player1">Salvar</button>
-          </div>
-        </div>
-
-        <div class="score-card player-card">
-          <div class="player-badge">JOGADOR 2</div>
-          <h3 id="player2Name">Jogador 2</h3>
-          <div class="score-value" id="score2">0</div>
-          <div class="score-controls">
-            <button class="btn" data-delta="1" data-target="player2">+</button>
-            <button class="btn" data-delta="-1" data-target="player2">-</button>
-            <input type="number" min="0" id="editScore2" />
-            <button class="btn" data-save="player2">Salvar</button>
-          </div>
-        </div>
+        <button id="resetScoreBtn" class="btn danger">Zerar placar</button>
       </div>
 
       <div id="playerMsg" class="msg"></div>
@@ -83,6 +145,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="js/firebase.js"></script>
+  <script src="js/tennisRules.js"></script>
   <script src="js/player.js"></script>
 </body>
 </html>
