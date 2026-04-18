@@ -1159,6 +1159,12 @@ body.player-page .score-card {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.match-player-row .score.green {
+  color: #c9ff57;
+  font-size: 16px;
+  line-height: 1;
+}
+
 .player-name {
   font-size: 20px;
   font-weight: 900;
@@ -1963,4 +1969,21 @@ body.player-page .score-card {
   .auth-brand h1 {
     font-size: 1.25rem;
   }
+}
+
+.section-head-space {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.matches-collapsed .filters-bar,
+.matches-collapsed .table-wrap,
+.matches-collapsed .pagination-bar {
+  display: none;
+}
+
+#toggleMatchesBtn {
+  white-space: nowrap;
 }
