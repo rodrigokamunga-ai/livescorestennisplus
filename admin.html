@@ -82,6 +82,8 @@
             <option value="Quartas de Final">Quartas de Final</option>
             <option value="Semifinais">Semifinais</option>
             <option value="Final">Final</option>
+            <option value="Treino">Treino</option>
+            <option value="Ranking">Ranking</option>
           </select>
         </label>
 
@@ -119,12 +121,16 @@
       <div id="adminMsg" class="msg"></div>
     </section>
 
-    <section class="panel panel-glass">
-      <div class="section-head">
+    <section id="matchesSection" class="panel panel-glass">
+      <div class="section-head section-head-space">
         <div>
           <span class="section-kicker">Lista de partidas</span>
           <h2>Partidas cadastradas</h2>
           <p class="muted">Filtre, pagine e gerencie as partidas</p>
+        </div>
+
+        <div class="actions">
+          <button id="toggleMatchesBtn" type="button" class="btn">Recolher lista</button>
         </div>
       </div>
 
