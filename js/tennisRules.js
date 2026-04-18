@@ -18,13 +18,15 @@ function isSetOf4Games(matchFormat) {
   return normalizeText(matchFormat).includes("4 games");
 }
 
-function resolveTieBreakMode(matchFormat) {
-  const text = normalizeText(matchFormat);
+function getCurrentSetNumber(score) {
+  return (score?.setHistory?.length || 0) + 1;
+}
 
-  if (/tiebreak de 7 pontos\b/.test(text)) return "tb7";
-  if (/supertiebreak de 10 pontos\b/.test(text)) return "super10";
+function resolveTieBreakMode(matchFormat, score = null) {
+  const setNumber = getCurrentSetNumber(score);
 
-  return null;
+  if (setNumber === 3) return "super10";
+  return "tb7";
 }
 
 function getPointLabel(points) {
@@ -69,21 +71,29 @@ function getTieBreakTarget(score) {
   return null;
 }
 
-function isTieBreakNeeded(games1, games2, matchFormat) {
+function isTieBreakNeeded(games1, games2, matchFormat, score = null) {
   if (isProSet(matchFormat)) return false;
 
   if (isSetOf4Games(matchFormat)) {
     return games1 === 3 && games2 === 3;
   }
 
-  return games1 === getSetTarget(matchFormat) && games2 === getSetTarget(matchFormat);
+  // Regra final: em 6x6 entra tiebreak de 7 pontos
+  return games1 === 6 && games2 === 6;
 }
 
 function isSetWon(games1, games2, matchFormat) {
-  const target = getSetTarget(matchFormat);
   const diff = Math.abs(games1 - games2);
 
-  return ((games1 >= target || games2 >= target) && diff >= 2);
+  if (isSetOf4Games(matchFormat)) {
+    return (games1 >= 4 || games2 >= 4) && diff >= 2;
+  }
+
+  if (isProSet(matchFormat)) {
+    return (games1 >= 8 || games2 >= 8) && diff >= 2;
+  }
+
+  return (games1 >= 6 || games2 >= 6) && diff >= 2;
 }
 
 function tieBreakWinner(tb1, tb2, targetPoints) {
@@ -110,11 +120,11 @@ function getMatchSetsToWin(matchFormat) {
   return 2;
 }
 
-function getMatchConfig(matchFormat) {
+function getMatchConfig(matchFormat, score = null) {
   return {
     noAd: noAdEnabled(matchFormat),
     advantage: advantageEnabled(matchFormat),
-    tieBreakMode: resolveTieBreakMode(matchFormat),
+    tieBreakMode: resolveTieBreakMode(matchFormat, score),
     proSet8: isProSet(matchFormat),
     setOf4Games: isSetOf4Games(matchFormat),
     setsToWin: getMatchSetsToWin(matchFormat),
@@ -143,9 +153,10 @@ function normalizeScore(score = {}) {
     ...defaultScore(),
     ...score,
     setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
-    tieBreakMode: score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
-      ? score.tieBreakMode
-      : null,
+    tieBreakMode:
+      score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
+        ? score.tieBreakMode
+        : null,
     server: score.server || "player1"
   };
 }
@@ -211,7 +222,10 @@ function evaluateGame(score, matchFormat) {
   }
 
   if (!noAd) {
-    if ((score.points1 >= 4 || score.points2 >= 4) && Math.abs(score.points1 - score.points2) >= 2) {
+    if (
+      (score.points1 >= 4 || score.points2 >= 4) &&
+      Math.abs(score.points1 - score.points2) >= 2
+    ) {
       const winner = score.points1 > score.points2 ? 1 : 2;
       completeGame(score, winner);
       return { gameWon: true, setWon: false, winner };
@@ -234,8 +248,6 @@ function evaluateGame(score, matchFormat) {
 }
 
 function evaluateSet(score, matchFormat) {
-  const config = getMatchConfig(matchFormat);
-
   if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
     const target = getTieBreakTarget(score);
     const winner = tieBreakWinner(score.tieBreakPoints1, score.tieBreakPoints2, target);
@@ -254,8 +266,8 @@ function evaluateSet(score, matchFormat) {
     return { setWon: true, winner, tieBreakStarted: false };
   }
 
-  if (isTieBreakNeeded(score.games1, score.games2, matchFormat)) {
-    score.tieBreakMode = resolveTieBreakMode(matchFormat);
+  if (isTieBreakNeeded(score.games1, score.games2, matchFormat, score)) {
+    score.tieBreakMode = resolveTieBreakMode(matchFormat, score);
     score.tieBreakPoints1 = 0;
     score.tieBreakPoints2 = 0;
     score.points1 = 0;
@@ -306,12 +318,12 @@ function updateScoreWithPoint(score, player, matchFormat) {
 }
 
 function isMatchFinished(score, matchFormat) {
-  const config = getMatchConfig(matchFormat);
+  const config = getMatchConfig(matchFormat, score);
   return score.sets1 >= config.setsToWin || score.sets2 >= config.setsToWin;
 }
 
 function getMatchWinner(score, matchFormat) {
-  const config = getMatchConfig(matchFormat);
+  const config = getMatchConfig(matchFormat, score);
 
   if (score.sets1 >= config.setsToWin) return 1;
   if (score.sets2 >= config.setsToWin) return 2;
