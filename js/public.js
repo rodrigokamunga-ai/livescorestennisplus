@@ -5,7 +5,10 @@
     const db = firebase.firestore();
     const state = { cachedMatches: [], timer: null };
 
+    const FILTER_KEY = "lsts_live_status_filter";
+
     const el = {
+      filter: document.getElementById("liveStatusFilter"),
       scheduledList: document.getElementById("scheduledList"),
       liveList: document.getElementById("liveList"),
       finishedList: document.getElementById("finishedList"),
@@ -56,6 +59,13 @@
         }
       },
 
+      normalizeStatus(status) {
+        const s = String(status || "scheduled").trim().toLowerCase();
+        if (s === "live") return "live";
+        if (s === "finished" || s === "wo") return "finished";
+        return "scheduled";
+      },
+
       normalizeScore(score = {}) {
         return {
           points1: Number(score.points1 || 0),
@@ -79,10 +89,6 @@
           setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
           server: score.server || "player1"
         };
-      },
-
-      isTieBreakMode(score) {
-        return score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
       },
 
       getCurrentSetNumber(score) {
@@ -113,33 +119,82 @@
         return server === "player2" ? 2 : 1;
       },
 
+      toDate(value) {
+        if (!value) return null;
+        if (value.toDate && typeof value.toDate === "function") {
+          const d = value.toDate();
+          return isNaN(d.getTime()) ? null : d;
+        }
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? null : d;
+      },
+
       getStartedAtMs(match) {
-        const started = match.startedAt?.toDate
-          ? match.startedAt.toDate()
-          : (match.startedAt ? new Date(match.startedAt) : null);
-        return started && !isNaN(started.getTime()) ? started.getTime() : null;
+        const started = U.toDate(match.startedAt);
+        if (started) return started.getTime();
+
+        const updated = U.toDate(match.updatedAt);
+        if (updated) return updated.getTime();
+
+        const matchDate = U.toDate(match.matchDateTime);
+        if (matchDate) return matchDate.getTime();
+
+        return null;
       },
 
       buildDuration(match) {
         if (match.status === "live") {
-          const startedAtMs = U.getStartedAtMs(match);
-          return startedAtMs ? U.durationText(Date.now() - startedAtMs) : "00:00:00";
+          const baseMs = U.getStartedAtMs(match);
+          return baseMs ? U.durationText(Date.now() - baseMs) : "00:00:00";
         }
         return U.durationText((match.durationSeconds || 0) * 1000);
       },
 
-      getPointDisplay(score) {
-        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+      getPointDisplay(match, score) {
+        const format = U.normalizeText(match.matchFormat);
+
+        const isOneSetFormat =
+          format.includes("1 set") &&
+          format.includes("supertiebreak de 10 pontos");
+
+        const isTwoSetsSuper10 =
+          format.includes("2 sets") &&
+          format.includes("supertiebreak de 10 pontos");
+
+        // Em formatos de 1 set, a coluna "PONTOS" fica vazia
+        if (isOneSetFormat) {
+          return { p1: "", p2: "" };
+        }
+
+        const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+        const lastSet = history.length ? history[history.length - 1] : null;
+
+        const isLiveTieBreak =
+          match.status === "live" &&
+          isTwoSetsSuper10 &&
+          (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10");
+
+        const isFinishedTieBreak =
+          match.status === "finished" &&
+          isTwoSetsSuper10 &&
+          !score.tieBreakMode &&
+          (
+            score.lastTieBreakMode === "tb7" ||
+            score.lastTieBreakMode === "super10" ||
+            (lastSet && (lastSet.tieBreakMode === "tb7" || lastSet.tieBreakMode === "super10"))
+          );
+
+        if (isLiveTieBreak) {
           return {
             p1: String(score.tieBreakPoints1 ?? 0),
             p2: String(score.tieBreakPoints2 ?? 0)
           };
         }
 
-        if (score.lastTieBreakMode === "super10") {
+        if (isFinishedTieBreak) {
           return {
-            p1: String(score.lastTieBreakPoints1 ?? 0),
-            p2: String(score.lastTieBreakPoints2 ?? 0)
+            p1: String(score.lastTieBreakPoints1 ?? lastSet?.tieBreakPoints1 ?? 0),
+            p2: String(score.lastTieBreakPoints2 ?? lastSet?.tieBreakPoints2 ?? 0)
           };
         }
 
@@ -160,17 +215,10 @@
         function formatSet(setObj) {
           if (!setObj) return { p1: "--", p2: "--" };
 
-          if (setObj.tieBreakMode === "tb7") {
+          if (setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10") {
             return {
               p1: `${setObj.games1 ?? 0}<sup>${setObj.tieBreakPoints1 ?? 0}</sup>`,
               p2: `${setObj.games2 ?? 0}<sup>${setObj.tieBreakPoints2 ?? 0}</sup>`
-            };
-          }
-
-          if (setObj.tieBreakMode === "super10") {
-            return {
-              p1: String(setObj.games1 ?? 0),
-              p2: String(setObj.games2 ?? 0)
             };
           }
 
@@ -195,6 +243,18 @@
               : { p1: "--", p2: "--" });
 
         return { set1, set2 };
+      },
+
+      getSavedFilter() {
+        return localStorage.getItem(FILTER_KEY) || "";
+      },
+
+      saveFilter(value) {
+        localStorage.setItem(FILTER_KEY, value || "");
+      },
+
+      isMobile() {
+        return window.matchMedia("(max-width: 768px)").matches;
       }
     };
 
@@ -221,50 +281,55 @@
       const category = U.escapeHtml(U.normalizeText(match.categoryName, "ATP 250"));
       const court = U.escapeHtml(U.normalizeText(match.court, ""));
       const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const format = U.escapeHtml(U.normalizeText(match.matchFormat, "2 sets com vantagem + um supertiebreak de 10 pontos"));
-      const status = match.status || "scheduled";
+      const format = U.escapeHtml(U.normalizeText(match.matchFormat, "1 set sem vantagem + um supertiebreak de 10 pontos"));
+      const status = U.normalizeStatus(match.status);
       const score = U.normalizeScore(match.score);
       const setColumns = U.getSetColumns(score);
       const server = U.getServerPosition(match, score);
       const serverP1 = server === 1 ? "🎾 " : "";
       const serverP2 = server === 2 ? "🎾 " : "";
       const duration = U.buildDuration(match);
-      const pointsDisplay = U.getPointDisplay(score);
+      const pointsDisplay = U.getPointDisplay(match, score);
 
-      return ` <article class="public-card match-board compact-match-board"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="match-format compact-format"> <span>Formato do jogo:</span> <strong>${format}</strong> </div> <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${pointsDisplay.p1 || "0"}</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${pointsDisplay.p2 || "0"}</div> </div> 
-      
-      <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>`
-       : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: 
-       <strong>${court}</strong></span>` : ""} ${match.matchDateTime ? `<span>Data: <strong>${formatDateTime(match.matchDateTime)}
-       </strong></span>` : ""} </div> </article> `;
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="match-format compact-format"> <span>Formato do jogo:</span> <strong>${format}</strong> </div> <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${pointsDisplay.p1 || ""}</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${pointsDisplay.p2 || ""}</div> </div> <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: <strong>${court}</strong></span>` : ""} ${match.matchDateTime ? `<span>Data: <strong>${formatDateTime(match.matchDateTime)}</strong></span>` : ""} </div> </article> `;
     }
 
-    function renderLists(matches) {
-      const scheduled = matches.filter(m => (m.status || "scheduled") === "scheduled");
-      const live = matches.filter(m => m.status === "live");
-      const finished = matches.filter(m => m.status === "finished" || m.status === "wo");
+    function applyFilterAndRender(matches) {
+      const selectedFilter = U.isMobile() ? U.normalizeStatus(U.getSavedFilter() || "") : "";
+
+      const scheduled = matches.filter(m => U.normalizeStatus(m.status) === "scheduled");
+      const live = matches.filter(m => U.normalizeStatus(m.status) === "live");
+      const finished = matches.filter(m => U.normalizeStatus(m.status) === "finished");
+
+      const visibleScheduled = !selectedFilter || selectedFilter === "scheduled" ? scheduled : [];
+      const visibleLive = !selectedFilter || selectedFilter === "live" ? live : [];
+      const visibleFinished = !selectedFilter || selectedFilter === "finished" ? finished : [];
 
       if (el.countScheduled) el.countScheduled.textContent = scheduled.length;
       if (el.countLive) el.countLive.textContent = live.length;
       if (el.countFinished) el.countFinished.textContent = finished.length;
 
       if (el.scheduledList) {
-        el.scheduledList.innerHTML = scheduled.length
-          ? scheduled.map(createCard).join("")
+        el.scheduledList.innerHTML = visibleScheduled.length
+          ? visibleScheduled.map(createCard).join("")
           : renderEmpty("Nenhum jogo do dia");
       }
 
       if (el.liveList) {
-        el.liveList.innerHTML = live.length
-          ? live.map(createCard).join("")
+        el.liveList.innerHTML = visibleLive.length
+          ? visibleLive.map(createCard).join("")
           : renderEmpty("Nenhuma partida em andamento");
       }
 
       if (el.finishedList) {
-        el.finishedList.innerHTML = finished.length
-          ? finished.map(createCard).join("")
+        el.finishedList.innerHTML = visibleFinished.length
+          ? visibleFinished.map(createCard).join("")
           : renderEmpty("Nenhuma partida finalizada");
       }
+    }
+
+    function renderLists(matches) {
+      applyFilterAndRender(matches);
     }
 
     function listenMatches() {
@@ -272,12 +337,8 @@
         (snapshot) => {
           state.cachedMatches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           state.cachedMatches.sort((a, b) => {
-            const da = a.matchDateTime?.toDate
-              ? a.matchDateTime.toDate().getTime()
-              : new Date(a.matchDateTime || 0).getTime();
-            const dbv = b.matchDateTime?.toDate
-              ? b.matchDateTime.toDate().getTime()
-              : new Date(b.matchDateTime || 0).getTime();
+            const da = U.getStartedAtMs(a) || 0;
+            const dbv = U.getStartedAtMs(b) || 0;
             return da - dbv;
           });
           renderLists(state.cachedMatches);
@@ -292,10 +353,25 @@
     }
 
     function refreshLiveDurations() {
-      if (state.cachedMatches.length) renderLists(state.cachedMatches);
+      if (state.cachedMatches.length) {
+        renderLists(state.cachedMatches);
+      }
+    }
+
+    function initFilter() {
+      if (!el.filter) return;
+
+      const saved = U.getSavedFilter();
+      el.filter.value = saved;
+
+      el.filter.addEventListener("change", () => {
+        U.saveFilter(el.filter.value);
+        renderLists(state.cachedMatches);
+      });
     }
 
     function init() {
+      initFilter();
       listenMatches();
       state.timer = setInterval(refreshLiveDurations, 1000);
     }

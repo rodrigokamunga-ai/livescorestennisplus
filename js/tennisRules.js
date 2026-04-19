@@ -10,23 +10,31 @@ function advantageEnabled(matchFormat) {
   return normalizeText(matchFormat).includes("com vantagem");
 }
 
-function isProSet(matchFormat) {
-  return normalizeText(matchFormat).includes("pro de 8 games");
+function isOneSetSuper10(matchFormat) {
+  const text = normalizeText(matchFormat);
+  return text.includes("1 set") && text.includes("supertiebreak de 10 pontos");
 }
 
-function isSetOf4Games(matchFormat) {
-  return normalizeText(matchFormat).includes("4 games");
+function isTwoSetsSuper10(matchFormat) {
+  const text = normalizeText(matchFormat);
+  return text.includes("2 sets") && text.includes("supertiebreak de 10 pontos");
+}
+
+function isPro8Super10(matchFormat) {
+  const text = normalizeText(matchFormat);
+  return text.includes("pro de 8 games") && text.includes("supertiebreak de 10 pontos");
+}
+
+function isAllowedFormat(matchFormat) {
+  return (
+    isOneSetSuper10(matchFormat) ||
+    isTwoSetsSuper10(matchFormat) ||
+    isPro8Super10(matchFormat)
+  );
 }
 
 function getCurrentSetNumber(score) {
   return (score?.setHistory?.length || 0) + 1;
-}
-
-function resolveTieBreakMode(matchFormat, score = null) {
-  const setNumber = getCurrentSetNumber(score);
-
-  if (setNumber === 3) return "super10";
-  return "tb7";
 }
 
 function getPointLabel(points) {
@@ -60,36 +68,38 @@ function getPointDisplay(points1, points2, matchFormat, score = null) {
 }
 
 function getSetTarget(matchFormat) {
-  if (isProSet(matchFormat)) return 8;
-  if (isSetOf4Games(matchFormat)) return 4;
+  const text = normalizeText(matchFormat);
+  if (text.includes("pro de 8 games")) return 8;
   return 6;
 }
 
 function getTieBreakTarget(score) {
-  if (score?.tieBreakMode === "tb7") return 7;
-  if (score?.tieBreakMode === "super10") return 10;
-  return null;
+  return score?.tieBreakMode === "super10" ? 10 : 7;
 }
 
-function isTieBreakNeeded(games1, games2, matchFormat, score = null) {
-  if (isProSet(matchFormat)) return false;
+function getMatchSetsToWin(matchFormat) {
+  const text = normalizeText(matchFormat);
 
-  if (isSetOf4Games(matchFormat)) {
-    return games1 === 3 && games2 === 3;
+  if (text.includes("2 sets")) return 2;
+  if (text.includes("1 set")) return 1;
+
+  return 1;
+}
+
+function isTieBreakNeeded(games1, games2, matchFormat) {
+  const text = normalizeText(matchFormat);
+
+  if (text.includes("pro de 8 games")) {
+    return games1 === 7 && games2 === 7;
   }
 
-  // Regra final: em 6x6 entra tiebreak de 7 pontos
   return games1 === 6 && games2 === 6;
 }
 
 function isSetWon(games1, games2, matchFormat) {
   const diff = Math.abs(games1 - games2);
 
-  if (isSetOf4Games(matchFormat)) {
-    return (games1 >= 4 || games2 >= 4) && diff >= 2;
-  }
-
-  if (isProSet(matchFormat)) {
+  if (normalizeText(matchFormat).includes("pro de 8 games")) {
     return (games1 >= 8 || games2 >= 8) && diff >= 2;
   }
 
@@ -106,18 +116,20 @@ function tieBreakWinner(tb1, tb2, targetPoints) {
   return 0;
 }
 
-function getMatchSetsToWin(matchFormat) {
-  const text = normalizeText(matchFormat);
+function shouldStartSuper10AfterSets(matchFormat, score) {
+  if (!isTwoSetsSuper10(matchFormat)) return false;
 
-  if (
-    text.includes("1 set com vantagem") ||
-    text.includes("1 set sem vantagem") ||
-    text.includes("1 set pro")
-  ) {
-    return 1;
-  }
+  const finishedSets = Array.isArray(score?.setHistory) ? score.setHistory.length : 0;
+  return finishedSets >= 2 && score.sets1 === 1 && score.sets2 === 1;
+}
 
-  return 2;
+function shouldUseSuper10InCurrentSet(matchFormat) {
+  return isOneSetSuper10(matchFormat) || isPro8Super10(matchFormat);
+}
+
+function resolveTieBreakMode(matchFormat, score = null) {
+  if (shouldStartSuper10AfterSets(matchFormat, score)) return "super10";
+  return "tb7";
 }
 
 function getMatchConfig(matchFormat, score = null) {
@@ -125,8 +137,6 @@ function getMatchConfig(matchFormat, score = null) {
     noAd: noAdEnabled(matchFormat),
     advantage: advantageEnabled(matchFormat),
     tieBreakMode: resolveTieBreakMode(matchFormat, score),
-    proSet8: isProSet(matchFormat),
-    setOf4Games: isSetOf4Games(matchFormat),
     setsToWin: getMatchSetsToWin(matchFormat),
     setTarget: getSetTarget(matchFormat)
   };
@@ -143,6 +153,9 @@ function defaultScore() {
     tieBreakMode: null,
     tieBreakPoints1: 0,
     tieBreakPoints2: 0,
+    lastTieBreakMode: null,
+    lastTieBreakPoints1: 0,
+    lastTieBreakPoints2: 0,
     setHistory: [],
     server: "player1"
   };
@@ -157,18 +170,12 @@ function normalizeScore(score = {}) {
       score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
         ? score.tieBreakMode
         : null,
+    lastTieBreakMode:
+      score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
+        ? score.lastTieBreakMode
+        : null,
     server: score.server || "player1"
   };
-}
-
-function addPoint(score, player) {
-  if (player === 1) score.points1 += 1;
-  if (player === 2) score.points2 += 1;
-}
-
-function removePoint(score, player) {
-  if (player === 1) score.points1 = Math.max(0, score.points1 - 1);
-  if (player === 2) score.points2 = Math.max(0, score.points2 - 1);
 }
 
 function completeGame(score, winner) {
@@ -179,17 +186,28 @@ function completeGame(score, winner) {
   score.points2 = 0;
 }
 
-function completeSet(score, winner, fromTieBreak = false) {
+function completeSet(score, winner, fromTieBreak = false, matchFormat = "") {
   if (fromTieBreak) {
+    score.lastTieBreakMode = score.tieBreakMode;
+    score.lastTieBreakPoints1 = Number(score.tieBreakPoints1 || 0);
+    score.lastTieBreakPoints2 = Number(score.tieBreakPoints2 || 0);
+
     if (winner === 1) score.games1 += 1;
     if (winner === 2) score.games2 += 1;
+  } else {
+    score.lastTieBreakMode = null;
+    score.lastTieBreakPoints1 = 0;
+    score.lastTieBreakPoints2 = 0;
   }
 
   const completedSet = {
     setNumber: score.setHistory.length + 1,
     games1: score.games1,
     games2: score.games2,
-    winner
+    winner,
+    tieBreakMode: fromTieBreak ? score.tieBreakMode : null,
+    tieBreakPoints1: fromTieBreak ? Number(score.tieBreakPoints1 || 0) : null,
+    tieBreakPoints2: fromTieBreak ? Number(score.tieBreakPoints2 || 0) : null
   };
 
   score.setHistory.push(completedSet);
@@ -201,9 +219,13 @@ function completeSet(score, winner, fromTieBreak = false) {
   score.games2 = 0;
   score.points1 = 0;
   score.points2 = 0;
-  score.tieBreakMode = null;
   score.tieBreakPoints1 = 0;
   score.tieBreakPoints2 = 0;
+  score.tieBreakMode = null;
+
+  if (shouldStartSuper10AfterSets(matchFormat, score)) {
+    score.tieBreakMode = "super10";
+  }
 }
 
 function evaluateGame(score, matchFormat) {
@@ -214,7 +236,7 @@ function evaluateGame(score, matchFormat) {
     const winner = tieBreakWinner(score.tieBreakPoints1, score.tieBreakPoints2, target);
 
     if (winner) {
-      completeSet(score, winner, true);
+      completeSet(score, winner, true, matchFormat);
       return { gameWon: false, setWon: true, winner };
     }
 
@@ -253,27 +275,41 @@ function evaluateSet(score, matchFormat) {
     const winner = tieBreakWinner(score.tieBreakPoints1, score.tieBreakPoints2, target);
 
     if (winner) {
-      completeSet(score, winner, true);
+      completeSet(score, winner, true, matchFormat);
       return { setWon: true, winner, tieBreakStarted: false };
     }
 
     return { setWon: false, winner: 0, tieBreakStarted: false };
   }
 
-  if (isSetWon(score.games1, score.games2, matchFormat)) {
-    const winner = score.games1 > score.games2 ? 1 : 2;
-    completeSet(score, winner, false);
-    return { setWon: true, winner, tieBreakStarted: false };
+  if (shouldStartSuper10AfterSets(matchFormat, score)) {
+    score.tieBreakMode = "super10";
+    score.tieBreakPoints1 = 0;
+    score.tieBreakPoints2 = 0;
+    score.points1 = 0;
+    score.points2 = 0;
+    return { setWon: false, winner: 0, tieBreakStarted: true };
   }
 
-  if (isTieBreakNeeded(score.games1, score.games2, matchFormat, score)) {
-    score.tieBreakMode = resolveTieBreakMode(matchFormat, score);
+  if (isTieBreakNeeded(score.games1, score.games2, matchFormat)) {
+    if (shouldUseSuper10InCurrentSet(matchFormat)) {
+      score.tieBreakMode = "super10";
+    } else {
+      score.tieBreakMode = "tb7";
+    }
+
     score.tieBreakPoints1 = 0;
     score.tieBreakPoints2 = 0;
     score.points1 = 0;
     score.points2 = 0;
 
     return { setWon: false, winner: 0, tieBreakStarted: true };
+  }
+
+  if (isSetWon(score.games1, score.games2, matchFormat)) {
+    const winner = score.games1 > score.games2 ? 1 : 2;
+    completeSet(score, winner, false, matchFormat);
+    return { setWon: true, winner, tieBreakStarted: false };
   }
 
   return { setWon: false, winner: 0, tieBreakStarted: false };
@@ -294,7 +330,8 @@ function updateScoreWithPoint(score, player, matchFormat) {
     };
   }
 
-  addPoint(score, player);
+  if (player === 1) score.points1 += 1;
+  if (player === 2) score.points2 += 1;
 
   const gameResult = evaluateGame(score, matchFormat);
   if (gameResult.gameWon) {
