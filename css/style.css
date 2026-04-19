@@ -1987,3 +1987,335 @@ body.player-page .score-card {
 #toggleMatchesBtn {
   white-space: nowrap;
 }
+
+/* ========================= FILTRO MOBILE NO PLACAR AO VIVO ========================= */
+.mobile-filters {
+  display: none;
+  margin: 0 0 14px 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.filter-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #dbe6ff;
+}
+
+.filter-select {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 28, 45, 0.65);
+  color: #fff;
+  padding: 0 12px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.filter-select:focus {
+  border-color: rgba(77, 163, 255, 0.7);
+  box-shadow: 0 0 0 2px rgba(77, 163, 255, 0.15);
+}
+
+@media (max-width: 768px) {
+  .mobile-filters {
+    display: block;
+  }
+
+  .public-grid.board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-column {
+    min-height: auto;
+  }
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-logo-img {
+  display: block;
+  width: 68px;
+  height: 88px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .app-logo-img {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+.matches-body {
+  display: block;
+}
+
+.matches-collapsed .matches-body {
+  display: none;
+}
+
+.matches-collapsed .section-subtitle {
+  display: none;
+}
+
+.matches-collapsed .section-head {
+  margin-bottom: 0;
+  padding-bottom: 18px;
+}
+
+.section-head-space {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-head-space .actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  min-width: 120px;
+}
+
+.compact-toggle-btn {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  line-height: 1;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-logo-img {
+  display: block;
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .app-logo-img {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+.section-head-space {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-head-space .actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  min-width: 120px;
+}
+
+.compact-toggle-btn {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  line-height: 1;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.matches-body {
+  display: block;
+}
+
+.matches-collapsed .matches-body {
+  display: none;
+}
+
+.matches-collapsed .section-subtitle {
+  display: none;
+}
+
+.matches-collapsed .section-head {
+  margin-bottom: 0;
+  padding-bottom: 18px;
+}
+
+#toggleMatchesBtn {
+  white-space: nowrap;
+}
+
+body.admin-page .section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 0;
+  margin-bottom: 18px;
+}
+
+body.admin-page .section-head h2 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin-top: 2px;
+  color: #f0f4ff;
+}
+
+body.admin-page .actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.admin-page .actions.full {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+}
+
+body.admin-page .form.grid-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0 22px 22px;
+}
+
+body.admin-page .form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: rgba(232, 238, 252, 0.84);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+body.admin-page .form input,
+body.admin-page .form select,
+body.admin-page .filters-bar input,
+body.admin-page .filters-bar select,
+body.admin-page .dialog input,
+body.admin-page .dialog select,
+body.admin-page .dialog textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 18, 30, 0.62);
+  color: #f4f8ff;
+  outline: none;
+}
+
+body.admin-page .form input:focus,
+body.admin-page .form select:focus,
+body.admin-page .filters-bar input:focus,
+body.admin-page .filters-bar select:focus,
+body.admin-page .dialog input:focus,
+body.admin-page .dialog select:focus,
+body.admin-page .dialog textarea:focus {
+  border-color: rgba(110, 165, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(110, 165, 255, 0.15);
+}
+
+body.admin-page .msg {
+  padding: 0 22px 22px;
+  min-height: 22px;
+  color: rgba(232, 238, 252, 0.9);
+  font-size: 0.95rem;
+}
+
+body.admin-page .filters-bar {
+  display: grid;
+  grid-template-columns: 1.3fr 1.3fr 0.9fr;
+  gap: 12px;
+  padding: 0 22px 18px;
+}
+
+body.admin-page .table-wrap {
+  padding: 0 22px 18px;
+  overflow-x: auto;
+}
+
+body.admin-page .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+body.admin-page .admin-table thead th {
+  text-align: left;
+  padding: 14px 12px;
+  font-size: 0.9rem;
+  color: rgba(232, 238, 252, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page .admin-table tbody td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: top;
+  color: #eef4ff;
+}
+
+body.admin-page .admin-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.admin-page .col-actions {
+  width: 220px;
+}
+
+body.admin-page .pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 22px 22px;
+}
+
+body.admin-page .pagination-info {
+  color: rgba(232, 238, 252, 0.8);
+}
+
+body.admin-page .dialog {
+  width: min(920px, calc(100% - 24px));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  background: #121b2d;
+  color: #eef4ff;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
+  padding: 18px;
+}
+
+body.admin-page .dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+body.admin-page .dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+body.admin-page .details {
+  display: grid;
+  gap: 10px;
+  color: rgba(232, 238, 252, 0.92);
+}
