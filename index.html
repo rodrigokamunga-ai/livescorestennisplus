@@ -3,28 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Live Scores Tennis +</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="public-page public-dashboard-page">
-  <header class="topbar topbar-glass dashboard-topbar">
-    <div class="brand-wrap dashboard-brand">
-      <div class="app-logo">
-        <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
-      </div>
-      <div>
-        <h1>Live Scores Tennis +</h1>
-        <p>Placar ao vivo</p>
-      </div>
-    </div>
-  </header>
-
   <main class="container dashboard-container">
 
     <div class="mobile-filters">
       <label for="liveStatusFilter" class="filter-label">Filtrar partidas</label>
       <select id="liveStatusFilter" class="filter-select">
-        <option value="">Todos</option>
+        <option value="all">Todos</option>
         <option value="scheduled">Jogos do dia</option>
         <option value="live">Jogos em andamento</option>
         <option value="finished">Jogos finalizados</option>
