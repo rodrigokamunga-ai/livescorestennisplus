@@ -9,7 +9,9 @@
 <body class="public-page public-dashboard-page">
   <header class="topbar topbar-glass dashboard-topbar">
     <div class="brand-wrap dashboard-brand">
-      <div class="brand-icon">🎾</div>
+      <div class="app-logo">
+        <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
+      </div>
       <div>
         <h1>Live Scores Tennis +</h1>
         <p>Placar ao vivo</p>
@@ -18,6 +20,17 @@
   </header>
 
   <main class="container dashboard-container">
+
+    <div class="mobile-filters">
+      <label for="liveStatusFilter" class="filter-label">Filtrar partidas</label>
+      <select id="liveStatusFilter" class="filter-select">
+        <option value="">Todos</option>
+        <option value="scheduled">Jogos do dia</option>
+        <option value="live">Jogos em andamento</option>
+        <option value="finished">Jogos finalizados</option>
+      </select>
+    </div>
+
     <section class="public-grid board-grid dashboard-grid" id="gamesGrid">
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">

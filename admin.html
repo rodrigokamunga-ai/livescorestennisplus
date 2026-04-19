@@ -13,7 +13,9 @@
 
       <header class="topbar topbar-glass admin-topbar-inside">
         <div class="brand-wrap">
-          <div class="brand-icon">🎾</div>
+          <div class="app-logo">
+            <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
+          </div>
           <div>
             <h1>Painel Administrativo</h1>
             <p>Cadastro e manutenção das partidas</p>
@@ -32,10 +34,6 @@
           <h2 id="formTitle">Nova partida</h2>
           <p class="muted">Cadastre e gerencie os jogos ao vivo</p>
         </div>
-
-        <div class="actions">
-          <button id="newMatchBtn" class="btn">Nova partida</button>
-        </div>
       </div>
 
       <form id="matchForm" class="form grid-form">
@@ -48,19 +46,15 @@
         <label>Formato da partida
           <select id="matchFormat" required>
             <option value="">Selecione...</option>
-            <option value="3 sets com vantagem">3 sets com vantagem</option>
-            <option value="3 sets sem vantagem">3 sets sem vantagem</option>
-            <option value="2 sets com vantagem + o 3º set um supertiebreak de 10 pontos">2 sets com vantagem + o 3º set um supertiebreak de 10 pontos</option>
-            <option value="2 sets sem vantagem + o 3º set um supertiebreak de 10 pontos">2 sets sem vantagem + o 3º set um supertiebreak de 10 pontos</option>
-            <option value="1 set com vantagem com supertiebreak de 10 pontos">1 set com vantagem com supertiebreak de 10 pontos</option>
-            <option value="1 set sem vantagem com um supertiebreak de 10 pontos">1 set sem vantagem com um supertiebreak de 10 pontos</option>
-            <option value="1 set com vantagem com um tiebreak de 7 pontos">1 set com vantagem com um tiebreak de 7 pontos</option>
-            <option value="1 set sem vantagem com um tiebreak de 7 pontos">1 set sem vantagem com um tiebreak de 7 pontos</option>
-            <option value="1 set pro de 8 games com vantagem com um tiebreak de 7 pontos">1 set pro de 8 games com vantagem com um tiebreak de 7 pontos</option>
-            <option value="1 set pro de 8 games sem vantagem com um tiebreak de 7 pontos">1 set pro de 8 games sem vantagem com um tiebreak de 7 pontos</option>
-            <option value="1 set pro de 8 games sem vantagem com um supertiebreak de 10 pontos">1 set pro de 8 games sem vantagem com um supertiebreak de 10 pontos</option>
-            <option value="2 sets de 4 games sem vantagem com um supertiebreak de 10 pontos">2 sets de 4 games sem vantagem com um supertiebreak de 10 pontos</option>
-            <option value="2 sets de 4 games com vantagem com um supertiebreak de 10 pontos">2 sets de 4 games com vantagem com um supertiebreak de 10 pontos</option>
+            <option value="1 set sem vantagem + um supertiebreak de 10 pontos">
+              1 set sem vantagem + um supertiebreak de 10 pontos
+            </option>
+            <option value="2 sets sem vantagem + um supertiebreak de 10 pontos">
+              2 sets sem vantagem + um supertiebreak de 10 pontos
+            </option>
+            <option value="1 set pro de 8 games sem vantagem + um supertiebreak de 10 pontos">
+              1 set pro de 8 games sem vantagem + um supertiebreak de 10 pontos
+            </option>
           </select>
         </label>
 
@@ -126,46 +120,48 @@
         <div>
           <span class="section-kicker">Lista de partidas</span>
           <h2>Partidas cadastradas</h2>
-          <p class="muted">Filtre, pagine e gerencie as partidas</p>
+          <p class="muted section-subtitle">Filtre, pagine e gerencie as partidas</p>
         </div>
 
         <div class="actions">
-          <button id="toggleMatchesBtn" type="button" class="btn">Recolher lista</button>
+          <button id="toggleMatchesBtn" type="button" class="btn compact-toggle-btn">Recolher</button>
         </div>
       </div>
 
-      <div class="filters-bar">
-        <input type="text" id="filterPlayers" placeholder="Pesquisar por jogador" />
-        <input type="text" id="filterCategory" placeholder="Pesquisar por categoria" />
-        <select id="filterStatus">
-          <option value="">Todos os status</option>
-          <option value="scheduled">Jogos do dia</option>
-          <option value="live">Em andamento</option>
-          <option value="finished">Finalizada</option>
-          <option value="wo">WO</option>
-        </select>
-      </div>
-
-      <div class="table-wrap desktop-table">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th class="col-players">Jogadores</th>
-              <th class="col-category">Categoria</th>
-              <th class="col-status">Status</th>
-              <th class="col-actions">Opções</th>
-            </tr>
-          </thead>
-          <tbody id="matchesTable"></tbody>
-        </table>
-      </div>
-
-      <div class="pagination-bar">
-        <button id="prevPageBtn" class="btn">Anterior</button>
-        <div class="pagination-info">
-          Página <strong id="pageInfo">1</strong> de <strong id="totalPages">1</strong>
+      <div class="matches-body">
+        <div class="filters-bar">
+          <input type="text" id="filterPlayers" placeholder="Pesquisar por jogador" />
+          <input type="text" id="filterCategory" placeholder="Pesquisar por categoria" />
+          <select id="filterStatus">
+            <option value="">Todos os status</option>
+            <option value="scheduled">Jogos do dia</option>
+            <option value="live">Em andamento</option>
+            <option value="finished">Finalizada</option>
+            <option value="wo">WO</option>
+          </select>
         </div>
-        <button id="nextPageBtn" class="btn">Próxima</button>
+
+        <div class="table-wrap desktop-table">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th class="col-players">Jogadores</th>
+                <th class="col-category">Categoria</th>
+                <th class="col-status">Status</th>
+                <th class="col-actions">Opções</th>
+              </tr>
+            </thead>
+            <tbody id="matchesTable"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <button id="prevPageBtn" class="btn">Anterior</button>
+          <div class="pagination-info">
+            Página <strong id="pageInfo">1</strong> de <strong id="totalPages">1</strong>
+          </div>
+          <button id="nextPageBtn" class="btn">Próxima</button>
+        </div>
       </div>
     </section>
 

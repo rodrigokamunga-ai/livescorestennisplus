@@ -14,15 +14,20 @@
     <section class="player-hero panel panel-glass">
 
       <div class="player-hero-top">
-        <div>
-          <span class="section-kicker">Painel do Jogador</span>
-          <h2 id="matchTitle">Partida</h2>
+        <div class="brand-wrap">
+          <div class="app-logo">
+            <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
+          </div>
+          <div>
+            <span class="section-kicker">Painel do Jogador</span>
+            <h2 id="matchTitle">Partida</h2>
 
-          <div class="match-meta-top">
-            <div class="meta-line">
-              Data e hora: <strong id="matchDateTimeTop">-</strong>
+            <div class="match-meta-top">
+              <div class="meta-line">
+                Data e hora: <strong id="matchDateTimeTop">-</strong>
+              </div>
+              <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
             </div>
-            <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
           </div>
         </div>
       </div>
@@ -36,8 +41,6 @@
         <div class="premium-score-grid">
           <!-- JOGADOR 1 -->
           <section class="premium-player-card player-card">
-            
-
             <div class="premium-player-name" id="player1Name">Jogador 1</div>
 
             <div class="premium-point-box">
@@ -83,8 +86,6 @@
 
           <!-- JOGADOR 2 -->
           <section class="premium-player-card player-card">
-            
-
             <div class="premium-player-name" id="player2Name">Jogador 2</div>
 
             <div class="premium-point-box">
@@ -135,6 +136,7 @@
         <button id="startBtn" class="btn primary">Iniciar partida</button>
         <button id="finishBtn" class="btn danger">Finalizar partida</button>
         <button id="resetScoreBtn" class="btn danger">Zerar placar</button>
+        <button id="undoBtn" class="btn">Desfazer última ação</button>
       </div>
 
       <div id="playerMsg" class="msg"></div>
