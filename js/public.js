@@ -43,19 +43,26 @@
 
       statusLabel(status) {
         switch (status) {
-          case "live": return "EM ANDAMENTO";
-          case "finished": return "FINALIZADA";
-          case "wo": return "FINALIZADA POR WO";
-          default: return "NÃO INICIADA";
+          case "live":
+            return "EM ANDAMENTO";
+          case "finished":
+            return "FINALIZADA";
+          case "wo":
+            return "FINALIZADA POR WO";
+          default:
+            return "NÃO INICIADA";
         }
       },
 
       statusClass(status) {
         switch (status) {
-          case "live": return "status-live";
+          case "live":
+            return "status-live";
           case "finished":
-          case "wo": return "status-finished";
-          default: return "status-scheduled";
+          case "wo":
+            return "status-finished";
+          default:
+            return "status-scheduled";
         }
       },
 
@@ -74,18 +81,21 @@
           games2: Number(score.games2 || 0),
           sets1: Number(score.sets1 || 0),
           sets2: Number(score.sets2 || 0),
+
           tieBreakMode:
             score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
               ? score.tieBreakMode
               : null,
           tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
           tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
+
           lastTieBreakMode:
             score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
               ? score.lastTieBreakMode
               : null,
           lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
           lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+
           setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
           server: score.server || "player1"
         };
@@ -97,11 +107,16 @@
 
       tennisPointLabel(points) {
         switch (points) {
-          case 0: return "0";
-          case 1: return "15";
-          case 2: return "30";
-          case 3: return "40";
-          default: return "40";
+          case 0:
+            return "0";
+          case 1:
+            return "15";
+          case 2:
+            return "30";
+          case 3:
+            return "40";
+          default:
+            return "40";
         }
       },
 
@@ -143,58 +158,67 @@
       },
 
       buildDuration(match) {
+        const startedMs = U.getStartedAtMs(match);
+        const finishedMs = U.toDate(match.finishedAt)?.getTime?.() ?? null;
+
         if (match.status === "live") {
-          const baseMs = U.getStartedAtMs(match);
-          return baseMs ? U.durationText(Date.now() - baseMs) : "00:00:00";
+          return startedMs ? U.durationText(Date.now() - startedMs) : "00:00:00";
         }
-        return U.durationText((match.durationSeconds || 0) * 1000);
+
+        if (match.status === "finished" || match.status === "wo") {
+          if (startedMs && finishedMs && finishedMs >= startedMs) {
+            return U.durationText(finishedMs - startedMs);
+          }
+
+          if (match.durationSeconds && Number(match.durationSeconds) > 0) {
+            return U.durationText(Number(match.durationSeconds) * 1000);
+          }
+
+          return "00:00:00";
+        }
+
+        if (match.durationSeconds && Number(match.durationSeconds) > 0) {
+          return U.durationText(Number(match.durationSeconds) * 1000);
+        }
+
+        return "00:00:00";
       },
 
       getPointDisplay(match, score) {
-        const format = U.normalizeText(match.matchFormat);
-
-        const isOneSetFormat =
-          format.includes("1 set") &&
-          format.includes("supertiebreak de 10 pontos");
-
-        const isTwoSetsSuper10 =
-          format.includes("2 sets") &&
-          format.includes("supertiebreak de 10 pontos");
-
-        // Em formatos de 1 set, a coluna "PONTOS" fica vazia
-        if (isOneSetFormat) {
-          return { p1: "", p2: "" };
-        }
-
         const history = Array.isArray(score.setHistory) ? score.setHistory : [];
         const lastSet = history.length ? history[history.length - 1] : null;
 
+        const liveTieBreakMode =
+          score.tieBreakMode ||
+          match.tieBreakMode ||
+          lastSet?.tieBreakMode ||
+          null;
+
+        const finishedTieBreakMode =
+          score.lastTieBreakMode ||
+          match.lastTieBreakMode ||
+          lastSet?.tieBreakMode ||
+          null;
+
         const isLiveTieBreak =
           match.status === "live" &&
-          isTwoSetsSuper10 &&
-          (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10");
+          (liveTieBreakMode === "tb7" || liveTieBreakMode === "super10");
 
         const isFinishedTieBreak =
-          match.status === "finished" &&
-          isTwoSetsSuper10 &&
-          !score.tieBreakMode &&
-          (
-            score.lastTieBreakMode === "tb7" ||
-            score.lastTieBreakMode === "super10" ||
-            (lastSet && (lastSet.tieBreakMode === "tb7" || lastSet.tieBreakMode === "super10"))
-          );
+          (match.status === "finished" || match.status === "wo") &&
+          (finishedTieBreakMode === "tb7" || finishedTieBreakMode === "super10");
 
         if (isLiveTieBreak) {
           return {
-            p1: String(score.tieBreakPoints1 ?? 0),
-            p2: String(score.tieBreakPoints2 ?? 0)
+            p1: String(score.tieBreakPoints1 ?? match.tieBreakPoints1 ?? lastSet?.tieBreakPoints1 ?? 0),
+            p2: String(score.tieBreakPoints2 ?? match.tieBreakPoints2 ?? lastSet?.tieBreakPoints2 ?? 0)
           };
         }
 
         if (isFinishedTieBreak) {
           return {
-            p1: String(score.lastTieBreakPoints1 ?? lastSet?.tieBreakPoints1 ?? 0),
-            p2: String(score.lastTieBreakPoints2 ?? lastSet?.tieBreakPoints2 ?? 0)
+            p1: String(score.lastTieBreakPoints1 ?? match.lastTieBreakPoints1 ?? lastSet?.tieBreakPoints1 ?? 0),
+            p2: String(score.lastTieBreakPoints2 ?? match.lastTieBreakPoints2 ?? lastSet?.tieBreakPoints2 ?? 0)
           };
         }
 
@@ -232,25 +256,25 @@
 
         const set1 = history[0]
           ? formatSet(history[0])
-          : (currentSetNumber === 1
-              ? { p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0) }
-              : { p1: "--", p2: "--" });
+          : currentSetNumber === 1
+            ? { p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0) }
+            : { p1: "--", p2: "--" };
 
         const set2 = history[1]
           ? formatSet(history[1])
-          : (currentSetNumber === 2
-              ? { p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0) }
-              : { p1: "--", p2: "--" });
+          : currentSetNumber === 2
+            ? { p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0) }
+            : { p1: "--", p2: "--" };
 
         return { set1, set2 };
       },
 
       getSavedFilter() {
-        return localStorage.getItem(FILTER_KEY) || "";
+        return localStorage.getItem(FILTER_KEY) || "all";
       },
 
       saveFilter(value) {
-        localStorage.setItem(FILTER_KEY, value || "");
+        localStorage.setItem(FILTER_KEY, value || "all");
       },
 
       isMobile() {
@@ -281,7 +305,9 @@
       const category = U.escapeHtml(U.normalizeText(match.categoryName, "ATP 250"));
       const court = U.escapeHtml(U.normalizeText(match.court, ""));
       const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const format = U.escapeHtml(U.normalizeText(match.matchFormat, "1 set sem vantagem + um supertiebreak de 10 pontos"));
+      const format = U.escapeHtml(
+        U.normalizeText(match.matchFormat, "1 set sem vantagem + um supertiebreak de 10 pontos")
+      );
       const status = U.normalizeStatus(match.status);
       const score = U.normalizeScore(match.score);
       const setColumns = U.getSetColumns(score);
@@ -294,16 +320,64 @@
       return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="match-format compact-format"> <span>Formato do jogo:</span> <strong>${format}</strong> </div> <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${pointsDisplay.p1 || ""}</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${pointsDisplay.p2 || ""}</div> </div> <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: <strong>${court}</strong></span>` : ""} ${match.matchDateTime ? `<span>Data: <strong>${formatDateTime(match.matchDateTime)}</strong></span>` : ""} </div> </article> `;
     }
 
+    function getActiveFilter() {
+      const saved = U.getSavedFilter();
+
+      if (!U.isMobile()) return "all";
+
+      if (saved === "scheduled" || saved === "live" || saved === "finished" || saved === "all") {
+        return saved;
+      }
+
+      return "all";
+    }
+
     function applyFilterAndRender(matches) {
-      const selectedFilter = U.isMobile() ? U.normalizeStatus(U.getSavedFilter() || "") : "";
+      const selectedFilter = getActiveFilter();
+      const isMobile = U.isMobile();
 
-      const scheduled = matches.filter(m => U.normalizeStatus(m.status) === "scheduled");
-      const live = matches.filter(m => U.normalizeStatus(m.status) === "live");
-      const finished = matches.filter(m => U.normalizeStatus(m.status) === "finished");
+      const scheduled = matches
+        .filter(m => U.normalizeStatus(m.status) === "scheduled")
+        .sort((a, b) => {
+          const da = U.toDate(a.matchDateTime)?.getTime() || 0;
+          const dbv = U.toDate(b.matchDateTime)?.getTime() || 0;
+          return da - dbv;
+        });
 
-      const visibleScheduled = !selectedFilter || selectedFilter === "scheduled" ? scheduled : [];
-      const visibleLive = !selectedFilter || selectedFilter === "live" ? live : [];
-      const visibleFinished = !selectedFilter || selectedFilter === "finished" ? finished : [];
+      const live = matches
+        .filter(m => U.normalizeStatus(m.status) === "live")
+        .sort((a, b) => {
+          const da = U.getStartedAtMs(a) || 0;
+          const dbv = U.getStartedAtMs(b) || 0;
+          return da - dbv;
+        });
+
+      const finished = matches
+        .filter(m => U.normalizeStatus(m.status) === "finished")
+        .sort((a, b) => {
+          const fa = U.toDate(a.finishedAt)?.getTime() || U.getStartedAtMs(a) || 0;
+          const fb = U.toDate(b.finishedAt)?.getTime() || U.getStartedAtMs(b) || 0;
+          return fb - fa;
+        });
+
+      const scheduledVisibleBase = isMobile ? scheduled : scheduled.slice(0, 4);
+      const liveVisibleBase = isMobile ? live : live.slice(0, 4);
+      const finishedVisibleBase = isMobile ? finished : finished.slice(0, 4);
+
+      const visibleScheduled =
+        selectedFilter === "all" || selectedFilter === "scheduled"
+          ? scheduledVisibleBase
+          : [];
+
+      const visibleLive =
+        selectedFilter === "all" || selectedFilter === "live"
+          ? liveVisibleBase
+          : [];
+
+      const visibleFinished =
+        selectedFilter === "all" || selectedFilter === "finished"
+          ? finishedVisibleBase
+          : [];
 
       if (el.countScheduled) el.countScheduled.textContent = scheduled.length;
       if (el.countLive) el.countLive.textContent = live.length;
@@ -362,7 +436,7 @@
       if (!el.filter) return;
 
       const saved = U.getSavedFilter();
-      el.filter.value = saved;
+      el.filter.value = saved || "all";
 
       el.filter.addEventListener("change", () => {
         U.saveFilter(el.filter.value);
