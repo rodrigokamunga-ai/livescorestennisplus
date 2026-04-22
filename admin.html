@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin | Live Scores Tennis +</title>
+  <title>Admin | Live Scores Tennis </title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="admin-page">
@@ -76,6 +76,7 @@
             <option value="Quartas de Final">Quartas de Final</option>
             <option value="Semifinais">Semifinais</option>
             <option value="Final">Final</option>
+            <option value="Grupos">Grupos</option>
             <option value="Treino">Treino</option>
             <option value="Ranking">Ranking</option>
           </select>
@@ -96,6 +97,14 @@
 
         <label>Nome do jogador 2
           <input type="text" id="player2" required />
+        </label>
+
+        <label>Probabilidade de vitória Jogador 1 (%)
+          <input type="number" id="probPlayer1" min="0" max="100" step="0.01" placeholder="" />
+        </label>
+        
+        <label>Probabilidade de vitória Jogador 2 (%)
+          <input type="number" id="probPlayer2" min="0" max="100" step="0.01" placeholder="" />
         </label>
 
         <label>WO (vencedor por WO)
