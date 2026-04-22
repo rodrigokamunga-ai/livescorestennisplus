@@ -51,9 +51,10 @@ function getPointDisplay(points1, points2, matchFormat, score = null) {
 
   const noAd = noAdEnabled(matchFormat);
 
+  // Regra pedida: 40x40 deve aparecer como ponto decisivo
   if (!noAd) {
     if (points1 >= 3 && points2 >= 3) {
-      if (points1 === points2) return "DEUCE";
+      if (points1 === points2) return "40x40 - Ponto decisivo";
       if (points1 === points2 + 1) return "AD";
       if (points2 === points1 + 1) return "AD";
     }
@@ -157,7 +158,14 @@ function defaultScore() {
     lastTieBreakPoints1: 0,
     lastTieBreakPoints2: 0,
     setHistory: [],
-    server: "player1"
+    server: "player1",
+
+    totalPoints1: 0,
+    totalPoints2: 0,
+    breakPointsWon1: 0,
+    breakPointsWon2: 0,
+    breakPointsChances1: 0,
+    breakPointsChances2: 0
   };
 }
 
@@ -174,7 +182,13 @@ function normalizeScore(score = {}) {
       score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
         ? score.lastTieBreakMode
         : null,
-    server: score.server || "player1"
+    server: score.server || "player1",
+    totalPoints1: Number(score.totalPoints1 || 0),
+    totalPoints2: Number(score.totalPoints2 || 0),
+    breakPointsWon1: Number(score.breakPointsWon1 || 0),
+    breakPointsWon2: Number(score.breakPointsWon2 || 0),
+    breakPointsChances1: Number(score.breakPointsChances1 || 0),
+    breakPointsChances2: Number(score.breakPointsChances2 || 0)
   };
 }
 
@@ -191,9 +205,6 @@ function completeSet(score, winner, fromTieBreak = false, matchFormat = "") {
     score.lastTieBreakMode = score.tieBreakMode;
     score.lastTieBreakPoints1 = Number(score.tieBreakPoints1 || 0);
     score.lastTieBreakPoints2 = Number(score.tieBreakPoints2 || 0);
-
-    if (winner === 1) score.games1 += 1;
-    if (winner === 2) score.games2 += 1;
   } else {
     score.lastTieBreakMode = null;
     score.lastTieBreakPoints1 = 0;
@@ -244,6 +255,8 @@ function evaluateGame(score, matchFormat) {
   }
 
   if (!noAd) {
+    // Regra de vantagem normal.
+    // No momento em que um jogador abre 2 pontos após o 40x40, o game fecha.
     if (
       (score.points1 >= 4 || score.points2 >= 4) &&
       Math.abs(score.points1 - score.points2) >= 2
@@ -256,6 +269,7 @@ function evaluateGame(score, matchFormat) {
     return { gameWon: false, setWon: false, winner: 0 };
   }
 
+  // No-ad
   if (score.points1 === 3 && score.points2 === 3) {
     return { gameWon: false, setWon: false, winner: 0 };
   }

@@ -97,7 +97,14 @@
           lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
 
           setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
-          server: score.server || "player1"
+          server: score.server || "player1",
+
+          totalPoints1: Number(score.totalPoints1 || 0),
+          totalPoints2: Number(score.totalPoints2 || 0),
+          breakPointsWon1: Number(score.breakPointsWon1 || 0),
+          breakPointsWon2: Number(score.breakPointsWon2 || 0),
+          breakPointsChances1: Number(score.breakPointsChances1 || 0),
+          breakPointsChances2: Number(score.breakPointsChances2 || 0)
         };
       },
 
@@ -132,6 +139,18 @@
       getServerPosition(match, score) {
         const server = String(score.server || match.server || "player1");
         return server === "player2" ? 2 : 1;
+      },
+
+      getWinnerPosition(match, score) {
+        if (match.status !== "finished" && match.status !== "wo") return null;
+
+        const sets1 = Number(score.sets1 || 0);
+        const sets2 = Number(score.sets2 || 0);
+
+        if (sets1 > sets2) return 1;
+        if (sets2 > sets1) return 2;
+
+        return null;
       },
 
       toDate(value) {
@@ -279,6 +298,41 @@
 
       isMobile() {
         return window.matchMedia("(max-width: 768px)").matches;
+      },
+
+      getWinProbabilities(match) {
+        const probability = match.probability || {};
+        const p1 = Number(
+          probability.player1 ??
+          match.probabilityPlayer1 ??
+          match.probPlayer1 ??
+          0
+        );
+        const p2 = Number(
+          probability.player2 ??
+          match.probabilityPlayer2 ??
+          match.probPlayer2 ??
+          0
+        );
+
+        return {
+          p1: Number.isFinite(p1) ? Math.max(0, Math.min(100, p1)) : 0,
+          p2: Number.isFinite(p2) ? Math.max(0, Math.min(100, p2)) : 0
+        };
+      },
+
+      getMatchSummary(match) {
+        const score = U.normalizeScore(match.score || {});
+        const summary = match.summary || match.matchSummary || {};
+
+        return {
+          totalPoints1: Number(summary.totalPoints1 ?? score.totalPoints1 ?? 0),
+          totalPoints2: Number(summary.totalPoints2 ?? score.totalPoints2 ?? 0),
+          breakPointsWon1: Number(summary.breakPointsWon1 ?? score.breakPointsWon1 ?? 0),
+          breakPointsChances1: Number(summary.breakPointsChances1 ?? score.breakPointsChances1 ?? 0),
+          breakPointsWon2: Number(summary.breakPointsWon2 ?? score.breakPointsWon2 ?? 0),
+          breakPointsChances2: Number(summary.breakPointsChances2 ?? score.breakPointsChances2 ?? 0)
+        };
       }
     };
 
@@ -299,25 +353,137 @@
       return `<div class="public-card empty-card"><div class="card-title">${U.escapeHtml(message)}</div></div>`;
     }
 
+    function renderWinProbabilityChart(match) {
+      const { p1, p2 } = U.getWinProbabilities(match);
+
+      if (p1 <= 0 && p2 <= 0) return "";
+
+      const p1Name = U.escapeHtml(U.normalizeText(match.player1, "JOGADOR 1"));
+      const p2Name = U.escapeHtml(U.normalizeText(match.player2, "JOGADOR 2"));
+
+      const p1Width = Math.max(0, Math.min(100, p1));
+      const p2Width = Math.max(0, Math.min(100, p2));
+
+      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória - Bolão Maui Open</div> <div class="win-probability-bar" aria-label="Probabilidade de vitória"> <div class="win-probability-segment win-probability-p1" style="width:${p1Width}%" title="${p1Name} ${p1Width}%"> ${p1Width > 12 ? `${p1Width}%` : ""} </div> <div class="win-probability-segment win-probability-p2" style="width:${p2Width}%" title="${p2Name} ${p2Width}%"> ${p2Width > 12 ? `${p2Width}%` : ""} </div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1Width}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2Width}%</span> </div> </div> `;
+    }
+
+    function renderMatchSummary(match) {
+      const p1Name = U.escapeHtml(U.normalizeText(match.player1, "JOGADOR 1"));
+      const p2Name = U.escapeHtml(U.normalizeText(match.player2, "JOGADOR 2"));
+      const s = U.getMatchSummary(match);
+
+      return ` <div class="match-summary"> <div class="match-summary-title">Resumo da partida</div> <div class="match-summary-grid"> <div class="match-summary-item"> <span class="summary-label">${p1Name}</span> <span class="summary-value"> Pontos: <strong>${s.totalPoints1}</strong> | Break points: <strong>${s.breakPointsWon1}/${s.breakPointsChances1}</strong> </span> </div> <div class="match-summary-item"> <span class="summary-label">${p2Name}</span> <span class="summary-value"> Pontos: <strong>${s.totalPoints2}</strong> | Break points: <strong>${s.breakPointsWon2}/${s.breakPointsChances2}</strong> </span> </div> </div> </div> `;
+    }
+
     function createCard(match) {
-      const p1 = U.escapeHtml(U.normalizeText(match.player1, "JOGADOR 1"));
-      const p2 = U.escapeHtml(U.normalizeText(match.player2, "JOGADOR 2"));
+      const p1Raw = U.normalizeText(match.player1, "JOGADOR 1");
+      const p2Raw = U.normalizeText(match.player2, "JOGADOR 2");
+
+      const p1 = U.escapeHtml(p1Raw);
+      const p2 = U.escapeHtml(p2Raw);
+
       const category = U.escapeHtml(U.normalizeText(match.categoryName, "ATP 250"));
       const court = U.escapeHtml(U.normalizeText(match.court, ""));
       const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const format = U.escapeHtml(
-        U.normalizeText(match.matchFormat, "1 set sem vantagem + um supertiebreak de 10 pontos")
+      const formatRaw = U.normalizeText(
+        match.matchFormat,
+        "1 set sem vantagem + um supertiebreak de 10 pontos"
       );
+      const format = U.escapeHtml(formatRaw);
+
       const status = U.normalizeStatus(match.status);
       const score = U.normalizeScore(match.score);
       const setColumns = U.getSetColumns(score);
+
       const server = U.getServerPosition(match, score);
-      const serverP1 = server === 1 ? "🎾 " : "";
-      const serverP2 = server === 2 ? "🎾 " : "";
+      const serverIsP1 = server === 1;
+
+      const serverP1 = serverIsP1 ? "🎾 " : "";
+      const serverP2 = serverIsP1 ? "" : "🎾 ";
+
       const duration = U.buildDuration(match);
       const pointsDisplay = U.getPointDisplay(match, score);
+      const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
 
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="match-format compact-format"> <span>Formato do jogo:</span> <strong>${format}</strong> </div> <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${pointsDisplay.p1 || ""}</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${pointsDisplay.p2 || ""}</div> </div> <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: <strong>${court}</strong></span>` : ""} ${match.matchDateTime ? `<span>Data: <strong>${formatDateTime(match.matchDateTime)}</strong></span>` : ""} </div> </article> `;
+      let liveFeedMessage = "";
+
+      if (status === "live") {
+        const p1Pts = Number(score.points1 || 0);
+        const p2Pts = Number(score.points2 || 0);
+
+        const p1Games = Number(score.games1 || 0);
+        const p2Games = Number(score.games2 || 0);
+
+        const serverPts = serverIsP1 ? p1Pts : p2Pts;
+        const receiverPts = serverIsP1 ? p2Pts : p1Pts;
+
+        const tieBreakMode = score.tieBreakMode || match.tieBreakMode || null;
+        const isTieBreak = tieBreakMode === "tb7";
+        const isSuperTieBreak = tieBreakMode === "super10";
+
+        const deuceAdv = U.tennisDeuceAdv(p1Pts, p2Pts);
+
+        const formatLower = formatRaw.toLowerCase();
+        const isOneSetFormat =
+          formatLower.includes("1 set pro") ||
+          formatLower.includes("1 set sem vantagem");
+
+        const isGamePointForServer = serverPts >= 3 && receiverPts <= 2;
+        const isBreakPointForReceiver = receiverPts >= 3 && serverPts <= 2;
+
+        const p1LeadingGames = p1Games > p2Games;
+        const p2LeadingGames = p2Games > p1Games;
+
+        const isSetPointForP1 =
+          p1LeadingGames &&
+          ((serverIsP1 && isGamePointForServer) || (!serverIsP1 && isBreakPointForReceiver));
+
+        const isSetPointForP2 =
+          p2LeadingGames &&
+          ((serverIsP1 && isBreakPointForReceiver) || (!serverIsP1 && isGamePointForServer));
+
+        if (isSuperTieBreak) {
+          liveFeedMessage = "SUPERTIEBREAK";
+        } else if (isTieBreak) {
+          liveFeedMessage = "TIEBREAK";
+        } else if (deuceAdv === "DEUCE") {
+          liveFeedMessage = "IGUAIS — PONTO DECISIVO";
+        } else if (deuceAdv === "AD1") {
+          liveFeedMessage = serverIsP1
+            ? `PONTO DECISIVO PARA ${p1Raw.toUpperCase()}`
+            : `PONTO DECISIVO PARA ${p2Raw.toUpperCase()}`;
+        } else if (deuceAdv === "AD2") {
+          liveFeedMessage = serverIsP1
+            ? `PONTO DECISIVO PARA ${p2Raw.toUpperCase()}`
+            : `PONTO DECISIVO PARA ${p1Raw.toUpperCase()}`;
+        } else if (isGamePointForServer) {
+          liveFeedMessage = `GAME POINT PARA ${serverIsP1 ? p1Raw.toUpperCase() : p2Raw.toUpperCase()}`;
+        } else if (isBreakPointForReceiver) {
+          liveFeedMessage = `BREAK POINT PARA ${serverIsP1 ? p2Raw.toUpperCase() : p1Raw.toUpperCase()}`;
+        } else if (isSetPointForP1) {
+          liveFeedMessage = isOneSetFormat
+            ? `MATCH POINT PARA ${p1Raw.toUpperCase()}`
+            : `SET POINT PARA ${p1Raw.toUpperCase()}`;
+        } else if (isSetPointForP2) {
+          liveFeedMessage = isOneSetFormat
+            ? `MATCH POINT PARA ${p2Raw.toUpperCase()}`
+            : `SET POINT PARA ${p2Raw.toUpperCase()}`;
+        } else if (p1Pts >= 4 && p1Pts >= p2Pts + 2) {
+          liveFeedMessage = `GAME ${p1Raw.toUpperCase()}`;
+        } else if (p2Pts >= 4 && p2Pts >= p1Pts + 2) {
+          liveFeedMessage = `GAME ${p2Raw.toUpperCase()}`;
+        }
+
+        if (isSuperTieBreak && liveFeedMessage.startsWith("MATCH POINT")) {
+          liveFeedMessage = liveFeedMessage.replace("MATCH POINT", "MATCHPOINT");
+        }
+      }
+
+      if (status === "scheduled") {
+        return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name">${p1}</span> <span class="vs-separator">X</span> <span class="player-name">${p2}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${ stage || matchDate ? ` <span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span> ` : "" } </div> </article> `;
+      }
+
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${ status === "finished" ? "" : ` <div class="match-format compact-format"> <span>Formato do jogo:</span> <strong>${format}</strong> </div> ` } ${ status === "live" && liveFeedMessage ? `<div class="live-feed">${U.escapeHtml(liveFeedMessage)}</div>` : "" } <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${pointsDisplay.p1 || ""}</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${pointsDisplay.p2 || ""}</div> </div> ${status === "live" ? renderWinProbabilityChart(match) : ""} ${status === "live" ? renderMatchSummary(match) : ""} <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${status === "finished" ? "" : (court ? `<span>Quadra: <strong>${court}</strong></span>` : "")} ${status === "finished" ? "" : (match.matchDateTime ? `<span>Data: <strong>${matchDate}</strong></span>` : "")} </div> </article> `;
     }
 
     function getActiveFilter() {
@@ -360,8 +526,8 @@
           return fb - fa;
         });
 
-      const scheduledVisibleBase = isMobile ? scheduled : scheduled.slice(0, 4);
-      const liveVisibleBase = isMobile ? live : live.slice(0, 4);
+      const scheduledVisibleBase = isMobile ? scheduled : scheduled.slice(0, 7);
+      const liveVisibleBase = isMobile ? live : live.slice(0, 3);
       const finishedVisibleBase = isMobile ? finished : finished.slice(0, 4);
 
       const visibleScheduled =

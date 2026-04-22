@@ -95,6 +95,63 @@
       return JSON.parse(JSON.stringify(obj ?? null));
     }
 
+    function toggleServer(currentServer) {
+      return String(currentServer) === "player2" ? "player1" : "player2";
+    }
+
+    function defaultScore() {
+      return {
+        points1: 0,
+        points2: 0,
+        games1: 0,
+        games2: 0,
+        sets1: 0,
+        sets2: 0,
+        tieBreakMode: null,
+        tieBreakPoints1: 0,
+        tieBreakPoints2: 0,
+        lastTieBreakMode: null,
+        lastTieBreakPoints1: 0,
+        lastTieBreakPoints2: 0,
+        setHistory: [],
+        server: "player1",
+
+        totalPoints1: 0,
+        totalPoints2: 0,
+        breakPointsWon1: 0,
+        breakPointsWon2: 0,
+        breakPointsChances1: 0,
+        breakPointsChances2: 0
+      };
+    }
+
+    function normalizeScore(score = {}) {
+      return {
+        ...defaultScore(),
+        ...score,
+        setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
+        tieBreakMode:
+          score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
+            ? score.tieBreakMode
+            : null,
+        lastTieBreakMode:
+          score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
+            ? score.lastTieBreakMode
+            : null,
+        server: score.server || "player1",
+        totalPoints1: Number(score.totalPoints1 || 0),
+        totalPoints2: Number(score.totalPoints2 || 0),
+        breakPointsWon1: Number(score.breakPointsWon1 || 0),
+        breakPointsWon2: Number(score.breakPointsWon2 || 0),
+        breakPointsChances1: Number(score.breakPointsChances1 || 0),
+        breakPointsChances2: Number(score.breakPointsChances2 || 0)
+      };
+    }
+
+    function isTieBreak(score = {}) {
+      return score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
+    }
+
     function buildLastActionSnapshot(data) {
       return {
         score: cloneDeep(data.score || defaultScore()),
@@ -135,6 +192,32 @@
       if (data.score?.tieBreakMode === "super10" && data.status === "live") {
         if (el.statusLabel) el.statusLabel.textContent = "EM ANDAMENTO • SUPERTIEBREAK";
       }
+    }
+
+    function getPointDisplay(points1, points2, matchFormat, score = null) {
+      if (typeof window.getPointDisplay === "function") {
+        return window.getPointDisplay(points1, points2, matchFormat, score);
+      }
+
+      if (score && (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10")) {
+        return `${score.tieBreakPoints1 || 0}x${score.tieBreakPoints2 || 0}`;
+      }
+
+      const noAd = String(matchFormat || "").toLowerCase().includes("sem vantagem");
+
+      if (!noAd) {
+        if (points1 >= 3 && points2 >= 3) {
+          if (points1 === points2) return "40x40 - Ponto decisivo";
+          if (points1 === points2 + 1) return "AD";
+          if (points2 === points1 + 1) return "AD";
+        }
+        const label = (p) => (p <= 0 ? "0" : p === 1 ? "15" : p === 2 ? "30" : "40");
+        return `${label(points1)}x${label(points2)}`;
+      }
+
+      if (points1 === 3 && points2 === 3) return "40x40 - Ponto decisivo";
+      const label = (p) => (p <= 0 ? "0" : p === 1 ? "15" : p === 2 ? "30" : "40");
+      return `${label(points1)}x${label(points2)}`;
     }
 
     function renderMatch(data) {
@@ -240,6 +323,148 @@
       return startedAt;
     }
 
+    function applyStatsForPoint(score, data, winnerPos, beforeScore) {
+      if (winnerPos === 1) score.totalPoints1 = Number(score.totalPoints1 || 0) + 1;
+      if (winnerPos === 2) score.totalPoints2 = Number(score.totalPoints2 || 0) + 1;
+
+      const server = String(score.server || data.server || "player1");
+      const serverPos = server === "player2" ? 2 : 1;
+      const receiverPos = serverPos === 1 ? 2 : 1;
+
+      const beforeServerPoints =
+        serverPos === 1 ? Number(beforeScore.points1 || 0) : Number(beforeScore.points2 || 0);
+      const beforeReceiverPoints =
+        serverPos === 1 ? Number(beforeScore.points2 || 0) : Number(beforeScore.points1 || 0);
+
+      const isTieBreakNow =
+        score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
+
+      const isDeucePoint =
+        !isTieBreakNow &&
+        beforeServerPoints >= 3 &&
+        beforeReceiverPoints >= 3 &&
+        beforeServerPoints === beforeReceiverPoints;
+
+      const isBreakPoint =
+        !isTieBreakNow &&
+        (
+          (beforeReceiverPoints >= 3 && beforeServerPoints <= 2)
+          || isDeucePoint
+        );
+
+      if (isBreakPoint) {
+        if (receiverPos === 1) score.breakPointsChances1 += 1;
+        if (receiverPos === 2) score.breakPointsChances2 += 1;
+
+        if (winnerPos === receiverPos) {
+          if (receiverPos === 1) score.breakPointsWon1 += 1;
+          if (receiverPos === 2) score.breakPointsWon2 += 1;
+        }
+      }
+    }
+
+    function applyPointToScore(score, winnerPos, data) {
+      const beforeScore = cloneDeep(score);
+
+      let result = null;
+
+      if (typeof window.updateScoreWithPoint === "function") {
+        result = window.updateScoreWithPoint(score, winnerPos, data.matchFormat) || null;
+      } else {
+        if (isTieBreak(score)) {
+          if (winnerPos === 1) score.tieBreakPoints1 += 1;
+          if (winnerPos === 2) score.tieBreakPoints2 += 1;
+        } else {
+          if (winnerPos === 1) score.points1 += 1;
+          if (winnerPos === 2) score.points2 += 1;
+        }
+      }
+
+      applyStatsForPoint(score, data, winnerPos, beforeScore);
+
+      // troca o saque automaticamente quando o game termina
+      if (result && result.gameWon) {
+        score.server = toggleServer(score.server || data.server || "player1");
+      }
+
+      return score;
+    }
+
+    async function registerPointAndStats(winnerPos) {
+      if (!id) return;
+
+      const ref = __db.collection("matches").doc(id);
+
+      try {
+        const snap = await ref.get();
+        if (!snap.exists) return setMsg("Partida não encontrada.");
+
+        let data = snap.data();
+
+        if (isMatchLocked(data)) {
+          return setMsg("A partida já foi finalizada. Não é possível alterar o placar.");
+        }
+
+        if (data.status !== "live") {
+          await ensureMatchStarted(ref, data);
+          const updatedSnap = await ref.get();
+          data = updatedSnap.data();
+        }
+
+        const lastAction = buildLastActionSnapshot(data);
+        const score = normalizeScore(data.score);
+
+        score.totalPoints1 = Number(score.totalPoints1 || 0);
+        score.totalPoints2 = Number(score.totalPoints2 || 0);
+        score.breakPointsWon1 = Number(score.breakPointsWon1 || 0);
+        score.breakPointsWon2 = Number(score.breakPointsWon2 || 0);
+        score.breakPointsChances1 = Number(score.breakPointsChances1 || 0);
+        score.breakPointsChances2 = Number(score.breakPointsChances2 || 0);
+
+        applyPointToScore(score, winnerPos, data);
+
+        score.setHistory = Array.isArray(score.setHistory) ? score.setHistory : [];
+        score.server = score.server || data.server || "player1";
+
+        const finished = typeof window.isMatchFinished === "function"
+          ? window.isMatchFinished(score, data.matchFormat)
+          : false;
+
+        const winner = typeof window.getMatchWinner === "function"
+          ? window.getMatchWinner(score, data.matchFormat)
+          : 0;
+
+        await ref.update({
+          lastAction,
+          score: {
+            ...score,
+            setHistory: score.setHistory,
+            lastTieBreakMode: score.lastTieBreakMode || null,
+            lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
+            lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+            totalPoints1: Number(score.totalPoints1 || 0),
+            totalPoints2: Number(score.totalPoints2 || 0),
+            breakPointsWon1: Number(score.breakPointsWon1 || 0),
+            breakPointsWon2: Number(score.breakPointsWon2 || 0),
+            breakPointsChances1: Number(score.breakPointsChances1 || 0),
+            breakPointsChances2: Number(score.breakPointsChances2 || 0)
+          },
+          server: score.server,
+          status: finished ? "finished" : data.status,
+          finishedAt: finished ? firebase.firestore.FieldValue.serverTimestamp() : (data.finishedAt || null),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          winnerByWO: winner ? (winner === 1 ? "player1" : "player2") : (data.winnerByWO || ""),
+          startedAt: data.startedAt || null,
+          durationSeconds: data.durationSeconds || 0
+        });
+
+        setMsg(winnerPos === 1 ? "Ponto do Jogador 1 salvo." : "Ponto do Jogador 2 salvo.");
+      } catch (err) {
+        console.error(err);
+        setMsg(err.message);
+      }
+    }
+
     async function saveScore(updateFn) {
       if (!id) return;
       const ref = __db.collection("matches").doc(id);
@@ -268,8 +493,13 @@
         score.setHistory = Array.isArray(score.setHistory) ? score.setHistory : [];
         score.server = score.server || data.server || "player1";
 
-        const finished = isMatchFinished(score, data.matchFormat);
-        const winner = getMatchWinner(score, data.matchFormat);
+        const finished = typeof window.isMatchFinished === "function"
+          ? window.isMatchFinished(score, data.matchFormat)
+          : false;
+
+        const winner = typeof window.getMatchWinner === "function"
+          ? window.getMatchWinner(score, data.matchFormat)
+          : 0;
 
         await ref.update({
           lastAction,
@@ -278,7 +508,13 @@
             setHistory: score.setHistory,
             lastTieBreakMode: score.lastTieBreakMode || null,
             lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-            lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0)
+            lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+            totalPoints1: Number(score.totalPoints1 || 0),
+            totalPoints2: Number(score.totalPoints2 || 0),
+            breakPointsWon1: Number(score.breakPointsWon1 || 0),
+            breakPointsWon2: Number(score.breakPointsWon2 || 0),
+            breakPointsChances1: Number(score.breakPointsChances1 || 0),
+            breakPointsChances2: Number(score.breakPointsChances2 || 0)
           },
           server: score.server,
           status: finished ? "finished" : data.status,
@@ -288,14 +524,6 @@
           startedAt: data.startedAt || null,
           durationSeconds: data.durationSeconds || 0
         });
-
-        if (result.tieBreakStarted) {
-          setMsg(
-            score.tieBreakMode === "super10"
-              ? "Supertiebreak iniciado."
-              : "Tie-break iniciado."
-          );
-        }
       } catch (err) {
         console.error(err);
         setMsg(err.message);
@@ -409,7 +637,13 @@
               setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
               lastTieBreakMode: score.lastTieBreakMode || null,
               lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-              lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0)
+              lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+              totalPoints1: Number(score.totalPoints1 || 0),
+              totalPoints2: Number(score.totalPoints2 || 0),
+              breakPointsWon1: Number(score.breakPointsWon1 || 0),
+              breakPointsWon2: Number(score.breakPointsWon2 || 0),
+              breakPointsChances1: Number(score.breakPointsChances1 || 0),
+              breakPointsChances2: Number(score.breakPointsChances2 || 0)
             },
             server: score.server || data.server || "player1",
             startedAt: data.startedAt || null
@@ -459,23 +693,21 @@
           const target = btn.dataset.target;
           const delta = Number(btn.dataset.delta);
 
-          await saveScore((score, data) => {
+          if (delta > 0) {
+            await registerPointAndStats(target === "player1" ? 1 : 2);
+            return;
+          }
+
+          await saveScore((score) => {
             const player = target === "player1" ? 1 : 2;
 
-            if (delta > 0) {
-              updateScoreWithPoint(score, player, data.matchFormat);
+            if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+              if (player === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
+              if (player === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
             } else {
-              if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-                if (player === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
-                if (player === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
-              } else {
-                if (player === 1) score.points1 = Math.max(0, score.points1 - 1);
-                if (player === 2) score.points2 = Math.max(0, score.points2 - 1);
-              }
+              if (player === 1) score.points1 = Math.max(0, score.points1 - 1);
+              if (player === 2) score.points2 = Math.max(0, score.points2 - 1);
             }
-
-            score.setHistory = Array.isArray(score.setHistory) ? score.setHistory : [];
-            score.server = score.server || data.server || "player1";
           });
         });
       });
@@ -518,9 +750,17 @@
             score.setHistory = Array.isArray(score.setHistory) ? score.setHistory : [];
             score.server = score.server || data.server || "player1";
 
-            const setResult = evaluateSet(score, data.matchFormat);
-            const finished = isMatchFinished(score, data.matchFormat);
-            const winner = getMatchWinner(score, data.matchFormat);
+            const setResult = typeof window.evaluateSet === "function"
+              ? window.evaluateSet(score, data.matchFormat)
+              : { tieBreakStarted: false, setWon: false };
+
+            const finished = typeof window.isMatchFinished === "function"
+              ? window.isMatchFinished(score, data.matchFormat)
+              : false;
+
+            const winner = typeof window.getMatchWinner === "function"
+              ? window.getMatchWinner(score, data.matchFormat)
+              : 0;
 
             await ref.update({
               lastAction,
@@ -529,7 +769,13 @@
                 setHistory: score.setHistory,
                 lastTieBreakMode: score.lastTieBreakMode || null,
                 lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-                lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0)
+                lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+                totalPoints1: Number(score.totalPoints1 || 0),
+                totalPoints2: Number(score.totalPoints2 || 0),
+                breakPointsWon1: Number(score.breakPointsWon1 || 0),
+                breakPointsWon2: Number(score.breakPointsWon2 || 0),
+                breakPointsChances1: Number(score.breakPointsChances1 || 0),
+                breakPointsChances2: Number(score.breakPointsChances2 || 0)
               },
               updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
               server: score.server,
@@ -575,7 +821,13 @@
               setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
               lastTieBreakMode: score.lastTieBreakMode || null,
               lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-              lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0)
+              lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+              totalPoints1: Number(score.totalPoints1 || 0),
+              totalPoints2: Number(score.totalPoints2 || 0),
+              breakPointsWon1: Number(score.breakPointsWon1 || 0),
+              breakPointsWon2: Number(score.breakPointsWon2 || 0),
+              breakPointsChances1: Number(score.breakPointsChances1 || 0),
+              breakPointsChances2: Number(score.breakPointsChances2 || 0)
             },
             server: "player1",
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -611,7 +863,13 @@
               setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
               lastTieBreakMode: score.lastTieBreakMode || null,
               lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-              lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0)
+              lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+              totalPoints1: Number(score.totalPoints1 || 0),
+              totalPoints2: Number(score.totalPoints2 || 0),
+              breakPointsWon1: Number(score.breakPointsWon1 || 0),
+              breakPointsWon2: Number(score.breakPointsWon2 || 0),
+              breakPointsChances1: Number(score.breakPointsChances1 || 0),
+              breakPointsChances2: Number(score.breakPointsChances2 || 0)
             },
             server: "player2",
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()

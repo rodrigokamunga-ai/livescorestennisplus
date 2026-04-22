@@ -32,6 +32,8 @@
       tournamentStage: document.getElementById("tournamentStage"),
       player1: document.getElementById("player1"),
       player2: document.getElementById("player2"),
+      probPlayer1: document.getElementById("probPlayer1"),
+      probPlayer2: document.getElementById("probPlayer2"),
       winnerByWO: document.getElementById("winnerByWO"),
       status: document.getElementById("status"),
       formTitle: document.getElementById("formTitle"),
@@ -163,6 +165,8 @@
       if (el.docId) el.docId.value = "";
       if (el.status) el.status.value = "scheduled";
       if (el.winnerByWO) el.winnerByWO.value = "";
+      if (el.probPlayer1) el.probPlayer1.value = "";
+      if (el.probPlayer2) el.probPlayer2.value = "";
       if (el.formTitle) el.formTitle.textContent = "Nova partida";
       setMsg("");
     }
@@ -176,6 +180,8 @@
       if (el.tournamentStage) el.tournamentStage.value = data?.tournamentStage || "";
       if (el.player1) el.player1.value = data?.player1 || "";
       if (el.player2) el.player2.value = data?.player2 || "";
+      if (el.probPlayer1) el.probPlayer1.value = data?.probPlayer1 ?? "";
+      if (el.probPlayer2) el.probPlayer2.value = data?.probPlayer2 ?? "";
       if (el.winnerByWO) el.winnerByWO.value = data?.winnerByWO || "";
       if (el.status) el.status.value = data?.status || "scheduled";
       if (el.formTitle) el.formTitle.textContent = id ? "Editando partida" : "Nova partida";
@@ -185,14 +191,20 @@
       return `${location.origin}${location.pathname.replace("admin.html", "player.html")}?id=${id}`;
     }
 
+    function formatProb(value) {
+      if (value === null || value === undefined || value === "") return "-";
+      const n = Number(value);
+      return Number.isFinite(n) ? `${n}%` : "-";
+    }
+
     function detailsHTML(d, id) {
       const link = buildPublicLink(id);
-      return ` <div><strong>Categoria:</strong> ${d.categoryName || "-"}</div> <div><strong>Formato:</strong> ${U.normalizeMatchFormat(d.matchFormat || "-")}</div> <div><strong>Data e hora do jogo:</strong> ${d.matchDateTime || "-"}</div> <div><strong>Quadra:</strong> ${d.court || "-"}</div> <div><strong>Fase:</strong> ${d.tournamentStage || "-"}</div> <div><strong>Jogador 1:</strong> ${d.player1 || "-"}</div> <div><strong>Jogador 2:</strong> ${d.player2 || "-"}</div> <div><strong>Status:</strong> ${d.status || "-"}</div> <div><strong>WO:</strong> ${d.winnerByWO || "Nenhum"}</div> <div><strong>Link da partida:</strong> <a href="${link}" target="_blank" rel="noreferrer">${link}</a></div> `;
+      return ` <div><strong>Categoria:</strong> ${d.categoryName || "-"}</div> <div><strong>Formato:</strong> ${U.normalizeMatchFormat(d.matchFormat || "-")}</div> <div><strong>Data e hora do jogo:</strong> ${d.matchDateTime || "-"}</div> <div><strong>Quadra:</strong> ${d.court || "-"}</div> <div><strong>Fase:</strong> ${d.tournamentStage || "-"}</div> <div><strong>Jogador 1:</strong> ${d.player1 || "-"}</div> <div><strong>Jogador 2:</strong> ${d.player2 || "-"}</div> <div><strong>Prob. vitória Jogador 1:</strong> ${formatProb(d.probPlayer1)}</div> <div><strong>Prob. vitória Jogador 2:</strong> ${formatProb(d.probPlayer2)}</div> <div><strong>Status:</strong> ${d.status || "-"}</div> <div><strong>WO:</strong> ${d.winnerByWO || "Nenhum"}</div> <div><strong>Link da partida:</strong> <a href="${link}" target="_blank" rel="noreferrer">${link}</a></div> `;
     }
 
     function rowHTML(docSnap) {
       const d = docSnap.data();
-      return ` <tr> <td> <div class="players-cell"> <strong>${d.player1 || "Jogador 1"}</strong> <span>vs</span> <strong>${d.player2 || "Jogador 2"}</strong> </div> </td> <td title="${d.categoryName || "-"}">${d.categoryName || "-"}</td> <td><span class="status-tag status-${String(d.status || "scheduled").toLowerCase()}">${d.status || "scheduled"}</span></td> <td> <div class="action-icons"> <button class="icon-btn" data-action="copy" data-id="${docSnap.id}" title="Copiar link" aria-label="Copiar link">🔗</button> <button class="icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" aria-label="Detalhar">👁️</button> <button class="icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" aria-label="Editar">✏️</button> <button class="icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" aria-label="Excluir">🗑️</button> </div> </td> </tr> `;
+      return ` <tr> <td> <div class="players-cell"> <strong>${d.player1 || "Jogador 1"}</strong> <span>vs</span> <strong>${d.player2 || "Jogador 2"}</strong> </div> <div class="muted" style="font-size: 12px;"> ${formatProb(d.probPlayer1)} x ${formatProb(d.probPlayer2)} </div> </td> <td title="${d.categoryName || "-"}">${d.categoryName || "-"}</td> <td><span class="status-tag status-${String(d.status || "scheduled").toLowerCase()}">${d.status || "scheduled"}</span></td> <td> <div class="action-icons"> <button class="icon-btn" data-action="copy" data-id="${docSnap.id}" title="Copiar link" aria-label="Copiar link">🔗</button> <button class="icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" aria-label="Detalhar">👁️</button> <button class="icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" aria-label="Editar">✏️</button> <button class="icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" aria-label="Excluir">🗑️</button> </div> </td> </tr> `;
     }
 
     function sortLocalMatches() {
@@ -313,6 +325,16 @@
           return setMsg("Formato inválido. Use apenas os 3 formatos permitidos.");
         }
 
+        const prob1 = el.probPlayer1?.value === "" ? null : Number(el.probPlayer1.value);
+        const prob2 = el.probPlayer2?.value === "" ? null : Number(el.probPlayer2.value);
+
+        if (prob1 !== null && prob2 !== null) {
+          const soma = Math.round((prob1 + prob2) * 100) / 100;
+          if (soma !== 100) {
+            return setMsg("A soma das probabilidades deve ser 100%.");
+          }
+        }
+
         const data = {
           categoryName: el.categoryName?.value.trim() || "",
           matchFormat: selectedFormat,
@@ -321,6 +343,8 @@
           tournamentStage: el.tournamentStage?.value.trim() || "",
           player1: el.player1?.value.trim() || "",
           player2: el.player2?.value.trim() || "",
+          probPlayer1: prob1,
+          probPlayer2: prob2,
           winnerByWO: el.winnerByWO?.value || "",
           status: el.status?.value || "scheduled",
           score: {
