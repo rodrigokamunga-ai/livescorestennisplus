@@ -1292,3 +1292,1167 @@ body.player-page .score-card {
   border-radius: 10px;
   white-space: nowrap;
 }
+
+/* ========================= AJUSTE SOMENTE PARA JOGOS DO DIA ========================= */
+.public-card.scheduled-match .match-format,
+.public-card.scheduled-match .match-table-head,
+.public-card.scheduled-match .match-player-row {
+  display: none;
+}
+
+.public-card.scheduled-match .scheduled-player-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 4px 10px;
+  text-align: center;
+  font-weight: 800;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.public-card.scheduled-match .scheduled-player-line .player-name {
+  font-size: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.public-card.scheduled-match .scheduled-player-line .vs-separator {
+  font-size: 14px;
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+.public-card.scheduled-match .scheduled-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  text-align: center;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.public-card.scheduled-match .scheduled-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* Se a tela for pequena, mantém Fase + Data na mesma linha o máximo possível */
+@media (max-width: 768px) {
+  .public-card.scheduled-match .scheduled-footer {
+    font-size: 9px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-card.scheduled-match .scheduled-player-line {
+    gap: 6px;
+  }
+
+  .public-card.scheduled-match .scheduled-player-line .player-name,
+  .public-card.scheduled-match .scheduled-player-line .vs-separator {
+    font-size: 13px;
+  }
+}
+
+/* ========================= AJUSTE SOMENTE PARA FINALIZADOS ========================= */
+.public-card.finished-match .match-format,
+.public-card.finished-match .match-table-head,
+.public-card.finished-match .match-player-row {
+  display: none;
+}
+
+.public-card.finished-match .finished-player-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 4px 10px;
+  text-align: center;
+  font-weight: 800;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.public-card.finished-match .finished-player-line .player-name {
+  font-size: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.public-card.finished-match .finished-player-line .vs-separator {
+  font-size: 14px;
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+.public-card.finished-match .finished-player-line .winner {
+  color: #c8ff62;
+}
+
+.public-card.finished-match .finished-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  text-align: center;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.public-card.finished-match .finished-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* ========================= AJUSTE SOMENTE PARA FINALIZADOS ========================= */
+.public-card.finished-match .match-format,
+.public-card.finished-match .match-table-head,
+.public-card.finished-match .match-player-row {
+  display: none;
+}
+
+.public-card.finished-match .finished-player-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 4px 10px;
+  text-align: center;
+  font-weight: 800;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.public-card.finished-match .finished-player-line .player-name {
+  font-size: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.public-card.finished-match .finished-player-line .vs-separator {
+  font-size: 14px;
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+.public-card.finished-match .finished-player-line .winner {
+  color: #c8ff62;
+}
+
+.public-card.finished-match .finished-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  text-align: center;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.public-card.finished-match .finished-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* ========================================================= LAYOUT FINAL CONSOLIDADO — FOCO EM "EM ANDAMENTO" - Coluna 1 menor - Coluna 2 maior - Coluna 3 menor - Card do meio mais alto e com visual TV Cole no FINAL do style.css ========================================================= */
+
+/* ========================= GRID PRINCIPAL DAS 3 COLUNAS ========================= */
+body.public-page .public-grid.board-grid,
+body.public-dashboard-page .dashboard-grid {
+  grid-template-columns: 0.75fr 1.5fr 0.75fr;
+  gap: 18px;
+  align-items: start;
+}
+
+/* ========================= COLUNA DO MEIO MAIS DESTAQUE ========================= */
+body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2),
+body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) {
+  position: relative;
+  z-index: 2;
+  padding: 22px;
+  transform: scale(1.01);
+transform-origin: top center;
+  border: 1px solid rgba(200, 255, 92, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(200, 255, 92, 0.10),
+    0 18px 42px rgba(0, 0, 0, 0.30),
+    0 0 28px rgba(200, 255, 92, 0.10);
+  background:
+    radial-gradient(circle at top, rgba(200, 255, 92, 0.10), transparent 35%),
+    linear-gradient(180deg, rgba(31, 40, 60, 0.96), rgba(15, 22, 36, 0.99));
+}
+
+/* ========================= CABEÇALHO DA COLUNA "EM ANDAMENTO" ========================= */
+body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2) .section-icon.live,
+body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) .section-icon.live {
+  background: linear-gradient(180deg, rgba(93, 255, 149, 0.18), rgba(93, 255, 149, 0.08));
+  border-color: rgba(93, 255, 149, 0.22);
+  box-shadow: 0 0 18px rgba(93, 255, 149, 0.14);
+}
+
+body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2) .dashboard-title h3,
+body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) .dashboard-title h3 {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(200, 255, 92, 0.18);
+}
+
+body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2) .badge,
+body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) .badge {
+  background: linear-gradient(180deg, #d8ff63 0%, #aeea2d 100%);
+  color: #0b1320;
+  box-shadow: 0 0 14px rgba(200, 255, 92, 0.25);
+}
+
+/* ========================= LISTA DE JOGOS EM ANDAMENTO ========================= */
+body.public-page #liveList,
+body.public-dashboard-page #liveList {
+  gap: 14px;
+}
+
+/* ========================= CARD DO AO VIVO / EM ANDAMENTO ========================= */
+body.public-page #liveList .public-card.match-board,
+body.public-page #liveList .public-card.match-card,
+body.public-page #liveList .public-card.game-card,
+body.public-dashboard-page #liveList .public-card.match-board,
+body.public-dashboard-page #liveList .public-card.match-card,
+body.public-dashboard-page #liveList .public-card.game-card {
+  background:
+    linear-gradient(180deg, rgba(28, 39, 60, 0.98), rgba(12, 18, 30, 0.99));
+  border: 1px solid rgba(200, 255, 92, 0.26);
+  border-radius: 18px;
+  padding: 14px;
+  min-height: 220px;
+  box-shadow:
+    0 0 0 1px rgba(200, 255, 92, 0.10),
+    0 14px 28px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ========================= ELEMENTOS INTERNOS DO CARD AO VIVO ========================= */
+body.public-page #liveList .match-board-top,
+body.public-page #liveList .card-top,
+body.public-dashboard-page #liveList .match-board-top,
+body.public-dashboard-page #liveList .card-top {
+  margin-bottom: 10px;
+}
+
+body.public-page #liveList .match-chip,
+body.public-dashboard-page #liveList .match-chip {
+  background: linear-gradient(180deg, #d8ff63 0%, #b7f148 100%);
+  color: #0b1320;
+  letter-spacing: 0.4px;
+  box-shadow: 0 0 12px rgba(200, 255, 92, 0.18);
+}
+
+body.public-page #liveList .status-live,
+body.public-dashboard-page #liveList .status-live {
+  color: #d8ff63;
+}
+
+body.public-page #liveList .match-format,
+body.public-dashboard-page #liveList .match-format {
+  margin-bottom: 10px;
+  padding: 9px 10px;
+}
+
+/* Alinhar "Formato do jogo:" à esquerda só em Em andamento */
+body.public-page #liveList .match-format,
+body.public-dashboard-page #liveList .match-format {
+  text-align: left;
+}
+body.public-page #liveList .match-player-row,
+body.public-dashboard-page #liveList .match-player-row {
+  min-height: 52px;
+  margin-top: 6px;
+  border-radius: 12px;
+}
+
+body.public-page #liveList .player-name,
+body.public-dashboard-page #liveList .player-name {
+  font-size: 14px;
+}
+
+body.public-page #liveList .score,
+body.public-dashboard-page #liveList .score {
+  font-size: 24px;
+}
+
+/* ========================= MODO TV OPCIONAL ========================= */
+/* Se quiser mostrar apenas a coluna do meio, adicione tv-mode no body: <body class="public-page public-dashboard-page tv-mode"> */
+body.tv-mode .public-grid.board-grid,
+body.tv-mode .dashboard-grid {
+  grid-template-columns: 1fr;
+}
+
+body.tv-mode .public-grid.board-grid > .dashboard-column,
+body.tv-mode .dashboard-grid > .dashboard-column {
+  display: none;
+}
+
+body.tv-mode .public-grid.board-grid > .dashboard-column:nth-child(2),
+body.tv-mode .dashboard-grid > .dashboard-column:nth-child(2) {
+  display: flex;
+  transform: none;
+  max-width: 100%;
+  min-height: calc(100vh - 120px);
+  padding: 24px;
+}
+
+/* ========================= RESPONSIVO ========================= */
+@media (max-width: 1100px) {
+  body.public-page .public-grid.board-grid,
+  body.public-dashboard-page .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2),
+  body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2),
+  body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) {
+    padding: 18px;
+    min-height: auto;
+  }
+
+  body.public-page #liveList .public-card.match-board,
+  body.public-page #liveList .public-card.match-card,
+  body.public-page #liveList .public-card.game-card,
+  body.public-dashboard-page #liveList .public-card.match-board,
+  body.public-dashboard-page #liveList .public-card.match-card,
+  body.public-dashboard-page #liveList .public-card.game-card {
+    min-height: auto;
+    padding: 12px;
+  }
+}
+
+
+/* ========================================================= FINALIZADOS MAIS COMPACTOS NO LAYOUT ATUAL Baseado em: .public-card[data-status="finished"] ========================================================= */
+
+.public-card[data-status="finished"] {
+  padding: 4px 6px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.public-card[data-status="finished"] .match-board-top {
+  margin-bottom: 3px;
+  gap: 6px;
+}
+
+.public-card[data-status="finished"] .match-chip,
+.public-card[data-status="finished"] .match-status {
+  font-size: 8px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .match-format {
+  margin-bottom: 4px;
+  padding: 5px 6px;
+  border-radius: 8px;
+}
+
+.public-card[data-status="finished"] .match-format span {
+  font-size: 1px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .match-format strong {
+  font-size: 10px;
+  margin-top: 1px;
+  line-height: 1.05;
+}
+
+.public-card[data-status="finished"] .match-table-head {
+  padding: 0 2px 2px;
+  font-size: 8px;
+  letter-spacing: 0.4px;
+}
+
+.public-card[data-status="finished"] .match-player-row {
+  min-height: 30px;
+  margin-top: 3px;
+  padding: 0 3px;
+  border-radius: 8px;
+}
+
+.public-card[data-status="finished"] .player-name {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .score {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .match-footer {
+  margin-top: 3px;
+  gap: 4px;
+  padding: 0 1px;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.public-card[data-status="finished"] .match-footer strong {
+  font-size: 10px;
+}
+
+/* ========================================================= TV PREMIUM — JOGOS EM ANDAMENTO Mais destaque, fonte maior e linhas mais altas ========================================================= */
+
+body.public-page #liveList .public-card[data-status="live"],
+body.public-dashboard-page #liveList .public-card[data-status="live"] {
+  background:
+    radial-gradient(circle at top, rgba(200, 255, 92, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(30, 40, 60, 0.99), rgba(12, 18, 30, 0.99));
+  border: 1px solid rgba(200, 255, 92, 0.24);
+  border-radius: 18px;
+  padding: 14px;
+  min-height: 240px;
+  box-shadow:
+    0 0 0 1px rgba(200, 255, 92, 0.10),
+    0 18px 34px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-board-top,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-board-top {
+  margin-bottom: 10px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-chip,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-chip {
+  background: linear-gradient(180deg, #d8ff63 0%, #b7f148 100%);
+  color: #0b1320;
+  font-size: 11px;
+  box-shadow: 0 0 14px rgba(200, 255, 92, 0.18);
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-status,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-status {
+  font-size: 11px;
+  color: #d8ff63;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-format {
+  margin-bottom: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-format span,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format span {
+  font-size: 11px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-format strong,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format strong {
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head {
+  font-size: 10px;
+  padding: 0 4px 6px;
+  letter-spacing: 0.5px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row {
+  min-height: 58px;
+  margin-top: 6px;
+  padding: 0 6px;
+  border-radius: 13px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .player-name,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name {
+  font-size: 18px;
+  line-height: 1.05;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .score,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .score {
+  font-size: 30px;
+  line-height: 1;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-footer,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-footer {
+  margin-top: 8px;
+  gap: 8px;
+  font-size: 11px;
+  padding: 0 2px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-footer strong,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-footer strong {
+  font-size: 11px;
+}
+
+/* ========================================================= JOGOS DO DIA MAIS COMPACTOS Fonte menor e menos espaço ========================================================= */
+
+.public-card.scheduled-match {
+  padding: 4px 6px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.public-card.scheduled-match .match-board-top {
+  margin-bottom: 3px;
+  gap: 6px;
+}
+
+.public-card.scheduled-match .match-chip,
+.public-card.scheduled-match .match-status {
+  font-size: 8px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.public-card.scheduled-match .scheduled-player-line {
+  padding: 6px 4px 7px;
+  gap: 6px;
+}
+
+.public-card.scheduled-match .scheduled-player-line .player-name {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.public-card.scheduled-match .scheduled-player-line .vs-separator {
+  font-size: 9px;
+  line-height: 1;
+}
+
+.public-card.scheduled-match .scheduled-footer {
+  margin-top: 3px;
+  gap: 4px;
+  padding: 0 1px;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.public-card.scheduled-match .scheduled-footer strong {
+  font-size: 10px;
+}
+
+/* ========================================================= CARD "EM ANDAMENTO" PREMIUM PARA TV Alinhamento perfeito dos pontos + fonte maior + linhas altas ========================================================= */
+
+body.public-page #liveList .public-card[data-status="live"],
+body.public-dashboard-page #liveList .public-card[data-status="live"] {
+  background:
+    radial-gradient(circle at top, rgba(200, 255, 92, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(30, 40, 60, 0.99), rgba(12, 18, 30, 0.99));
+  border: 1px solid rgba(200, 255, 92, 0.24);
+  border-radius: 18px;
+  padding: 14px;
+  min-height: 240px;
+  box-shadow:
+    0 0 0 1px rgba(200, 255, 92, 0.10),
+    0 18px 34px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Cabeçalho do card */
+body.public-page #liveList .public-card[data-status="live"] .match-board-top,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-board-top {
+  margin-bottom: 10px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-chip,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-chip {
+  background: linear-gradient(180deg, #d8ff63 0%, #b7f148 100%);
+  color: #0b1320;
+  font-size: 11px;
+  box-shadow: 0 0 14px rgba(200, 255, 92, 0.18);
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-status,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-status {
+  font-size: 11px;
+  color: #d8ff63;
+}
+
+/* Formato do jogo */
+body.public-page #liveList .public-card[data-status="live"] .match-format,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format {
+  margin-bottom: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-format span,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format span {
+  font-size: 11px;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-format strong,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format strong {
+  font-size: 13px;
+  margin-top: 2px;
+  line-height: 1.1;
+}
+
+/* Cabeçalho das colunas: JOGADOR | 1º SET | 2º SET | PONTOS */
+body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(56px, 0.45fr) minmax(56px, 0.45fr) minmax(56px, 0.45fr);
+  align-items: center;
+  gap: 0;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head {
+  padding: 0 4px 6px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #9fb1ce;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-table-head > div,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div,
+body.public-page #liveList .public-card[data-status="live"] .match-player-row > div,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div {
+  text-align: center;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
+body.public-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child {
+  text-align: left;
+}
+
+/* Linhas dos jogadores mais altas */
+body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row {
+  min-height: 58px;
+  margin-top: 6px;
+  padding: 0 6px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(43, 55, 79, 0.78), rgba(24, 34, 53, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Nome do jogador maior */
+body.public-page #liveList .public-card[data-status="live"] .player-name,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name {
+  font-size: 18px;
+  line-height: 1.05;
+  padding-right: 6px;
+}
+
+/* Placar maior e bem centralizado */
+body.public-page #liveList .public-card[data-status="live"] .score,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .score {
+  font-size: 30px;
+  line-height: 1;
+  width: 100%;
+  justify-self: center;
+  text-align: center;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .score.green,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .score.green {
+  color: #c9ff57;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .score.gray,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .score.gray {
+  color: #e6ecf7;
+}
+
+/* Rodapé mais limpo */
+body.public-page #liveList .public-card[data-status="live"] .match-footer,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-footer {
+  margin-top: 8px;
+  gap: 8px;
+  font-size: 11px;
+  padding: 0 2px;
+  line-height: 1.15;
+}
+
+body.public-page #liveList .public-card[data-status="live"] .match-footer strong,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-footer strong {
+  font-size: 11px;
+}
+
+/* Um toque extra de premium */
+body.public-page #liveList .public-card[data-status="live"] .match-chip,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .match-chip,
+body.public-page #liveList .public-card[data-status="live"] .score.green,
+body.public-dashboard-page #liveList .public-card[data-status="live"] .score.green {
+  text-shadow: 0 0 10px rgba(200, 255, 92, 0.12);
+}
+
+/* ========================================================= FINALIZADOS: PULAR UMA LINHA ENTRE CATEGORIA E JOGADORES ========================================================= */
+
+.public-card[data-status="finished"] .match-board-top {
+  margin-bottom: 12px;
+}
+
+.public-card[data-status="finished"] .match-table-head {
+  margin-top: 6px;
+}
+
+.public-card[data-status="finished"] .match-player-row:first-of-type {
+  margin-top: 8px;
+}
+
+/* ========================================================= FEED AO VIVO - COLUNA EM ANDAMENTO ========================================================= */
+
+body.public-page #liveList .live-feed,
+body.public-dashboard-page #liveList .live-feed {
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(200, 255, 92, 0.14), rgba(200, 255, 92, 0.06));
+  border: 1px solid rgba(200, 255, 92, 0.18);
+  color: #d8ff63;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 0 14px rgba(200, 255, 92, 0.10);
+}
+
+/* ========================================================= PROBABILIDADE DE VITÓRIA ========================================================= */
+
+.win-probability {
+  margin-top: 10px;
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(200, 255, 92, 0.10);
+}
+
+.win-probability-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: #d8ff63;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.prob-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.prob-row:last-child {
+  margin-bottom: 0;
+}
+
+.prob-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  color: #eef4ff;
+}
+
+.prob-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prob-value {
+  font-size: 13px;
+  color: #d8ff63;
+}
+
+.prob-bar {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.prob-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.prob-fill-p1 {
+  background: linear-gradient(90deg, #d8ff63, #86e53c);
+}
+
+.prob-fill-p2 {
+  background: linear-gradient(90deg, #6fb1ff, #4b84f0);
+}
+
+/* ============================ Probabilidade de vitória ============================ */
+
+.win-probability {
+  margin-top: 14px;
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.win-probability-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 12px;
+}
+
+.prob-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.prob-row:last-child {
+  margin-bottom: 0;
+}
+
+.prob-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.prob-name {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prob-value {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.95);
+  min-width: 52px;
+  text-align: right;
+}
+
+.prob-bar {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.20);
+}
+
+.prob-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.15);
+}
+
+.prob-fill-p1 {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
+}
+
+.prob-fill-p2 {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
+}
+
+/* opcional: melhora em cards escuros */
+.public-card .win-probability {
+  background: linear-gradient(180deg, rgba(10, 18, 32, 0.70), rgba(10, 18, 32, 0.45));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.win-probability-chart {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+}
+
+.win-probability-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 10px;
+}
+
+.probability-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.prob-grid-line {
+  stroke: rgba(255,255,255,0.10);
+  stroke-width: 1;
+  shape-rendering: geometricPrecision;
+}
+
+.prob-y-label {
+  fill: rgba(255,255,255,0.55);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.prob-x-label {
+  fill: rgba(255,255,255,0.92);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.prob-point-label {
+  fill: rgba(255,255,255,0.96);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.prob-line {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.prob-line-p1 {
+  stroke: #22c55e;
+  filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.35));
+}
+
+.prob-line-p2 {
+  stroke: #3b82f6;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.35));
+}
+
+.prob-dot {
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.prob-dot-p1 {
+  fill: #22c55e;
+}
+
+.prob-dot-p2 {
+  fill: #3b82f6;
+}
+
+.win-probability-legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.92);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+}
+
+.legend-item-p1 {
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.legend-item-p2 {
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.win-probability-chart {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+}
+
+.win-probability-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 12px;
+}
+
+.win-probability-bar {
+  width: 100%;
+  height: 18px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.18);
+}
+
+.win-probability-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: width 0.4s ease;
+}
+
+.win-probability-p1 {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  box-shadow: 0 0 14px rgba(34,197,94,0.25);
+}
+
+.win-probability-p2 {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  box-shadow: 0 0 14px rgba(59,130,246,0.25);
+}
+
+.win-probability-legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.92);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+}
+
+.legend-item-p1 {
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.legend-item-p2 {
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+/* ========================================================= RESUMO DA PARTIDA - 2 COLUNAS ========================================================= */
+
+.match-summary {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+}
+
+.match-summary-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 12px;
+}
+
+.match-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.match-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  min-width: 0;
+}
+
+.summary-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.96);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-value {
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(255,255,255,0.82);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-value strong {
+  color: #d8ff63;
+  font-weight: 900;
+}
+
