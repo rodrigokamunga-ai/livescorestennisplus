@@ -258,16 +258,33 @@
         function formatSet(setObj) {
           if (!setObj) return { p1: "--", p2: "--" };
 
-          if (setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10") {
+          const games1 = Number(setObj.games1 ?? 0);
+          const games2 = Number(setObj.games2 ?? 0);
+          const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
+          const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
+          const isTieBreak = setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10";
+
+          if (isTieBreak) {
+            const hasTieBreakResult = tb1 > 0 || tb2 > 0;
+
+            if (hasTieBreakResult) {
+              const p1Won = tb1 > tb2;
+
+              return {
+                p1: `${p1Won ? 7 : 6}<sup>${tb1}</sup>`,
+                p2: `${p1Won ? 6 : 7}<sup>${tb2}</sup>`
+              };
+            }
+
             return {
-              p1: `${setObj.games1 ?? 0}<sup>${setObj.tieBreakPoints1 ?? 0}</sup>`,
-              p2: `${setObj.games2 ?? 0}<sup>${setObj.tieBreakPoints2 ?? 0}</sup>`
+              p1: `${games1}<sup>${tb1}</sup>`,
+              p2: `${games2}<sup>${tb2}</sup>`
             };
           }
 
           return {
-            p1: String(setObj.games1 ?? 0),
-            p2: String(setObj.games2 ?? 0)
+            p1: String(games1),
+            p2: String(games2)
           };
         }
 
@@ -364,7 +381,7 @@
       const p1Width = Math.max(0, Math.min(100, p1));
       const p2Width = Math.max(0, Math.min(100, p2));
 
-      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória - Bolão Maui Open</div> <div class="win-probability-bar" aria-label="Probabilidade de vitória"> <div class="win-probability-segment win-probability-p1" style="width:${p1Width}%" title="${p1Name} ${p1Width}%"> ${p1Width > 12 ? `${p1Width}%` : ""} </div> <div class="win-probability-segment win-probability-p2" style="width:${p2Width}%" title="${p2Name} ${p2Width}%"> ${p2Width > 12 ? `${p2Width}%` : ""} </div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1Width}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2Width}%</span> </div> </div> `;
+      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar" aria-label="Probabilidade de vitória"> <div class="win-probability-segment win-probability-p1" style="width:${p1Width}%" title="${p1Name} ${p1Width}%"> ${p1Width > 12 ? `${p1Width}%` : ""} </div> <div class="win-probability-segment win-probability-p2" style="width:${p2Width}%" title="${p2Name} ${p2Width}%"> ${p2Width > 12 ? `${p2Width}%` : ""} </div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1Width}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2Width}%</span> </div> </div> `;
     }
 
     function renderMatchSummary(match) {
@@ -443,9 +460,9 @@
           ((serverIsP1 && isBreakPointForReceiver) || (!serverIsP1 && isGamePointForServer));
 
         if (isSuperTieBreak) {
-          liveFeedMessage = "SUPERTIEBREAK";
+          liveFeedMessage = "SUPER TIE-BREAK";
         } else if (isTieBreak) {
-          liveFeedMessage = "TIEBREAK";
+          liveFeedMessage = "TIE-BREAK";
         } else if (deuceAdv === "DEUCE") {
           liveFeedMessage = "IGUAIS — PONTO DECISIVO";
         } else if (deuceAdv === "AD1") {

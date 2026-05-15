@@ -53,6 +53,15 @@
     };
 
     const U = {
+      escapeHtml(str = "") {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      },
+
       normalizeText: (text) => String(text || "").toLowerCase().trim(),
 
       allowedMatchFormat(value) {
@@ -70,56 +79,11 @@
         return U.normalizeText(matchFormat).includes("sem vantagem");
       },
 
-      advantageEnabled(matchFormat) {
-        return U.normalizeText(matchFormat).includes("com vantagem");
-      },
-
-      isProSet(matchFormat) {
-        return U.normalizeText(matchFormat).includes("pro de 8 games");
-      },
-
-      isSetOf4Games(matchFormat) {
-        return U.normalizeText(matchFormat).includes("4 games");
-      },
-
-      getSetTarget(matchFormat) {
-        if (U.isProSet(matchFormat)) return 8;
-        if (U.isSetOf4Games(matchFormat)) return 4;
-        return 6;
-      },
-
-      getMatchSetsToWin(matchFormat) {
-        const text = U.normalizeText(matchFormat);
-        if (text.includes("2 sets")) return 2;
-        if (text.includes("1 set")) return 1;
-        return 1;
-      },
-
       getPointLabel(points) {
         if (points <= 0) return "0";
         if (points === 1) return "15";
         if (points === 2) return "30";
         return "40";
-      },
-
-      getPointDisplay(points1, points2, matchFormat, score = null) {
-        if (score && (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10")) {
-          return `${score.tieBreakPoints1 || 0}x${score.tieBreakPoints2 || 0}`;
-        }
-
-        const noAd = U.noAdEnabled(matchFormat);
-
-        if (!noAd) {
-          if (points1 >= 3 && points2 >= 3) {
-            if (points1 === points2) return "DEUCE";
-            if (points1 === points2 + 1) return "AD";
-            if (points2 === points1 + 1) return "AD";
-          }
-          return `${U.getPointLabel(points1)}x${U.getPointLabel(points2)}`;
-        }
-
-        if (points1 === 3 && points2 === 3) return "40x40 - Ponto decisivo";
-        return `${U.getPointLabel(points1)}x${U.getPointLabel(points2)}`;
       },
 
       defaultScore() {
@@ -133,8 +97,17 @@
           tieBreakMode: null,
           tieBreakPoints1: 0,
           tieBreakPoints2: 0,
+          lastTieBreakMode: null,
+          lastTieBreakPoints1: 0,
+          lastTieBreakPoints2: 0,
           setHistory: [],
-          server: "player1"
+          server: "player1",
+          totalPoints1: 0,
+          totalPoints2: 0,
+          breakPointsWon1: 0,
+          breakPointsWon2: 0,
+          breakPointsChances1: 0,
+          breakPointsChances2: 0
         };
       },
 
@@ -147,7 +120,34 @@
             score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
               ? score.tieBreakMode
               : null,
+          lastTieBreakMode:
+            score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
+              ? score.lastTieBreakMode
+              : null,
           server: score.server || "player1"
+        };
+      },
+
+      getSetDisplay(setObj) {
+        if (!setObj) return { p1: "--", p2: "--" };
+
+        const games1 = Number(setObj.games1 ?? 0);
+        const games2 = Number(setObj.games2 ?? 0);
+        const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
+        const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
+        const isTieBreak = setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10";
+
+        if (isTieBreak && (tb1 > 0 || tb2 > 0)) {
+          const p1Won = tb1 > tb2;
+          return {
+            p1: String(p1Won ? 7 : 6),
+            p2: String(p1Won ? 6 : 7)
+          };
+        }
+
+        return {
+          p1: String(games1),
+          p2: String(games2)
         };
       }
     };
@@ -197,14 +197,137 @@
       return Number.isFinite(n) ? `${n}%` : "-";
     }
 
-    function detailsHTML(d, id) {
+    function formatDuration(seconds) {
+      const total = Number(seconds || 0);
+      const h = String(Math.floor(total / 3600)).padStart(2, "0");
+      const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+      const s = String(total % 60).padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    }
+
+    function getMatchDuration(d) {
+      if (d?.durationSeconds && Number(d.durationSeconds) > 0) {
+        return formatDuration(d.durationSeconds);
+      }
+
+      const started = d?.startedAt?.toDate ? d.startedAt.toDate() : (d?.startedAt ? new Date(d.startedAt) : null);
+      const finished = d?.finishedAt?.toDate ? d.finishedAt.toDate() : (d?.finishedAt ? new Date(d.finishedAt) : null);
+
+      if (
+        started &&
+        finished &&
+        !isNaN(started.getTime()) &&
+        !isNaN(finished.getTime()) &&
+        finished >= started
+      ) {
+        return formatDuration(Math.floor((finished.getTime() - started.getTime()) / 1000));
+      }
+
+      return "-";
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      try {
+        const d = value.toDate ? value.toDate() : new Date(value);
+        return new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+          timeStyle: "short"
+        }).format(d);
+      } catch {
+        return "-";
+      }
+    }
+
+    function getWinnerPosition(score, d) {
+      const status = String(d?.status || "").trim().toLowerCase();
+      const woWinner = String(d?.winnerByWO || "").trim().toLowerCase();
+
+      if (status === "wo") {
+        if (woWinner === "player1") return 1;
+        if (woWinner === "player2") return 2;
+      }
+
+      if (Number(score.sets1 || 0) > Number(score.sets2 || 0)) return 1;
+      if (Number(score.sets2 || 0) > Number(score.sets1 || 0)) return 2;
+
+      if (Number(score.totalPoints1 || 0) > Number(score.totalPoints2 || 0)) return 1;
+      if (Number(score.totalPoints2 || 0) > Number(score.totalPoints1 || 0)) return 2;
+
+      return null;
+    }
+
+    function getWONumberOrName(d) {
+      const woWinner = String(d?.winnerByWO || "").trim().toLowerCase();
+
+      if (woWinner === "player1") return d?.player1 || "Jogador 1";
+      if (woWinner === "player2") return d?.player2 || "Jogador 2";
+
+      return "Nenhum";
+    }
+
+    function renderScoreBlock(d) {
+      const score = U.normalizeScore(d.score || {});
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+      const set1 = U.getSetDisplay(history[0]);
+      const set2 = U.getSetDisplay(history[1]);
+
+      const duration = getMatchDuration(d);
+      const status = String(d?.status || "").trim().toLowerCase();
+      const woWinner = String(d?.winnerByWO || "").trim().toLowerCase();
+      const isWO = status === "wo";
+
+      const isTB =
+        score.tieBreakMode === "tb7" ||
+        score.tieBreakMode === "super10" ||
+        score.lastTieBreakMode === "tb7" ||
+        score.lastTieBreakMode === "super10";
+
+      const pointsText = isTB
+        ? `${Number(score.tieBreakPoints1 || score.lastTieBreakPoints1 || 0)}x${Number(score.tieBreakPoints2 || score.lastTieBreakPoints2 || 0)}`
+        : `${Number(score.points1 || 0)}x${Number(score.points2 || 0)}`;
+
+      const winnerPos = getWinnerPosition(score, d);
+      const p1IsWinner = isWO ? woWinner === "player1" : winnerPos === 1;
+
+      const p1Name = U.escapeHtml(d.player1 || "Jogador 1");
+      const p2Name = U.escapeHtml(d.player2 || "Jogador 2");
+
+      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${p1IsWinner ? "winner-row" : ""}"> <div class="detail-player-title"> ${p1Name} X ${p2Name} ${p1IsWinner ? `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>` : ""} </div> ${ isWO ? `<div class="detail-score-line"><span>Status</span><strong>FINALIZADA POR WO</strong></div>` : ` <div class="detail-score-line"> <span>1º set</span> <strong>${U.escapeHtml(set1.p1)} x ${U.escapeHtml(set1.p2)}</strong> </div> <div class="detail-score-line"> <span>2º set</span> <strong>${U.escapeHtml(set2.p1)} x ${U.escapeHtml(set2.p2)}</strong> </div> <div class="detail-pill" style="margin-top: 10px;"> <span>Pontos</span> <strong>${U.escapeHtml(pointsText)}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top: 12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
+    }
+
+    function renderSummaryBlock(d) {
+      const score = U.normalizeScore(d.score || {});
+      const totalPoints1 = Number(score.totalPoints1 || 0);
+      const totalPoints2 = Number(score.totalPoints2 || 0);
+      const breakPointsWon1 = Number(score.breakPointsWon1 || 0);
+      const breakPointsChances1 = Number(score.breakPointsChances1 || 0);
+      const breakPointsWon2 = Number(score.breakPointsWon2 || 0);
+      const breakPointsChances2 = Number(score.breakPointsChances2 || 0);
+
+      return ` <section class="detail-section detail-section-summary"> <div class="detail-section-header"> <h4>Resumo da partida</h4> <span class="detail-section-subtitle">Estatísticas gerais</span> </div> <div class="detail-summary-grid"> <div class="detail-summary-card"> <div class="detail-player-title">${U.escapeHtml(d.player1 || "Jogador 1")}</div> <div class="detail-summary-line"> <span>Pontos totais</span> <strong>${totalPoints1}</strong> </div> <div class="detail-summary-line"> <span>Break points</span> <strong>${breakPointsWon1}/${breakPointsChances1}</strong> </div> </div> <div class="detail-summary-card"> <div class="detail-player-title">${U.escapeHtml(d.player2 || "Jogador 2")}</div> <div class="detail-summary-line"> <span>Pontos totais</span> <strong>${totalPoints2}</strong> </div> <div class="detail-summary-line"> <span>Break points</span> <strong>${breakPointsWon2}/${breakPointsChances2}</strong> </div> </div> </div> </section> `;
+    }
+
+    function renderGeneralBlock(d) {
+      return ` <section class="detail-section detail-section-general"> <div class="detail-section-header"> <h4>Dados gerais</h4> <span class="detail-section-subtitle">Informações da partida</span> </div> <div class="detail-info-grid"> <div class="detail-info-item"><span>Categoria</span><strong>${U.escapeHtml(d.categoryName || "-")}</strong></div> <div class="detail-info-item"><span>Formato</span><strong>${U.escapeHtml(U.normalizeMatchFormat(d.matchFormat || "-") || d.matchFormat || "-")}</strong></div> <div class="detail-info-item"><span>Data e hora</span><strong>${U.escapeHtml(formatDateTime(d.matchDateTime))}</strong></div> <div class="detail-info-item"><span>Quadra</span><strong>${U.escapeHtml(d.court || "-")}</strong></div> <div class="detail-info-item"><span>Fase</span><strong>${U.escapeHtml(d.tournamentStage || "-")}</strong></div> <div class="detail-info-item"><span>Status</span><strong>${U.escapeHtml(d.status || "-")}</strong></div> <div class="detail-info-item"><span>Jogador 1</span><strong>${U.escapeHtml(d.player1 || "-")}</strong></div> <div class="detail-info-item"><span>Jogador 2</span><strong>${U.escapeHtml(d.player2 || "-")}</strong></div> <div class="detail-info-item"><span>Prob. Jogador 1</span><strong>${U.escapeHtml(formatProb(d.probPlayer1))}</strong></div> <div class="detail-info-item"><span>Prob. Jogador 2</span><strong>${U.escapeHtml(formatProb(d.probPlayer2))}</strong></div> <div class="detail-info-item"><span>Vencedor por WO</span><strong>${U.escapeHtml(getWONumberOrName(d))}</strong></div> </div> </section> `;
+    }
+
+    function renderPublicLinkBlock(id) {
       const link = buildPublicLink(id);
-      return ` <div><strong>Categoria:</strong> ${d.categoryName || "-"}</div> <div><strong>Formato:</strong> ${U.normalizeMatchFormat(d.matchFormat || "-")}</div> <div><strong>Data e hora do jogo:</strong> ${d.matchDateTime || "-"}</div> <div><strong>Quadra:</strong> ${d.court || "-"}</div> <div><strong>Fase:</strong> ${d.tournamentStage || "-"}</div> <div><strong>Jogador 1:</strong> ${d.player1 || "-"}</div> <div><strong>Jogador 2:</strong> ${d.player2 || "-"}</div> <div><strong>Prob. vitória Jogador 1:</strong> ${formatProb(d.probPlayer1)}</div> <div><strong>Prob. vitória Jogador 2:</strong> ${formatProb(d.probPlayer2)}</div> <div><strong>Status:</strong> ${d.status || "-"}</div> <div><strong>WO:</strong> ${d.winnerByWO || "Nenhum"}</div> <div><strong>Link da partida:</strong> <a href="${link}" target="_blank" rel="noreferrer">${link}</a></div> `;
+
+      return ` <section class="detail-section detail-section-link"> <div class="detail-section-header"> <h4>Link público</h4> <span class="detail-section-subtitle">Abrir ou copiar a partida</span> </div> <div class="detail-link-box"> <a href="${U.escapeHtml(link)}" target="_blank" rel="noreferrer"> ${U.escapeHtml(link)} </a> </div> </section> `;
+    }
+
+    function detailsHTML(d, id) {
+      return ` <div class="details-layout"> ${renderGeneralBlock(d)} ${renderScoreBlock(d)} ${renderSummaryBlock(d)} ${renderPublicLinkBlock(id)} </div> `;
     }
 
     function rowHTML(docSnap) {
       const d = docSnap.data();
-      return ` <tr> <td> <div class="players-cell"> <strong>${d.player1 || "Jogador 1"}</strong> <span>vs</span> <strong>${d.player2 || "Jogador 2"}</strong> </div> <div class="muted" style="font-size: 12px;"> ${formatProb(d.probPlayer1)} x ${formatProb(d.probPlayer2)} </div> </td> <td title="${d.categoryName || "-"}">${d.categoryName || "-"}</td> <td><span class="status-tag status-${String(d.status || "scheduled").toLowerCase()}">${d.status || "scheduled"}</span></td> <td> <div class="action-icons"> <button class="icon-btn" data-action="copy" data-id="${docSnap.id}" title="Copiar link" aria-label="Copiar link">🔗</button> <button class="icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" aria-label="Detalhar">👁️</button> <button class="icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" aria-label="Editar">✏️</button> <button class="icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" aria-label="Excluir">🗑️</button> </div> </td> </tr> `;
+      const statusText = String(d.status || "scheduled").toLowerCase();
+      const label = statusText === "wo" ? "WO" : (d.status || "scheduled");
+
+      return ` <tr> <td> <div class="players-cell"> <strong>${U.escapeHtml(d.player1 || "Jogador 1")}</strong> <span>vs</span> <strong>${U.escapeHtml(d.player2 || "Jogador 2")}</strong> </div> <div class="muted" style="font-size: 12px;"> ${U.escapeHtml(formatProb(d.probPlayer1))} x ${U.escapeHtml(formatProb(d.probPlayer2))} </div> </td> <td title="${U.escapeHtml(d.categoryName || "-")}">${U.escapeHtml(d.categoryName || "-")}</td> <td><span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span></td> <td> <div class="action-icons"> <button class="icon-btn" data-action="copy" data-id="${docSnap.id}" title="Copiar link" aria-label="Copiar link">🔗</button> <button class="icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" aria-label="Detalhar">👁️</button> <button class="icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" aria-label="Editar">✏️</button> <button class="icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" aria-label="Excluir">🗑️</button> </div> </td> </tr> `;
     }
 
     function sortLocalMatches() {
@@ -335,6 +458,9 @@
           }
         }
 
+        const woWinner = el.winnerByWO?.value || "";
+        const finalStatus = woWinner ? "wo" : (el.status?.value || "scheduled");
+
         const data = {
           categoryName: el.categoryName?.value.trim() || "",
           matchFormat: selectedFormat,
@@ -345,8 +471,8 @@
           player2: el.player2?.value.trim() || "",
           probPlayer1: prob1,
           probPlayer2: prob2,
-          winnerByWO: el.winnerByWO?.value || "",
-          status: el.status?.value || "scheduled",
+          winnerByWO: woWinner,
+          status: finalStatus,
           score: {
             points1: 0,
             points2: 0,
@@ -361,7 +487,13 @@
             lastTieBreakPoints1: 0,
             lastTieBreakPoints2: 0,
             setHistory: [],
-            server: "player1"
+            server: "player1",
+            totalPoints1: 0,
+            totalPoints2: 0,
+            breakPointsWon1: 0,
+            breakPointsWon2: 0,
+            breakPointsChances1: 0,
+            breakPointsChances2: 0
           },
           durationSeconds: 0,
           startedAt: null,
@@ -372,7 +504,7 @@
         try {
           if (el.docId?.value) {
             await __db.collection("matches").doc(el.docId.value).update(data);
-            setMsg("Partida atualizada.");
+            setMsg(woWinner ? "Partida salva como WO." : "Partida atualizada.");
           } else {
             await __db.collection("matches").add({
               ...data,
@@ -380,7 +512,7 @@
               publicLinkId: crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8),
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            setMsg("Partida cadastrada com sucesso!");
+            setMsg(woWinner ? "Partida cadastrada como WO." : "Partida cadastrada com sucesso!");
           }
           clearForm();
         } catch (err) {
