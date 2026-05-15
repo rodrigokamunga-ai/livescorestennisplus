@@ -3039,3 +3039,351 @@ body.admin-page .detail-link-box a:hover {
   }
 }
 
+/* ========================================================= MODAL DETALHES DA PARTIDA — PLACAR + WO + VENCEDOR Cole no final do style.css ========================================================= */
+
+/* Modal geral */
+body.admin-page .dialog {
+  width: min(980px, calc(100% - 20px));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top, rgba(200, 255, 92, 0.08), transparent 28%),
+    linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
+  color: #eef4ff;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.48);
+  padding: 18px;
+}
+
+body.admin-page .dialog::backdrop {
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+body.admin-page .dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page .dialog-head h3 {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #f4f8ff;
+  letter-spacing: 0.01em;
+}
+
+/* Layout geral */
+body.admin-page .details,
+body.admin-page .details-layout {
+  display: grid;
+  gap: 14px;
+}
+
+/* Seções */
+body.admin-page .detail-section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+body.admin-page .detail-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.admin-page .detail-section-header h4 {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #d8ff63;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.admin-page .detail-section-subtitle {
+  font-size: 0.82rem;
+  color: rgba(232, 238, 252, 0.58);
+}
+
+/* Dados gerais */
+body.admin-page .detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body.admin-page .detail-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+}
+
+body.admin-page .detail-info-item span {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(232, 238, 252, 0.60);
+  font-weight: 800;
+}
+
+body.admin-page .detail-info-item strong {
+  font-size: 0.95rem;
+  color: #f4f8ff;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+/* ========================= PLACAR — 1 COLUNA ========================= */
+
+body.admin-page .single-score-card {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+body.admin-page .detail-score-row {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+body.admin-page .detail-score-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+/* Destaque do vencedor */
+body.admin-page .detail-score-row.winner-row {
+  border-color: rgba(216, 255, 99, 0.55);
+  background: linear-gradient(180deg, rgba(216, 255, 99, 0.14), rgba(12, 18, 30, 0.68));
+  box-shadow:
+    0 0 0 1px rgba(216, 255, 99, 0.16),
+    0 0 20px rgba(216, 255, 99, 0.12);
+}
+
+body.admin-page .detail-player-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.98rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+/* Badge de vencedor */
+body.admin-page .winner-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d8ff63, #b7f148);
+  color: #0b1320;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+  box-shadow: 0 0 12px rgba(216, 255, 99, 0.18);
+}
+
+/* Linhas do placar */
+body.admin-page .detail-score-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  margin-top: 8px;
+}
+
+body.admin-page .detail-score-line span {
+  font-size: 0.82rem;
+  color: rgba(232, 238, 252, 0.68);
+  font-weight: 700;
+}
+
+body.admin-page .detail-score-line strong {
+  font-size: 0.96rem;
+  color: #d8ff63;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pill genérica */
+body.admin-page .detail-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.admin-page .detail-pill span {
+  font-size: 0.8rem;
+  color: rgba(232, 238, 252, 0.68);
+  font-weight: 700;
+}
+
+body.admin-page .detail-pill strong {
+  font-size: 0.96rem;
+  color: #d8ff63;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Resumo da partida */
+body.admin-page .detail-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body.admin-page .detail-summary-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+}
+
+body.admin-page .detail-summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.admin-page .detail-summary-line span {
+  font-size: 0.82rem;
+  color: rgba(232, 238, 252, 0.68);
+  font-weight: 700;
+}
+
+body.admin-page .detail-summary-line strong {
+  font-size: 0.95rem;
+  color: #d8ff63;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Link público */
+body.admin-page .detail-link-box {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+body.admin-page .detail-link-box a {
+  display: block;
+  color: #8fb7ff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+body.admin-page .detail-link-box a:hover {
+  color: #cfe0ff;
+  text-decoration: underline;
+}
+
+/* WO */
+body.admin-page .detail-score-row .detail-score-line strong {
+  color: #d8ff63;
+}
+
+body.admin-page .detail-score-row .winner-badge {
+  animation: woPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes woPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(216, 255, 99, 0.18);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 16px rgba(216, 255, 99, 0.28);
+  }
+}
+
+/* Estado de WO mais evidente */
+body.admin-page .detail-score-row.winner-row {
+  border-left: 4px solid #d8ff63;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  body.admin-page .detail-info-grid,
+  body.admin-page .detail-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.admin-page .dialog {
+    width: min(100% - 14px, 980px);
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  body.admin-page .dialog-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.admin-page .dialog-head .btn {
+    width: 100%;
+  }
+
+  body.admin-page .detail-section {
+    padding: 14px;
+  }
+
+  body.admin-page .detail-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.admin-page .detail-score-line,
+  body.admin-page .detail-pill,
+  body.admin-page .detail-summary-line {
+    flex-direction: row;
+  }
+}
+
