@@ -24,6 +24,7 @@
       finishBtn: document.getElementById("finishBtn"),
       resetScoreBtn: document.getElementById("resetScoreBtn"),
       undoBtn: document.getElementById("undoBtn"),
+      exitBtn: document.getElementById("exitBtn"),
       player1Name: document.getElementById("player1Name"),
       player2Name: document.getElementById("player2Name"),
       servePlayer1: document.getElementById("servePlayer1"),
@@ -687,6 +688,16 @@
       });
 
       el.undoBtn?.addEventListener("click", undoLastAction);
+
+      el.exitBtn?.addEventListener("click", () => {
+        window.close();
+
+        setTimeout(() => {
+          if (!window.closed) {
+            history.back();
+          }
+        }, 100);
+      });
 
       document.querySelectorAll("[data-delta]").forEach((btn) => {
         btn.addEventListener("click", async () => {
