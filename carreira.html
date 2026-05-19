@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carreira | Live Scores Tennis</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style> .career-pagination { margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; } .career-page-info { font-weight: 700; color: #e8eefc; text-align: center; } @media (max-width: 480px) { .career-pagination { gap: 8px; } .career-page-info { font-size: 0.85rem; } } </style>
+</head>
+
+<body class="career-page">
+  <main class="container stack">
+
+    <section class="panel panel-glass" style="padding: 22px;">
+      <div class="career-header">
+        <div>
+          <span class="section-kicker">Histórico do atleta</span>
+          <h1 id="pageTitle">Carreira</h1>
+          <p id="subtitle">Histórico de partidas finalizadas do usuário logado</p>
+        </div>
+      </div>
+
+      <div class="career-summary">
+        <div class="career-summary-card">
+          <span>Total de partidas</span>
+          <strong id="totalMatches">0</strong>
+        </div>
+
+        <div class="career-summary-card wo">
+          <span>WO</span>
+          <strong id="totalWo">0</strong>
+        </div>
+
+        <div class="career-summary-card win">
+          <span>Vitórias</span>
+          <strong id="totalWins">0</strong>
+        </div>
+
+        <div class="career-summary-card loss">
+          <span>Derrotas</span>
+          <strong id="totalLosses">0</strong>
+        </div>
+      </div>
+
+      <div id="careerFiltersSection" class="career-filters">
+        <label>
+          Nome do Jogador 1
+          <input type="text" id="profileName" readonly />
+        </label>
+
+        <label>
+          Jogador 2
+          <input type="text" id="playerName" placeholder="Filtrar pelo Jogador 2" />
+        </label>
+
+        <label>
+          Fase do Torneio
+          <select id="stageFilter">
+            <option value="">Todas</option>
+            <option value="Primeira Rodada">Primeira Rodada</option>
+            <option value="Segunda Rodada">Segunda Rodada</option>
+            <option value="Terceira Rodada">Terceira Rodada</option>
+            <option value="Oitavas de Final">Oitavas de Final</option>
+            <option value="Quartas de Final">Quartas de Final</option>
+            <option value="Semifinais">Semifinais</option>
+            <option value="Final">Final</option>
+            <option value="Grupos">Grupos</option>
+            <option value="Treino">Treino</option>
+            <option value="Ranking">Ranking</option>
+          </select>
+        </label>
+
+        <label>
+          Resultado
+          <select id="resultFilter">
+            <option value="">Todos</option>
+            <option value="wins">Vitórias</option>
+            <option value="losses">Derrotas</option>
+          </select>
+        </label>
+
+        <label>
+          Situação do torneio
+          <select id="tournamentSituationFilter">
+            <option value="">Todas</option>
+            <option value="champion">Campeão</option>
+            <option value="runnerup">Vice - Campeão</option>
+          </select>
+        </label>
+
+        <label>
+          Data início
+          <input type="date" id="fromDate" />
+        </label>
+
+        <label>
+          Data fim
+          <input type="date" id="toDate" />
+        </label>
+
+        <div class="career-filter-actions">
+          <button type="button" class="btn primary career-filter-btn" id="applyFilterBtn">
+            <span class="career-btn-icon">🔎</span>
+            <span>Filtrar</span>
+          </button>
+
+          <button type="button" class="btn career-filter-btn" id="clearFilterBtn">
+            <span class="career-btn-icon">🧹</span>
+            <span>Limpar</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="summaryMessage" class="career-message"></div>
+
+      <div id="historyList" class="career-history-list"></div>
+
+      <!-- PAGINAÇÃO -->
+      <div class="career-pagination">
+        <button type="button" id="prevPageBtn" class="career-page-btn">
+          <span class="career-page-btn-icon">⬅️</span>
+          <span class="career-page-btn-label">Anterior</span>
+        </button>
+      
+        <span id="pageInfo" class="career-page-info">Página 1 de 1</span>
+      
+        <button type="button" id="nextPageBtn" class="career-page-btn">
+          <span class="career-page-btn-icon">➡️</span>
+          <span class="career-page-btn-label">Próximo</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="career-bottom-nav">
+    <a href="menu.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">🏠</span>
+      <span class="career-bottom-label">Início</span>
+    </a>
+
+    <a href="index.html" class="career-bottom-btn" target="_blank" rel="noopener noreferrer">
+      <span class="career-bottom-icon">📺</span>
+      <span class="career-bottom-label">Visualização</span>
+    </a>
+
+    <a href="admin.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">🎾</span>
+      <span class="career-bottom-label">Partida</span>
+    </a>
+
+    <button type="button" id="toggleFiltersBtn" class="career-bottom-btn">
+      <span class="career-bottom-icon">📋</span>
+      <span class="career-bottom-label">Lista</span>
+    </button>
+
+    <a href="jogadores.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">👤</span>
+      <span class="career-bottom-label">Jogador</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/carreira.js"></script>
+</body>
+</html>

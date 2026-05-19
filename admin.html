@@ -3,34 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin | Live Scores Tennis </title>
+  <title>Admin | Live Scores Tennis</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style> body.admin-page { padding-bottom: 92px; } .admin-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; padding: 6px 10px 8px; background: rgba(10, 16, 28, 0.92); border-top: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18); } .admin-bottom-btn { appearance: none; border: 1px solid rgba(255, 255, 255, 0.08); background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)); color: #eef4ff; text-decoration: none; border-radius: 16px; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-weight: 800; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18); cursor: pointer; width: 100%; padding: 6px 8px; transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease; } .admin-bottom-btn:hover { transform: translateY(-1px); background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04)); border-color: rgba(216, 255, 99, 0.22); } .admin-bottom-icon { font-size: 1.12rem; line-height: 1; } .admin-bottom-label { font-size: 0.7rem; line-height: 1; text-align: center; white-space: nowrap; } .admin-bottom-btn.logout .admin-bottom-icon { color: #ff7b7b; } .list-recolher-wrap { display: flex; justify-content: flex-end; align-items: center; margin-left: auto; } .list-recolher-btn { min-height: 42px; padding: 10px 14px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; white-space: nowrap; } .list-recolher-btn .admin-bottom-icon { font-size: 1rem; } .pagination-nav { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; } .pagination-nav .admin-bottom-btn { min-width: 128px; min-height: 56px; flex: 0 0 auto; } .pagination-nav .admin-bottom-btn:disabled, .list-recolher-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; } .filters-collapsed .filters-bar { display: none !important; } /* Botões do formulário em linha, sem scroll */ .admin-form-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: center; padding-top: 4px; overflow: visible !important; } .admin-form-actions .admin-form-btn { width: 100%; min-height: 56px; border-radius: 16px; } .admin-form-actions .admin-form-btn.primary { background: linear-gradient(180deg, rgba(216, 255, 99, 0.18), rgba(216, 255, 99, 0.08)); border-color: rgba(216, 255, 99, 0.22); } .admin-form-actions .admin-form-btn .admin-bottom-label { font-size: 0.72rem; } .admin-form-actions .admin-form-btn .admin-bottom-icon { font-size: 1rem; } @media (max-width: 480px) { body.admin-page { padding-bottom: 84px; } .admin-bottom-nav { gap: 6px; padding: 5px 8px 7px; } .admin-bottom-btn { min-height: 56px; border-radius: 14px; } .admin-bottom-label { font-size: 0.66rem; } .pagination-nav { gap: 8px; flex-wrap: nowrap; } .pagination-nav .admin-bottom-btn { min-width: 110px; min-height: 52px; } .pagination-info { font-size: 0.82rem; text-align: center; line-height: 1.25; } .admin-form-actions { gap: 6px; } .admin-form-actions .admin-form-btn { min-height: 52px; padding: 6px 8px; } .admin-form-actions .admin-form-btn .admin-bottom-label { font-size: 0.66rem; } } </style>
 </head>
 <body class="admin-page">
   <main class="container stack">
 
-    <section class="panel panel-glass admin-panel">
-
-      <header class="topbar topbar-glass admin-topbar-inside">
-        <div class="brand-wrap">
-          <div class="app-logo">
-            <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
-          </div>
-          <div>
-            <h1>Painel Administrativo</h1>
-            <p>Cadastro e manutenção das partidas</p>
-          </div>
-        </div>
-
-        <nav class="topnav">
-          <a href="index.html" class="btn link">Visualização</a>
-          <button id="logoutBtn" class="btn link">Sair</button>
-        </nav>
-      </header>
-
+    <div id="matchFormWrapper" class="match-form-wrapper" style="display: none;">
       <div class="section-head">
         <div>
-          <span class="section-kicker">Gerenciamento</span>
           <h2 id="formTitle">Nova partida</h2>
           <p class="muted">Cadastre e gerencie os jogos ao vivo</p>
         </div>
@@ -40,20 +22,29 @@
         <input type="hidden" id="docId" />
 
         <label>Nome da categoria
-          <input type="text" id="categoryName" required />
+          <input type="text" id="categoryName" required placeholder="Informe o nome da categoria" />
+        </label>
+
+        <label>Tipo de piso
+          <select id="surfaceType" required>
+            <option value="">Selecione o tipo de piso</option>
+            <option value="Rápida">Rápida</option>
+            <option value="Saibro">Saibro</option>
+            <option value="Grama">Grama</option>
+          </select>
         </label>
 
         <label>Formato da partida
           <select id="matchFormat" required>
-            <option value="">Selecione...</option>
+            <option value="">Selecione o formato da partida</option>
             <option value="1 set sem vantagem + um supertiebreak de 10 pontos">
-              1 set sem vantagem + um Supertiebreak de 10 pontos
+              1 set no AD + um super tie-break de 10 pontos
             </option>
             <option value="2 sets sem vantagem + um supertiebreak de 10 pontos">
-              2 sets sem vantagem + um Supertiebreak de 10 pontos
+              2 sets no AD + um super tie-break de 10 pontos
             </option>
             <option value="1 set pro de 8 games sem vantagem + um supertiebreak de 10 pontos">
-              1 set pro de 8 games sem vantagem + um Supertiebreak de 10 pontos
+              1 set pro de 8 games no AD + um super tie-break de 10 pontos
             </option>
           </select>
         </label>
@@ -63,12 +54,12 @@
         </label>
 
         <label>Quadra
-          <input type="text" id="court" required />
+          <input type="text" id="court" required placeholder="Informe local ou quadra de jogo" />
         </label>
 
         <label>Fase do torneio
           <select id="tournamentStage" required>
-            <option value="">Selecione...</option>
+            <option value="">Selecione a fase do torneio</option>
             <option value="Primeira Rodada">Primeira Rodada</option>
             <option value="Segunda Rodada">Segunda Rodada</option>
             <option value="Terceira Rodada">Terceira Rodada</option>
@@ -84,6 +75,7 @@
 
         <label>Status inicial
           <select id="status">
+            <option value="scheduled">Informe o status da partida</option>
             <option value="scheduled">Jogos do dia</option>
             <option value="live">Em andamento</option>
             <option value="finished">Finalizada</option>
@@ -96,15 +88,15 @@
         </label>
 
         <label>Nome do jogador 2
-          <input type="text" id="player2" required />
+          <input type="text" id="player2" required placeholder="Informe o nome do seu adversário" />
         </label>
 
         <label>Probabilidade de vitória Jogador 1 (%)
-          <input type="number" id="probPlayer1" min="0" max="100" step="0.01" placeholder="" />
+          <input type="number" id="probPlayer1" min="0" max="100" step="0.01" placeholder="Exemplo 50%" />
         </label>
-        
+
         <label>Probabilidade de vitória Jogador 2 (%)
-          <input type="number" id="probPlayer2" min="0" max="100" step="0.01" placeholder="" />
+          <input type="number" id="probPlayer2" min="0" max="100" step="0.01" placeholder="Exemplo 50%" />
         </label>
 
         <label>Vencedor por WO
@@ -115,30 +107,38 @@
           </select>
         </label>
 
-        <div class="actions full">
-          <button type="submit" class="btn primary">Salvar</button>
-          <button type="button" id="clearBtn" class="btn">Limpar</button>
+        <div class="actions full admin-form-actions">
+          <button type="submit" class="admin-bottom-btn admin-form-btn primary">
+            <span class="admin-bottom-icon">💾</span>
+            <span class="admin-bottom-label">Salvar</span>
+          </button>
+
+          <button type="button" id="clearBtn" class="admin-bottom-btn admin-form-btn">
+            <span class="admin-bottom-icon">🧹</span>
+            <span class="admin-bottom-label">Limpar</span>
+          </button>
+
+          <button type="button" id="cancelBtn" class="admin-bottom-btn admin-form-btn">
+            <span class="admin-bottom-icon">❌</span>
+            <span class="admin-bottom-label">Cancelar</span>
+          </button>
         </div>
       </form>
 
       <div id="adminMsg" class="msg"></div>
-    </section>
+    </div>
 
     <section id="matchesSection" class="panel panel-glass">
       <div class="section-head section-head-space">
         <div>
           <span class="section-kicker">Lista de partidas</span>
-          <h2>Partidas cadastradas</h2>
+          <h3>Partidas cadastradas</h3>
           <p class="muted section-subtitle">Filtre, pagine e gerencie as partidas</p>
-        </div>
-
-        <div class="actions">
-          <button id="toggleMatchesBtn" type="button" class="btn compact-toggle-btn">Recolher</button>
         </div>
       </div>
 
       <div class="matches-body">
-        <div class="filters-bar">
+        <div class="filters-bar" id="filtersBar">
           <input type="text" id="filterPlayers" placeholder="Pesquisar por jogador" />
           <input type="text" id="filterCategory" placeholder="Pesquisar por categoria" />
           <select id="filterStatus">
@@ -164,13 +164,26 @@
           </table>
         </div>
 
-        <div class="pagination-bar">
-          <button id="prevPageBtn" class="btn">Anterior</button>
-          <div class="pagination-info">
-            Página <strong id="pageInfo">1</strong> de <strong id="totalPages">1</strong>
-          </div>
-          <button id="nextPageBtn" class="btn">Próxima</button>
-        </div>
+        
+
+          <!-- PAGINAÇÃO -->
+<div class="admin-pagination">
+  <button type="button" id="prevPageBtn" class="admin-page-btn">
+    <span class="admin-page-btn-icon">⬅️</span>
+    <span class="admin-page-btn-label">Anterior</span>
+  </button>
+
+  <span id="pageInfo" class="admin-page-info">Página 1 de 1</span>
+
+  <button type="button" id="nextPageBtn" class="admin-page-btn">
+    <span class="admin-page-btn-icon">➡️</span>
+    <span class="admin-page-btn-label">Próximo</span>
+  </button>
+</div>
+<br>
+
+
+    
       </div>
     </section>
 
@@ -183,6 +196,33 @@
     </div>
     <div id="detailsContent" class="details"></div>
   </dialog>
+
+  <nav class="admin-bottom-nav">
+    <a href="menu.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">🏠</span>
+      <span class="admin-bottom-label">Início</span>
+    </a>
+
+    <button type="button" id="showFormBtnBottom" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">➕</span>
+      <span class="admin-bottom-label">Incluir</span>
+    </button>
+
+    <button type="button" id="toggleMatchesBtnBottom" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">📋</span>
+      <span class="admin-bottom-label">Lista</span>
+    </button>
+
+    <a href="carreira.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">📈</span>
+      <span class="admin-bottom-label">Carreira</span>
+    </a>
+
+    <a href="jogadores.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">👤</span>
+      <span class="admin-bottom-label">Jogador</span>
+    </a>
+  </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perfil | Live Scores Tennis</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style> body.profile-page { min-height: 100vh; background: radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%), linear-gradient(180deg, #121b2d 0%, #0f1726 100%); color: #e8eefc; padding: 20px 0 120px; } .profile-shell { width: min(960px, calc(100% - 24px)); margin: 0 auto; } .profile-card { background: linear-gradient(180deg, rgba(31, 40, 60, 0.92), rgba(15, 22, 36, 0.96)); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 22px; box-shadow: 0 16px 36px rgba(0,0,0,0.22); } .profile-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; } .profile-header h1 { margin: 0; font-size: 1.45rem; font-weight: 900; } .profile-header p { margin-top: 6px; color: rgba(232,238,252,0.7); } .profile-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } .profile-form label { display: flex; flex-direction: column; gap: 8px; font-weight: 700; color: rgba(232,238,252,0.86); } .profile-form input, .profile-form textarea, .profile-form select { width: 100%; padding: 11px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(12,18,30,0.62); color: #f4f8ff; outline: none; } .profile-form textarea { min-height: 120px; resize: vertical; } .profile-form .full { grid-column: 1 / -1; } .profile-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; } .profile-msg { margin-top: 12px; min-height: 22px; color: rgba(232,238,252,0.9); } @media (max-width: 768px) { .profile-form { grid-template-columns: 1fr; } } </style>
+</head>
+<body class="profile-page">
+  <main class="profile-shell">
+    <section class="profile-card">
+      <div class="profile-header">
+        <div>
+          <span class="section-kicker">Meu perfil</span>
+          <h1>Preencher perfil</h1>
+          <p>Atualize seus dados para o sistema exibir seu nome corretamente.</p>
+        </div>
+
+        <div class="profile-actions">
+          <a href="menu.html" class="btn primary">Voltar</a>
+        </div>
+      </div>
+
+      <form id="profileForm" class="profile-form">
+        <label>Nome do jogador
+          <input type="text" id="displayName" placeholder="Nome que será exibido no sistema" required />
+        </label>
+
+        <label>E-mail
+          <input type="email" id="email" readonly />
+        </label>
+
+        <label>Telefone
+          <input type="text" id="phone" placeholder="(11) 99999-9999" />
+        </label>
+
+        <label>País
+          <input type="text" id="country" placeholder="Brasil" />
+        </label>
+
+        <label class="full">Bio
+          <textarea id="bio" placeholder="Informações sobre o jogador, estilo de jogo, objetivo, etc."></textarea>
+        </label>
+
+        <label class="full">Link da foto
+          <input type="url" id="photoUrl" placeholder="https://..." />
+        </label>
+
+        <div class="full profile-actions">
+          <button type="submit" class="btn primary">Salvar perfil</button>
+          <button type="button" id="clearProfileBtn" class="btn">Limpar</button>
+        </div>
+      </form>
+
+      <div id="profileMsg" class="profile-msg"></div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/perfil.js"></script>
+</body>
+</html>
