@@ -3,19 +3,28 @@
 
   const PublicApp = (() => {
     const db = firebase.firestore();
-    const state = { cachedMatches: [], timer: null, unsubscribe: null };
 
-    const FILTER_KEY = "lsts_live_status_filter";
+    const state = {
+      cachedMatches:   [],
+      timer:           null,
+      unsubscribe:     null,
+      finishedPending: {}
+    };
+
+    const FILTER_KEY        = "lsts_live_status_filter";
+    const FINISHED_DELAY_MS = 60_000;
 
     const el = {
-      filter: document.getElementById("liveStatusFilter"),
-      scheduledList: document.getElementById("scheduledList"),
-      liveList: document.getElementById("liveList"),
-      finishedList: document.getElementById("finishedList"),
+      filter:         document.getElementById("liveStatusFilter"),
+      scheduledList:  document.getElementById("scheduledList"),
+      liveList:       document.getElementById("liveList"),
+      finishedList:   document.getElementById("finishedList"),
       countScheduled: document.getElementById("countScheduled"),
-      countLive: document.getElementById("countLive"),
-      countFinished: document.getElementById("countFinished")
+      countLive:      document.getElementById("countLive"),
+      countFinished:  document.getElementById("countFinished")
     };
+
+    // ─── Utilitários ──────────────────────────────────────────────────────
 
     const U = {
       escapeHtml(str = "") {
@@ -34,111 +43,125 @@
 
       durationText(ms) {
         if (!ms || ms < 0) return "00:00:00";
-        const s = Math.floor(ms / 1000);
-        const h = String(Math.floor(s / 3600)).padStart(2, "0");
-        const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+        const s   = Math.floor(ms / 1000);
+        const h   = String(Math.floor(s / 3600)).padStart(2, "0");
+        const m   = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
         const sec = String(s % 60).padStart(2, "0");
         return `${h}:${m}:${sec}`;
       },
 
+      // ✅ Inclui "suspended"
       statusLabel(status) {
         switch (status) {
-          case "live":
-            return "EM ANDAMENTO";
-          case "finished":
-            return "FINALIZADA";
-          case "wo":
-            return "FINALIZADA POR WO";
-          default:
-            return "NÃO INICIADA";
+          case "live":      return "EM ANDAMENTO";
+          case "suspended": return "SUSPENSA";
+          case "finished":  return "FINALIZADA";
+          case "wo":        return "FINALIZADA POR WO";
+          default:          return "NÃO INICIADA";
         }
       },
 
       statusClass(status) {
         switch (status) {
-          case "live":
-            return "status-live";
-          case "finished":
-          case "wo":
-            return "status-finished";
-          default:
-            return "status-scheduled";
+          case "live":                return "status-live";
+          case "suspended":           return "status-suspended";
+          case "finished": case "wo": return "status-finished";
+          default:                    return "status-scheduled";
         }
       },
 
+      // ✅ "suspended" vai para a coluna "Em andamento"
       normalizeStatus(status) {
         const s = String(status || "scheduled").trim().toLowerCase();
-        if (s === "live") return "live";
+        if (s === "live")                   return "live";
+        if (s === "suspended")              return "suspended";
         if (s === "finished" || s === "wo") return "finished";
         return "scheduled";
       },
 
       normalizeScore(score = {}) {
         return {
-          points1: Number(score.points1 || 0),
-          points2: Number(score.points2 || 0),
-          games1: Number(score.games1 || 0),
-          games2: Number(score.games2 || 0),
-          sets1: Number(score.sets1 || 0),
-          sets2: Number(score.sets2 || 0),
-
-          tieBreakMode:
-            score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
-              ? score.tieBreakMode
-              : null,
-          tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
-          tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
-
-          lastTieBreakMode:
-            score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
-              ? score.lastTieBreakMode
-              : null,
+          points1:             Number(score.points1             || 0),
+          points2:             Number(score.points2             || 0),
+          games1:              Number(score.games1              || 0),
+          games2:              Number(score.games2              || 0),
+          sets1:               Number(score.sets1               || 0),
+          sets2:               Number(score.sets2               || 0),
+          tieBreakMode:        score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
+                                 ? score.tieBreakMode : null,
+          tieBreakPoints1:     Number(score.tieBreakPoints1     || 0),
+          tieBreakPoints2:     Number(score.tieBreakPoints2     || 0),
+          lastTieBreakMode:    score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
+                                 ? score.lastTieBreakMode : null,
           lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
           lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
-
-          setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
-          server: score.server || "player1",
-
-          totalPoints1: Number(score.totalPoints1 || 0),
-          totalPoints2: Number(score.totalPoints2 || 0),
-          breakPointsWon1: Number(score.breakPointsWon1 || 0),
-          breakPointsWon2: Number(score.breakPointsWon2 || 0),
+          setHistory:          Array.isArray(score.setHistory) ? score.setHistory : [],
+          server:              score.server    || "player1",
+          advantage:           score.advantage || null,
+          totalPoints1:        Number(score.totalPoints1        || 0),
+          totalPoints2:        Number(score.totalPoints2        || 0),
+          breakPointsWon1:     Number(score.breakPointsWon1     || 0),
+          breakPointsWon2:     Number(score.breakPointsWon2     || 0),
           breakPointsChances1: Number(score.breakPointsChances1 || 0),
           breakPointsChances2: Number(score.breakPointsChances2 || 0)
         };
       },
 
-      getCurrentSetNumber(score) {
-        return (Array.isArray(score?.setHistory) ? score.setHistory.length : 0) + 1;
-      },
-
       tennisPointLabel(points) {
-        switch (points) {
-          case 0:
-            return "0";
-          case 1:
-            return "15";
-          case 2:
-            return "30";
-          case 3:
-            return "40";
-          default:
-            return "40";
+        switch (Number(points || 0)) {
+          case 0:  return "0";
+          case 1:  return "15";
+          case 2:  return "30";
+          case 3:  return "40";
+          default: return "40";
         }
       },
 
-      tennisDeuceAdv(points1, points2) {
-        if (points1 >= 3 && points2 >= 3) {
-          if (points1 === points2) return "DEUCE";
-          if (points1 === points2 + 1) return "AD1";
-          if (points2 === points1 + 1) return "AD2";
+      getPointDisplay(score, matchFormat, isFinished = false) {
+        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+          return {
+            p1: String(score.tieBreakPoints1 ?? 0),
+            p2: String(score.tieBreakPoints2 ?? 0)
+          };
         }
-        return null;
-      },
 
-      getServerPosition(match, score) {
-        const server = String(score.server || match.server || "player1");
-        return server === "player2" ? 2 : 1;
+        if (isFinished && (score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")) {
+          return {
+            p1: String(score.lastTieBreakPoints1 ?? 0),
+            p2: String(score.lastTieBreakPoints2 ?? 0)
+          };
+        }
+
+        const fmt   = String(matchFormat || "").toLowerCase();
+        const noAd  = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
+        const hasAd = fmt.includes("com vantagem") || fmt.includes("3 sets");
+        const p1    = score.points1;
+        const p2    = score.points2;
+
+        if (hasAd && !noAd) {
+          if (score.advantage === "player1") return { p1: "AD", p2: "40" };
+          if (score.advantage === "player2") return { p1: "40", p2: "AD" };
+          if (p1 >= 3 && p2 >= 3) {
+            if (p1 === p2) return { p1: "40", p2: "40" };
+            if (p1 > p2)   return { p1: "AD", p2: "40" };
+            if (p2 > p1)   return { p1: "40", p2: "AD" };
+          }
+          return { p1: U.tennisPointLabel(p1), p2: U.tennisPointLabel(p2) };
+        }
+
+        if (noAd) {
+          if (p1 === 3 && p2 === 3) return { p1: "40", p2: "40" };
+          return { p1: U.tennisPointLabel(p1), p2: U.tennisPointLabel(p2) };
+        }
+
+        if (score.advantage === "player1") return { p1: "AD", p2: "40" };
+        if (score.advantage === "player2") return { p1: "40", p2: "AD" };
+        if (p1 >= 3 && p2 >= 3) {
+          if (p1 === p2) return { p1: "40", p2: "40" };
+          if (p1 > p2)   return { p1: "AD", p2: "40" };
+          if (p2 > p1)   return { p1: "40", p2: "AD" };
+        }
+        return { p1: U.tennisPointLabel(p1), p2: U.tennisPointLabel(p2) };
       },
 
       toDate(value) {
@@ -154,496 +177,587 @@
       getStartedAtMs(match) {
         const started = U.toDate(match.startedAt);
         if (started) return started.getTime();
-
         const updated = U.toDate(match.updatedAt);
         if (updated) return updated.getTime();
-
         const matchDate = U.toDate(match.matchDateTime);
         if (matchDate) return matchDate.getTime();
-
         return null;
       },
 
+      // ✅ buildDuration corrigido para suspended e live com accumulatedSeconds
       buildDuration(match) {
-        const startedMs = U.getStartedAtMs(match);
-        const finishedMs = U.toDate(match.finishedAt)?.getTime?.() ?? null;
+        const accumulated = Number(match.accumulatedSeconds || 0);
 
-        if (match.status === "live") {
-          return startedMs ? U.durationText(Date.now() - startedMs) : "00:00:00";
+        // Partida suspensa: exibe o tempo acumulado até a suspensão
+        if (match.status === "suspended") {
+          return U.durationText(accumulated * 1000);
         }
 
-        if (match.status === "finished" || match.status === "wo") {
-          if (startedMs && finishedMs && finishedMs >= startedMs) {
-            return U.durationText(finishedMs - startedMs);
+        // Partida ao vivo: acumulado + tempo desde o último startedAt
+        if (match.status === "live") {
+          const started = U.toDate(match.startedAt);
+          if (started && !isNaN(started.getTime())) {
+            const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+            return U.durationText((accumulated + elapsed) * 1000);
           }
+          // Fallback sem startedAt
+          return U.durationText(accumulated * 1000);
+        }
 
+        // Partida finalizada: usa durationSeconds salvo
+        if (match.status === "finished" || match.status === "wo") {
           if (match.durationSeconds && Number(match.durationSeconds) > 0) {
             return U.durationText(Number(match.durationSeconds) * 1000);
           }
-
+          // Fallback: startedAt → finishedAt
+          const startedMs  = U.getStartedAtMs(match);
+          const finishedMs = U.toDate(match.finishedAt)?.getTime?.() ?? null;
+          if (startedMs && finishedMs && finishedMs >= startedMs) {
+            return U.durationText(finishedMs - startedMs);
+          }
           return "00:00:00";
         }
 
+        // Agendada
         if (match.durationSeconds && Number(match.durationSeconds) > 0) {
           return U.durationText(Number(match.durationSeconds) * 1000);
         }
-
         return "00:00:00";
       },
 
-      getPointDisplay(match, score) {
-        const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-        const lastSet = history.length ? history[history.length - 1] : null;
+      getSavedFilter() { return localStorage.getItem(FILTER_KEY) || "all"; },
+      saveFilter(v)    { localStorage.setItem(FILTER_KEY, v || "all"); },
+      isMobile()       { return window.matchMedia("(max-width: 768px)").matches; },
 
-        const liveTieBreakMode =
-          score.tieBreakMode ||
-          match.tieBreakMode ||
-          lastSet?.tieBreakMode ||
-          null;
-
-        const finishedTieBreakMode =
-          score.lastTieBreakMode ||
-          match.lastTieBreakMode ||
-          lastSet?.tieBreakMode ||
-          null;
-
-        const isLiveTieBreak =
-          match.status === "live" &&
-          (liveTieBreakMode === "tb7" || liveTieBreakMode === "super10");
-
-        const isFinishedTieBreak =
-          (match.status === "finished" || match.status === "wo") &&
-          (finishedTieBreakMode === "tb7" || finishedTieBreakMode === "super10");
-
-        if (isLiveTieBreak) {
-          return {
-            p1: String(score.tieBreakPoints1 ?? match.tieBreakPoints1 ?? lastSet?.tieBreakPoints1 ?? 0),
-            p2: String(score.tieBreakPoints2 ?? match.tieBreakPoints2 ?? lastSet?.tieBreakPoints2 ?? 0)
-          };
-        }
-
-        if (isFinishedTieBreak) {
-          return {
-            p1: String(score.lastTieBreakPoints1 ?? match.lastTieBreakPoints1 ?? lastSet?.tieBreakPoints1 ?? 0),
-            p2: String(score.lastTieBreakPoints2 ?? match.lastTieBreakPoints2 ?? lastSet?.tieBreakPoints2 ?? 0)
-          };
-        }
-
-        const deuceAdv = U.tennisDeuceAdv(score.points1, score.points2);
-        if (deuceAdv === "DEUCE") return { p1: "40", p2: "40" };
-        if (deuceAdv === "AD1") return { p1: "AD", p2: "40" };
-        if (deuceAdv === "AD2") return { p1: "40", p2: "AD" };
-
+      getMatchSummary(match) {
+        const score   = U.normalizeScore(match.score || {});
+        const summary = match.summary || match.matchSummary || {};
         return {
-          p1: U.tennisPointLabel(score.points1),
-          p2: U.tennisPointLabel(score.points2)
+          totalPoints1:        Number(summary.totalPoints1        ?? score.totalPoints1        ?? 0),
+          totalPoints2:        Number(summary.totalPoints2        ?? score.totalPoints2        ?? 0),
+          breakPointsWon1:     Number(summary.breakPointsWon1     ?? score.breakPointsWon1     ?? 0),
+          breakPointsChances1: Number(summary.breakPointsChances1 ?? score.breakPointsChances1 ?? 0),
+          breakPointsWon2:     Number(summary.breakPointsWon2     ?? score.breakPointsWon2     ?? 0),
+          breakPointsChances2: Number(summary.breakPointsChances2 ?? score.breakPointsChances2 ?? 0)
         };
       },
 
-      getSetColumns(score) {
+      formatBreakPoints(won, chances) {
+        return `${Number(won || 0)} / ${Number(chances || 0)}`;
+      },
+
+      getWinnerPosition(match, score) {
+        const status   = String(match?.status    || "").trim().toLowerCase();
+        const woWinner = String(match?.winnerByWO || "").trim().toLowerCase();
+        if (status === "wo") {
+          if (woWinner === "player1") return 1;
+          if (woWinner === "player2") return 2;
+        }
+        if (Number(score.sets1 || 0) > Number(score.sets2 || 0)) return 1;
+        if (Number(score.sets2 || 0) > Number(score.sets1 || 0)) return 2;
+        return null;
+      },
+
+      getLastActionSnapshot(match) {
+        const la = match?.lastAction || null;
+        if (!la) return null;
+        return {
+          score:           U.normalizeScore(la.score || {}),
+          status:          String(la.status          || "live"),
+          winnerByWO:      String(la.winnerByWO      || ""),
+          server:          String(la.server          || "player1"),
+          durationSeconds: Number(la.durationSeconds || 0),
+          startedAt:       la.startedAt  || null,
+          finishedAt:      la.finishedAt || null
+        };
+      },
+
+      getSetColumns(match, score) {
         const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-
-        function formatSet(setObj) {
+        const fmt     = String(match.matchFormat || "").toLowerCase();
+      
+        const hasTwoSets   = fmt.includes("2 sets");
+        const hasThreeSets = fmt.includes("3 sets");
+      
+        function formatSet(setObj, isCurrent = false, matchStatus = "") {
           if (!setObj) return { p1: "--", p2: "--" };
-
-          const games1 = Number(setObj.games1 ?? 0);
-          const games2 = Number(setObj.games2 ?? 0);
+      
+          const g1  = Number(setObj.games1 ?? 0);
+          const g2  = Number(setObj.games2 ?? 0);
           const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
           const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
-          const isTieBreak = setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10";
-
-          if (isTieBreak) {
-            const hasTieBreakResult = tb1 > 0 || tb2 > 0;
-
-            if (hasTieBreakResult) {
+      
+          const isTB = setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10";
+          const isFinished = String(matchStatus || "").toLowerCase() === "finished" || String(matchStatus || "").toLowerCase() === "wo";
+      
+          // Tie-break normal (7 pontos)
+          if (setObj.tieBreakMode === "tb7") {
+            if (tb1 > 0 || tb2 > 0) {
               const p1Won = tb1 > tb2;
-
               return {
                 p1: `${p1Won ? 7 : 6}<sup>${tb1}</sup>`,
                 p2: `${p1Won ? 6 : 7}<sup>${tb2}</sup>`
               };
             }
-
-            return {
-              p1: `${games1}<sup>${tb1}</sup>`,
-              p2: `${games2}<sup>${tb2}</sup>`
-            };
           }
-
-          return {
-            p1: String(games1),
-            p2: String(games2)
-          };
+      
+          // Super tie-break (10 pontos)
+          if (setObj.tieBreakMode === "super10") {
+            // Durante a partida: sempre manter o set em 6x6
+            if (!isFinished && isCurrent) {
+              return { p1: "6", p2: "6" };
+            }
+      
+            // Finalizada: exibir 7x6 com os pontos do super tie-break em superscript
+            if (tb1 > 0 || tb2 > 0) {
+              const p1Won = tb1 > tb2;
+              return {
+                p1: `${p1Won ? 7 : 6}<sup>${tb1}</sup>`,
+                p2: `${p1Won ? 6 : 7}<sup>${tb2}</sup>`
+              };
+            }
+      
+            // Fallback: se ainda não tiver pontos gravados
+            return { p1: "6", p2: "6" };
+          }
+      
+          return { p1: String(g1), p2: String(g2) };
         }
-
-        const currentSetNumber = U.getCurrentSetNumber(score);
-
-        const set1 = history[0]
-          ? formatSet(history[0])
-          : currentSetNumber === 1
-            ? { p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0) }
-            : { p1: "--", p2: "--" };
-
-        const set2 = history[1]
-          ? formatSet(history[1])
-          : currentSetNumber === 2
-            ? { p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0) }
-            : { p1: "--", p2: "--" };
-
-        return { set1, set2 };
-      },
-
-      getSavedFilter() {
-        return localStorage.getItem(FILTER_KEY) || "all";
-      },
-
-      saveFilter(value) {
-        localStorage.setItem(FILTER_KEY, value || "all");
-      },
-
-      isMobile() {
-        return window.matchMedia("(max-width: 768px)").matches;
-      },
-
-      getWinProbabilities(match) {
-        const probability = match.probability || {};
-        const p1 = Number(
-          probability.player1 ??
-          match.probabilityPlayer1 ??
-          match.probPlayer1 ??
-          0
-        );
-        const p2 = Number(
-          probability.player2 ??
-          match.probabilityPlayer2 ??
-          match.probPlayer2 ??
-          0
-        );
-
-        return {
-          p1: Number.isFinite(p1) ? Math.max(0, Math.min(100, p1)) : 0,
-          p2: Number.isFinite(p2) ? Math.max(0, Math.min(100, p2)) : 0
+      
+        const currentSetNum  = history.length + 1;
+        const currentSetData = {
+          p1: String(score.games1 ?? 0),
+          p2: String(score.games2 ?? 0)
         };
-      },
-
-      getMatchSummary(match) {
-        const score = U.normalizeScore(match.score || {});
-        const summary = match.summary || match.matchSummary || {};
-
-        return {
-          totalPoints1: Number(summary.totalPoints1 ?? score.totalPoints1 ?? 0),
-          totalPoints2: Number(summary.totalPoints2 ?? score.totalPoints2 ?? 0),
-          breakPointsWon1: Number(summary.breakPointsWon1 ?? score.breakPointsWon1 ?? 0),
-          breakPointsChances1: Number(summary.breakPointsChances1 ?? score.breakPointsChances1 ?? 0),
-          breakPointsWon2: Number(summary.breakPointsWon2 ?? score.breakPointsWon2 ?? 0),
-          breakPointsChances2: Number(summary.breakPointsChances2 ?? score.breakPointsChances2 ?? 0)
-        };
-      },
-
-      getWinnerPosition(match, score) {
-        const status = String(match?.status || "").trim().toLowerCase();
-        const woWinner = String(match?.winnerByWO || "").trim().toLowerCase();
-
-        if (status === "wo") {
-          if (woWinner === "player1") return 1;
-          if (woWinner === "player2") return 2;
+      
+        function getSet(index) {
+          if (history[index]) {
+            return formatSet(history[index], false, match.status);
+          }
+      
+          if (currentSetNum === index + 1) {
+            const currentIsSuperTB = score.tieBreakMode === "super10";
+      
+            // Se o set atual está em super tie-break, a coluna do set deve seguir 6x6 enquanto a partida está ao vivo
+            if (currentIsSuperTB && String(match.status || "").toLowerCase() !== "finished" && String(match.status || "").toLowerCase() !== "wo") {
+              return { p1: "6", p2: "6" };
+            }
+      
+            return currentSetData;
+          }
+      
+          return { p1: "--", p2: "--" };
         }
+      
+        const set1 = getSet(0);
+        const set2 = (hasTwoSets || hasThreeSets) ? getSet(1) : null;
+        const set3 = hasThreeSets ? getSet(2) : null;
+      
+        return { hasTwoSets, hasThreeSets, set1, set2, set3 };
+      },
+      isBreakPoint(score, matchFormat) {
+        const fmt    = String(matchFormat || "").toLowerCase();
+        const noAd   = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
+        const hasAd  = fmt.includes("com vantagem") || fmt.includes("3 sets");
+        const server = score.server || "player1";
+        const sp     = server === "player1" ? score.points1 : score.points2;
+        const rp     = server === "player1" ? score.points2 : score.points1;
 
-        const sets1 = Number(score.sets1 || 0);
-        const sets2 = Number(score.sets2 || 0);
-
-        if (sets1 > sets2) return 1;
-        if (sets2 > sets1) return 2;
-
-        return null;
+        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") return false;
+        if (noAd && sp === 3 && rp === 3) return true;
+        if (hasAd && !noAd) {
+          if (server === "player1" && score.advantage === "player2") return true;
+          if (server === "player2" && score.advantage === "player1") return true;
+        }
+        if (rp === 3 && sp < 3) return true;
+        return false;
       }
     };
+
+    // ─── Estilos inline ───────────────────────────────────────────────────
+
+    function injectInlineStyles() {
+      if (document.getElementById("publicAppInlineStyles")) return;
+      const style = document.createElement("style");
+      style.id = "publicAppInlineStyles";
+      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.96rem; line-height:1.2; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } /* ✅ Status SUSPENSA */ .status-suspended { color: #fbbf24; } .suspended-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: rgba(251,191,36,0.14); border: 1px solid rgba(251,191,36,0.28); color: #fbbf24; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; } .suspended-duration { text-align: center; font-size: 11px; font-weight: 800; color: rgba(251,191,36,0.85); padding: 2px 0 4px; letter-spacing: 0.04em; } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:12px; } .team-name-compact { font-size:0.92rem; } } `;
+      document.head.appendChild(style);
+    }
+
+    // ─── Helpers de partida ───────────────────────────────────────────────
 
     function formatDateTime(value) {
       if (!value) return "";
       try {
         const d = value.toDate ? value.toDate() : new Date(value);
         return new Intl.DateTimeFormat("pt-BR", {
-          dateStyle: "short",
-          timeStyle: "short"
+          dateStyle: "short", timeStyle: "short"
         }).format(d);
-      } catch {
-        return "";
-      }
+      } catch { return ""; }
     }
 
     function renderEmpty(message) {
       return `<div class="public-card empty-card"><div class="card-title">${U.escapeHtml(message)}</div></div>`;
     }
 
-    function renderWinProbabilityChart(match) {
-      const { p1, p2 } = U.getWinProbabilities(match);
+    function getGameFormat(match) {
+      return String(match?.gameFormat || "Simples").trim();
+    }
 
+    function isDoublesFormat(match) {
+      const gf = getGameFormat(match);
+      return gf === "Duplas" || gf === "Duplas Mistas";
+    }
+
+    function getTeam1Name(match) {
+      const p1 = String(match.player1 || "Jogador 1").trim();
+      const p2 = String(match.player2 || "Jogador 2").trim();
+      return isDoublesFormat(match) ? `${p1}/\n${p2}` : p1;
+    }
+
+    function getTeam2Name(match) {
+      const p3 = String(match.player3 || "Jogador 3").trim();
+      const p4 = String(match.player4 || "Jogador 4").trim();
+      return isDoublesFormat(match)
+        ? `${p3}/\n${p4}`
+        : String(match.player2 || "Jogador 2").trim();
+    }
+
+    // ─── Probabilidade de vitória ─────────────────────────────────────────
+
+    function getWinProbabilitiesByScore(match) {
+      const score = U.normalizeScore(match.score || {});
+      let p1 = 50, p2 = 50;
+
+      p1 += (Number(score.sets1   || 0) - Number(score.sets2   || 0)) * 14;
+      p2 += (Number(score.sets2   || 0) - Number(score.sets1   || 0)) * 14;
+      p1 += (Number(score.games1  || 0) - Number(score.games2  || 0)) * 3;
+      p2 += (Number(score.games2  || 0) - Number(score.games1  || 0)) * 3;
+      p1 += (Number(score.points1 || 0) - Number(score.points2 || 0)) * 1.5;
+      p2 += (Number(score.points2 || 0) - Number(score.points1 || 0)) * 1.5;
+
+      if (score.tieBreakMode) {
+        p1 += (Number(score.tieBreakPoints1 || 0) - Number(score.tieBreakPoints2 || 0)) * 4;
+        p2 += (Number(score.tieBreakPoints2 || 0) - Number(score.tieBreakPoints1 || 0)) * 4;
+      }
+
+      if (score.advantage === "player1") p1 += 5;
+      if (score.advantage === "player2") p2 += 5;
+
+      p1 = Math.max(0, Math.min(100, Math.round(p1)));
+      p2 = 100 - p1;
+      return { p1, p2 };
+    }
+
+    function renderWinProbabilityChart(match) {
+      const { p1, p2 } = getWinProbabilitiesByScore(match);
       if (p1 <= 0 && p2 <= 0) return "";
 
-      const p1Name = U.escapeHtml(U.normalizeText(match.player1, "JOGADOR 1"));
-      const p2Name = U.escapeHtml(U.normalizeText(match.player2, "JOGADOR 2"));
+      const p1Name = U.escapeHtml(
+        isDoublesFormat(match) ? getTeam1Name(match).replace(/\n/g, " ") : String(match.player1 || "Jogador 1").trim()
+      );
+      const p2Name = U.escapeHtml(
+        isDoublesFormat(match) ? getTeam2Name(match).replace(/\n/g, " ") : String(match.player2 || "Jogador 2").trim()
+      );
 
-      const p1Width = Math.max(0, Math.min(100, p1));
-      const p2Width = Math.max(0, Math.min(100, p2));
-
-      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar" aria-label="Probabilidade de vitória"> <div class="win-probability-segment win-probability-p1" style="width:${p1Width}%" title="${p1Name} ${p1Width}%"> ${p1Width > 12 ? `${p1Width}%` : ""} </div> <div class="win-probability-segment win-probability-p2" style="width:${p2Width}%" title="${p2Name} ${p2Width}%"> ${p2Width > 12 ? `${p2Width}%` : ""} </div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1Width}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2Width}%</span> </div> </div> `;
+      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%"> ${p1 > 12 ? `${p1}%` : ""} </div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%"> ${p2 > 12 ? `${p2}%` : ""} </div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div>`;
     }
 
     function renderMatchSummary(match) {
-      const p1Name = U.escapeHtml(U.normalizeText(match.player1, "JOGADOR 1"));
-      const p2Name = U.escapeHtml(U.normalizeText(match.player2, "JOGADOR 2"));
-      const s = U.getMatchSummary(match);
+      const team1 = isDoublesFormat(match) ? getTeam1Name(match).replace(/\n/g, " ").trim() : String(match.player1 || "Jogador 1").trim();
+      const team2 = isDoublesFormat(match) ? getTeam2Name(match).replace(/\n/g, " ").trim() : String(match.player2 || "Jogador 2").trim();
+      const s   = U.getMatchSummary(match);
+      const bp1 = U.formatBreakPoints(s.breakPointsWon1, s.breakPointsChances1);
+      const bp2 = U.formatBreakPoints(s.breakPointsWon2, s.breakPointsChances2);
 
-      return ` <div class="match-summary"> <div class="match-summary-title">Resumo da partida</div> <div class="match-summary-grid"> <div class="match-summary-item"> <span class="summary-label">${p1Name}</span> <span class="summary-value"> Pontos: <strong>${s.totalPoints1}</strong> | Break points: <strong>${s.breakPointsWon1}/${s.breakPointsChances1}</strong> </span> </div> <div class="match-summary-item"> <span class="summary-label">${p2Name}</span> <span class="summary-value"> Pontos: <strong>${s.totalPoints2}</strong> | Break points: <strong>${s.breakPointsWon2}/${s.breakPointsChances2}</strong> </span> </div> </div> </div> `;
+      return ` <div class="match-summary"> <div class="match-summary-title">Resumo da partida</div> <div class="match-summary-grid"> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team1)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints1}</strong></span> <span class="summary-value">Break points: <strong>${bp1}</strong></span> </div> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team2)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints2}</strong></span> <span class="summary-value">Break points: <strong>${bp2}</strong></span> </div> </div> </div>`;
     }
+
+    // ─── Live feed ────────────────────────────────────────────────────────
+
+    function getLiveFeedMessage(match) {
+      // ✅ Suspensa: não exibe feed
+      if (match.status === "suspended") return "";
+
+      const score      = U.normalizeScore(match.score || {});
+      const lastAction = U.getLastActionSnapshot(match);
+
+      const p1Raw = String(match.player1 || "Jogador 1").trim();
+      const p2Raw = String(match.player2 || "Jogador 2").trim();
+      const fmt   = String(match.matchFormat || "").toLowerCase();
+      const noAd  = fmt.includes("sem vantagem") || fmt.includes("no ad");
+      const hasAd = fmt.includes("com vantagem") || fmt.includes("3 sets");
+
+      const isTieBreak      = score.tieBreakMode === "tb7";
+      const isSuperTieBreak = score.tieBreakMode === "super10";
+
+      if (match.status === "live" && !lastAction) return "Partida iniciada";
+      if (isSuperTieBreak) return "";
+      if (isTieBreak)      return "🎾 TIE-BREAK";
+
+      if (hasAd && !noAd) {
+        if (score.advantage === "player1") return `VANTAGEM ${p1Raw}`;
+        if (score.advantage === "player2") return `VANTAGEM ${p2Raw}`;
+        const p1 = score.points1, p2 = score.points2;
+        if (p1 >= 3 && p2 >= 3) {
+          if (p1 === p2) return "IGUAIS";
+          if (p1 > p2)   return `VANTAGEM ${p1Raw}`;
+          if (p2 > p1)   return `VANTAGEM ${p2Raw}`;
+        }
+      }
+
+      if (noAd && score.points1 === 3 && score.points2 === 3) {
+        return "🎯 BREAK POINT — PONTO DECISIVO";
+      }
+
+      if (U.isBreakPoint(score, match.matchFormat)) {
+        const server  = score.server || "player1";
+        const rcvName = server === "player1" ? p2Raw : p1Raw;
+        return `🔴 BREAK POINT — ${rcvName}`;
+      }
+
+      const prevScore = lastAction?.score || null;
+      if (prevScore) {
+        const nowSets1  = Number(score.sets1     || 0);
+        const nowSets2  = Number(score.sets2     || 0);
+        const prevSets1 = Number(prevScore.sets1 || 0);
+        const prevSets2 = Number(prevScore.sets2 || 0);
+
+        if (nowSets1 > prevSets1) return `🏆 SET ${p1Raw}`;
+        if (nowSets2 > prevSets2) return `🏆 SET ${p2Raw}`;
+
+        const nowG1  = Number(score.games1     || 0);
+        const nowG2  = Number(score.games2     || 0);
+        const prevG1 = Number(prevScore.games1 || 0);
+        const prevG2 = Number(prevScore.games2 || 0);
+
+        if (nowG1 > prevG1) return `GAME ${p1Raw}`;
+        if (nowG2 > prevG2) return `GAME ${p2Raw}`;
+      }
+
+      return "";
+    }
+
+    // ─── Sacador ──────────────────────────────────────────────────────────
+
+    function getServeBall(score, playerPos, isFinished = false, winnerPos = null) {
+      // Quando a partida terminou, a bolinha fica no vencedor
+      if (isFinished && winnerPos) {
+        const showForWinner = playerPos === winnerPos;
+        return showForWinner ? `<span class="serve-ball" title="Vencedor"></span>` : "";
+      }
+    
+      // Durante a partida, continua mostrando o sacador
+      const server  = score.server || "player1";
+      const serving = (playerPos === 1 && server === "player1") ||
+                      (playerPos === 2 && server === "player2");
+      return serving ? `<span class="serve-ball" title="Sacador"></span>` : "";
+    }
+
+    // ─── Cabeçalho da tabela ──────────────────────────────────────────────
+
+    function buildSetHead(setColumns) {
+      const cls = setColumns.hasThreeSets ? "three-set-head"
+                : setColumns.hasTwoSets   ? "two-set-head"
+                : "one-set-head";
+
+      return ` <div class="match-table-head compact-head ${cls}"> <div class="team-label">JOGADOR</div> <div>1º SET</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div>2º SET</div>` : ""} ${setColumns.hasThreeSets ? `<div>3º SET</div>` : ""} <div>PONTOS</div> </div>`;
+    }
+
+    // ─── Linha de jogador ─────────────────────────────────────────────────
+
+    function buildPlayerRow(teamName, setColumns, pts, playerPos, score, isWinner, isWO, isFinished = false, winnerPos = null) {
+      const rowCls     = setColumns.hasThreeSets ? "three-set-row"
+                       : setColumns.hasTwoSets   ? "two-set-row"
+                       : "one-set-row";
+      const ptsDisplay = isWO ? "WO" : pts;
+      const serveBall  = getServeBall(score, playerPos, isFinished, winnerPos);
+      const setP       = playerPos === 1 ? "p1" : "p2";
+    
+      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact ${isWinner ? "winner" : ""}" style="white-space:pre-line;"> ${serveBall}${U.escapeHtml(teamName)} </div> <div class="score green">${setColumns.set1[setP]}</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="score green">${setColumns.set2?.[setP] ?? "--"}</div>` : ""} ${setColumns.hasThreeSets ? `<div class="score green">${setColumns.set3?.[setP] ?? "--"}</div>` : ""} <div class="score gray">${ptsDisplay}</div> </div>`;
+    }
+
+    // ─── Card finalizado ──────────────────────────────────────────────────
 
     function renderFinalizedCard(match) {
-      const p1Raw = U.normalizeText(match.player1, "JOGADOR 1");
-      const p2Raw = U.normalizeText(match.player2, "JOGADOR 2");
+      const team1      = getTeam1Name(match);
+      const team2      = getTeam2Name(match);
+      const category   = U.escapeHtml(U.normalizeText(match.categoryName,    ""));
+      const stage      = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
+      const status     = U.normalizeStatus(match.status);
+      const score      = U.normalizeScore(match.score);
+      const setColumns = U.getSetColumns(match, score);
+      const duration   = U.buildDuration(match);
+      const winnerPos  = U.getWinnerPosition(match, score);
+      const isWO       = String(match.status || "").toLowerCase() === "wo";
+      const ptDisp     = U.getPointDisplay(score, match.matchFormat, true);
 
-      const p1 = U.escapeHtml(p1Raw);
-      const p2 = U.escapeHtml(p2Raw);
-
-      const category = U.escapeHtml(U.normalizeText(match.categoryName, "ATP 250"));
-      const court = U.escapeHtml(U.normalizeText(match.court, ""));
-      const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const formatRaw = U.normalizeText(
-        match.matchFormat,
-        "1 set sem vantagem + um supertiebreak de 10 pontos"
-      );
-      const format = U.escapeHtml(formatRaw);
-
-      const status = U.normalizeStatus(match.status);
-      const score = U.normalizeScore(match.score);
-      const setColumns = U.getSetColumns(score);
-
-      const server = U.getServerPosition(match, score);
-      const serverIsP1 = server === 1;
-
-      const serverP1 = serverIsP1 ? "🎾 " : "";
-      const serverP2 = serverIsP1 ? "" : "🎾 ";
-
-      const duration = U.buildDuration(match);
-      const pointsDisplay = U.getPointDisplay(match, score);
-      const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
-
-      const winnerPos = U.getWinnerPosition(match, score);
-      const p1Winner = winnerPos === 1;
-      const p2Winner = winnerPos === 2;
-      const isWO = String(match.status || "").toLowerCase() === "wo";
-
-      let liveFeedMessage = "";
-      if (isWO) {
-        liveFeedMessage = "";
-      } else {
-        liveFeedMessage = "";
-      }
-
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(match.status)}</div> </div> <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row ${p1Winner ? "winner-row" : ""}"> <div class="player-name ${p1Winner ? "winner" : ""}">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${isWO ? "WO" : (pointsDisplay.p1 || "")}</div> </div> <div class="match-player-row compact-row ${p2Winner ? "winner-row" : ""}"> <div class="player-name ${p2Winner ? "winner" : ""}">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${isWO ? "WO" : (pointsDisplay.p2 || "")}</div> </div> <div class="live-feed wo-feed">${U.escapeHtml(liveFeedMessage)}</div> <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: <strong>${court}</strong></span>` : ""} ${matchDate ? `<span>Data: <strong>${matchDate}</strong></span>` : ""} </div> </article> `;
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)}
+      
+      ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)}
+${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} 
+      
+      
+      <div class="match-footer compact-footer match-footer-inline"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} </div> </article>`;
     }
+
+    // ─── Card ao vivo (inclui suspensa) ───────────────────────────────────
 
     function renderLiveCard(match) {
-      const p1Raw = U.normalizeText(match.player1, "JOGADOR 1");
-      const p2Raw = U.normalizeText(match.player2, "JOGADOR 2");
+      const team1       = getTeam1Name(match);
+      const team2       = getTeam2Name(match);
+      const category    = U.escapeHtml(U.normalizeText(match.categoryName,    ""));
+      const court       = U.escapeHtml(U.normalizeText(match.court,           ""));
+      const stage       = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
+      const rawStatus   = match.status || "live";
+      const status      = U.normalizeStatus(rawStatus);
+      const score       = U.normalizeScore(match.score);
+      const setColumns  = U.getSetColumns(match, score);
+      const duration    = U.buildDuration(match);
+      const matchDate   = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
+      const liveFeedMsg = getLiveFeedMessage(match);
 
-      const p1 = U.escapeHtml(p1Raw);
-      const p2 = U.escapeHtml(p2Raw);
+      const isSuspended     = rawStatus === "suspended";
+      const isSuperTBActive = score.tieBreakMode === "super10";
+      const isTB7Active     = score.tieBreakMode === "tb7";
 
-      const category = U.escapeHtml(U.normalizeText(match.categoryName, "ATP 250"));
-      const court = U.escapeHtml(U.normalizeText(match.court, ""));
-      const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const formatRaw = U.normalizeText(
-        match.matchFormat,
-        "1 set sem vantagem + um supertiebreak de 10 pontos"
-      );
-      const format = U.escapeHtml(formatRaw);
+      // Pontos: suspensa mostra os pontos congelados (isFinished = false)
+      const ptDisp = U.getPointDisplay(score, match.matchFormat, false);
 
-      const status = U.normalizeStatus(match.status);
-      const score = U.normalizeScore(match.score);
-      const setColumns = U.getSetColumns(score);
+      // ✅ Badge de suspensa
+      const suspendedBadge = isSuspended
+        ? `<div class="suspended-badge">⏸ SUSPENSA</div>`
+        : "";
 
-      const server = U.getServerPosition(match, score);
-      const serverIsP1 = server === 1;
+      // ✅ Duração congelada exibida quando suspensa
+      const suspendedDuration = isSuspended
+        ? `<div class="suspended-duration">⏱ Duração pausada: ${duration}</div>`
+        : "";
 
-      const serverP1 = serverIsP1 ? "🎾 " : "";
-      const serverP2 = serverIsP1 ? "" : "🎾 ";
+      const tbLabel = !isSuspended && isSuperTBActive
+        ? `<div class="tb-active-label">🎾 Super Tie-break</div>`
+        : !isSuspended && isTB7Active
+          ? `<div class="tb-active-label">🎾 Tie-break</div>`
+          : "";
 
-      const duration = U.buildDuration(match);
-      const pointsDisplay = U.getPointDisplay(match, score);
-      const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
-
-      let liveFeedMessage = "";
-
-      const p1Pts = Number(score.points1 || 0);
-      const p2Pts = Number(score.points2 || 0);
-      const p1Games = Number(score.games1 || 0);
-      const p2Games = Number(score.games2 || 0);
-
-      const serverPts = serverIsP1 ? p1Pts : p2Pts;
-      const receiverPts = serverIsP1 ? p2Pts : p1Pts;
-
-      const tieBreakMode = score.tieBreakMode || match.tieBreakMode || null;
-      const isTieBreak = tieBreakMode === "tb7";
-      const isSuperTieBreak = tieBreakMode === "super10";
-
-      const deuceAdv = U.tennisDeuceAdv(p1Pts, p2Pts);
-
-      const formatLower = formatRaw.toLowerCase();
-      const isOneSetFormat =
-        formatLower.includes("1 set pro") ||
-        formatLower.includes("1 set sem vantagem");
-
-      const isGamePointForServer = serverPts >= 3 && receiverPts <= 2;
-      const isBreakPointForReceiver = receiverPts >= 3 && serverPts <= 2;
-
-      const p1LeadingGames = p1Games > p2Games;
-      const p2LeadingGames = p2Games > p1Games;
-
-      const isSetPointForP1 =
-        p1LeadingGames &&
-        ((serverIsP1 && isGamePointForServer) || (!serverIsP1 && isBreakPointForReceiver));
-
-      const isSetPointForP2 =
-        p2LeadingGames &&
-        ((serverIsP1 && isBreakPointForReceiver) || (!serverIsP1 && isGamePointForServer));
-
-      if (isSuperTieBreak) {
-        liveFeedMessage = "SUPER TIE-BREAK";
-      } else if (isTieBreak) {
-        liveFeedMessage = "TIE-BREAK";
-      } else if (deuceAdv === "DEUCE") {
-        liveFeedMessage = "IGUAIS — PONTO DECISIVO";
-      } else if (deuceAdv === "AD1") {
-        liveFeedMessage = serverIsP1
-          ? `PONTO DECISIVO PARA ${p1Raw.toUpperCase()}`
-          : `PONTO DECISIVO PARA ${p2Raw.toUpperCase()}`;
-      } else if (deuceAdv === "AD2") {
-        liveFeedMessage = serverIsP1
-          ? `PONTO DECISIVO PARA ${p2Raw.toUpperCase()}`
-          : `PONTO DECISIVO PARA ${p1Raw.toUpperCase()}`;
-      } else if (isGamePointForServer) {
-        liveFeedMessage = `GAME POINT PARA ${serverIsP1 ? p1Raw.toUpperCase() : p2Raw.toUpperCase()}`;
-      } else if (isBreakPointForReceiver) {
-        liveFeedMessage = `BREAK POINT PARA ${serverIsP1 ? p2Raw.toUpperCase() : p1Raw.toUpperCase()}`;
-      } else if (isSetPointForP1) {
-        liveFeedMessage = isOneSetFormat
-          ? `MATCH POINT PARA ${p1Raw.toUpperCase()}`
-          : `SET POINT PARA ${p1Raw.toUpperCase()}`;
-      } else if (isSetPointForP2) {
-        liveFeedMessage = isOneSetFormat
-          ? `MATCH POINT PARA ${p2Raw.toUpperCase()}`
-          : `SET POINT PARA ${p2Raw.toUpperCase()}`;
-      } else if (p1Pts >= 4 && p1Pts >= p2Pts + 2) {
-        liveFeedMessage = `GAME ${p1Raw.toUpperCase()}`;
-      } else if (p2Pts >= 4 && p2Pts >= p1Pts + 2) {
-        liveFeedMessage = `GAME ${p2Raw.toUpperCase()}`;
-      }
-
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${status === "live" && liveFeedMessage ? `<div class="live-feed">${U.escapeHtml(liveFeedMessage)}</div>` : ""} <div class="match-table-head compact-head"> <div>JOGADOR</div> <div>1º SET</div> <div>2º SET</div> <div>PONTOS</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP1}${p1}</div> <div class="score green">${setColumns.set1.p1}</div> <div class="score green">${setColumns.set2.p1}</div> <div class="score gray">${pointsDisplay.p1 || ""}</div> </div> <div class="match-player-row compact-row"> <div class="player-name">${serverP2}${p2}</div> <div class="score green">${setColumns.set1.p2}</div> <div class="score green">${setColumns.set2.p2}</div> <div class="score gray">${pointsDisplay.p2 || ""}</div> </div> ${status === "live" ? renderWinProbabilityChart(match) : ""} ${status === "live" ? renderMatchSummary(match) : ""} <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: <strong>${court}</strong></span>` : ""} ${matchDate ? `<span>Data: <strong>${matchDate}</strong></span>` : ""} </div> </article> `;
+      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} <div class="match-footer compact-footer"> ${stage ? `<span>Fase: <strong>${stage}</strong></span>` : ""} ${!isSuspended && duration ? `<span>Duração: <strong>${duration}</strong></span>` : ""} ${court ? `<span>Quadra: <strong>${court}</strong></span>` : ""} ${matchDate ? `<span>Data: <strong>${matchDate}</strong></span>` : ""} </div> </article>`;
     }
 
-    function createCard(match) {
-      const status = U.normalizeStatus(match.status);
+    // ─── Card agendado ────────────────────────────────────────────────────
 
-      if (status === "finished") {
-        return renderFinalizedCard(match);
-      }
-
-      if (status === "live") {
-        return renderLiveCard(match);
-      }
-
-      const p1Raw = U.normalizeText(match.player1, "JOGADOR 1");
-      const p2Raw = U.normalizeText(match.player2, "JOGADOR 2");
-      const p1 = U.escapeHtml(p1Raw);
-      const p2 = U.escapeHtml(p2Raw);
-
-      const category = U.escapeHtml(U.normalizeText(match.categoryName, "ATP 250"));
-      const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
+    function createScheduledCard(match) {
+      const team1     = getTeam1Name(match);
+      const team2     = getTeam2Name(match);
+      const category  = U.escapeHtml(U.normalizeText(match.categoryName,    ""));
+      const stage     = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
+      const status    = U.normalizeStatus(match.status);
       const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
 
-      return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-chip">${category}</div> <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name">${p1}</span> <span class="vs-separator">X</span> <span class="player-name">${p2}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span>${stage ? `<strong>${stage}</strong>` : ""}${stage && matchDate ? " • " : ""}${matchDate ? `<strong>${matchDate}</strong>` : ""}</span>` : ""} </div> </article> `;
+      return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name team-name-compact">${U.escapeHtml(team1)}</span> <span class="vs-separator">X</span> <span class="player-name team-name-compact">${U.escapeHtml(team2)}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span>` : ""} </div> </article>`;
     }
+
+    // ─── Roteador de cards ────────────────────────────────────────────────
+
+    function createCard(match, forceStatus = null) {
+      const rawStatus = match.status || "scheduled";
+      const status    = forceStatus || U.normalizeStatus(rawStatus);
+
+      if (status === "finished") return renderFinalizedCard(match);
+
+      // ✅ "suspended" e "live" usam o mesmo card (renderLiveCard)
+      if (status === "live" || rawStatus === "suspended") return renderLiveCard(match);
+
+      return createScheduledCard(match);
+    }
+
+    // ─── Filtro e renderização ────────────────────────────────────────────
 
     function getActiveFilter() {
       const saved = U.getSavedFilter();
-
       if (!U.isMobile()) return "all";
-
-      if (saved === "scheduled" || saved === "live" || saved === "finished" || saved === "all") {
-        return saved;
-      }
-
-      return "all";
+      return ["scheduled", "live", "finished", "all"].includes(saved) ? saved : "all";
     }
 
     function applyFilterAndRender(matches) {
-      const selectedFilter = getActiveFilter();
+      const filter   = getActiveFilter();
       const isMobile = U.isMobile();
+      const now      = Date.now();
 
-      const scheduled = matches
-        .filter(m => U.normalizeStatus(m.status) === "scheduled")
-        .sort((a, b) => {
-          const da = U.toDate(a.matchDateTime)?.getTime() || 0;
-          const dbv = U.toDate(b.matchDateTime)?.getTime() || 0;
-          return da - dbv;
-        });
+      const scheduled = [];
+      const live      = [];
+      const finished  = [];
 
-      const live = matches
-        .filter(m => U.normalizeStatus(m.status) === "live")
-        .sort((a, b) => {
-          const da = U.getStartedAtMs(a) || 0;
-          const dbv = U.getStartedAtMs(b) || 0;
-          return da - dbv;
-        });
+      matches.forEach((m) => {
+        const rawStatus = String(m.status || "scheduled").trim().toLowerCase();
+        const mid       = m.id || m.matchId || "";
 
-      const finished = matches
-        .filter(m => U.normalizeStatus(m.status) === "finished")
-        .sort((a, b) => {
-          const fa = U.toDate(a.finishedAt)?.getTime() || U.getStartedAtMs(a) || 0;
-          const fb = U.toDate(b.finishedAt)?.getTime() || U.getStartedAtMs(b) || 0;
-          return fb - fa;
-        });
+        if (rawStatus === "finished" || rawStatus === "wo") {
+          if (!state.finishedPending[mid]) {
+            const finishedAt = U.toDate(m.finishedAt)?.getTime() || now;
+            state.finishedPending[mid] = finishedAt;
+          }
 
-      const scheduledVisibleBase = isMobile ? scheduled : scheduled.slice(0, 7);
-      const liveVisibleBase = isMobile ? live : live.slice(0, 3);
-      const finishedVisibleBase = isMobile ? finished : finished.slice(0, 4);
+          const elapsed = now - state.finishedPending[mid];
 
-      const visibleScheduled =
-        selectedFilter === "all" || selectedFilter === "scheduled"
-          ? scheduledVisibleBase
-          : [];
+          if (elapsed < FINISHED_DELAY_MS) {
+            live.push({ match: m, forceStatus: "finished" });
+          } else {
+            delete state.finishedPending[mid];
+            finished.push({ match: m, forceStatus: null });
+          }
+        } else if (rawStatus === "live") {
+          delete state.finishedPending[mid];
+          live.push({ match: m, forceStatus: null });
 
-      const visibleLive =
-        selectedFilter === "all" || selectedFilter === "live"
-          ? liveVisibleBase
-          : [];
+        // ✅ "suspended" aparece na coluna "Em andamento"
+        } else if (rawStatus === "suspended") {
+          delete state.finishedPending[mid];
+          live.push({ match: m, forceStatus: null });
 
-      const visibleFinished =
-        selectedFilter === "all" || selectedFilter === "finished"
-          ? finishedVisibleBase
-          : [];
+        } else {
+          scheduled.push({ match: m, forceStatus: null });
+        }
+      });
+
+      scheduled.sort((a, b) =>
+        (U.toDate(a.match.matchDateTime)?.getTime() || 0) -
+        (U.toDate(b.match.matchDateTime)?.getTime() || 0)
+      );
+      live.sort((a, b) =>
+        (U.getStartedAtMs(a.match) || 0) - (U.getStartedAtMs(b.match) || 0)
+      );
+      finished.sort((a, b) => {
+        const fa = U.toDate(a.match.finishedAt)?.getTime() || U.getStartedAtMs(a.match) || 0;
+        const fb = U.toDate(b.match.finishedAt)?.getTime() || U.getStartedAtMs(b.match) || 0;
+        return fb - fa;
+      });
+
+      const visScheduled = filter === "all" || filter === "scheduled"
+        ? (isMobile ? scheduled : scheduled.slice(0, 7)) : [];
+      const visLive      = filter === "all" || filter === "live"
+        ? (isMobile ? live      : live.slice(0, 3))      : [];
+      const visFinished  = filter === "all" || filter === "finished"
+        ? (isMobile ? finished  : finished.slice(0, 4))  : [];
 
       if (el.countScheduled) el.countScheduled.textContent = scheduled.length;
-      if (el.countLive) el.countLive.textContent = live.length;
-      if (el.countFinished) el.countFinished.textContent = finished.length;
+      if (el.countLive)      el.countLive.textContent      = live.length;
+      if (el.countFinished)  el.countFinished.textContent  = finished.length;
 
       if (el.scheduledList) {
-        el.scheduledList.innerHTML = visibleScheduled.length
-          ? visibleScheduled.map(createCard).join("")
+        el.scheduledList.innerHTML = visScheduled.length
+          ? visScheduled.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
           : renderEmpty("Nenhum jogo do dia");
       }
 
       if (el.liveList) {
-        el.liveList.innerHTML = visibleLive.length
-          ? visibleLive.map(createCard).join("")
+        el.liveList.innerHTML = visLive.length
+          ? visLive.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
           : renderEmpty("Nenhuma partida em andamento");
       }
 
       if (el.finishedList) {
-        el.finishedList.innerHTML = visibleFinished.length
-          ? visibleFinished.map(createCard).join("")
+        el.finishedList.innerHTML = visFinished.length
+          ? visFinished.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
           : renderEmpty("Nenhuma partida finalizada");
       }
     }
@@ -652,59 +766,57 @@
       applyFilterAndRender(matches);
     }
 
+    // ─── Firestore ────────────────────────────────────────────────────────
+
     function listenMatches(currentUser) {
       if (!currentUser) {
-        if (el.scheduledList) el.scheduledList.innerHTML = renderEmpty("Usuário não autenticado");
-        if (el.liveList) el.liveList.innerHTML = renderEmpty("Usuário não autenticado");
-        if (el.finishedList) el.finishedList.innerHTML = renderEmpty("Usuário não autenticado");
+        [el.scheduledList, el.liveList, el.finishedList].forEach(
+          (e) => e && (e.innerHTML = renderEmpty("Usuário não autenticado"))
+        );
         return;
       }
 
-      if (state.unsubscribe) {
-        state.unsubscribe();
-        state.unsubscribe = null;
-      }
+      state.unsubscribe?.();
+      state.unsubscribe = null;
 
       state.unsubscribe = db.collection("matches")
         .where("ownerId", "==", currentUser.uid)
         .onSnapshot(
           (snapshot) => {
-            state.cachedMatches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            state.cachedMatches.sort((a, b) => {
-              const da = U.getStartedAtMs(a) || 0;
-              const dbv = U.getStartedAtMs(b) || 0;
-              return da - dbv;
-            });
+            state.cachedMatches = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            state.cachedMatches.sort(
+              (a, b) => (U.getStartedAtMs(a) || 0) - (U.getStartedAtMs(b) || 0)
+            );
             renderLists(state.cachedMatches);
           },
-          (error) => {
-            console.error("Erro ao carregar partidas:", error);
-            if (el.scheduledList) el.scheduledList.innerHTML = renderEmpty("Erro ao carregar jogos");
-            if (el.liveList) el.liveList.innerHTML = renderEmpty("Erro ao carregar jogos");
-            if (el.finishedList) el.finishedList.innerHTML = renderEmpty("Erro ao carregar jogos");
+          (err) => {
+            console.error("Erro ao carregar partidas:", err);
+            [el.scheduledList, el.liveList, el.finishedList].forEach(
+              (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos"))
+            );
           }
         );
     }
 
     function refreshLiveDurations() {
-      if (state.cachedMatches.length) {
-        renderLists(state.cachedMatches);
-      }
+      if (state.cachedMatches.length) renderLists(state.cachedMatches);
     }
+
+    // ─── Filtro ───────────────────────────────────────────────────────────
 
     function initFilter() {
       if (!el.filter) return;
-
-      const saved = U.getSavedFilter();
-      el.filter.value = saved || "all";
-
+      el.filter.value = U.getSavedFilter() || "all";
       el.filter.addEventListener("change", () => {
         U.saveFilter(el.filter.value);
         renderLists(state.cachedMatches);
       });
     }
 
+    // ─── Init ─────────────────────────────────────────────────────────────
+
     function init() {
+      injectInlineStyles();
       initFilter();
 
       if (typeof __auth === "undefined") {
@@ -714,12 +826,11 @@
 
       __auth.onAuthStateChanged((user) => {
         if (!user) {
-          if (el.scheduledList) el.scheduledList.innerHTML = renderEmpty("Usuário não autenticado");
-          if (el.liveList) el.liveList.innerHTML = renderEmpty("Usuário não autenticado");
-          if (el.finishedList) el.finishedList.innerHTML = renderEmpty("Usuário não autenticado");
+          [el.scheduledList, el.liveList, el.finishedList].forEach(
+            (e) => e && (e.innerHTML = renderEmpty("Usuário não autenticado"))
+          );
           return;
         }
-
         listenMatches(user);
       });
 

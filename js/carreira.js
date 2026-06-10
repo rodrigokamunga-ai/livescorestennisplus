@@ -4,13 +4,15 @@
   const CareerApp = (() => {
     const PAGE_SIZE = 5;
 
-    const db = firebase.firestore();
+    const getDb = () => (typeof __db !== "undefined" ? __db : firebase.firestore());
 
     const state = {
       allMatches: [],
       filteredMatches: [],
       currentUser: null,
       currentProfileName: "",
+      // Nome atualizado do perfil (pode diferir do nome nas partidas)
+      currentProfileNameNew: "",
       unsubscribe: null,
       filtersCollapsed: false,
       currentPage: 1
@@ -19,6 +21,9 @@
     const el = {
       profileName: document.getElementById("profileName"),
       playerName: document.getElementById("playerName"),
+      modalityFilter: document.getElementById("modalityFilter"),
+      gameFormatFilter: document.getElementById("gameFormatFilter"),
+      tournamentFilter: document.getElementById("tournamentFilter"),
       stageFilter: document.getElementById("stageFilter"),
       resultFilter: document.getElementById("resultFilter"),
       tournamentSituationFilter: document.getElementById("tournamentSituationFilter"),
@@ -30,20 +35,20 @@
       totalWins: document.getElementById("totalWins"),
       totalLosses: document.getElementById("totalLosses"),
       totalWo: document.getElementById("totalWo"),
+      totalTournaments: document.getElementById("totalTournaments"),
+      totalChampion: document.getElementById("totalChampion"),
+      totalRunnerup: document.getElementById("totalRunnerup"),
       historyList: document.getElementById("historyList"),
       summaryMessage: document.getElementById("summaryMessage"),
       pageTitle: document.getElementById("pageTitle"),
       subtitle: document.getElementById("subtitle"),
       toggleFiltersBtn: document.getElementById("toggleFiltersBtn"),
-      toggleFilterBtn: document.getElementById("toggleFilterBtn"),
-      careerFiltersToggleBtn: document.getElementById("careerFiltersToggleBtn"),
-      filtersToggleBtn: document.getElementById("filtersToggleBtn"),
-
-      // paginação
       prevPageBtn: document.getElementById("prevPageBtn"),
       nextPageBtn: document.getElementById("nextPageBtn"),
       pageInfo: document.getElementById("pageInfo")
     };
+
+    // ─── Utilitários ──────────────────────────────────────────────────────────
 
     const U = {
       escapeHtml(str = "") {
@@ -56,12 +61,16 @@
       },
 
       normalizeText(value = "") {
-        return String(value || "").trim().toLowerCase();
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
       },
 
       toDate(value) {
         if (!value) return null;
-        if (value && typeof value.toDate === "function") {
+        if (typeof value.toDate === "function") {
           const d = value.toDate();
           return isNaN(d.getTime()) ? null : d;
         }
@@ -120,7 +129,7 @@
       },
 
       getMatchFormat(match) {
-        const candidates = [
+        const found = [
           match?.matchFormat,
           match?.format,
           match?.jogoFormat,
@@ -129,84 +138,102 @@
           match?.match?.matchFormat,
           match?.details?.matchFormat,
           match?.details?.format
-        ];
-
-        const found = candidates.find((v) => String(v || "").trim());
+        ].find((v) => String(v || "").trim());
         return found ? String(found).trim() : "-";
       },
 
       getSurfaceType(match) {
-        const candidates = [
+        const found = [
           match?.surfaceType,
           match?.tipoPiso,
           match?.surface,
           match?.courtSurface
-        ];
+        ].find((v) => String(v || "").trim());
+        return found ? String(found).trim() : "-";
+      },
 
-        const found = candidates.find((v) => String(v || "").trim());
+      getModalidade(match) {
+        const found = [match?.modality, match?.modalidade].find((v) => String(v || "").trim());
+        return found ? String(found).trim() : "-";
+      },
+
+      getGameFormat(match) {
+        const found = [match?.gameFormat, match?.formatoJogo, match?.game_format].find((v) =>
+          String(v || "").trim()
+        );
         return found ? String(found).trim() : "-";
       },
 
       getCourt(match) {
-        const candidates = [
-          match?.court,
-          match?.quadra,
-          match?.courtName,
-          match?.location
-        ];
-
-        const found = candidates.find((v) => String(v || "").trim());
+        const found = [match?.court, match?.quadra, match?.courtName, match?.location].find((v) =>
+          String(v || "").trim()
+        );
         return found ? String(found).trim() : "-";
+      },
+
+      getTournamentName(match) {
+        return String(match?.tournamentName || "").trim() || "-";
       },
 
       getMatchDuration(match) {
         if (match?.durationSeconds && Number(match.durationSeconds) > 0) {
           return U.formatDuration(match.durationSeconds);
         }
-
         const started = U.toDate(match?.startedAt);
         const finished = U.toDate(match?.finishedAt);
-
         if (started && finished && finished >= started) {
           return U.formatDuration(Math.floor((finished.getTime() - started.getTime()) / 1000));
         }
-
         return "-";
       },
 
       getWinnerPosition(match) {
         const status = U.normalizeText(match.status);
         const woWinner = U.normalizeText(match.winnerByWO);
-
         if (status === "wo") {
           if (woWinner === "player1") return 1;
           if (woWinner === "player2") return 2;
           return null;
         }
-
         const score = U.normalizeScore(match.score || {});
         if (score.sets1 > score.sets2) return 1;
         if (score.sets2 > score.sets1) return 2;
-
         return null;
       },
 
+      // Verifica se o usuário logado é dono da partida
+      isOwnerMatch(match) {
+        const ownerId = String(match.ownerId || "").trim();
+        if (!state.currentUser) return false;
+        return ownerId === state.currentUser.uid;
+      },
+
+      // Retorna o nome do jogador logado na partida
+      getOwnerNameInMatch(match) {
+        const ownerName = String(match.ownerName || "").trim();
+        if (ownerName) return ownerName;
+        return state.currentProfileName || "";
+      },
+
       getLoggedUserOutcome(match) {
-        const target = U.normalizeText(state.currentProfileName || el.playerName?.value || "");
         const winnerPos = U.getWinnerPosition(match);
+        if (!winnerPos) return "unknown";
+
+        const ownerId = String(match.ownerId || "").trim();
+        const isOwner = state.currentUser && ownerId === state.currentUser.uid;
+
+        if (!isOwner) return "unknown";
+
+        const ownerName = U.normalizeText(U.getOwnerNameInMatch(match));
+        const currentName = U.normalizeText(state.currentProfileName || "");
         const p1 = U.normalizeText(match.player1 || "");
         const p2 = U.normalizeText(match.player2 || "");
 
-        if (!winnerPos) return "unknown";
+        const ownerIsP1 = p1 === ownerName || p1 === currentName;
+        const ownerIsP2 = p2 === ownerName || p2 === currentName;
 
-        if (winnerPos === 1) {
-          return p1 === target ? "win" : "loss";
-        }
-
-        if (winnerPos === 2) {
-          return p2 === target ? "win" : "loss";
-        }
-
+        if (winnerPos === 1) return ownerIsP1 ? "win" : "loss";
+        if (winnerPos === 2) return ownerIsP2 ? "win" : "loss";
         return "unknown";
       },
 
@@ -216,7 +243,6 @@
 
       getTournamentSituation(match) {
         if (!U.isFinalMatch(match)) return "";
-
         const outcome = U.getLoggedUserOutcome(match);
         if (outcome === "win") return "champion";
         if (outcome === "loss") return "runnerup";
@@ -226,47 +252,39 @@
       getScoreLabel(match) {
         const score = U.normalizeScore(match.score || {});
         const status = U.normalizeText(match.status);
-
         if (status === "wo") return "WO";
-
         const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-
         if (history.length) {
-          const sets = history.map((setObj) => {
-            const g1 = Number(setObj?.games1 || 0);
-            const g2 = Number(setObj?.games2 || 0);
-            const tb1 = Number(setObj?.tieBreakPoints1 || 0);
-            const tb2 = Number(setObj?.tieBreakPoints2 || 0);
-            const isTB = setObj?.tieBreakMode === "tb7" || setObj?.tieBreakMode === "super10";
-
-            if (isTB && (tb1 > 0 || tb2 > 0)) {
-              const p1Won = tb1 > tb2;
-              return `${p1Won ? 7 : 6}x${p1Won ? 6 : 7} (${tb1}-${tb2})`;
-            }
-
-            return `${g1}x${g2}`;
-          });
-
-          return sets.join(" ");
+          return history
+            .map((setObj) => {
+              const g1 = Number(setObj?.games1 || 0);
+              const g2 = Number(setObj?.games2 || 0);
+              const tb1 = Number(setObj?.tieBreakPoints1 || 0);
+              const tb2 = Number(setObj?.tieBreakPoints2 || 0);
+              const isTB =
+                setObj?.tieBreakMode === "tb7" || setObj?.tieBreakMode === "super10";
+              if (isTB && (tb1 > 0 || tb2 > 0)) {
+                const p1Won = tb1 > tb2;
+                return `${p1Won ? 7 : 6}x${p1Won ? 6 : 7} (${tb1}-${tb2})`;
+              }
+              return `${g1}x${g2}`;
+            })
+            .join(" ");
         }
-
         return `${score.sets1}x${score.sets2}`;
       },
 
       isMatchForLoggedUser(match, currentUser) {
         const ownerId = String(match.ownerId || "").trim();
-        const ownedById = currentUser && ownerId && ownerId === currentUser.uid;
-        return Boolean(ownedById);
+        return Boolean(currentUser && ownerId && ownerId === currentUser.uid);
       },
 
       applyDateFilter(matches, from, to) {
         const fromTs = from ? new Date(`${from}T00:00:00`).getTime() : null;
         const toTs = to ? new Date(`${to}T23:59:59`).getTime() : null;
-
         return matches.filter((m) => {
           const dt = U.toDate(m.matchDateTime);
           if (!dt) return false;
-
           const ts = dt.getTime();
           if (fromTs !== null && ts < fromTs) return false;
           if (toTs !== null && ts > toTs) return false;
@@ -276,14 +294,69 @@
 
       matchOpponentFilter(match, opponentText) {
         if (!opponentText) return true;
-
-        const p1 = U.normalizeText(match.player1 || "");
-        const p2 = U.normalizeText(match.player2 || "");
         const query = U.normalizeText(opponentText);
+        return [match.player1, match.player2, match.player3, match.player4].some((p) =>
+          U.normalizeText(p || "").includes(query)
+        );
+      },
 
-        return p1.includes(query) || p2.includes(query);
+      matchModalidadeFilter(match, modalityText) {
+        if (!modalityText) return true;
+        return U.normalizeText(U.getModalidade(match)) === U.normalizeText(modalityText);
+      },
+
+      matchGameFormatFilter(match, gameFormatText) {
+        if (!gameFormatText) return true;
+        return U.normalizeText(U.getGameFormat(match)) === U.normalizeText(gameFormatText);
+      },
+
+      matchTournamentFilter(match, tournamentText) {
+        if (!tournamentText) return true;
+        return U.normalizeText(U.getTournamentName(match)).includes(
+          U.normalizeText(tournamentText)
+        );
+      },
+
+      isDoubles(match) {
+        const gf = U.normalizeText(U.getGameFormat(match));
+        return gf === "duplas" || gf === "duplas mistas";
+      },
+
+      formatPlayerName(name = "") {
+        return String(name || "").trim() || "-";
+      },
+
+      // Substitui o nome do jogador logado pelo nome atual do perfil
+      resolvePlayerName(name, match) {
+        const ownerName = U.normalizeText(U.getOwnerNameInMatch(match));
+        const currentName = state.currentProfileName || "";
+        const normalized = U.normalizeText(name || "");
+
+        if (ownerName && normalized === ownerName && currentName) {
+          return currentName;
+        }
+        return name || "-";
+      },
+
+      getTeam1Line(match) {
+        const p1 = U.resolvePlayerName(match.player1, match);
+        const p2 = U.resolvePlayerName(match.player2, match);
+        return U.isDoubles(match)
+          ? `${U.formatPlayerName(p1)} / ${U.formatPlayerName(p2)}`
+          : U.formatPlayerName(p1);
+      },
+
+      getTeam2Line(match) {
+        const p3 = U.resolvePlayerName(match.player3, match);
+        const p4 = U.resolvePlayerName(match.player4, match);
+        if (U.isDoubles(match)) {
+          return `${U.formatPlayerName(p3)} / ${U.formatPlayerName(p4)}`;
+        }
+        return U.formatPlayerName(U.resolvePlayerName(match.player2, match));
       }
     };
+
+    // ─── UI helpers ───────────────────────────────────────────────────────────
 
     function setSummaryMessage(text) {
       if (el.summaryMessage) el.summaryMessage.textContent = text || "";
@@ -294,13 +367,18 @@
         el.profileName.value = profileName || "";
         el.profileName.readOnly = true;
       }
-
       if (el.playerName) el.playerName.value = "";
+      if (el.modalityFilter) el.modalityFilter.value = "";
+      if (el.gameFormatFilter) el.gameFormatFilter.value = "";
+      if (el.tournamentFilter) el.tournamentFilter.value = "";
     }
 
     function getFilters() {
       return {
         player: el.playerName?.value?.trim() || "",
+        modality: el.modalityFilter?.value?.trim() || "",
+        gameFormat: el.gameFormatFilter?.value?.trim() || "",
+        tournament: el.tournamentFilter?.value?.trim() || "",
         stage: el.stageFilter?.value?.trim() || "",
         result: el.resultFilter?.value?.trim() || "",
         tournamentSituation: el.tournamentSituationFilter?.value?.trim() || "",
@@ -309,50 +387,82 @@
       };
     }
 
-    function computeStats(matches, targetPlayerName) {
-      let wins = 0;
-      let losses = 0;
-      let wo = 0;
+    // ─── Estatísticas ─────────────────────────────────────────────────────────
 
-      const target = U.normalizeText(targetPlayerName);
+    function computeStats(matches) {
+      let wins = 0,
+        losses = 0,
+        wo = 0;
 
       matches.forEach((m) => {
-        const winnerPos = U.getWinnerPosition(m);
-        const p1 = U.normalizeText(m.player1 || "");
-        const p2 = U.normalizeText(m.player2 || "");
-
-        if (U.normalizeText(m.status) === "wo") wo += 1;
-
-        const targetIsP1 = p1 === target;
-        const targetIsP2 = p2 === target;
-
-        if ((winnerPos === 1 && targetIsP1) || (winnerPos === 2 && targetIsP2)) {
-          wins += 1;
-        } else if (targetIsP1 || targetIsP2) {
-          losses += 1;
-        }
+        if (U.normalizeText(m.status) === "wo") wo++;
+        const outcome = U.getLoggedUserOutcome(m);
+        if (outcome === "win") wins++;
+        if (outcome === "loss") losses++;
       });
 
       return { wins, losses, wo };
     }
 
+    // ─── Torneios ─────────────────────────────────────────────────────────────
+
+    const TOURNAMENT_STAGES = new Set([
+      "primeira rodada",
+      "segunda rodada",
+      "terceira rodada",
+      "oitavas de final",
+      "quartas de final",
+      "semifinais",
+      "final",
+      "grupos"
+    ]);
+
+    function isTournamentStage(match) {
+      return TOURNAMENT_STAGES.has(U.normalizeText(match.tournamentStage || ""));
+    }
+
+    function computeTournamentStats(matches) {
+      const tournamentsWithName = new Set();
+      let tournamentsWithoutName = 0;
+      let champion = 0;
+      let runnerup = 0;
+
+      matches.forEach((m) => {
+        if (!isTournamentStage(m)) return;
+        const tName = U.normalizeText(String(m.tournamentName || "").trim());
+        if (tName) {
+          tournamentsWithName.add(tName);
+        } else {
+          tournamentsWithoutName++;
+        }
+        const situation = U.getTournamentSituation(m);
+        if (situation === "champion") champion++;
+        if (situation === "runnerup") runnerup++;
+      });
+
+      return {
+        tournaments: tournamentsWithName.size + tournamentsWithoutName,
+        champion,
+        runnerup
+      };
+    }
+
     function renderSummary(matches) {
       const total = matches.length;
-      const targetPlayer = state.currentProfileName || el.playerName?.value?.trim() || "";
-
-      const stats = computeStats(matches, targetPlayer);
+      const stats = computeStats(matches);
+      const tStats = computeTournamentStats(matches);
 
       if (el.totalMatches) el.totalMatches.textContent = String(total);
       if (el.totalWins) el.totalWins.textContent = String(stats.wins);
       if (el.totalLosses) el.totalLosses.textContent = String(stats.losses);
       if (el.totalWo) el.totalWo.textContent = String(stats.wo);
+      if (el.totalTournaments) el.totalTournaments.textContent = String(tStats.tournaments);
+      if (el.totalChampion) el.totalChampion.textContent = String(tStats.champion);
+      if (el.totalRunnerup) el.totalRunnerup.textContent = String(tStats.runnerup);
 
-      const player = targetPlayer || "Usuário";
-
+      const player = state.currentProfileName || "Usuário";
       if (el.pageTitle) el.pageTitle.textContent = `Carreira - ${player}`;
-      if (el.subtitle) {
-        el.subtitle.textContent = `Histórico de partidas finalizadas do usuário logado`;
-      }
+      if (el.subtitle) el.subtitle.textContent = "Histórico de partidas finalizadas do usuário";
 
       if (el.summaryMessage) {
         el.summaryMessage.textContent = total
@@ -361,11 +471,21 @@
       }
     }
 
+    // ─── Renderização dos cards ───────────────────────────────────────────────
+
+    function formatTeamName(match) {
+      const team1 = U.getTeam1Line(match);
+      const team2 = U.getTeam2Line(match);
+      if (U.isDoubles(match)) {
+        return `${U.escapeHtml(team1)}<br>${U.escapeHtml(team2)}`;
+      }
+      return `${U.escapeHtml(team1)} x ${U.escapeHtml(team2)}`;
+    }
+
     function renderPagedHistory(matches) {
       if (!el.historyList) return;
 
       const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
-
       if (state.currentPage > totalPages) state.currentPage = totalPages;
       if (state.currentPage < 1) state.currentPage = 1;
 
@@ -375,92 +495,94 @@
       if (!pageItems.length) {
         el.historyList.innerHTML = `<div class="empty-card">Nenhuma partida encontrada para os filtros selecionados.</div>`;
       } else {
-        const target = U.normalizeText(state.currentProfileName || el.playerName?.value || "");
-
         el.historyList.innerHTML = pageItems
           .map((m) => {
             const date = U.formatDate(m.matchDateTime);
+            const modality = U.escapeHtml(U.getModalidade(m));
+            const gameFormat = U.escapeHtml(U.getGameFormat(m));
             const category = U.escapeHtml(m.categoryName || "-");
-            const format = U.escapeHtml(U.getMatchFormat(m));
-            const surfaceType = U.escapeHtml(U.getSurfaceType(m));
+            const tournament = U.escapeHtml(U.getTournamentName(m));
+            const surfaceTypeRaw =
+              U.getModalidade(m) === "Beach Tênis" ? "Areia" : U.getSurfaceType(m);
+            const surfaceType = U.escapeHtml(surfaceTypeRaw);
             const court = U.escapeHtml(U.getCourt(m));
             const stage = U.escapeHtml(m.tournamentStage || "-");
-            const p1 = U.escapeHtml(m.player1 || "-");
-            const p2 = U.escapeHtml(m.player2 || "-");
             const score = U.escapeHtml(U.getScoreLabel(m));
             const duration = U.escapeHtml(U.getMatchDuration(m));
-            const winnerPos = U.getWinnerPosition(m);
             const situation = U.getTournamentSituation(m);
 
-            const p1Name = U.normalizeText(m.player1 || "");
-            const p2Name = U.normalizeText(m.player2 || "");
+            const outcome = U.getLoggedUserOutcome(m);
+            const isWinner = outcome === "win";
 
-            const isWinner =
-              winnerPos === 1 ? p1Name === target :
-              winnerPos === 2 ? p2Name === target :
-              false;
-
-            const cardClass = isWinner ? "career-card career-card-win" : "career-card career-card-loss";
+            const cardClass = isWinner
+              ? "career-card career-card-win"
+              : "career-card career-card-loss";
 
             const situationLabel =
               situation === "champion"
-                ? "Campeão"
+                ? "🏆 Campeão"
                 : situation === "runnerup"
-                  ? "Vice - Campeão"
-                  : "";
+                ? "🥈 Vice-Campeão"
+                : "";
 
-            return ` <article class="${cardClass}"> <div class="career-card-head"> <div class="career-card-title">${p1} x ${p2}</div> <div class="career-card-result"> ${situationLabel || (isWinner ? "VITÓRIA" : "DERROTA")} </div> </div> <div class="career-grid"> <div class="career-item"> <span>Data</span> <strong>${U.escapeHtml(date)}</strong> </div> <div class="career-item"> <span>Categoria</span> <strong>${category}</strong> </div> <div class="career-item"> <span>Formato</span> <strong>${format}</strong> </div> <div class="career-item"> <span>Fase</span> <strong>${stage}</strong> </div> <div class="career-item"> <span>Tipo de piso</span> <strong>${surfaceType}</strong> </div> <div class="career-item"> <span>Quadra</span> <strong>${court}</strong> </div> <div class="career-item"> <span>Placar</span> <strong>${score}</strong> </div> <div class="career-item"> <span>Duração</span> <strong>${duration}</strong> </div> </div> </article> `;
+            const resultLabel = situationLabel || (isWinner ? "VITÓRIA" : "DERROTA");
+
+            const teamDisplay = formatTeamName(m);
+
+            return ` <article class="${cardClass}"> <div class="career-card-top-status"> <div class="career-card-result">${resultLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${U.escapeHtml(date)}</strong></div> <div class="career-item"><span>Modalidade</span><strong>${modality}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> <div class="career-item"><span>Categoria</span><strong>${category}</strong></div> <div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div> <div class="career-item"><span>Fase</span><strong>${stage}</strong></div> <div class="career-item"><span>Tipo de piso</span><strong>${surfaceType}</strong></div> <div class="career-item"><span>Quadra</span><strong>${court}</strong></div> <div class="career-item"><span>Placar</span><strong>${score}</strong></div> <div class="career-item"><span>Duração</span><strong>${duration}</strong></div> </div> </article> `;
           })
           .join("");
       }
 
-      if (el.pageInfo) {
-        el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
-      }
-
-      if (el.prevPageBtn) {
-        el.prevPageBtn.disabled = state.currentPage <= 1;
-      }
-
-      if (el.nextPageBtn) {
-        el.nextPageBtn.disabled = state.currentPage >= totalPages;
-      }
+      if (el.pageInfo) el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
+      if (el.prevPageBtn) el.prevPageBtn.disabled = state.currentPage <= 1;
+      if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
     }
 
+    // ─── Filtros ──────────────────────────────────────────────────────────────
+
     function applyFiltersAndRender() {
-      const { player, stage, result, tournamentSituation, from, to } = getFilters();
+      const {
+        player,
+        modality,
+        gameFormat,
+        tournament,
+        stage,
+        result,
+        tournamentSituation,
+        from,
+        to
+      } = getFilters();
 
-      const base = state.allMatches.filter((m) =>
-        U.isMatchForLoggedUser(m, state.currentUser)
-      );
+      let filtered = state.allMatches.filter((m) => U.isMatchForLoggedUser(m, state.currentUser));
 
-      let filtered = base;
-
-      if (player) {
-        filtered = filtered.filter((m) => U.matchOpponentFilter(m, player));
-      }
+      if (player) filtered = filtered.filter((m) => U.matchOpponentFilter(m, player));
+      if (modality) filtered = filtered.filter((m) => U.matchModalidadeFilter(m, modality));
+      if (gameFormat) filtered = filtered.filter((m) => U.matchGameFormatFilter(m, gameFormat));
+      if (tournament) filtered = filtered.filter((m) => U.matchTournamentFilter(m, tournament));
 
       if (stage) {
         filtered = filtered.filter((m) => String(m.tournamentStage || "").trim() === stage);
       }
 
-      if (result === "wins") {
-        filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "win");
-      }
-
-      if (result === "losses") {
-        filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "loss");
-      }
+      if (result === "wins") filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "win");
+      if (result === "losses") filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "loss");
 
       if (tournamentSituation === "champion") {
         filtered = filtered.filter((m) => U.getTournamentSituation(m) === "champion");
       }
-
       if (tournamentSituation === "runnerup") {
         filtered = filtered.filter((m) => U.getTournamentSituation(m) === "runnerup");
       }
 
       filtered = U.applyDateFilter(filtered, from, to);
+
+      // Ordena por data: mais recente primeiro
+      filtered.sort((a, b) => {
+        const da = U.toDate(a.matchDateTime)?.getTime() || 0;
+        const db = U.toDate(b.matchDateTime)?.getTime() || 0;
+        return db - da;
+      });
 
       state.filteredMatches = filtered;
       state.currentPage = 1;
@@ -468,61 +590,32 @@
       renderPagedHistory(filtered);
     }
 
+    // ─── Toggle filtros ───────────────────────────────────────────────────────
+
     function updateToggleButtonUI() {
-      const btn =
-        el.toggleFiltersBtn ||
-        el.toggleFilterBtn ||
-        el.careerFiltersToggleBtn ||
-        el.filtersToggleBtn;
-    
+      const btn = el.toggleFiltersBtn;
       if (!btn) return;
-    
-      const icon = btn.querySelector(
-        ".career-bottom-icon, .career-btn-icon, .filters-toggle-icon, .toggle-icon"
-      );
-    
-      const label = btn.querySelector(
-        ".career-bottom-label, .career-toggle-label, .filters-toggle-label, .btn-label"
-      );
-    
-      const isCollapsed = state.filtersCollapsed;
-    
-      if (icon) {
-        icon.textContent = isCollapsed ? "🔎" : "📋";
-      }
-    
-      if (label) {
-        label.textContent = isCollapsed ? "Filtros" : "Lista";
-      }
+      const icon = btn.querySelector(".career-bottom-icon");
+      const label = btn.querySelector(".career-bottom-label");
+      if (icon) icon.textContent = state.filtersCollapsed ? "🔎" : "📋";
+      if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
     }
 
     function setFiltersCollapsed(collapsed) {
       state.filtersCollapsed = !!collapsed;
-
-      const filtersWrap = document.querySelector(".career-filters");
-      if (filtersWrap) {
-        filtersWrap.classList.toggle("is-collapsed", state.filtersCollapsed);
-      }
-
+      const filtersWrap = document.getElementById("careerFiltersSection");
+      filtersWrap?.classList.toggle("is-collapsed", state.filtersCollapsed);
       updateToggleButtonUI();
     }
 
     function bindToggleFilters() {
-      const btn =
-        el.toggleFiltersBtn ||
-        el.toggleFilterBtn ||
-        el.careerFiltersToggleBtn ||
-        el.filtersToggleBtn ||
-        document.querySelector("[data-action='toggle-filters']");
-
-      if (!btn) return;
-
-      btn.addEventListener("click", () => {
+      el.toggleFiltersBtn?.addEventListener("click", () => {
         setFiltersCollapsed(!state.filtersCollapsed);
       });
-
       updateToggleButtonUI();
     }
+
+    // ─── Eventos ──────────────────────────────────────────────────────────────
 
     function bindEvents() {
       el.applyFilterBtn?.addEventListener("click", applyFiltersAndRender);
@@ -534,6 +627,7 @@
         if (el.tournamentSituationFilter) el.tournamentSituationFilter.value = "";
         if (el.fromDate) el.fromDate.value = "";
         if (el.toDate) el.toDate.value = "";
+        if (el.tournamentFilter) el.tournamentFilter.value = "";
         state.currentPage = 1;
         applyFiltersAndRender();
       });
@@ -556,18 +650,46 @@
       bindToggleFilters();
     }
 
+    // ─── Logout ───────────────────────────────────────────────────────────────
+
+    const logoutBtnBottom = document.getElementById("logoutBtnBottom");
+
+    logoutBtnBottom?.addEventListener("click", async () => {
+      try {
+        localStorage.removeItem("lsts_admin_session");
+        await __auth.signOut();
+        window.location.replace("login.html");
+      } catch (err) {
+        console.error("Erro ao sair:", err);
+      }
+    });
+
+    // ─── Firestore ────────────────────────────────────────────────────────────
+
+    async function loadCurrentProfileName(user) {
+      try {
+        const doc = await getDb().collection("profiles").doc(user.uid).get();
+        if (doc.exists && doc.data().displayName) {
+          state.currentProfileName = doc.data().displayName.trim();
+        } else {
+          state.currentProfileName = user.displayName || "";
+        }
+      } catch {
+        state.currentProfileName = user.displayName || "";
+      }
+    }
+
     function listenMatches() {
       if (!state.currentUser) {
         setSummaryMessage("Usuário não autenticado.");
         return;
       }
 
-      if (state.unsubscribe) {
-        state.unsubscribe();
-        state.unsubscribe = null;
-      }
+      state.unsubscribe?.();
+      state.unsubscribe = null;
 
-      state.unsubscribe = db.collection("matches")
+      state.unsubscribe = getDb()
+        .collection("matches")
         .where("ownerId", "==", state.currentUser.uid)
         .onSnapshot(
           (snapshot) => {
@@ -577,7 +699,6 @@
                 const status = U.normalizeText(m.status);
                 return status === "finished" || status === "wo";
               });
-
             applyFiltersAndRender();
           },
           (err) => {
@@ -587,6 +708,8 @@
         );
     }
 
+    // ─── Init ─────────────────────────────────────────────────────────────────
+
     function init() {
       if (typeof __auth === "undefined") {
         setSummaryMessage("Firebase Auth não carregado.");
@@ -595,7 +718,7 @@
 
       bindEvents();
 
-      __auth.onAuthStateChanged((user) => {
+      __auth.onAuthStateChanged(async (user) => {
         if (!user) {
           state.currentUser = null;
           state.currentProfileName = "";
@@ -605,7 +728,10 @@
         }
 
         state.currentUser = user;
-        state.currentProfileName = U.getCurrentUserProfile(user);
+
+        // Carrega o nome mais atual do perfil (Firestore > Auth)
+        await loadCurrentProfileName(user);
+
         setDefaultFields(state.currentProfileName);
         listenMatches();
       });
