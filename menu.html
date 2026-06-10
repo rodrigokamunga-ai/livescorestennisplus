@@ -7,47 +7,39 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0f1726" />
   <title>Menu | Live Scores Tennis</title>
-  <link rel="stylesheet" href="css/style.css" />
-
-  <style> :root { --bg-1: #121b2d; --bg-2: #0f1726; --line: rgba(255, 255, 255, 0.10); --text: #e8eefc; --muted: rgba(232, 238, 252, 0.72); --accent: #d8ff63; --accent-soft: rgba(216, 255, 99, 0.12); --shadow: 0 16px 36px rgba(0, 0, 0, 0.24); --header-h: 66px; --bottom-h: 66px; } html, body { min-height: 100%; margin: 0; } body.menu-page { min-height: 100vh; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; color: var(--text); background: radial-gradient(circle at top, rgba(72, 96, 136, 0.22), transparent 30%), radial-gradient(circle at 78% 0%, rgba(216, 255, 99, 0.08), transparent 24%), linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%); padding-top: calc(var(--header-h) + env(safe-area-inset-top)); padding-bottom: calc(var(--bottom-h) + env(safe-area-inset-bottom) + 10px); box-sizing: border-box; } /* HEADER FIXO */ .menu-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1100; height: calc(var(--header-h) + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); background: rgba(10, 16, 28, 0.94); border-bottom: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); box-sizing: border-box; } .menu-header-inner { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 10px; box-sizing: border-box; } .header-left, .header-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; } .header-center { flex: 1; min-width: 0; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; } .header-title { font-size: 0.98rem; font-weight: 900; line-height: 1; letter-spacing: 0.02em; } .header-subtitle { font-size: 0.72rem; color: var(--muted); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; } .header-alert-btn { appearance: none; border: 1px solid rgba(255, 255, 255, 0.08); background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)); color: var(--text); text-decoration: none; border-radius: 14px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14); cursor: pointer; -webkit-tap-highlight-color: transparent; flex-shrink: 0; position: relative; } .header-alert-btn:hover { border-color: rgba(216, 255, 99, 0.22); background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04)); } .header-alert-icon { font-size: 1rem; line-height: 1; } .header-alert-badge { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: #ff4d4d; border: 2px solid rgba(10, 16, 28, 0.94); box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.18); } /* CONTEÚDO */ .menu-shell { width: min(1100px, calc(100% - 12px)); margin: 0 auto; padding: 12px 0 16px; } .menu-hero { padding: 16px; border-radius: 28px; background: linear-gradient(180deg, rgba(31, 40, 60, 0.94), rgba(15, 22, 36, 0.98)); border: 1px solid rgba(255,255,255,0.08); box-shadow: var(--shadow); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); } .menu-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; } .section-kicker { display: inline-block; text-transform: uppercase; letter-spacing: 0.10em; font-weight: 800; font-size: 0.74rem; color: #9bc0ff; margin-bottom: 8px; } .menu-top h1 { margin: 0; font-size: clamp(1.3rem, 4vw, 2rem); font-weight: 950; letter-spacing: -0.02em; line-height: 1.05; } .menu-top p { margin: 8px 0 0; color: var(--muted); font-size: 0.95rem; line-height: 1.35; } .menu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; } .menu-app-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 170px; padding: 16px 14px; border-radius: 24px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); color: var(--text); text-decoration: none; box-shadow: 0 10px 22px rgba(0,0,0,0.18); transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease; cursor: pointer; user-select: none; width: 100%; text-align: center; appearance: none; -webkit-tap-highlight-color: transparent; position: relative; overflow: hidden; } .menu-app-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(216,255,99,0.08), transparent 55%); opacity: 0; transition: opacity 0.15s ease; pointer-events: none; } .menu-app-btn:hover, .menu-app-btn:active { transform: translateY(-2px); border-color: rgba(216,255,99,0.24); box-shadow: 0 18px 30px rgba(0,0,0,0.24); background: linear-gradient(180deg, rgba(216,255,99,0.11), rgba(255,255,255,0.04)); } .menu-app-btn:hover::before, .menu-app-btn:active::before { opacity: 1; } .menu-app-btn > div { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; } .menu-app-icon { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; font-size: 1.95rem; background: linear-gradient(180deg, rgba(216,255,99,0.18), rgba(216,255,99,0.08)); border: 1px solid rgba(216,255,99,0.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); flex-shrink: 0; } .menu-app-title { font-size: 0.98rem; font-weight: 900; letter-spacing: 0.01em; line-height: 1.12; margin-top: 2px; } .menu-app-subtitle { font-size: 0.80rem; color: var(--muted); line-height: 1.32; max-width: 240px; margin-top: 2px; } .menu-logout .menu-app-icon { background: linear-gradient(180deg, rgba(255, 105, 105, 0.18), rgba(255, 105, 105, 0.08)); border: 1px solid rgba(255, 105, 105, 0.18); } /* BOTTOM NAV PADRONIZADO */ .menu-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; padding: 6px 10px 8px; background: rgba(10, 16, 28, 0.92); border-top: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18); box-sizing: border-box; } .menu-bottom-btn { appearance: none; border: 1px solid rgba(255, 255, 255, 0.08); background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)); color: #eef4ff; text-decoration: none; border-radius: 16px; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-weight: 800; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18); cursor: pointer; width: 100%; padding: 6px 8px; transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease; -webkit-tap-highlight-color: transparent; } .menu-bottom-btn:hover { transform: translateY(-1px); background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04)); border-color: rgba(216, 255, 99, 0.22); } .menu-bottom-icon { font-size: 1.12rem; line-height: 1; } .menu-bottom-label { font-size: 0.7rem; line-height: 1; text-align: center; white-space: nowrap; } .menu-bottom-btn.logout .menu-bottom-icon { color: #ff7b7b; } .menu-bottom-btn.logout { background: linear-gradient(180deg, rgba(255, 123, 123, 0.12), rgba(255, 255, 255, 0.03)); } /* MODAL */ .alert-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 16px; box-sizing: border-box; } .alert-modal-overlay.show { display: flex; } .alert-modal { width: min(420px, 100%); background: linear-gradient(180deg, rgba(24, 32, 50, 0.98), rgba(15, 22, 36, 0.98)); border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 24px 60px rgba(0,0,0,0.45); padding: 18px; color: var(--text); } .alert-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; } .alert-modal-kicker { text-transform: uppercase; letter-spacing: 0.10em; font-size: 0.72rem; font-weight: 800; color: #9bc0ff; margin-bottom: 6px; } .alert-modal-title { margin: 0; font-size: 1.05rem; font-weight: 900; line-height: 1.1; } .alert-modal-close { appearance: none; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.06); color: var(--text); width: 36px; height: 36px; border-radius: 12px; cursor: pointer; font-size: 1rem; line-height: 1; flex-shrink: 0; } .alert-modal-body { color: var(--muted); font-size: 0.95rem; line-height: 1.45; } .alert-modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; } .alert-modal-ok { appearance: none; border: 1px solid rgba(216,255,99,0.18); background: linear-gradient(180deg, rgba(216,255,99,0.16), rgba(216,255,99,0.08)); color: var(--text); padding: 10px 14px; border-radius: 12px; font-weight: 800; cursor: pointer; } .alert-empty { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 14px; color: var(--muted); } .alert-game-list { display: grid; gap: 10px; } .alert-game-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 12px; } .alert-game-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; } .alert-game-kicker { font-size: 0.70rem; text-transform: uppercase; letter-spacing: 0.08em; color: #9bc0ff; font-weight: 800; margin-bottom: 4px; } .alert-game-title { font-size: 0.95rem; font-weight: 900; line-height: 1.35; color: #eef4ff; } .alert-game-time { font-size: 0.88rem; font-weight: 900; color: #d8ff63; white-space: nowrap; } .alert-game-date { margin-top: 6px; font-size: 0.80rem; color: var(--muted); } @media (max-width: 920px) { .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .menu-app-btn { min-height: 180px; } } @media (max-width: 620px) { .menu-hero { padding: 14px; border-radius: 24px; } .menu-grid { gap: 10px; } .menu-app-btn { min-height: 164px; padding: 12px 10px; border-radius: 22px; } .menu-app-icon { width: 64px; height: 64px; font-size: 1.65rem; } .menu-app-title { font-size: 0.92rem; } .menu-app-subtitle { font-size: 0.72rem; } .menu-bottom-nav { gap: 6px; padding: 5px 8px 7px; } .menu-bottom-btn { min-height: 56px; border-radius: 14px; } .menu-bottom-label { font-size: 0.66rem; } .header-title { font-size: 0.94rem; } .header-subtitle { font-size: 0.68rem; } } @media (max-width: 430px) { .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .menu-app-btn { min-height: 156px; padding: 10px 8px; gap: 9px; } .menu-app-icon { width: 56px; height: 56px; font-size: 1.42rem; border-radius: 18px; } .menu-app-title { font-size: 0.84rem; } .menu-app-subtitle { font-size: 0.66rem; line-height: 1.25; } .menu-bottom-nav { height: 64px; } body.menu-page { padding-bottom: calc(64px + env(safe-area-inset-bottom) + 8px); } .alert-modal { padding: 16px; border-radius: 20px; } .alert-game-title { font-size: 0.90rem; } .alert-game-time { font-size: 0.84rem; } } @media (max-width: 360px) { .menu-app-btn { min-height: 150px; padding: 9px 7px; } .menu-app-icon { width: 52px; height: 52px; font-size: 1.32rem; } .menu-app-title { font-size: 0.80rem; } .menu-app-subtitle { font-size: 0.63rem; } .menu-bottom-btn { min-height: 44px; } .menu-bottom-label { font-size: 0.50rem; } .header-alert-btn { width: 40px; height: 40px; } } </style>
+  <link rel="stylesheet" href="css/menu.css" />
 </head>
 
 <body class="menu-page">
 
-  <header class="menu-header">
-    <div class="menu-header-inner">
-      <div class="header-left">
-        <button type="button" id="alertBtnTop" class="header-alert-btn" aria-label="Alertas">
-          <span class="header-alert-icon">⚠️</span>
-          <span class="header-alert-badge" aria-hidden="true"></span>
+  <main class="menu-shell" style="padding-top:0;">
+    <section class="menu-hero">
+
+      <div class="menu-top">
+        <div class="menu-welcome">
+          <img id="menuProfileAvatar" class="menu-welcome-avatar" src="img/avatar-default.png" alt="Foto de perfil" />
+          <div class="menu-welcome-text">
+            <span class="section-kicker">Acesso rápido</span>
+            <h1 id="welcomeTitle">Bem-vindo</h1>
+            <p id="welcomeText">Escolha uma área para abrir.</p>
+          </div>
+        </div>
+
+        <button type="button" id="alertBtnTop" class="header-btn" aria-label="Alertas">
+          <span class="header-icon">⚠️</span>
+          <span class="header-alert-badge" id="alertBadge" aria-hidden="true" style="display:none;">0</span>
         </button>
       </div>
 
-      <div class="header-center">
-        <div class="header-title" id="headerUserTitle">Menu</div>
-        <div class="header-subtitle" id="headerUserSubtitle">Acesso rápido às áreas do sistema</div>
-      </div>
-
-      <div class="header-right"></div>
-    </div>
-  </header>
-
-  <main class="menu-shell">
-    <section class="menu-hero">
-      <div class="menu-top">
-        <div>
-          <span class="section-kicker">Acesso rápido</span>
-          <h1 id="welcomeTitle">Bem-vindo</h1>
-          <p id="welcomeText">Escolha uma área para abrir.</p>
-        </div>
-      </div>
-
       <div class="menu-grid">
+
         <a href="index.html" class="menu-app-btn" target="_blank" rel="noopener noreferrer">
           <div class="menu-app-icon">📺</div>
           <div>
             <div class="menu-app-title">Visualização</div>
-            <div class="menu-app-subtitle">Tela pública com jogos do dia, em andamento e finalizados.</div>
+            <div class="menu-app-subtitle">
+              Tela pública com jogos do dia, em andamento e finalizados.
+            </div>
           </div>
         </a>
 
@@ -55,23 +47,49 @@
           <div class="menu-app-icon">🎾</div>
           <div>
             <div class="menu-app-title">Partida</div>
-            <div class="menu-app-subtitle">Cadastro e manutenção das partidas do sistema.</div>
+            <div class="menu-app-subtitle">
+              Cadastro e manutenção das partidas do sistema.
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="menu-app-btn" id="sharePublicBtn" role="button">
+          <div class="menu-app-icon">🔗</div>
+          <div>
+            <div class="menu-app-title">Compartilhar</div>
+            <div class="menu-app-subtitle">
+              Envie o link da tela pública por WhatsApp, e-mail ou outro app.
+            </div>
           </div>
         </a>
 
         <a href="carreira.html" class="menu-app-btn">
-          <div class="menu-app-icon">📈</div>
+          <div class="menu-app-icon">🏆</div>
           <div>
             <div class="menu-app-title">Carreira</div>
-            <div class="menu-app-subtitle">Histórico, evolução por ano e desempenho dos jogadores.</div>
+            <div class="menu-app-subtitle">
+              Conquistas, histórico, evolução por ano e comparação com adversários.
+            </div>
           </div>
         </a>
 
-        <a href="jogadores.html" class="menu-app-btn">
+        <a href="dashboard.html" class="menu-app-btn">
+          <div class="menu-app-icon">📊</div>
+          <div>
+            <div class="menu-app-title">Dashboard</div>
+            <div class="menu-app-subtitle">
+              Gráficos de vitórias e derrotas do Jogador.
+            </div>
+          </div>
+        </a>
+
+        <a href="perfil.html" class="menu-app-btn">
           <div class="menu-app-icon">👤</div>
           <div>
-            <div class="menu-app-title">Jogador</div>
-            <div class="menu-app-subtitle">Confrontos, histórico e comparação com adversários.</div>
+            <div class="menu-app-title">Perfil</div>
+            <div class="menu-app-subtitle">
+              Edite seus dados, foto, senha e preferências.
+            </div>
           </div>
         </a>
 
@@ -79,17 +97,21 @@
           <div class="menu-app-icon">👥</div>
           <div>
             <div class="menu-app-title">Usuários</div>
-            <div class="menu-app-subtitle">Gerenciar cadastros, bloqueios e acessos.</div>
+            <div class="menu-app-subtitle">
+              Gerenciar cadastros, bloqueios e acessos.
+            </div>
           </div>
         </a>
+
       </div>
     </section>
   </main>
 
   <nav class="menu-bottom-nav">
-    <a href="perfil.html" class="menu-bottom-btn">
-      <span class="menu-bottom-icon">👤</span>
-      <span class="menu-bottom-label">Perfil</span>
+
+    <a href="menu.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">🏠</span>
+      <span class="menu-bottom-label">Início</span>
     </a>
 
     <a href="dashboard.html" class="menu-bottom-btn">
@@ -97,23 +119,23 @@
       <span class="menu-bottom-label">Dashboard</span>
     </a>
 
+    <a href="perfil.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">👤</span>
+      <span class="menu-bottom-label">Perfil</span>
+    </a>
+
     <a href="admin.html" class="menu-bottom-btn">
       <span class="menu-bottom-icon">🎾</span>
       <span class="menu-bottom-label">Partida</span>
-    </a>
-
-    <a href="carreira.html" class="menu-bottom-btn">
-      <span class="menu-bottom-icon">📈</span>
-      <span class="menu-bottom-label">Carreira</span>
     </a>
 
     <button type="button" id="logoutBtnBottom" class="menu-bottom-btn logout">
       <span class="menu-bottom-icon">🚪</span>
       <span class="menu-bottom-label">Sair</span>
     </button>
+
   </nav>
 
-  <!-- MODAL DE ALERTA -->
   <div id="alertModalOverlay" class="alert-modal-overlay" aria-hidden="true">
     <div class="alert-modal" role="dialog" aria-modal="true" aria-labelledby="alertModalTitle">
       <div class="alert-modal-header">

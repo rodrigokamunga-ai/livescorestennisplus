@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Criar cadastro | Live Scores Tennis</title>
   <link rel="stylesheet" href="css/style.css" />
+  
 </head>
+
 <body class="auth-page">
   <main class="auth-wrap">
     <section class="auth-card">
+
       <div class="brand-wrap auth-brand">
         <div class="app-logo">
           <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
@@ -19,24 +22,48 @@
         </div>
       </div>
 
-      <form id="registerForm" class="form auth-form">
-        <label>Nome
-          <input type="text" id="displayName" required placeholder="Informe o nome do jogador que será exibido" />
+      <!-- ── Cadastro com Google ─────────────────────────────── -->
+      <button type="button" id="googleRegisterBtn" class="btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+        Cadastrar com Google
+      </button>
+
+      <div class="auth-divider">ou cadastre com e-mail</div>
+
+      <!-- ── Formulário e-mail/senha ────────────────────────── -->
+      <form id="registerForm" class="form auth-form" novalidate>
+
+        <label>Nome do Usuário
+          <input type="text" id="displayName" required placeholder="Nome do jogador que será exibido" />
         </label>
 
         <label>E-mail
-          <input type="email" id="email" required placeholder="Informe o e-mail" />
+          <input type="email" id="email" required placeholder="Informe o e-mail" autocomplete="email" />
         </label>
 
         <label>Senha
-          <input type="password" id="password" required minlength="6" placeholder="Informe a senha" />
+          <div class="password-wrapper">
+            <input type="password" id="password" required minlength="8" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+            <button type="button" class="toggle-pw" data-target="password" aria-label="Mostrar/ocultar senha">👁️</button>
+          </div>
+          <!-- Barra de força -->
+          <div class="password-strength-bar" id="strengthBar"></div>
+          <div class="password-strength-label" id="strengthLabel"></div>
         </label>
 
         <label>Confirmar senha
-          <input type="password" id="confirmPassword" required minlength="6" placeholder="Confirme sua senha" />
+          <div class="password-wrapper">
+            <input type="password" id="confirmPassword" required minlength="8" placeholder="Repita a senha" autocomplete="new-password" />
+            <button type="button" class="toggle-pw" data-target="confirmPassword" aria-label="Mostrar/ocultar confirmação">👁️</button>
+          </div>
         </label>
 
         <button type="submit" class="btn primary">Cadastrar</button>
+
+        <!-- ── Biometria (WebAuthn — aparece após cadastro) ── -->
+        <button type="button" id="biometricRegisterBtn" class="btn-biometric" style="display:none;">
+          🔐 Registrar biometria para login rápido
+        </button>
 
         <div class="auth-links">
           <a href="login.html" class="auth-link">Já tenho conta</a>

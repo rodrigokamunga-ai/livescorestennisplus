@@ -3,160 +3,168 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jogador | Live Scores Tennis </title>
+  <title>Jogador | Live Scores Tennis</title>
   <link rel="stylesheet" href="css/style.css" />
-
-  <style> /* VISUAL PREMIUM DOS JOGADORES */ .premium-score-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; margin-top:16px; } .premium-player-card{ background:linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:18px; min-height:300px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 12px 30px rgba(0,0,0,.22); } .premium-top-box{ position:relative; height:110px; border-radius:20px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); display:flex; align-items:center; justify-content:center; overflow:hidden; } .premium-status-dot{ position:absolute; left:50%; top:50%; transform:translate(-105px, -50%); width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 0 0 2px rgba(0,0,0,.25); z-index:2; } .premium-ball{ width:70px; height:70px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; background:rgba(144, 238, 144, 0.10); border:2px solid rgba(181, 255, 97, 0.22); box-shadow:0 0 0 6px rgba(181, 255, 97, 0.08); z-index:1; } .premium-player-name{ margin-top:14px; padding:16px 12px; border-radius:18px; text-align:center; font-size:26px; font-weight:800; color:#eaf1ff; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); } .premium-point-box{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top:18px; } .premium-point-btn{ width:56px; height:56px; border-radius:16px; border:1px solid rgba(181, 255, 97, 0.22); background:rgba(93, 108, 81, 0.45); color:#c8ff62; font-size:34px; font-weight:900; line-height:1; cursor:pointer; transition:transform .15s ease, background .15s ease; } .premium-point-btn:hover{ transform:translateY(-1px); background:rgba(93, 108, 81, 0.62); } .premium-point-value{ font-size:58px; line-height:1; font-weight:900; color:#c8ff62; letter-spacing:1px; min-width:70px; text-align:center; } .premium-card-footer{ margin-top:16px; display:flex; flex-direction:column; gap:12px; } .premium-secondary-block{ padding:14px; border-radius:16px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); } /* SAQUE */ .serve-box{ margin-bottom:12px; } .serve-option-inline{ display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; } .serve-option-inline input{ width:16px; height:16px; accent-color:#4da3ff; cursor:pointer; } .serve-visual{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); transition:all .2s ease; width:100%; } .serve-racket{ font-size:22px; transition:filter .2s ease, transform .2s ease; } .serve-option-inline.is-serving .serve-visual{ border-color:rgba(77,163,255,.65); background:rgba(77,163,255,.18); box-shadow:0 0 0 1px rgba(77,163,255,.25) inset; } .serve-option-inline.is-serving .serve-racket{ filter:hue-rotate(185deg) saturate(2.5) brightness(1.2); transform:scale(1.05); } /* BLOCO QUADRADO EM 2 COLUNAS */ .score-grid-2{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; } .square-box{ min-height:74px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(20, 28, 45, .55); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:10px; } .square-box span{ display:block; font-size:12px; color:#aab5c7; font-weight:700; margin-bottom:6px; } .square-box strong{ font-size:24px; color:#ffffff; font-weight:900; line-height:1; } /* MANUAL GAMES */ .manual-mini{ display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end; } .manual-mini label{ display:flex; flex-direction:column; gap:6px; font-size:12px; font-weight:700; color:#aab5c7; } .manual-mini input{ width:100%; min-width:120px; height:44px; border-radius:12px; border:1px solid rgba(255,255,255,.08); background:rgba(20, 28, 45, .65); color:#fff; padding:0 12px; font-size:15px; outline:none; } .mini-save{ height:44px; padding:0 14px; border-radius:12px; white-space:nowrap; } .premium-card-footer .premium-secondary-block{ margin-top:0; } .match-meta-top{ margin-top:8px; display:flex; flex-direction:column; gap:4px; } .match-meta-top .meta-line{ font-size:14px; color:#dbe6ff; font-weight:600; } .match-meta-top .meta-line strong{ color:#ffffff; font-weight:800; } .panel-actions-inline{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; } /* BOTTOM NAV PADRONIZADO */ .player-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: rgba(10, 16, 28, 0.92); border-top: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18); box-sizing: border-box; } .player-bottom-btn { appearance: none; border: 1px solid rgba(255, 255, 255, 0.08); background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)); color: #eef4ff; text-decoration: none; border-radius: 16px; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-weight: 800; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18); cursor: pointer; width: 100%; padding: 4px 4px; transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease; -webkit-tap-highlight-color: transparent; box-sizing: border-box; } .player-bottom-btn:hover { transform: translateY(-1px); background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04)); border-color: rgba(216, 255, 99, 0.22); } .player-bottom-icon { font-size: 1.12rem; line-height: 1; } .player-bottom-label { font-size: 0.7rem; line-height: 1; text-align: center; white-space: nowrap; } .player-bottom-btn.danger .player-bottom-icon { color: #ff7b7b; } .player-bottom-btn.primary-action { background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.03)); border-color: rgba(216, 255, 99, 0.18); } @media (max-width: 700px){ .premium-score-grid{ grid-template-columns:1fr; } .premium-player-card{ min-height:260px; } .premium-player-name{ font-size:22px; } .premium-point-value{ font-size:50px; } .score-grid-2{ grid-template-columns:1fr 1fr; } .manual-mini{ grid-template-columns:1fr; } .player-bottom-nav { padding: 3px; } .player-bottom-btn { min-height: 56px; border-radius: 14px; } .player-bottom-label { font-size: 0.62rem; } .panel-actions-inline{ justify-content:space-between; width:100%; } } @media (max-width: 430px) { .player-bottom-nav { height: 64px; } body.player-page { padding-bottom: calc(64px + env(safe-area-inset-bottom) + 8px); } .player-bottom-btn { min-height: 54px; border-radius: 12px; } .player-bottom-label { font-size: 0.56rem; } } </style>
 </head>
 
 <body class="player-page">
   <main class="container stack">
     <section class="player-hero panel panel-glass">
 
+      <!-- Cabeçalho -->
       <div class="player-hero-top">
         <div class="brand-wrap">
-          <div class="app-logo">
-            <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
-          </div>
           <div>
-            <span class="section-kicker">Painel do Jogador</span>
+            <span class="section-kicker">Controle da Partida</span>
             <h2 id="matchTitle">Partida</h2>
-
             <div class="match-meta-top">
-              <div class="meta-line">
-                Data e hora: <strong id="matchDateTimeTop">-</strong>
-              </div>
+              <div class="meta-line">Data e hora: <strong id="matchDateTimeTop">-</strong></div>
               <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Timer + Status -->
       <div class="player-timer-bar">
-        <div><span>Duração</span><strong id="duration">00:00:00</strong></div>
-        <div><span>Status</span><strong id="statusLabel">NÃO INICIADA</strong></div>
-      </div>
-
-      <div id="playerPanelBody">
-        <div class="premium-score-grid">
-          <!-- JOGADOR 1 -->
-          <section class="premium-player-card player-card">
-            <div class="premium-player-name" id="player1Name">Jogador 1</div>
-
-            <div class="premium-point-box">
-              <button class="premium-point-btn" data-delta="-1" data-target="player1">-</button>
-              <button class="premium-point-btn" data-delta="1" data-target="player1">+</button>
-              <strong id="points1" class="premium-point-value">0</strong>
-            </div>
-
-            <div class="premium-card-footer">
-              <div class="premium-secondary-block">
-                <div class="serve-box">
-                  <label class="serve-option-inline" for="servePlayer1">
-                    <input type="radio" name="server" value="player1" id="servePlayer1" />
-                    <span class="serve-visual">
-                      <span class="serve-racket">🎾</span>
-                      <span>Jogador 1</span>
-                    </span>
-                  </label>
-                </div>
-
-                <div class="score-grid-2">
-                  <div class="square-box">
-                    <span>Games</span>
-                    <strong id="games1">0</strong>
-                  </div>
-                  <div class="square-box">
-                    <span>Sets</span>
-                    <strong id="sets1">0</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="premium-secondary-block">
-                <div class="manual-mini">
-                  <label>Games Jogador 1
-                    <input type="number" min="0" id="editGames1" />
-                  </label>
-                  <button class="btn mini-save" data-save="player1-games">Salvar Games</button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- JOGADOR 2 -->
-          <section class="premium-player-card player-card">
-            <div class="premium-player-name" id="player2Name">Jogador 2</div>
-
-            <div class="premium-point-box">
-              <button class="premium-point-btn" data-delta="-1" data-target="player2">-</button>
-              <button class="premium-point-btn" data-delta="1" data-target="player2">+</button>
-              <strong id="points2" class="premium-point-value">0</strong>
-            </div>
-
-            <div class="premium-card-footer">
-              <div class="premium-secondary-block">
-                <div class="serve-box">
-                  <label class="serve-option-inline" for="servePlayer2">
-                    <input type="radio" name="server" value="player2" id="servePlayer2" />
-                    <span class="serve-visual">
-                      <span class="serve-racket">🎾</span>
-                      <span>Jogador 2</span>
-                    </span>
-                  </label>
-                </div>
-
-                <div class="score-grid-2">
-                  <div class="square-box">
-                    <span>Games</span>
-                    <strong id="games2">0</strong>
-                  </div>
-                  <div class="square-box">
-                    <span>Sets</span>
-                    <strong id="sets2">0</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="premium-secondary-block">
-                <div class="manual-mini">
-                  <label>Games Jogador 2
-                    <input type="number" min="0" id="editGames2" />
-                  </label>
-                  <button class="btn mini-save" data-save="player2-games">Salvar Games</button>
-                </div>
-              </div>
-            </div>
-          </section>
+        <div class="timer-line">
+          <span>Duração</span>
+          <strong id="duration">00:00:00</strong>
+        </div>
+        <div class="timer-line">
+          <span>Situação</span>
+          <strong id="statusLabel">Não Iniciada</strong>
         </div>
       </div>
+
+      <!-- Toggle Games / Pontos -->
+      <div class="input-mode-toggle" id="inputModeToggle">
+        <label id="modeGamesLabel" class="active" for="modeGames">
+          <input type="radio" name="inputMode" id="modeGames" value="games" checked />
+          <span>🎮 Games</span>
+        </label>
+        <label id="modePointsLabel" for="modePoints">
+          <input type="radio" name="inputMode" id="modePoints" value="points" />
+          <span>🎯 Pontos</span>
+        </label>
+      </div>
+
+      <!-- Placar: um jogador por linha -->
+      <div class="score-unified" id="playerPanelBody">
+
+        <!-- ── Jogador 1 ── -->
+        <div class="player-col">
+
+          <!-- Nome + Saque na mesma linha -->
+          <label class="player-col-name-row" for="servePlayer1" id="serveOption1">
+            <input type="radio" name="server" value="player1" id="servePlayer1" />
+            <span class="serve-ball-indicator" title="Sacador"></span>
+            <span class="player-col-name" id="player1Name">Jogador 1</span>
+          </label>
+
+          <!-- Pontos (modo Pontos) -->
+          <div class="point-control" id="pointControl1">
+            <button class="point-btn" data-delta="-1" data-target="player1">−</button>
+            <strong class="point-value" id="points1">0</strong>
+            <button class="point-btn" data-delta="1" data-target="player1">+</button>
+          </div>
+
+          <!-- Games +/– (modo Games) -->
+          <div class="games-control" id="gamesControl1">
+            <div class="games-control-btns">
+              <button class="games-mini-btn" data-games-delta="-1" data-games-target="player1">−</button>
+              <span class="games-mini-val" id="gamesVal1">0</span>
+              <button class="games-mini-btn" data-games-delta="1" data-games-target="player1">+</button>
+            </div>
+          </div>
+
+          <!-- Games / Sets display -->
+          <div class="score-row">
+            <div class="score-box">
+              <span>Games</span>
+              <strong id="games1">0</strong>
+            </div>
+            <div class="score-box">
+              <span>Sets</span>
+              <strong id="sets1">0</strong>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Jogador 2 ── -->
+        <div class="player-col">
+
+          <!-- Nome + Saque na mesma linha -->
+          <label class="player-col-name-row" for="servePlayer2" id="serveOption2">
+            <input type="radio" name="server" value="player2" id="servePlayer2" />
+            <span class="serve-ball-indicator" title="Sacador"></span>
+            <span class="player-col-name" id="player2Name">Jogador 2</span>
+          </label>
+
+          <!-- Pontos (modo Pontos) -->
+          <div class="point-control" id="pointControl2">
+            <button class="point-btn" data-delta="-1" data-target="player2">−</button>
+            <strong class="point-value" id="points2">0</strong>
+            <button class="point-btn" data-delta="1" data-target="player2">+</button>
+          </div>
+
+          <!-- Games +/– (modo Games) -->
+          <div class="games-control" id="gamesControl2">
+            <div class="games-control-btns">
+              <button class="games-mini-btn" data-games-delta="-1" data-games-target="player2">−</button>
+              <span class="games-mini-val" id="gamesVal2">0</span>
+              <button class="games-mini-btn" data-games-delta="1" data-games-target="player2">+</button>
+            </div>
+          </div>
+
+          <!-- Games / Sets display -->
+          <div class="score-row">
+            <div class="score-box">
+              <span>Games</span>
+              <strong id="games2">0</strong>
+            </div>
+            <div class="score-box">
+              <span>Sets</span>
+              <strong id="sets2">0</strong>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!-- /score-unified -->
+
+      <!-- Campos ocultos para compatibilidade -->
+      <input type="hidden" id="editGames1" />
+      <input type="hidden" id="editGames2" />
+      <span style="display:none" id="games1Label"></span>
+      <span style="display:none" id="games2Label"></span>
+      <!-- Labels legados para compatibilidade com player.js -->
+      <span style="display:none" id="servePlayer1Label">Jogador 1</span>
+      <span style="display:none" id="servePlayer2Label">Jogador 2</span>
 
       <div id="playerMsg" class="msg"></div>
     </section>
   </main>
 
-  <!-- BARRA INFERIOR PADRONIZADA -->
+  <!-- Bottom Nav -->
   <nav class="player-bottom-nav">
-    <a href="menu.html" class="player-bottom-btn">
-      <span class="player-bottom-icon">🏠</span>
-      <span class="player-bottom-label">Início</span>
+    <a href="admin.html" class="player-bottom-btn">
+      <span class="player-bottom-icon">🎾</span>
+      <span class="player-bottom-label">Partida</span>
     </a>
-
     <button id="startBtn" class="player-bottom-btn primary-action" type="button">
-      <span class="player-bottom-icon">▶️</span>
-      <span class="player-bottom-label">Iniciar</span>
+      <span class="player-bottom-icon" id="startBtnIcon">▶️</span>
+      <span class="player-bottom-label" id="startBtnLabel">Iniciar</span>
     </button>
-
     <button id="finishBtn" class="player-bottom-btn danger" type="button">
       <span class="player-bottom-icon">🏁</span>
       <span class="player-bottom-label">Finalizar</span>
     </button>
-
     <button id="resetScoreBtn" class="player-bottom-btn danger" type="button">
       <span class="player-bottom-icon">🧹</span>
       <span class="player-bottom-label">Zerar</span>
     </button>
-
     <button id="undoBtn" class="player-bottom-btn" type="button">
       <span class="player-bottom-icon">↩️</span>
       <span class="player-bottom-label">Desfazer</span>

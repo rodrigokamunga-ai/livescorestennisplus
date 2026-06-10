@@ -4,58 +4,251 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Perfil | Live Scores Tennis</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <style> body.profile-page { min-height: 100vh; background: radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%), linear-gradient(180deg, #121b2d 0%, #0f1726 100%); color: #e8eefc; padding: 20px 0 120px; } .profile-shell { width: min(960px, calc(100% - 24px)); margin: 0 auto; } .profile-card { background: linear-gradient(180deg, rgba(31, 40, 60, 0.92), rgba(15, 22, 36, 0.96)); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 22px; box-shadow: 0 16px 36px rgba(0,0,0,0.22); } .profile-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; } .profile-header h1 { margin: 0; font-size: 1.45rem; font-weight: 900; } .profile-header p { margin-top: 6px; color: rgba(232,238,252,0.7); } .profile-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } .profile-form label { display: flex; flex-direction: column; gap: 8px; font-weight: 700; color: rgba(232,238,252,0.86); } .profile-form input, .profile-form textarea, .profile-form select { width: 100%; padding: 11px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(12,18,30,0.62); color: #f4f8ff; outline: none; } .profile-form textarea { min-height: 120px; resize: vertical; } .profile-form .full { grid-column: 1 / -1; } .profile-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; } .profile-msg { margin-top: 12px; min-height: 22px; color: rgba(232,238,252,0.9); } @media (max-width: 768px) { .profile-form { grid-template-columns: 1fr; } } </style>
+  <link rel="stylesheet" href="css/perfil.css" />
 </head>
+
 <body class="profile-page">
   <main class="profile-shell">
     <section class="profile-card">
+
+      <!-- Cabeçalho -->
       <div class="profile-header">
         <div>
           <span class="section-kicker">Meu perfil</span>
           <h1>Preencher perfil</h1>
           <p>Atualize seus dados para o sistema exibir seu nome corretamente.</p>
         </div>
+      </div>
 
-        <div class="profile-actions">
-          <a href="menu.html" class="btn primary">Voltar</a>
+      <!-- Foto de perfil -->
+      <div class="profile-avatar-wrap">
+        <img id="avatarPreview" class="profile-avatar-img" src="https://via.placeholder.com/80x80/1a2540/88a4d8?text=👤" alt="Foto de perfil" />
+        <div class="profile-avatar-info">
+          <span>Foto de perfil (máx. 2MB)</span>
+          <label class="btn-upload" for="photoFile">📷 Escolher foto</label>
+          <input type="file" id="photoFile" accept="image/*" style="display:none" />
+          <span id="photoFileName">Nenhum arquivo selecionado</span>
         </div>
       </div>
 
       <form id="profileForm" class="profile-form">
+
+        <!-- Informações pessoais -->
+        <div class="profile-section-title">Informações pessoais</div>
+
         <label>Nome do jogador
-          <input type="text" id="displayName" placeholder="Nome que será exibido no sistema" required />
+          <input type="text" id="displayName" readonly />
         </label>
 
         <label>E-mail
           <input type="email" id="email" readonly />
         </label>
 
-        <label>Telefone
-          <input type="text" id="phone" placeholder="(11) 99999-9999" />
+        <label>Sexo
+          <select id="gender">
+            <option value="">Selecione</option>
+            <option value="masculino">Masculino</option>
+            <option value="feminino">Feminino</option>
+            <option value="outro">Outro</option>
+            <option value="nao_informar">Prefiro não informar</option>
+          </select>
         </label>
+
+        <label>Data de nascimento
+          <input type="date" id="birthDate" />
+        </label>
+
+        <label>Altura (cm)
+          <input type="number" id="height" min="100" max="250" placeholder="Ex.: 180" />
+        </label>
+
+        <label>Peso (kg)
+          <input type="number" id="weight" min="30" max="200" placeholder="Ex.: 75" />
+        </label>
+
+        <!-- Contato -->
+        <div class="profile-section-title">Contato</div>
+
+        <label>Celular
+          <input type="tel" id="phone" placeholder="(11) 99999-9999" />
+        </label>
+
+        <!-- Localização -->
+        <div class="profile-section-title">Localização</div>
 
         <label>País
-          <input type="text" id="country" placeholder="Brasil" />
+          <select id="country">
+            <option value="">Selecione o país</option>
+            <option value="BR">🇧🇷 Brasil</option>
+            <option value="AR">🇦🇷 Argentina</option>
+            <option value="US">🇺🇸 Estados Unidos</option>
+            <option value="PT">🇵🇹 Portugal</option>
+            <option value="ES">🇪🇸 Espanha</option>
+            <option value="FR">🇫🇷 França</option>
+            <option value="DE">🇩🇪 Alemanha</option>
+            <option value="IT">🇮🇹 Itália</option>
+            <option value="GB">🇬🇧 Reino Unido</option>
+            <option value="AU">🇦🇺 Austrália</option>
+            <option value="CA">🇨🇦 Canadá</option>
+            <option value="MX">🇲🇽 México</option>
+            <option value="CL">🇨🇱 Chile</option>
+            <option value="CO">🇨🇴 Colômbia</option>
+            <option value="UY">🇺🇾 Uruguai</option>
+            <option value="PY">🇵🇾 Paraguai</option>
+            <option value="PE">🇵🇪 Peru</option>
+            <option value="BO">🇧🇴 Bolívia</option>
+            <option value="VE">🇻🇪 Venezuela</option>
+            <option value="outros">Outro</option>
+          </select>
         </label>
 
-        <label class="full">Bio
-          <textarea id="bio" placeholder="Informações sobre o jogador, estilo de jogo, objetivo, etc."></textarea>
+        <label id="stateLabel">Estado (UF)
+          <select id="state">
+            <option value="">Selecione o estado</option>
+          </select>
         </label>
 
-        <label class="full">Link da foto
-          <input type="url" id="photoUrl" placeholder="https://..." />
+        <label id="cityLabel">Cidade
+          <select id="city">
+            <option value="">Selecione a cidade</option>
+          </select>
         </label>
 
+        <!-- Estilo de jogo -->
+        <div class="profile-section-title">Estilo de jogo</div>
+
+        <label class="full">Forehand (mão dominante)
+          <div class="toggle-group">
+            <input type="radio" name="forehand" id="fh_destro" value="destro" />
+            <label for="fh_destro">🎾 Destro</label>
+            <input type="radio" name="forehand" id="fh_canhoto" value="canhoto" />
+            <label for="fh_canhoto">🎾 Canhoto</label>
+          </div>
+        </label>
+
+        <label class="full">Backhand
+          <div class="toggle-group">
+            <input type="radio" name="backhand" id="bh_uma" value="uma_mao" />
+            <label for="bh_uma">Uma mão</label>
+            <input type="radio" name="backhand" id="bh_duas" value="duas_maos" />
+            <label for="bh_duas">Duas mãos</label>
+          </div>
+        </label>
+
+        <!-- Salvar -->
         <div class="full profile-actions">
-          <button type="submit" class="btn primary">Salvar perfil</button>
-          <button type="button" id="clearProfileBtn" class="btn">Limpar</button>
+          <button type="submit" class="btn primary">💾 Salvar perfil</button>
+          <button type="button" id="clearProfileBtn" class="btn">🧹 Limpar</button>
         </div>
+
       </form>
 
       <div id="profileMsg" class="profile-msg"></div>
+
+      <!-- Segurança -->
+      <div class="profile-form" style="margin-top:24px;">
+
+        <div class="profile-section-title">Segurança</div>
+
+        <label>Senha atual
+          <input type="password" id="currentPassword" placeholder="Digite sua senha atual" autocomplete="current-password" />
+        </label>
+
+        <label>Nova senha
+          <div style="position:relative;">
+            <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="padding-right:90px;" />
+            <button type="button" id="generatePasswordBtn" title="Gerar senha forte" style="position:absolute;right:8px;top:50%; transform:translateY(-50%); background:rgba(216,255,99,0.12); border:1px solid rgba(216,255,99,0.22); color:#d8ff63;border-radius:8px; padding:5px 10px;cursor:pointer; font-size:0.76rem;font-weight:900; white-space:nowrap;line-height:1;" >
+              🔑 Gerar
+            </button>
+          </div>
+        </label>
+
+        <label>Confirmar nova senha
+          <input type="password" id="confirmPassword" placeholder="Repita a nova senha" autocomplete="new-password" />
+        </label>
+
+        <div class="full profile-actions">
+          <button type="button" id="changePasswordBtn" class="btn primary">
+            🔒 Alterar senha
+          </button>
+        </div>
+
+        <div id="passwordMsg" class="profile-msg full"></div>
+
+        <!-- Zona de perigo -->
+        <div class="profile-section-title profile-danger-title">
+          ⚠️ Zona de perigo
+        </div>
+
+        <div class="full profile-danger-zone">
+          <div class="profile-danger-info">
+            <strong>Deletar minha conta</strong>
+            <p>
+              Esta ação é <strong>irreversível</strong>. Todos os seus dados serão
+              permanentemente excluídos, incluindo partidas, perfil e histórico.
+            </p>
+          </div>
+          <button type="button" id="deleteAccountBtn" class="btn profile-btn-delete">
+            🗑️ Deletar minha conta
+          </button>
+        </div>
+
+      </div>
+
     </section>
   </main>
+
+  <!-- Modal de confirmação de exclusão de conta -->
+  <div id="deleteModalOverlay" class="delete-modal-overlay" aria-hidden="true">
+    <div class="delete-modal" role="dialog" aria-modal="true">
+      <div class="delete-modal-icon">⚠️</div>
+      <h3>Deletar minha conta</h3>
+      <p>
+        Esta ação é <strong style="color:#fca5a5;">permanente e irreversível</strong>.<br>
+        Todos os seus dados serão excluídos:<br>
+        perfil, partidas, histórico e configurações.
+      </p>
+      <label class="delete-modal-confirm-label" for="deleteConfirmInput">
+        Digite <strong style="color:#f87171;">DELETAR</strong> para confirmar:
+      </label>
+      <input type="text" id="deleteConfirmInput" class="delete-modal-confirm-input" placeholder="DELETAR" autocomplete="off" />
+      <div class="delete-modal-actions">
+        <button type="button" id="cancelDeleteBtn" class="btn">Cancelar</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-confirm-delete" disabled>
+          🗑️ Confirmar exclusão
+        </button>
+      </div>
+      <div id="deleteMsg" style="margin-top:12px;font-size:0.84rem;color:#fca5a5; text-align:center;min-height:18px;" ></div>
+    </div>
+  </div>
+
+  <!-- Navegação fixa inferior -->
+  <nav class="profile-bottom-nav">
+    <a href="menu.html" class="profile-bottom-btn">
+      <span class="profile-bottom-icon">🏠</span>
+      <span class="profile-bottom-label">Início</span>
+    </a>
+
+    <a href="dashboard.html" class="profile-bottom-btn">
+      <span class="profile-bottom-icon">📊</span>
+      <span class="profile-bottom-label">Dashboard</span>
+    </a>
+
+    <a href="carreira.html" class="profile-bottom-btn">
+      <span class="profile-bottom-icon">🏆</span>
+      <span class="profile-bottom-label">Carreira</span>
+    </a>
+
+    <a href="partida.html" class="profile-bottom-btn">
+      <span class="profile-bottom-icon">🎾</span>
+      <span class="profile-bottom-label">Partida</span>
+    </a>
+
+    <a href="login.html" class="profile-bottom-btn logout">
+      <span class="profile-bottom-icon">🚪</span>
+      <span class="profile-bottom-label">Sair</span>
+    </a>
+  </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>

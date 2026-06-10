@@ -6,8 +6,9 @@
   <title>Dashboard | Live Scores Tennis</title>
   <link rel="stylesheet" href="css/style.css" />
 
-  <style> body.dashboard-page { background: radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%), linear-gradient(180deg, #121b2d 0%, #0f1726 100%); color: #e8eefc; padding-bottom: 92px; } .dashboard-hero { padding: 22px; border-radius: 24px; background: linear-gradient(180deg, rgba(31, 40, 60, 0.94), rgba(15, 22, 36, 0.98)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 16px 36px rgba(0,0,0,0.24); } .dashboard-header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; } .dashboard-header h1 { margin: 0; font-size: 1.6rem; font-weight: 950; letter-spacing: -0.02em; } .dashboard-header p { margin: 8px 0 0; color: rgba(232, 238, 252, 0.72); font-size: 0.95rem; line-height: 1.35; } .dashboard-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; } .dashboard-filters label { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 700; color: rgba(232, 238, 252, 0.86); } .dashboard-filters input, .dashboard-filters select { width: 100%; padding: 12px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(12, 18, 30, 0.62); color: #f4f8ff; outline: none; } .dashboard-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; } .dashboard-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; } .dash-card { border-radius: 22px; padding: 18px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; } .dash-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 48%); pointer-events: none; } .dash-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; z-index: 1; } .dash-card-icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-size: 1.25rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); flex: 0 0 auto; } .dash-card span { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(232,238,252,0.62); font-weight: 800; } .dash-card strong { font-size: 2.9rem; line-height: 1; font-weight: 950; color: #f4f8ff; margin-top: 10px; position: relative; z-index: 1; } .dash-card .capsule { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 800; color: rgba(232,238,252,0.88); width: fit-content; position: relative; z-index: 1; } .dash-card.total { border-top: 3px solid #60a5fa; } .dash-card.win { border-top: 3px solid #d8ff63; } .dash-card.loss { border-top: 3px solid #ff7b7b; } .dashboard-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; } .dashboard-panel { padding: 18px; border-radius: 22px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); } .dashboard-panel h2 { margin: 0 0 10px; font-size: 1rem; font-weight: 900; color: #f4f8ff; } .chart-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; } .legend-item { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 800; color: rgba(232,238,252,0.88); } .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; } .chart-box { display: flex; justify-content: center; align-items: center; min-height: 280px; } .chart-box canvas { max-width: 100%; max-height: 280px; } .dashboard-table-wrap { margin-top: 20px; padding: 14px; border-radius: 22px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); overflow-x: hidden; } .dashboard-table-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; } .dashboard-table-head h2 { margin: 0; font-size: 1rem; font-weight: 900; color: #f4f8ff; } .table-meta { font-size: 0.8rem; color: rgba(232,238,252,0.72); font-weight: 700; } .dashboard-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 0; } .dashboard-table th, .dashboard-table td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; font-size: 0.85rem; color: #e8eefc; word-break: break-word; } .dashboard-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(232,238,252,0.62); } .dashboard-pagination { margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; } .dash-page-btn { appearance: none; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); color: #eef4ff; border-radius: 999px; min-height: 44px; padding: 10px 14px; display: inline-flex; align-items: center; gap: 8px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 16px rgba(0,0,0,0.14); } .dash-page-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; } .dash-page-info { font-size: 0.85rem; font-weight: 800; color: rgba(232,238,252,0.82); padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); } .dashboard-message { margin-top: 14px; color: rgba(232, 238, 252, 0.82); font-size: 0.95rem; } @media (max-width: 900px) { .dashboard-filters, .dashboard-cards, .dashboard-grid { grid-template-columns: 1fr; } } @media (max-width: 768px) { .dashboard-hero { padding: 16px; } .dash-card strong { font-size: 2.4rem; } } </style>
+  <style> body.dashboard-page { background: radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%), linear-gradient(180deg, #121b2d 0%, #0f1726 100%); color: #e8eefc; padding-bottom: 92px; } .dashboard-hero { padding: 22px; border-radius: 24px; background: linear-gradient(180deg, rgba(31, 40, 60, 0.94), rgba(15, 22, 36, 0.98)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 16px 36px rgba(0,0,0,0.24); } .dashboard-header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; } .dashboard-header h1 { margin: 0; font-size: 1.6rem; font-weight: 950; letter-spacing: -0.02em; } .dashboard-header p { margin: 8px 0 0; color: rgba(232, 238, 252, 0.72); font-size: 0.95rem; line-height: 1.35; } .dashboard-filters { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; } .dashboard-filters label { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 700; color: rgba(232, 238, 252, 0.86); } .dashboard-filters input, .dashboard-filters select { width: 100%; padding: 12px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(12, 18, 30, 0.62); color: #f4f8ff; outline: none; } .dashboard-actions { display: flex; gap: 10px; flex-wrap: wrap; grid-column: 1 / -1; margin-top: 4px; } .dashboard-actions .btn { min-width: 128px; padding: 12px 16px; flex: 0 0 auto; } .dashboard-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; } .dash-card { border-radius: 22px; padding: 18px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; } .dash-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 48%); pointer-events: none; } .dash-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; z-index: 1; } .dash-card-icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-size: 1.25rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); flex: 0 0 auto; } .dash-card span { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(232,238,252,0.62); font-weight: 800; } .dash-card strong { font-size: 2.9rem; line-height: 1; font-weight: 950; color: #f4f8ff; margin-top: 10px; position: relative; z-index: 1; } .dash-card .capsule { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 800; color: rgba(232,238,252,0.88); width: fit-content; position: relative; z-index: 1; } .dash-card.total { border-top: 3px solid #60a5fa; } .dash-card.win { border-top: 3px solid #d8ff63; } .dash-card.loss { border-top: 3px solid #ff7b7b; } .dashboard-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; } .dashboard-panel { padding: 18px; border-radius: 22px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); } .dashboard-panel h2 { margin: 0 0 10px; font-size: 1rem; font-weight: 900; color: #f4f8ff; } .chart-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; } .legend-item { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 800; color: rgba(232,238,252,0.88); } .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; } .chart-box { display: flex; justify-content: center; align-items: center; min-height: 280px; } .chart-box canvas { max-width: 100%; max-height: 280px; } .dashboard-message { margin-top: 14px; color: rgba(232, 238, 252, 0.82); font-size: 0.95rem; } @media (max-width: 900px) { .dashboard-filters, .dashboard-cards, .dashboard-grid { grid-template-columns: 1fr; } } @media (max-width: 768px) { .dashboard-hero { padding: 16px; border-radius: 20px; } .dashboard-header { flex-direction: column; } .dash-card { min-height: 118px; padding: 16px; } .dash-card strong { font-size: 2.2rem; } .dashboard-panel { padding: 14px; } .chart-box { min-height: 240px; } .chart-box canvas { width: 100% !important; height: auto !important; } .dashboard-actions { flex-direction: column; } .dashboard-actions .btn { width: 100%; min-width: 0; } } @media (max-width: 430px) { .dashboard-hero { padding: 14px; } .dash-card { min-height: 112px; padding: 14px; } .dash-card strong { font-size: 2rem; } .dashboard-panel { padding: 14px; } } .dashboard-mobile-card { padding: 14px; border-radius: 18px; background: linear-gradient(180deg, rgba(44,54,74,.96), rgba(30,39,58,.98)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 10px; } .dashboard-mobile-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; } .dashboard-mobile-date { font-size: 0.8rem; color: rgba(232,238,252,0.75); font-weight: 800; } .dashboard-mobile-winner { font-size: 0.78rem; color: #f4f8ff; font-weight: 900; padding: 6px 10px; border-radius: 999px; background: rgba(96,165,250,0.14); border: 1px solid rgba(96,165,250,0.18); } .dashboard-mobile-confrontation { font-size: 0.95rem; font-weight: 800; color: #f4f8ff; line-height: 1.35; word-break: break-word; } .dashboard-mobile-meta { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 0.82rem; color: rgba(232,238,252,0.82); } .dashboard-mobile-meta strong { color: #fff; } </style>
 </head>
+
 <body class="dashboard-page">
   <main class="container stack">
     <section class="dashboard-hero panel panel-glass">
@@ -15,7 +16,7 @@
         <div>
           <span class="section-kicker">Dashboard</span>
           <h1>Resumo Geral</h1>
-          <p>Consulte partidas, vitórias e derrotas por ano e por adversário.</p>
+          <p>Consulte partidas, vitórias e derrotas por ano, modalidade e formato do jogo.</p>
         </div>
       </div>
 
@@ -23,24 +24,33 @@
         <label>
           Ano
           <select id="yearFilter">
-            <option value="">Todos os anos</option>
+            <option value="">Selecione o ano</option>
           </select>
         </label>
 
         <label>
-          Jogador 1
-          <input type="text" id="player1Filter" readonly />
+          Modalidade
+          <select id="modalityFilter" required>
+            <option value="">Todas</option>
+            <option value="Tênis">Tênis</option>
+            <option value="Beach Tênis">Beach Tênis</option>
+          </select>
         </label>
 
         <label>
-          Jogador 2
-          <input type="text" id="player2Filter" placeholder="Digite o nome do jogador" />
+          Formato do jogo
+          <select id="gameFormatFilter" required>
+            <option value="">Todos</option>
+            <option value="Simples">Simples</option>
+            <option value="Duplas">Duplas</option>
+            <option value="Duplas Mistas">Duplas Mistas</option>
+          </select>
         </label>
-      </div>
 
-      <div class="dashboard-actions">
-        <button type="button" class="btn primary" id="applyFilterBtn">🔎 Filtrar</button>
-        <button type="button" class="btn" id="clearFilterBtn">✖ Limpar</button>
+        <div class="dashboard-actions">
+          <button type="button" class="btn primary" id="applyFilterBtn">🔎 Filtrar</button>
+          <button type="button" class="btn" id="clearFilterBtn">✖ Limpar</button>
+        </div>
       </div>
 
       <div class="dashboard-cards">
@@ -48,7 +58,7 @@
           <div class="dash-card-top">
             <div>
               <span>Total de partidas</span>
-              <div class="capsule">Executivo</div>
+             
             </div>
             <div class="dash-card-icon">📊</div>
           </div>
@@ -59,7 +69,7 @@
           <div class="dash-card-top">
             <div>
               <span>Vitórias</span>
-              <div class="capsule">Performance</div>
+              
             </div>
             <div class="dash-card-icon">✅</div>
           </div>
@@ -70,7 +80,7 @@
           <div class="dash-card-top">
             <div>
               <span>Derrotas</span>
-              <div class="capsule">Rendimento</div>
+              
             </div>
             <div class="dash-card-icon">📉</div>
           </div>
@@ -102,31 +112,6 @@
         </div>
       </div>
 
-      <div class="dashboard-table-wrap">
-        <div class="dashboard-table-head">
-          <h2>Detalhamento</h2>
-          <div class="table-meta" id="tableMeta">0 registros</div>
-        </div>
-
-        <table class="dashboard-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Jogador 1</th>
-              <th>Jogador 2</th>
-              <th>Vencedor</th>
-            </tr>
-          </thead>
-          <tbody id="dashboardTableBody"></tbody>
-        </table>
-
-        <div class="dashboard-pagination">
-          <button type="button" class="dash-page-btn" id="prevPageBtn">⬅️ Anterior</button>
-          <span class="dash-page-info" id="pageInfo">Página 1 de 1</span>
-          <button type="button" class="dash-page-btn" id="nextPageBtn">Próximo ➡️</button>
-        </div>
-      </div>
-
       <div id="dashboardMessage" class="dashboard-message"></div>
     </section>
   </main>
@@ -136,22 +121,27 @@
       <span class="career-bottom-icon">🏠</span>
       <span class="career-bottom-label">Início</span>
     </a>
-    <a href="perfil.html" class="career-bottom-btn">
-      <span class="career-bottom-icon">👤</span>
-      <span class="career-bottom-label">Perfil</span>
-    </a>
-    <a href="jogadores.html" class="career-bottom-btn">
-        <span class="career-bottom-icon">👤</span>
-        <span class="career-bottom-label">Jogador</span>
-    </a>
+
+    <button type="button" id="toggleFiltersBtn" class="career-bottom-btn">
+      <span class="career-bottom-icon">📋</span>
+      <span class="career-bottom-label">Filtros</span>
+    </button>
+
+    
     <a href="admin.html" class="career-bottom-btn">
       <span class="career-bottom-icon">🎾</span>
       <span class="career-bottom-label">Partida</span>
     </a>
+
     <a href="carreira.html" class="career-bottom-btn">
-      <span class="career-bottom-icon">📈</span>
+      <span class="career-bottom-icon">🏆</span>
       <span class="career-bottom-label">Carreira</span>
     </a>
+
+    <button type="button" id="logoutBtnBottom" class="menu-bottom-btn logout">
+      <span class="menu-bottom-icon">🚪</span>
+      <span class="menu-bottom-label">Sair</span>
+    </button>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
