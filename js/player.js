@@ -55,6 +55,10 @@
     let liveStartedAtMs = null;
     let msgTimer        = null;
 
+    // NOVO: controle para bloquear "Desfazer" 5 minutos após finalizar
+    let undoLockTimer = null;
+    let undoLockedUntilMs = null;
+
     // ─── Modo de entrada ──────────────────────────────────────────────────
 
     function applyInputMode(mode) {
@@ -92,8 +96,6 @@
 
       // ── Finalizar ─────────────────────────────────────────────────────
       if (el.finishBtn) {
-        // Finalizar só fica ativo se a partida estiver live ou suspended
-        // e nunca quando já estiver finalizada
         el.finishBtn.disabled = isFinished
           || (status !== "live" && status !== "suspended");
         el.finishBtn.title = isFinished ? "Partida já finalizada" : "";
@@ -111,6 +113,62 @@
         btn.style.opacity = btn.disabled ? "0.35"  : "";
         btn.style.cursor  = btn.disabled ? "not-allowed" : "";
       });
+    }
+
+    // ─── NOVO: bloqueio do Desfazer 5 min após finalização ───────────────
+
+    function clearUndoLockTimer() {
+      if (undoLockTimer) {
+        clearTimeout(undoLockTimer);
+        undoLockTimer = null;
+      }
+    }
+
+    function applyUndoLockState(data) {
+      if (!el.undoBtn) return;
+
+      const isFinished = data.status === "finished" || data.status === "wo";
+      const finishedAt = data.finishedAt?.toDate
+        ? data.finishedAt.toDate()
+        : (data.finishedAt ? new Date(data.finishedAt) : null);
+
+      clearUndoLockTimer();
+      undoLockedUntilMs = null;
+
+      if (isFinished && finishedAt && !isNaN(finishedAt.getTime())) {
+        const elapsedMs = Date.now() - finishedAt.getTime();
+        const remainingMs = 5 * 60 * 1000 - elapsedMs;
+
+        if (remainingMs <= 0) {
+          el.undoBtn.disabled = true;
+          el.undoBtn.title = "Desfazer bloqueado após 5 minutos da finalização";
+          el.undoBtn.style.opacity = "0.35";
+          el.undoBtn.style.cursor = "not-allowed";
+          return;
+        }
+
+        undoLockedUntilMs = Date.now() + remainingMs;
+        el.undoBtn.disabled = false;
+        el.undoBtn.title = "Desfazer disponível por até 5 minutos após a finalização";
+        el.undoBtn.style.opacity = "";
+        el.undoBtn.style.cursor = "";
+
+        undoLockTimer = setTimeout(() => {
+          if (el.undoBtn) {
+            el.undoBtn.disabled = true;
+            el.undoBtn.title = "Desfazer bloqueado após 5 minutos da finalização";
+            el.undoBtn.style.opacity = "0.35";
+            el.undoBtn.style.cursor = "not-allowed";
+          }
+        }, remainingMs);
+
+        return;
+      }
+
+      el.undoBtn.disabled = !data.lastAction;
+      el.undoBtn.title = data.lastAction ? "" : "Não há ação anterior para desfazer";
+      el.undoBtn.style.opacity = el.undoBtn.disabled ? "0.35" : "";
+      el.undoBtn.style.cursor = el.undoBtn.disabled ? "not-allowed" : "";
     }
 
     // ─── Estado dos controles ─────────────────────────────────────────────
@@ -181,7 +239,6 @@
         el.startBtn.classList.remove("pause-action");
         el.startBtn.classList.add("primary-action");
       } else if (status === "finished" || status === "wo") {
-        // ✅ Garante ícone e label corretos quando finalizada
         el.startBtn.disabled = true;
         if (el.startBtnIcon)  el.startBtnIcon.textContent  = "▶️";
         if (el.startBtnLabel) el.startBtnLabel.textContent = "Iniciar";
@@ -425,10 +482,10 @@
 
       // ── ✅ Botões Iniciar / Finalizar / Zerar ─────────────────────────
       updateStartBtn(data.status);
-      updateMatchControls(data.status);       // ← NOVO: bloqueia os 3 quando finalizada
+      updateMatchControls(data.status);
 
       // ── Desfazer ──────────────────────────────────────────────────────
-      if (el.undoBtn) el.undoBtn.disabled = !data.lastAction;
+      applyUndoLockState(data);
 
       // ── Estado dos controles (desabilita quando finalizada/TB) ────────
       updateControlsState(data);
@@ -805,7 +862,6 @@
 
           const data       = snap.data();
 
-          // ✅ Guarda dupla: bloqueia se já finalizada
           if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
 
           const lastAction = buildLastActionSnapshot(data);
@@ -877,6 +933,17 @@
           if (!snap.exists) return setMsg("Partida não encontrada.", "error");
           const data = snap.data();
           if (!data.lastAction) return setMsg("Não há ação anterior para desfazer.", "error");
+
+          // NOVO: bloqueia após 5 minutos da finalização
+          const isFinished = data.status === "finished" || data.status === "wo";
+          if (isFinished && data.finishedAt?.toDate) {
+            const finishedAt = data.finishedAt.toDate();
+            const elapsedMs = Date.now() - finishedAt.getTime();
+            if (elapsedMs > 5 * 60 * 1000) {
+              return setMsg("O desfazer foi bloqueado após 5 minutos da finalização.", "error");
+            }
+          }
+
           const prev = data.lastAction;
           await ref.update({
             score:              prev.score              || defaultScore(),
