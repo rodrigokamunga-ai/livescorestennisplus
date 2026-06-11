@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin | Live Scores Tennis</title>
+
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
 </head>
 
 <body class="admin-page">
@@ -29,7 +31,6 @@
           </select>
         </label>
 
-        <!-- ✅ NOVO CAMPO: Nome do torneio -->
         <label>Nome do torneio
           <input type="text" id="tournamentName" placeholder="Informe o nome do torneio" />
         </label>
@@ -185,7 +186,6 @@
 
           <input type="text" id="filterCategory" placeholder="Pesquisar por categoria" />
 
-          <!-- ✅ NOVO FILTRO: Pesquisar por torneio -->
           <input type="text" id="filterTournament" placeholder="Pesquisar por torneio" />
 
           <select id="filterStatus">
@@ -196,7 +196,6 @@
             <option value="wo">WO</option>
           </select>
 
-          <!-- ✅ BOTÃO LIMPAR FILTROS -->
           <button type="button" id="clearFiltersBtn" class="btn btn-clear-filters">
             Limpar filtros
           </button>
@@ -210,7 +209,6 @@
                 <th class="col-modality">Modalidade</th>
                 <th class="col-game-format">Formato do jogo</th>
                 <th class="col-category">Categoria</th>
-                <!-- ✅ NOVA COLUNA: Torneio -->
                 <th class="col-tournament">Torneio</th>
                 <th class="col-status">Situação</th>
                 <th class="col-actions">Opções</th>
@@ -268,9 +266,9 @@
       <span class="admin-bottom-label">Carreira</span>
     </a>
 
-    <button type="button" id="logoutBtnBottom" class="menu-bottom-btn logout">
-      <span class="menu-bottom-icon">🚪</span>
-      <span class="menu-bottom-label">Sair</span>
+    <button type="button" id="logoutBtnBottom" class="admin-bottom-btn logout">
+      <span class="admin-bottom-icon">🚪</span>
+      <span class="admin-bottom-label">Sair</span>
     </button>
   </nav>
 
