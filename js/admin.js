@@ -255,6 +255,18 @@
         return `${U.escapeHtml(team1)} <span class="vs-separator">X</span> ${U.escapeHtml(team2)}`;
       },
 
+      getMatchDisplayHTMLMobile(d) {
+        const team1 = U.getTeam1NameFromData(d);
+        const team2 = U.getTeam2NameFromData(d);
+        const isDoubles = U.isDoublesFormatValue(d?.gameFormat);
+
+        if (isDoubles) {
+          return `${U.escapeHtml(team1)} <span class="vs-separator">X</span><br>${U.escapeHtml(team2)}`;
+        }
+
+        return `${U.escapeHtml(team1)} <span class="vs-separator">X</span> ${U.escapeHtml(team2)}`;
+      },
+
       getMatchSetCount(d) {
         const mf = U.normalizeText(U.formatMatchFormat(d?.matchFormat || ""));
         if (mf.includes("3 sets")) return 3;
@@ -573,13 +585,18 @@
       if (setCount >= 2) setsHtml += setLine("2º set", set2);
       if (setCount >= 3) setsHtml += setLine("3º set", set3);
 
-      const resultBadge = winnerPos === 1
-        ? `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`
-        : winnerPos === 2
-          ? `<span class="winner-badge loser-badge">PERDEU</span>`
-          : "";
+      let resultBadge = "";
+      let rowClass = "";
 
-      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${winnerPos === 1 ? "winner-row" : winnerPos === 2 ? "loser-row" : ""}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? `<div class="detail-score-line"><span>Situação</span><strong>FINALIZADA POR WO</strong></div>` : ` ${setsHtml} <div class="detail-pill" style="margin-top:10px;"> <span>Pontos</span><strong>${U.escapeHtml(pointsText)}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span><strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
+      if (winnerPos === 1) {
+        rowClass = "winner-row";
+        resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
+      } else if (winnerPos === 2) {
+        rowClass = "loser-row";
+        resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
+      }
+
+      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? `<div class="detail-score-line"><span>Situação</span><strong>FINALIZADA POR WO</strong></div>` : ` ${setsHtml} <div class="detail-pill" style="margin-top:10px;"> <span>Pontos</span><strong>${U.escapeHtml(pointsText)}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span><strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
     }
 
     function renderSummaryBlock(d) {
@@ -642,8 +659,7 @@
         state.unsubscribe = null;
       }
 
-      const query = __db.collection("matches")
-        .where("ownerId", "==", state.currentUser.uid);
+      const query = __db.collection("matches").where("ownerId", "==", state.currentUser.uid);
 
       state.unsubscribe = query.onSnapshot(
         (snapshot) => {
@@ -702,7 +718,7 @@
       const label = labelMap[statusText] || (d.status || "scheduled");
       const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
 
-      return ` <tr class="mobile-match-row"> <td colspan="7"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTML(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Modalidade:</strong> ${U.escapeHtml(d.modality || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Categoria:</strong> ${U.escapeHtml(d.categoryName || "-")}</div> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Fase:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir link">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr> `;
+      return ` <tr class="mobile-match-row"> <td colspan="7"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Modalidade:</strong> ${U.escapeHtml(d.modality || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Categoria:</strong> ${U.escapeHtml(d.categoryName || "-")}</div> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Fase:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir link">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr> `;
     }
 
     function renderCurrentPage() {
@@ -713,82 +729,6 @@
       el.tbody.innerHTML = pageItems.length
         ? pageItems.map(({ docSnap }) => state.isMobile ? mobileCardHTML(docSnap) : rowHTML(docSnap)).join("")
         : renderEmpty("Nenhuma partida encontrada.");
-    }
-
-    function renderGeneralBlock(d) {
-      const teamHTML = U.getMatchDisplayHTML(d);
-      const statusText = String(d?.status || "").trim().toLowerCase();
-      const situationLabel = statusText === "finished" ? "Finalizada"
-        : statusText === "wo" ? "Finalizada por WO"
-        : statusText === "live" ? "Em andamento"
-        : "Jogos do dia";
-      const woWinner = U.getWONumberOrName(d);
-
-      return ` <section class="detail-section detail-section-general"> <div class="detail-section-header"> <h4>Dados gerais</h4> <span class="detail-section-subtitle">Informações da partida</span> </div> <div class="detail-info-grid"> <div class="detail-info-item"><span>Modalidade</span><strong>${U.escapeHtml(d.modality || "-")}</strong></div> <div class="detail-info-item"><span>Formato do jogo</span><strong>${U.escapeHtml(d.gameFormat || "-")}</strong></div> <div class="detail-info-item"><span>Categoria</span><strong>${U.escapeHtml(d.categoryName || "-")}</strong></div> <div class="detail-info-item"><span>Torneio</span><strong>${U.escapeHtml(d.tournamentName || "-")}</strong></div> <div class="detail-info-item"><span>Tipo de piso</span><strong>${U.escapeHtml(d.surfaceType || "-")}</strong></div> <div class="detail-info-item"><span>Formato</span><strong>${U.escapeHtml(U.formatMatchFormat(d.matchFormat || "-"))}</strong></div> <div class="detail-info-item"><span>Data e hora</span><strong>${U.escapeHtml(d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-")}</strong></div> <div class="detail-info-item"><span>Quadra</span><strong>${U.escapeHtml(d.court || "-")}</strong></div> <div class="detail-info-item"><span>Fase</span><strong>${U.escapeHtml(d.tournamentStage || "-")}</strong></div> <div class="detail-info-item"><span>Situação</span><strong>${U.escapeHtml(situationLabel)}</strong></div> <div class="detail-info-item"><span>Jogadores</span><strong style="white-space:pre-line;">${teamHTML}</strong></div> <div class="detail-info-item"><span>Vencedor por WO</span><strong>${U.escapeHtml(woWinner)}</strong></div> </div> </section> `;
-    }
-
-    function renderScoreBlock(d) {
-      const score = U.normalizeScore(d.score || {});
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-      const set1 = U.getSetDisplay(history[0]);
-      const set2 = U.getSetDisplay(history[1]);
-      const set3 = U.getSetDisplay(history[2]);
-      const duration = getMatchDuration(d);
-      const status = String(d?.status || "").trim().toLowerCase();
-      const isWO = status === "wo";
-      const winnerPos = U.getWinnerPosition(score, d);
-      const teamHTML = U.getMatchDisplayHTML(d);
-      const setCount = detectSetCountFromMatch(d);
-
-      const pointsText =
-        (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10" ||
-         score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")
-          ? `${Number(score.tieBreakPoints1 || score.lastTieBreakPoints1 || 0)}x${Number(score.tieBreakPoints2 || score.lastTieBreakPoints2 || 0)}`
-          : `${Number(score.points1 || 0)}x${Number(score.points2 || 0)}`;
-
-      const setLine = (label, setObj) =>
-        `<div class="detail-score-line"><span>${label}</span><strong>${U.escapeHtml(setObj.p1)} x ${U.escapeHtml(setObj.p2)}</strong></div>`;
-
-      let setsHtml = "";
-      if (setCount >= 1) setsHtml += setLine("1º set", set1);
-      if (setCount >= 2) setsHtml += setLine("2º set", set2);
-      if (setCount >= 3) setsHtml += setLine("3º set", set3);
-
-      let resultBadge = "";
-      let rowClass = "";
-
-      if (winnerPos === 1) {
-        rowClass = "winner-row";
-        resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
-      } else if (winnerPos === 2) {
-        rowClass = "loser-row";
-        resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
-      }
-
-      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? `<div class="detail-score-line"><span>Situação</span><strong>FINALIZADA POR WO</strong></div>` : ` ${setsHtml} <div class="detail-pill" style="margin-top:10px;"> <span>Pontos</span><strong>${U.escapeHtml(pointsText)}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span><strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
-    }
-
-    function renderSummaryBlock(d) {
-      const score = U.normalizeScore(d.score || {});
-      const totalPoints1 = Number(score.totalPoints1 || 0);
-      const totalPoints2 = Number(score.totalPoints2 || 0);
-      const breakPointsWon1 = Number(score.breakPointsWon1 || 0);
-      const breakPointsChances1 = Number(score.breakPointsChances1 || 0);
-      const breakPointsWon2 = Number(score.breakPointsWon2 || 0);
-      const breakPointsChances2 = Number(score.breakPointsChances2 || 0);
-      const team1HTML = U.escapeHtml(U.getTeam1NameFromData(d));
-      const team2HTML = U.escapeHtml(U.getTeam2NameFromData(d));
-
-      return ` <section class="detail-section detail-section-summary"> <div class="detail-section-header"> <h4>Resumo da partida</h4> <span class="detail-section-subtitle">Estatísticas gerais</span> </div> <div class="detail-summary-grid"> <div class="detail-summary-card"> <div class="detail-player-title">${team1HTML}</div> <div class="detail-summary-line"><span>Pontos totais</span><strong>${totalPoints1}</strong></div> <div class="detail-summary-line"><span>Break points</span><strong>${breakPointsWon1}/${breakPointsChances1}</strong></div> </div> <div class="detail-summary-card"> <div class="detail-player-title">${team2HTML}</div> <div class="detail-summary-line"><span>Pontos totais</span><strong>${totalPoints2}</strong></div> <div class="detail-summary-line"><span>Break points</span><strong>${breakPointsWon2}/${breakPointsChances2}</strong></div> </div> </div> </section> `;
-    }
-
-    function detailsHTML(d) {
-      try {
-        return `<div class="details-layout">${renderGeneralBlock(d)}${renderScoreBlock(d)}${renderSummaryBlock(d)}</div>`;
-      } catch (err) {
-        console.error("Erro ao montar detalhes:", err, d);
-        return `<div class="details-layout"><p>Erro ao carregar os detalhes da partida.</p></div>`;
-      }
     }
 
     function onResize() {
