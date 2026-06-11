@@ -1,4 +1,4 @@
-/* ========================================================= ADMIN.CSS — APENAS ADMIN Layout, formulário, filtros, tabela, paginação, modal e mobile cards ========================================================= */
+/* ========================================================= ADMIN.CSS — Layout, formulário, filtros, tabela, paginação, modal e mobile cards ========================================================= */
 
 /* ========================= BASE ADMIN ========================= */
 body.admin-page {
@@ -25,6 +25,15 @@ body.admin-page textarea {
 
 body.admin-page * {
   box-sizing: border-box;
+}
+
+body.admin-page .hidden,
+body.admin-page .is-collapsed {
+  display: none !important;
+}
+
+body.admin-page .muted {
+  color: rgba(232, 238, 252, 0.68);
 }
 
 /* ========================= LAYOUT / CONTAINERS ========================= */
@@ -187,7 +196,7 @@ body.admin-page .admin-page-btn:disabled {
   box-shadow: none;
 }
 
-/* ========================= BOTÕES NO ESTILO DO "LIMPAR FILTROS" ========================= */
+/* ========================= BOTÕES PADRONIZADOS ========================= */
 body.admin-page .admin-form-actions .admin-form-btn,
 body.admin-page .btn-clear-filters,
 body.admin-page .admin-page-btn,
@@ -315,41 +324,39 @@ body.admin-page .players-cell {
   word-break: break-word;
 }
 
+/* ========================= AÇÕES NO DESKTOP ========================= */
+/* aqui está a correção principal dos botões desalinhados */
 body.admin-page .action-cell {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  grid-auto-rows: max-content;
   gap: 8px;
+  justify-content: center;
   align-items: center;
 }
 
 body.admin-page .action-top-row,
 body.admin-page .action-bottom-row {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: contents;
 }
 
-body.admin-page .icon-btn {
+body.admin-page .action-cell .icon-btn {
   min-width: 42px;
   min-height: 42px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #eef4ff;
-  font-size: 1rem;
-  line-height: 1;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
+  justify-self: center;
 }
 
-body.admin-page .icon-btn.danger {
+body.admin-page .action-cell .icon-btn.danger {
   background: linear-gradient(180deg, rgba(255, 123, 123, 0.18), rgba(255, 123, 123, 0.08));
   border-color: rgba(255, 123, 123, 0.18);
 }
 
-body.admin-page .icon-btn:not(.danger) {
+body.admin-page .action-cell .icon-btn:not(.danger) {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
 }
 
