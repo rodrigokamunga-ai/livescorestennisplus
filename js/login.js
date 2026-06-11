@@ -67,10 +67,23 @@ function saveBiometricUid(uid) {
   }
 }
 
-function saveBiometricCredIdIfExists() {
-  const current = localStorage.getItem(BIOMETRIC_CRED_KEY);
-  if (current) {
-    console.log("[login] credencial biométrica já existe no localStorage");
+function saveBiometricCredId(credIdB64) {
+  if (credIdB64) {
+    localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
+    console.log("[login] credencial biométrica salva/atualizada");
+  }
+}
+
+function ensureBiometricStorageFromUser(user) {
+  if (!user?.uid) return;
+
+  // Mantém o UID para a biometria.
+  saveBiometricUid(user.uid);
+
+  // Se já existir credencial biométrica, mantém.
+  const cred = localStorage.getItem(BIOMETRIC_CRED_KEY);
+  if (cred) {
+    console.log("[login] credencial biométrica já existente");
   }
 }
 
@@ -231,20 +244,6 @@ async function forceLogout() {
   } catch (err) {
     console.warn("[forceLogout] erro ao sair:", err);
   }
-}
-
-function getCurrentUser() {
-  return __auth && __auth.currentUser ? __auth.currentUser : null;
-}
-
-// ─── Salvar credencial biométrica ─────────────────────────────────────────────
-// Chame isso quando você registrar a biometria pela primeira vez.
-// Se já existir, mantém o valor salvo.
-
-function ensureBiometricStorageFromUser(user) {
-  if (!user?.uid) return;
-  saveBiometricUid(user.uid);
-  saveBiometricCredIdIfExists();
 }
 
 // ─── Inicializa Firebase Auth ────────────────────────────────────────────────
@@ -471,17 +470,6 @@ function initBiometricLogin() {
     try {
       setMsg("Aguardando biometria...", "info");
 
-      const currentUser = getCurrentUser();
-      console.log("[biometria] currentUser:", currentUser ? currentUser.uid : null);
-
-      if (!currentUser) {
-        setMsg(
-          "⚠️ Não existe sessão Firebase ativa. Faça login com e-mail ou Google primeiro.",
-          "error"
-        );
-        return;
-      }
-
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
@@ -510,19 +498,7 @@ function initBiometricLogin() {
         return;
       }
 
-      const isBlocked = await checkUserBlocked(currentUser.uid);
-
-      console.log("[biometria] Resultado checkUserBlocked:", isBlocked);
-
-      if (isBlocked === true) {
-        setMsg("⛔ Sua conta está bloqueada. Entre em contato com o administrador.", "error");
-        return;
-      }
-
-      if (isBlocked === null) {
-        console.warn("[biometria] não foi possível validar bloqueio, mas biometria foi válida.");
-      }
-
+      // ✅ Biometria válida: libera acesso localmente
       saveSession();
       setMsg("✅ Acesso liberado pela biometria!", "success");
       setTimeout(goHome, 800);
