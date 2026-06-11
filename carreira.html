@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Carreira | Live Scores Tennis</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/carreira.css" />
 
-  <style> .career-pagination { margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; } .career-page-info { font-weight: 700; color: #e8eefc; text-align: center; } /* ── Cards de resumo novos ── */ .career-summary-card.tournament { border-color: #a78bfa; } .career-summary-card.champion { border-color: #d8ff63; } .career-summary-card.runnerup { border-color: #60a5fa; } @media (max-width: 480px) { .career-pagination { gap: 8px; } .career-page-info { font-size: 0.85rem; } } </style>
+  
 </head>
 
 <body class="career-page">
@@ -27,10 +28,14 @@
 
       
       <div class="career-summary">
-        <div class="career-summary-card">
+        
+        
+        <div class="career-summary-card total matches">
           <span>Total de partidas</span>
           <strong id="totalMatches">0</strong>
         </div>
+
+       
 
          
          <div class="career-summary-card tournament">
@@ -61,6 +66,7 @@
           <span>Vice-campeonatos</span>
           <strong id="totalRunnerup">0</strong>
         </div>
+     
       </div>
 
       
