@@ -1,0 +1,472 @@
+/* ========================================================= USERS ADMIN — FINAL CORRIGIDO ========================================================= */
+
+body.admin-page {
+    background:
+      radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%),
+      linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
+    color: #e8eefc;
+    min-height: 100vh;
+    padding-bottom: 92px;
+    overflow-x: hidden;
+  }
+  
+  body.admin-page .admin-panel {
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  body.admin-page .section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 22px 0;
+    margin-bottom: 18px;
+  }
+  
+  body.admin-page .section-head h2 {
+    font-size: 1.35rem;
+    font-weight: 900;
+    margin-top: 2px;
+    color: #f0f4ff;
+  }
+  
+  body.admin-page .msg {
+    padding: 0 22px 22px;
+    min-height: 22px;
+    color: rgba(232, 238, 252, 0.9);
+    font-size: 0.95rem;
+  }
+  
+  body.admin-page .filters-bar {
+    display: grid;
+    grid-template-columns: 1.3fr 1.3fr 0.9fr;
+    gap: 12px;
+    padding: 0 22px 18px;
+  }
+  
+  body.admin-page .filters-bar input,
+  body.admin-page .filters-bar select {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 18, 30, 0.62);
+    color: #f4f8ff;
+    outline: none;
+  }
+  
+  body.admin-page .filters-bar input:focus,
+  body.admin-page .filters-bar select:focus {
+    border-color: rgba(110, 165, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(110, 165, 255, 0.15);
+  }
+  
+  body.admin-page .table-wrap {
+    padding: 0 22px 18px;
+    overflow-x: auto;
+  }
+  
+  body.admin-page .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+  }
+  
+  body.admin-page .admin-table thead th {
+    text-align: left;
+    padding: 14px 12px;
+    font-size: 0.9rem;
+    color: rgba(232, 238, 252, 0.82);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  body.admin-page .admin-table tbody td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: top;
+    color: #eef4ff;
+  }
+  
+  body.admin-page .admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  body.admin-page .status-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  
+  body.admin-page .status-live {
+    background: rgba(93, 255, 149, 0.12);
+    color: #5dff95;
+  }
+  
+  body.admin-page .status-scheduled {
+    background: rgba(216, 255, 99, 0.12);
+    color: #d8ff63;
+  }
+  
+  body.admin-page .status-finished {
+    background: rgba(255, 100, 100, 0.12);
+    color: #ff7b7b;
+  }
+  
+  body.admin-page .action-icons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  body.admin-page .icon-btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+    color: #eef4ff;
+    border-radius: 12px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 800;
+    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  }
+  
+  body.admin-page .icon-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(216, 255, 99, 0.22);
+    background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
+  }
+  
+  body.admin-page .icon-btn.danger {
+    background: linear-gradient(180deg, rgba(255, 123, 123, 0.14), rgba(255, 255, 255, 0.03));
+    border-color: rgba(255, 123, 123, 0.18);
+  }
+  
+  body.admin-page .admin-pagination {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 22px 0;
+  }
+  
+  body.admin-page .admin-page-info {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.10);
+    color: #eef4ff;
+    font-weight: 800;
+    font-size: 0.88rem;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+    white-space: nowrap;
+  }
+  
+  body.admin-page .admin-page-btn {
+    appearance: none;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    color: #eef4ff;
+    border-radius: 999px;
+    min-height: 44px;
+    min-width: 118px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+    cursor: pointer;
+    transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body.admin-page .admin-page-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(216,255,99,0.14), rgba(255,255,255,0.04));
+    border-color: rgba(216,255,99,0.22);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.18);
+  }
+  
+  body.admin-page .admin-page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* DESKTOP: só tabela */
+  @media (min-width: 769px) {
+    body.admin-page .mobile-user-row,
+    body.admin-page .mobile-user-card {
+      display: none !important;
+    }
+  
+    body.admin-page .desktop-user-row {
+      display: table-row !important;
+    }
+  }
+  
+  /* MOBILE: só card + filtros em coluna */
+  @media (max-width: 768px) {
+    body.admin-page {
+      padding-bottom: 78px;
+    }
+  
+    body.admin-page .section-head {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 18px 16px 0;
+    }
+  
+    /* ✅ Filtros um embaixo do outro */
+    body.admin-page .filters-bar {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  
+    body.admin-page .filters-bar input,
+    body.admin-page .filters-bar select {
+      width: 100%;
+    }
+  
+    body.admin-page .table-wrap,
+    body.admin-page .admin-pagination,
+    body.admin-page .msg {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  
+    body.admin-page .admin-table thead {
+      display: none;
+    }
+  
+    body.admin-page .admin-table {
+      min-width: 0 !important;
+      width: 100%;
+      table-layout: fixed;
+    }
+  
+    body.admin-page .desktop-user-row {
+      display: none !important;
+    }
+  
+    body.admin-page .mobile-user-row {
+      display: block !important;
+      margin-bottom: 12px;
+    }
+  
+    body.admin-page .mobile-user-row td {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+    }
+  
+    body.admin-page .mobile-user-card {
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 20px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(216, 255, 99, 0.12), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(96, 165, 250, 0.12), transparent 26%),
+        linear-gradient(180deg, rgba(37, 47, 68, 0.98), rgba(18, 25, 39, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow:
+        0 16px 34px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+  
+    body.admin-page .mobile-user-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%);
+      pointer-events: none;
+    }
+  
+    body.admin-page .mobile-user-top {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+  
+    body.admin-page .mobile-user-name {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #f4f8ff;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+  
+    body.admin-page .mobile-user-email {
+      font-size: 0.82rem;
+      color: rgba(232, 238, 252, 0.72);
+      word-break: break-word;
+      line-height: 1.4;
+    }
+  
+    body.admin-page .mobile-user-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+  
+    body.admin-page .mobile-user-meta {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: rgba(232, 238, 252, 0.82);
+      position: relative;
+      z-index: 1;
+    }
+  
+    body.admin-page .mobile-user-meta div {
+      padding: 10px 11px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      word-break: break-word;
+    }
+  
+    body.admin-page .mobile-user-meta strong {
+      color: #fff;
+      font-weight: 800;
+    }
+  
+    body.admin-page .mobile-user-actions {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+  
+    body.admin-page .mobile-user-actions .icon-btn {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 48px;
+      height: 48px;
+      border-radius: 12px;
+      padding: 0;
+    }
+  
+    body.admin-page .mobile-user-actions .icon-btn.danger {
+      background: linear-gradient(180deg, rgba(255, 123, 123, 0.18), rgba(255, 123, 123, 0.08));
+      border-color: rgba(255, 123, 123, 0.18);
+    }
+  
+    body.admin-page .mobile-user-actions .icon-btn:not(.danger) {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    }
+  
+    body.admin-page .empty-card {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.10);
+      color: rgba(232, 238, 252, 0.75);
+      text-align: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    body.admin-page .mobile-user-card {
+      padding: 12px;
+      border-radius: 16px;
+    }
+  
+    body.admin-page .mobile-user-name {
+      font-size: 0.88rem;
+    }
+  
+    body.admin-page .mobile-user-email {
+      font-size: 0.76rem;
+    }
+  
+    body.admin-page .mobile-user-actions {
+      gap: 6px;
+    }
+  
+    body.admin-page .mobile-user-actions .icon-btn {
+      min-height: 44px;
+      height: 44px;
+      border-radius: 11px;
+    }
+  
+    body.admin-page .admin-page-btn {
+      min-width: 96px;
+    }
+  
+    body.admin-page .admin-page-info {
+      font-size: 0.8rem;
+      min-height: 42px;
+      padding: 0 12px;
+    }
+  
+    body.admin-page .admin-pagination {
+      gap: 8px;
+    }
+  }
+
+  body.admin-page .admin-back-btn {
+    height: 44px;
+    min-height: 44px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    white-space: nowrap;
+    align-self: stretch;
+  }
+  
+  /* no mobile, ocupa a largura toda como os filtros */
+  @media (max-width: 768px) {
+    body.admin-page .topnav {
+      width: 100%;
+    }
+  
+    body.admin-page .admin-back-btn {
+      width: 100%;
+      height: 44px;
+    }
+  }
