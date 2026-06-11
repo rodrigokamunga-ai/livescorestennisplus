@@ -924,28 +924,34 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
   }
 
   /* nomes lado a lado */
-  body.admin-page .mobile-match-players {
-    font-size: 0.92rem;
-    font-weight: 900;
-    color: #f4f8ff;
-    line-height: 1.28;
-    word-break: break-word;
-    width: 100%;
-    position: relative;
-    z-index: 1;
-    white-space: nowrap;
-  }
+  /* nomes em 2 linhas no celular */
+body.admin-page .mobile-match-players {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #f4f8ff;
+  line-height: 1.28;
+  word-break: break-word;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  white-space: normal;
+}
 
-  body.admin-page .mobile-match-players strong {
-    display: inline;
-    line-height: 1.22;
-    font-size: 0.92rem;
-    letter-spacing: -0.01em;
-  }
+body.admin-page .mobile-match-players strong {
+  display: block;
+  line-height: 1.22;
+  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+}
 
-  body.admin-page .mobile-match-players br {
-    display: none;
-  }
+body.admin-page .mobile-match-players .vs-separator {
+  display: inline;
+  margin: 0 4px;
+}
+
+body.admin-page .mobile-match-players br {
+  display: block;
+}
 
   body.admin-page .mobile-match-meta {
     display: grid;
