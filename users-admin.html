@@ -4,28 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Usuários | Live Scores Tennis</title>
+
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/users-admin.css" />
 </head>
+
 <body class="admin-page">
   <main class="container stack">
-
     <section class="panel panel-glass admin-panel">
-
-      <header class="topbar topbar-glass admin-topbar-inside">
-        <div class="brand-wrap">
-          <div class="app-logo">
-            <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
-          </div>
-          <div>
-            <h1>Usuários</h1>
-            <p>Gerenciamento de cadastros</p>
-          </div>
-        </div>
-
-        <nav class="topnav">
-          <a href="menu.html" class="btn link">Voltar</a>
-        </nav>
-      </header>
 
       <div class="section-head">
         <div>
@@ -33,6 +19,10 @@
           <h2>Cadastros do sistema</h2>
           <p class="muted">Bloqueie, desbloqueie ou exclua usuários cadastrados</p>
         </div>
+
+        <nav class="topnav">
+          <a href="menu.html" class="btn link admin-back-btn">← Voltar ao menu</a>
+        </nav>
       </div>
 
       <div class="filters-bar">
@@ -60,9 +50,9 @@
         </table>
       </div>
 
+      <div id="paginationBar"></div>
       <div id="adminMsg" class="msg"></div>
     </section>
-
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
