@@ -53,15 +53,25 @@ function goHome() {
 
 function saveSession() {
   localStorage.setItem(SESSION_KEY, "1");
+  console.log("[login] sessão local salva");
 }
 
 function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-function saveBiometricData(uid, credIdB64) {
-  if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
-  if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
+function saveBiometricUid(uid) {
+  if (uid) {
+    localStorage.setItem(BIOMETRIC_KEY, uid);
+    console.log("[login] UID biométrico salvo:", uid);
+  }
+}
+
+function saveBiometricCredIdIfExists() {
+  const current = localStorage.getItem(BIOMETRIC_CRED_KEY);
+  if (current) {
+    console.log("[login] credencial biométrica já existe no localStorage");
+  }
 }
 
 function b64ToBytes(b64) {
@@ -73,28 +83,13 @@ function b64ToBytes(b64) {
   return bytes;
 }
 
-function bytesToB64(bytes) {
-  let binary = "";
-  bytes.forEach(byte => binary += String.fromCharCode(byte));
-  return btoa(binary);
-}
-
-function getCredentialIdFromAssertion(assertion) {
-  try {
-    return assertion?.rawId ? bytesToB64(new Uint8Array(assertion.rawId)) : "";
-  } catch (err) {
-    console.warn("Falha ao converter rawId para base64:", err);
-    return "";
-  }
-}
-
 // ─── Aviso de ambiente inseguro ───────────────────────────────────────────────
 
 function applyUnsafeEnvironmentUI() {
   if (googleLoginBtn) {
-    googleLoginBtn.disabled = true;
-    googleLoginBtn.style.opacity = "0.4";
-    googleLoginBtn.style.cursor = "not-allowed";
+    googleLoginBtn.disabled           = true;
+    googleLoginBtn.style.opacity      = "0.4";
+    googleLoginBtn.style.cursor       = "not-allowed";
     googleLoginBtn.style.pointerEvents = "none";
     googleLoginBtn.innerHTML =
       `<span>⚠️ Google indisponível — abra via https://localhost:8443</span>`;
@@ -147,14 +142,13 @@ function getAuthErrorMsg(code) {
     "auth/unauthorized-domain":
       "Domínio não autorizado. Adicione-o no Firebase Console.",
     "auth/internal-error":
-      "Erro interno. Tente novamente.",
+      "Erro interno. Tente novamente."
   };
 
   return errors[code] || "Ocorreu um erro inesperado. Tente novamente.";
 }
 
 // ─── Firestore / bloqueio ─────────────────────────────────────────────────────
-// Retornos:
 // true => bloqueado
 // false => liberado
 // null => não foi possível verificar
@@ -162,12 +156,12 @@ function getAuthErrorMsg(code) {
 async function checkUserBlocked(uid) {
   try {
     if (!window.__db) {
-      console.warn("Firestore (__db) não inicializado.");
+      console.warn("[checkUserBlocked] Firestore (__db) não inicializado.");
       return null;
     }
 
     if (!uid) {
-      console.warn("UID vazio na verificação de bloqueio.");
+      console.warn("[checkUserBlocked] UID vazio.");
       return null;
     }
 
@@ -178,7 +172,7 @@ async function checkUserBlocked(uid) {
     console.log("[checkUserBlocked] Documento existe?", doc.exists);
 
     if (!doc.exists) {
-      console.warn("[checkUserBlocked] Documento do usuário não encontrado:", uid);
+      console.warn("[checkUserBlocked] Documento não encontrado:", uid);
       return null;
     }
 
@@ -210,7 +204,7 @@ async function ensureUserDoc(user) {
         role:        "user",
         blocked:     false,
         createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt:   firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
 
       return;
@@ -218,15 +212,15 @@ async function ensureUserDoc(user) {
 
     const data = docSnap.data() || {};
     if (typeof data.blocked === "undefined") {
-      console.log("[ensureUserDoc] Ajustando campo blocked para false:", user.uid);
+      console.log("[ensureUserDoc] Ajustando blocked=false:", user.uid);
 
       await docRef.set({
         blocked: false,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     }
   } catch (err) {
-    console.error("[ensureUserDoc] Erro ao garantir documento do usuário:", err);
+    console.error("[ensureUserDoc] Erro:", err);
   }
 }
 
@@ -237,6 +231,20 @@ async function forceLogout() {
   } catch (err) {
     console.warn("[forceLogout] erro ao sair:", err);
   }
+}
+
+function getCurrentUser() {
+  return __auth && __auth.currentUser ? __auth.currentUser : null;
+}
+
+// ─── Salvar credencial biométrica ─────────────────────────────────────────────
+// Chame isso quando você registrar a biometria pela primeira vez.
+// Se já existir, mantém o valor salvo.
+
+function ensureBiometricStorageFromUser(user) {
+  if (!user?.uid) return;
+  saveBiometricUid(user.uid);
+  saveBiometricCredIdIfExists();
 }
 
 // ─── Inicializa Firebase Auth ────────────────────────────────────────────────
@@ -260,10 +268,7 @@ function initFirebaseAuth() {
 
         if (isBlocked === true) {
           await forceLogout();
-          setMsg(
-            "⛔ Sua conta está bloqueada. Entre em contato com o administrador.",
-            "error"
-          );
+          setMsg("⛔ Sua conta está bloqueada. Entre em contato com o administrador.", "error");
           return;
         }
 
@@ -272,6 +277,7 @@ function initFirebaseAuth() {
         }
 
         await ensureUserDoc(user);
+        ensureBiometricStorageFromUser(user);
         saveSession();
         goHome();
       });
@@ -292,10 +298,7 @@ form?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!CAN_USE_FIREBASE) {
-    setMsg(
-      "⚠️ Abra o sistema via https://localhost:8443 para fazer login.",
-      "error"
-    );
+    setMsg("⚠️ Abra o sistema via https://localhost:8443 para fazer login.", "error");
     return;
   }
 
@@ -322,18 +325,16 @@ form?.addEventListener("submit", async (e) => {
 
     if (isBlocked === true) {
       await forceLogout();
-      setMsg(
-        "⛔ Sua conta está bloqueada. Entre em contato com o administrador.",
-        "error"
-      );
+      setMsg("⛔ Sua conta está bloqueada. Entre em contato com o administrador.", "error");
       return;
     }
 
     if (isBlocked === null) {
-      console.warn("[loginEmail] Não foi possível validar bloqueio.");
+      console.warn("[loginEmail] não foi possível validar bloqueio, prosseguindo.");
     }
 
     await ensureUserDoc(user);
+    ensureBiometricStorageFromUser(user);
 
     if (rememberMe?.checked) {
       localStorage.setItem(REMEMBER_EMAIL_KEY, email);
@@ -341,7 +342,6 @@ form?.addEventListener("submit", async (e) => {
       localStorage.removeItem(REMEMBER_EMAIL_KEY);
     }
 
-    saveBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
     saveSession();
     goHome();
 
@@ -361,20 +361,17 @@ async function finishGoogleLogin(user) {
 
     if (isBlocked === true) {
       await forceLogout();
-      setMsg(
-        "⛔ Sua conta está bloqueada. Entre em contato com o administrador.",
-        "error"
-      );
+      setMsg("⛔ Sua conta está bloqueada. Entre em contato com o administrador.", "error");
       return;
     }
 
     if (isBlocked === null) {
-      console.warn("[finishGoogleLogin] Não foi possível validar bloqueio.");
+      console.warn("[finishGoogleLogin] não foi possível validar bloqueio, prosseguindo.");
     }
 
     await ensureUserDoc(user);
+    ensureBiometricStorageFromUser(user);
 
-    saveBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
     saveSession();
     setMsg("✅ Login com Google realizado!", "success");
     setTimeout(goHome, 800);
@@ -392,7 +389,6 @@ async function handleGoogleRedirectResult() {
 
   try {
     const result = await __auth.getRedirectResult();
-
     if (!result || !result.user) return;
 
     setMsg("Finalizando login com Google...", "info");
@@ -465,7 +461,7 @@ function initBiometricLogin() {
 
   if (!CAN_USE_BIOMETRIC || !uid || !credIdB64 || !window.PublicKeyCredential) {
     if (biometricBtn) biometricBtn.style.display = "none";
-    console.warn("[initBiometricLogin] Biometria indisponível.");
+    console.warn("[initBiometricLogin] biometria indisponível.");
     return;
   }
 
@@ -475,13 +471,24 @@ function initBiometricLogin() {
     try {
       setMsg("Aguardando biometria...", "info");
 
+      const currentUser = getCurrentUser();
+      console.log("[biometria] currentUser:", currentUser ? currentUser.uid : null);
+
+      if (!currentUser) {
+        setMsg(
+          "⚠️ Não existe sessão Firebase ativa. Faça login com e-mail ou Google primeiro.",
+          "error"
+        );
+        return;
+      }
+
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
       const credIdBytes = b64ToBytes(credIdB64);
 
       console.log("[biometria] iniciando WebAuthn...");
-      console.log("[biometria] UID consultado:", uid);
+      console.log("[biometria] UID localStorage:", uid);
 
       const assertion = await navigator.credentials.get({
         publicKey: {
@@ -503,20 +510,17 @@ function initBiometricLogin() {
         return;
       }
 
-      const isBlocked = await checkUserBlocked(uid);
+      const isBlocked = await checkUserBlocked(currentUser.uid);
 
       console.log("[biometria] Resultado checkUserBlocked:", isBlocked);
 
       if (isBlocked === true) {
-        setMsg(
-          "⛔ Sua conta está bloqueada. Entre em contato com o administrador.",
-          "error"
-        );
+        setMsg("⛔ Sua conta está bloqueada. Entre em contato com o administrador.", "error");
         return;
       }
 
       if (isBlocked === null) {
-        console.warn("[biometria] Não foi possível verificar a conta, mas a biometria foi válida.");
+        console.warn("[biometria] não foi possível validar bloqueio, mas biometria foi válida.");
       }
 
       saveSession();
