@@ -2,32 +2,30 @@
   "use strict";
 
   const MenuApp = (() => {
-    const ADMIN_EMAIL      = "rodrigokamunga@hotmail.com";
-    const COLLECTION_NAME  = "matches";
-    const READ_ALERTS_KEY  = "lsts_menu_alerts_read_signature";
-    const PUBLIC_URL       = `${window.location.origin}/index.html`;
-    const SESSION_KEY      = "lsts_admin_session";
+    const ADMIN_EMAIL = "rodrigokamunga@hotmail.com";
+    const COLLECTION_NAME = "matches";
+    const READ_ALERTS_KEY = "lsts_menu_alerts_read_signature";
+    const PUBLIC_URL = `${window.location.origin}/index.html`;
+    const SESSION_KEY = "lsts_admin_session";
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
-
-    // Fallback biométrico simples
     const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 
     const el = {
-      welcomeTitle:        document.getElementById("welcomeTitle"),
-      welcomeText:         document.getElementById("welcomeText"),
-      usersAdminBtn:       document.getElementById("usersAdminBtn"),
-      usersAdminMenuItem:  document.getElementById("usersAdminMenuItem"),
-      headerUserTitle:     document.getElementById("headerUserTitle"),
-      headerUserSubtitle:  document.getElementById("headerUserSubtitle"),
-      alertBtnTop:         document.getElementById("alertBtnTop"),
-      alertBadge:          document.querySelector(".header-alert-badge"),
-      alertModalOverlay:   document.getElementById("alertModalOverlay"),
-      alertModalBody:      document.getElementById("alertModalBody"),
-      closeAlertModalBtn:  document.getElementById("closeAlertModalBtn"),
+      welcomeTitle: document.getElementById("welcomeTitle"),
+      welcomeText: document.getElementById("welcomeText"),
+      usersAdminBtn: document.getElementById("usersAdminBtn"),
+      usersAdminMenuItem: document.getElementById("usersAdminMenuItem"),
+      headerUserTitle: document.getElementById("headerUserTitle"),
+      headerUserSubtitle: document.getElementById("headerUserSubtitle"),
+      alertBtnTop: document.getElementById("alertBtnTop"),
+      alertBadge: document.querySelector(".header-alert-badge"),
+      alertModalOverlay: document.getElementById("alertModalOverlay"),
+      alertModalBody: document.getElementById("alertModalBody"),
+      closeAlertModalBtn: document.getElementById("closeAlertModalBtn"),
       closeAlertModalBtn2: document.getElementById("closeAlertModalBtn2"),
-      logoutBtnBottom:     document.getElementById("logoutBtnBottom"),
-      sharePublicBtn:      document.getElementById("sharePublicBtn"),
-      profileAvatar:       document.getElementById("menuProfileAvatar")
+      logoutBtnBottom: document.getElementById("logoutBtnBottom"),
+      sharePublicBtn: document.getElementById("sharePublicBtn"),
+      profileAvatar: document.getElementById("menuProfileAvatar")
     };
 
     let currentAlertsSignature = "";
@@ -70,8 +68,10 @@
       try {
         const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
         if (!raw) return null;
+
         const parsed = JSON.parse(raw);
         if (!parsed || typeof parsed !== "object") return null;
+
         return {
           uid: parsed.uid || "",
           email: parsed.email || "",
@@ -143,8 +143,8 @@
       try {
         const shareData = {
           title: "Live Scores Tennis",
-          text:  "Acesse a tela pública do sistema:",
-          url:   PUBLIC_URL
+          text: "Acesse a tela pública do sistema:",
+          url: PUBLIC_URL
         };
 
         if (navigator.share) {
@@ -178,17 +178,17 @@
 
     function setWelcome(user) {
       const name = getName(user);
-      if (el.welcomeTitle)       el.welcomeTitle.textContent = `Bem-vindo, ${name}`;
-      if (el.welcomeText)        el.welcomeText.textContent  = "Escolha uma área para abrir.";
-      if (el.headerUserTitle)    el.headerUserTitle.textContent = "Menu";
+      if (el.welcomeTitle) el.welcomeTitle.textContent = `Bem-vindo, ${name}`;
+      if (el.welcomeText) el.welcomeText.textContent = "Escolha uma área para abrir.";
+      if (el.headerUserTitle) el.headerUserTitle.textContent = "Menu";
       if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
     }
 
     function setBiometricWelcome(user) {
       const name = getName(user);
-      if (el.welcomeTitle)       el.welcomeTitle.textContent = `Bem-vindo, ${name}`;
-      if (el.welcomeText)        el.welcomeText.textContent = "Acesso liberado pela biometria.";
-      if (el.headerUserTitle)    el.headerUserTitle.textContent = "Menu";
+      if (el.welcomeTitle) el.welcomeTitle.textContent = `Bem-vindo, ${name}`;
+      if (el.welcomeText) el.welcomeText.textContent = "Acesso liberado pela biometria.";
+      if (el.headerUserTitle) el.headerUserTitle.textContent = "Menu";
       if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
     }
 
@@ -246,11 +246,11 @@
       if (typeof value?.toDate === "function") {
         const d = value.toDate();
         if (isNaN(d.getTime())) return "";
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       }
       if (value instanceof Date) {
         if (isNaN(value.getTime())) return "";
-        return `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,"0")}-${String(value.getDate()).padStart(2,"0")}`;
+        return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
       }
       if (typeof value === "string") {
         const v = value.trim();
@@ -262,7 +262,7 @@
         }
         const d = new Date(v);
         if (!isNaN(d.getTime()))
-          return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       }
       return "";
     }
@@ -291,13 +291,13 @@
     const pickPlayer2 = (d) => d.player2 || d.nomeJogador2 || d.jogador2 || d.adversario || d.nomeAdversario || "Adversário";
     const pickPlayer3 = (d) => d.player3 || d.nomeJogador3 || d.jogador3 || "Jogador 3";
     const pickPlayer4 = (d) => d.player4 || d.nomeJogador4 || d.jogador4 || "Jogador 4";
-    const pickDate    = (d) => d.matchDateTime || d.dataPartida || d.data || d.date || d.matchDate || d.dataJogo || null;
-    const pickTime    = (d) => d.horaPartida || d.hora || d.time || d.matchTime || d.horario || null;
+    const pickDate = (d) => d.matchDateTime || d.dataPartida || d.data || d.date || d.matchDate || d.dataJogo || null;
+    const pickTime = (d) => d.horaPartida || d.hora || d.time || d.matchTime || d.horario || null;
 
     function getMatchDateTimeLabel(data) {
       const rawDate = pickDate(data);
-      const dateBR  = formatDateBR(rawDate);
-      const time    = normalizeTime(pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : ""));
+      const dateBR = formatDateBR(rawDate);
+      const time = normalizeTime(pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : ""));
       return dateBR ? `${dateBR} - ${time}` : "";
     }
 
@@ -337,12 +337,15 @@
       if (!el.alertBadge || !el.alertModalBody || !user?.uid) return;
       try {
         const db = getDb();
-        if (!db) { renderAlerts([]); return; }
+        if (!db) {
+          renderAlerts([]);
+          return;
+        }
 
-        const now  = new Date();
-        const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-        const matches  = [];
+        const matches = [];
         const snapshot = await db.collection(COLLECTION_NAME).get();
 
         snapshot.forEach((doc) => {
@@ -350,18 +353,18 @@
           if (data.ownerId !== user.uid) return;
           const rawDate = pickDate(data);
           if (normalizeDateOnly(rawDate) !== today) return;
-          const normalizedTime = normalizeTime(pickTime(data) || (rawDate ? String(rawDate).slice(11,16) : ""));
+          const normalizedTime = normalizeTime(pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : ""));
           matches.push({
             id: doc.id,
             jogador1: pickPlayer1(data),
             jogador2: pickPlayer2(data),
             jogador3: pickPlayer3(data),
             jogador4: pickPlayer4(data),
-            horaPartida:     normalizedTime,
-            dateTimeLabel:   getMatchDateTimeLabel(data),
-            categoryName:    data.categoryName || "",
+            horaPartida: normalizedTime,
+            dateTimeLabel: getMatchDateTimeLabel(data),
+            categoryName: data.categoryName || "",
             tournamentStage: data.tournamentStage || "",
-            playersHTML:     formatPlayersLine(data)
+            playersHTML: formatPlayersLine(data)
           });
         });
 
@@ -414,17 +417,14 @@
         const localSession = hasLocalSession();
         const biometricSession = hasBiometricSession();
 
-        console.log("[menu] onAuthStateChanged user:", user ? user.uid : null,
-          "localSession:", localSession,
-          "biometricSession:", biometricSession
-        );
+        console.log("[menu] onAuthStateChanged user:", user ? user.uid : null, "localSession:", localSession, "biometricSession:", biometricSession);
 
         if (user) {
           setWelcome(user);
 
           const isAdmin = normalizeEmail(user.email) === normalizeEmail(ADMIN_EMAIL);
-          if (el.usersAdminBtn)       el.usersAdminBtn.style.display      = isAdmin ? "flex" : "none";
-          if (el.usersAdminMenuItem)  el.usersAdminMenuItem.style.display = isAdmin ? "flex" : "none";
+          if (el.usersAdminBtn) el.usersAdminBtn.style.display = isAdmin ? "flex" : "none";
+          if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = isAdmin ? "flex" : "none";
 
           await Promise.allSettled([
             loadProfileAvatar(user),
@@ -441,8 +441,8 @@
             setBiometricWelcome(fallbackUser);
 
             const isAdmin = normalizeEmail(fallbackUser.email) === normalizeEmail(ADMIN_EMAIL);
-            if (el.usersAdminBtn)       el.usersAdminBtn.style.display      = isAdmin ? "flex" : "none";
-            if (el.usersAdminMenuItem)  el.usersAdminMenuItem.style.display = isAdmin ? "flex" : "none";
+            if (el.usersAdminBtn) el.usersAdminBtn.style.display = isAdmin ? "flex" : "none";
+            if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = isAdmin ? "flex" : "none";
 
             await Promise.allSettled([
               loadProfileAvatar(fallbackUser),
@@ -452,18 +452,14 @@
             return;
           }
 
-          // se houver sessão biométrica mas não conseguiu reconstruir o usuário,
-          // pelo menos não manda para login imediatamente
-          if (localSession || biometricSession) {
-            if (el.welcomeTitle)       el.welcomeTitle.textContent = "Bem-vindo";
-            if (el.welcomeText)        el.welcomeText.textContent = "Acesso liberado pela biometria.";
-            if (el.headerUserTitle)    el.headerUserTitle.textContent = "Menu";
-            if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
-            if (el.profileAvatar)      el.profileAvatar.src = "img/perfil-padrao.png";
-            if (el.usersAdminBtn)      el.usersAdminBtn.style.display = "none";
-            if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = "none";
-            return;
-          }
+          if (el.welcomeTitle) el.welcomeTitle.textContent = "Bem-vindo";
+          if (el.welcomeText) el.welcomeText.textContent = "Acesso liberado pela biometria.";
+          if (el.headerUserTitle) el.headerUserTitle.textContent = "Menu";
+          if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
+          if (el.profileAvatar) el.profileAvatar.src = "img/perfil-padrao.png";
+          if (el.usersAdminBtn) el.usersAdminBtn.style.display = "none";
+          if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = "none";
+          return;
         }
 
         goLogin();
