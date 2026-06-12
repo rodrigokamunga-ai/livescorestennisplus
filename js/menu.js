@@ -9,11 +9,14 @@
     const SESSION_KEY      = "lsts_admin_session";
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
 
+    // Fallback biométrico simples
+    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
+
     const el = {
-      welcomeTitle:       document.getElementById("welcomeTitle"),
+      welcomeTitle:        document.getElementById("welcomeTitle"),
       welcomeText:         document.getElementById("welcomeText"),
       usersAdminBtn:       document.getElementById("usersAdminBtn"),
-      usersAdminMenuItem:   document.getElementById("usersAdminMenuItem"),
+      usersAdminMenuItem:  document.getElementById("usersAdminMenuItem"),
       headerUserTitle:     document.getElementById("headerUserTitle"),
       headerUserSubtitle:  document.getElementById("headerUserSubtitle"),
       alertBtnTop:         document.getElementById("alertBtnTop"),
@@ -30,6 +33,10 @@
     let currentAlertsSignature = "";
 
     // ─── Helpers ──────────────────────────────────────────────────────────
+
+    function normalizeEmail(email = "") {
+      return String(email).trim().toLowerCase();
+    }
 
     function getName(user) {
       return user?.displayName || (user?.email ? user.email.split("@")[0] : "Usuário");
@@ -59,14 +66,37 @@
       return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
     }
 
+    function getBiometricCurrentUser() {
+      try {
+        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          uid: parsed.uid || "",
+          email: parsed.email || "",
+          displayName: parsed.displayName || ""
+        };
+      } catch (_) {
+        return null;
+      }
+    }
+
     function isAllowedOfflineSession() {
       return hasLocalSession() || hasBiometricSession();
+    }
+
+    async function buildFallbackUser() {
+      const biometricUser = getBiometricCurrentUser();
+      if (biometricUser?.uid) return biometricUser;
+
+      return null;
     }
 
     // ─── Foto do perfil ───────────────────────────────────────────────────
 
     async function loadProfileAvatar(user) {
-      if (!el.profileAvatar || !user) return;
+      if (!el.profileAvatar || !user?.uid) return;
 
       try {
         const db = getDb();
@@ -95,6 +125,7 @@
       try {
         localStorage.removeItem(SESSION_KEY);
         localStorage.removeItem(BIOMETRIC_SESSION_KEY);
+        localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
 
         const auth = getAuth();
         if (auth) await auth.signOut();
@@ -153,12 +184,12 @@
       if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
     }
 
-    function setBiometricWelcome() {
-      if (el.welcomeTitle)       el.welcomeTitle.textContent = "Bem-vindo";
+    function setBiometricWelcome(user) {
+      const name = getName(user);
+      if (el.welcomeTitle)       el.welcomeTitle.textContent = `Bem-vindo, ${name}`;
       if (el.welcomeText)        el.welcomeText.textContent = "Acesso liberado pela biometria.";
       if (el.headerUserTitle)    el.headerUserTitle.textContent = "Menu";
       if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
-      if (el.profileAvatar)      el.profileAvatar.src = "img/perfil-padrao.png";
     }
 
     // ─── Modal de alertas ─────────────────────────────────────────────────
@@ -186,11 +217,11 @@
       const seen = localStorage.getItem(READ_ALERTS_KEY) || "";
       if (!count || seen === currentAlertsSignature) {
         el.alertBadge.style.display = "none";
-        el.alertBadge.textContent   = "";
+        el.alertBadge.textContent = "";
         return;
       }
       el.alertBadge.style.display = "block";
-      el.alertBadge.textContent   = count > 9 ? "9+" : String(count);
+      el.alertBadge.textContent = count > 9 ? "9+" : String(count);
     }
 
     // ─── Helpers de data/hora ─────────────────────────────────────────────
@@ -303,7 +334,7 @@
     }
 
     async function loadTodayAlerts(user) {
-      if (!el.alertBadge || !el.alertModalBody || !user) return;
+      if (!el.alertBadge || !el.alertModalBody || !user?.uid) return;
       try {
         const db = getDb();
         if (!db) { renderAlerts([]); return; }
@@ -388,11 +419,10 @@
           "biometricSession:", biometricSession
         );
 
-        // Se houver Firebase Auth normal, segue fluxo completo
         if (user) {
           setWelcome(user);
 
-          const isAdmin = user.email === ADMIN_EMAIL;
+          const isAdmin = normalizeEmail(user.email) === normalizeEmail(ADMIN_EMAIL);
           if (el.usersAdminBtn)       el.usersAdminBtn.style.display      = isAdmin ? "flex" : "none";
           if (el.usersAdminMenuItem)  el.usersAdminMenuItem.style.display = isAdmin ? "flex" : "none";
 
@@ -404,17 +434,38 @@
           return;
         }
 
-        // Se não houver Firebase user, mas existir sessão local/biometria, libera menu
-        if (!user && (localSession || biometricSession)) {
-          setBiometricWelcome();
+        if (localSession || biometricSession) {
+          const fallbackUser = await buildFallbackUser();
 
-          if (el.usersAdminBtn)      el.usersAdminBtn.style.display      = "none";
-          if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = "none";
+          if (fallbackUser?.uid) {
+            setBiometricWelcome(fallbackUser);
 
-          return;
+            const isAdmin = normalizeEmail(fallbackUser.email) === normalizeEmail(ADMIN_EMAIL);
+            if (el.usersAdminBtn)       el.usersAdminBtn.style.display      = isAdmin ? "flex" : "none";
+            if (el.usersAdminMenuItem)  el.usersAdminMenuItem.style.display = isAdmin ? "flex" : "none";
+
+            await Promise.allSettled([
+              loadProfileAvatar(fallbackUser),
+              loadTodayAlerts(fallbackUser)
+            ]);
+
+            return;
+          }
+
+          // se houver sessão biométrica mas não conseguiu reconstruir o usuário,
+          // pelo menos não manda para login imediatamente
+          if (localSession || biometricSession) {
+            if (el.welcomeTitle)       el.welcomeTitle.textContent = "Bem-vindo";
+            if (el.welcomeText)        el.welcomeText.textContent = "Acesso liberado pela biometria.";
+            if (el.headerUserTitle)    el.headerUserTitle.textContent = "Menu";
+            if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
+            if (el.profileAvatar)      el.profileAvatar.src = "img/perfil-padrao.png";
+            if (el.usersAdminBtn)      el.usersAdminBtn.style.display = "none";
+            if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = "none";
+            return;
+          }
         }
 
-        // Sem nada válido, volta ao login
         goLogin();
       });
     }
