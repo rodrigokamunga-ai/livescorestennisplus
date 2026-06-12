@@ -4,19 +4,19 @@
   const CareerApp = (() => {
     const PAGE_SIZE = 5;
 
-    const getDb = () => (typeof __db !== "undefined" ? __db : firebase.firestore());
-
+    const ADMIN_KEY = "lsts_admin_session";
+    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
     const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
-    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
-    const SESSION_KEY = "lsts_admin_session";
+
+    const getDb = () => (typeof __db !== "undefined" ? __db : firebase.firestore());
+    const getAuth = () => (typeof __auth !== "undefined" ? __auth : firebase.auth());
 
     const state = {
       allMatches: [],
       filteredMatches: [],
       currentUser: null,
       currentProfileName: "",
-      // Nome atualizado do perfil (pode diferir do nome nas partidas)
       currentProfileNameNew: "",
       unsubscribe: null,
       filtersCollapsed: false,
@@ -130,7 +130,11 @@
 
       getCurrentUserProfile(user) {
         if (!user) return "";
-        return String(user.displayName || "").trim();
+        const displayName = String(user.displayName || "").trim();
+        if (displayName) return displayName;
+        const email = String(user.email || "").trim();
+        if (email) return email.split("@")[0];
+        return "";
       },
 
       getMatchFormat(match) {
@@ -206,14 +210,12 @@
         return null;
       },
 
-      // Verifica se o usuário logado é dono da partida
       isOwnerMatch(match) {
         const ownerId = String(match.ownerId || "").trim();
         if (!state.currentUser) return false;
         return ownerId === state.currentUser.uid;
       },
 
-      // Retorna o nome do jogador logado na partida
       getOwnerNameInMatch(match) {
         const ownerName = String(match.ownerName || "").trim();
         if (ownerName) return ownerName;
@@ -331,7 +333,6 @@
         return String(name || "").trim() || "-";
       },
 
-      // Substitui o nome do jogador logado pelo nome atual do perfil
       resolvePlayerName(name, match) {
         const ownerName = U.normalizeText(U.getOwnerNameInMatch(match));
         const currentName = state.currentProfileName || "";
@@ -582,7 +583,6 @@
 
       filtered = U.applyDateFilter(filtered, from, to);
 
-      // Ordena por data: mais recente primeiro
       filtered.sort((a, b) => {
         const da = U.toDate(a.matchDateTime)?.getTime() || 0;
         const db = U.toDate(b.matchDateTime)?.getTime() || 0;
@@ -661,38 +661,16 @@
 
     logoutBtnBottom?.addEventListener("click", async () => {
       try {
-        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(ADMIN_KEY);
         localStorage.removeItem(BIOMETRIC_SESSION_KEY);
-        localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
-        localStorage.removeItem(BIOMETRIC_UID_KEY);
-
-        const auth = typeof __auth !== "undefined" && __auth ? __auth : firebase.auth();
-        await auth.signOut();
-
+        await getAuth().signOut();
         window.location.replace("login.html");
       } catch (err) {
         console.error("Erro ao sair:", err);
       }
     });
 
-    // ─── Firestore ────────────────────────────────────────────────────────────
-
-    async function loadCurrentProfileName(user) {
-      try {
-        const doc = await getDb().collection("profiles").doc(user.uid).get();
-        if (doc.exists && doc.data().displayName) {
-          state.currentProfileName = doc.data().displayName.trim();
-        } else {
-          state.currentProfileName = user.displayName || "";
-        }
-      } catch {
-        state.currentProfileName = user.displayName || "";
-      }
-    }
-
-    function hasBiometricSession() {
-      return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
-    }
+    // ─── Firestore / sessão ────────────────────────────────────────────────────
 
     function getBiometricCurrentUser() {
       try {
@@ -710,33 +688,47 @@
       }
     }
 
-    async function resolveFallbackUser() {
-      const biometricCurrent = getBiometricCurrentUser();
-      if (biometricCurrent?.uid) return biometricCurrent;
-
-      const legacyUid = localStorage.getItem(BIOMETRIC_UID_KEY) || "";
-      if (!legacyUid) return null;
-
+    async function loadCurrentProfileName(user) {
       try {
-        const profileDoc = await getDb().collection("profiles").doc(legacyUid).get();
-        const profileData = profileDoc.exists ? (profileDoc.data() || {}) : {};
-
-        const userDoc = await getDb().collection("users").doc(legacyUid).get();
-        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
-
-        return {
-          uid: legacyUid,
-          email: userData.email || profileData.email || "",
-          displayName: profileData.displayName || userData.displayName || ""
-        };
-      } catch (err) {
-        console.warn("Erro ao reconstruir usuário legado:", err);
-        return {
-          uid: legacyUid,
-          email: "",
-          displayName: ""
-        };
+        const db = getDb();
+        const doc = await db.collection("profiles").doc(user.uid).get();
+        if (doc.exists && doc.data().displayName) {
+          state.currentProfileName = doc.data().displayName.trim();
+        } else {
+          state.currentProfileName = user.displayName || "";
+        }
+      } catch {
+        state.currentProfileName = user.displayName || "";
       }
+    }
+
+    async function buildFallbackUser() {
+      const biometricUser = getBiometricCurrentUser();
+      if (biometricUser?.uid) {
+        try {
+          const db = getDb();
+          const profileSnap = await db.collection("profiles").doc(biometricUser.uid).get();
+          const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+          const userSnap = await db.collection("users").doc(biometricUser.uid).get();
+          const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+          return {
+            uid: biometricUser.uid,
+            email: biometricUser.email || userData.email || profileData.email || "",
+            displayName:
+              biometricUser.displayName ||
+              profileData.displayName ||
+              userData.displayName ||
+              ""
+          };
+        } catch (err) {
+          console.warn("Falha ao reconstruir usuário biométrico:", err);
+          return biometricUser;
+        }
+      }
+
+      return null;
     }
 
     function listenMatches() {
@@ -779,13 +771,10 @@
       bindEvents();
 
       __auth.onAuthStateChanged(async (user) => {
-        let finalUser = user;
+        const hasLocal = localStorage.getItem(ADMIN_KEY) === "1";
+        const hasBiometric = localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
 
-        if (!finalUser) {
-          finalUser = await resolveFallbackUser();
-        }
-
-        if (!finalUser || !finalUser.uid) {
+        if (!user && !hasLocal && !hasBiometric) {
           state.currentUser = null;
           state.currentProfileName = "";
           setSummaryMessage("Usuário não autenticado.");
@@ -793,13 +782,28 @@
           return;
         }
 
-        state.currentUser = finalUser;
+        if (user) {
+          state.currentUser = user;
+          await loadCurrentProfileName(user);
+          setDefaultFields(state.currentProfileName);
+          listenMatches();
+          return;
+        }
 
-        // Carrega o nome mais atual do perfil (Firestore > Auth)
-        await loadCurrentProfileName(finalUser);
+        const fallbackUser = await buildFallbackUser();
 
-        setDefaultFields(state.currentProfileName);
-        listenMatches();
+        if (fallbackUser?.uid) {
+          state.currentUser = fallbackUser;
+          state.currentProfileName = String(fallbackUser.displayName || "").trim() || fallbackUser.email || "";
+          setDefaultFields(state.currentProfileName);
+          listenMatches();
+          return;
+        }
+
+        state.currentUser = null;
+        state.currentProfileName = "";
+        setSummaryMessage("Usuário não autenticado.");
+        renderPagedHistory([]);
       });
     }
 
