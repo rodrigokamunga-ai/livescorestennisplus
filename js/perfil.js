@@ -2,42 +2,36 @@
   "use strict";
 
   const ProfileApp = (() => {
-
-    const getDb   = () => (typeof __db   !== "undefined" ? __db   : firebase.firestore());
+    const getDb = () => (typeof __db !== "undefined" ? __db : firebase.firestore());
     const getAuth = () => (typeof __auth !== "undefined" ? __auth : firebase.auth());
 
-    // Sessões
     const ADMIN_KEY = "lsts_admin_session";
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
     const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 
-    // Imagem padrão do avatar
     const DEFAULT_AVATAR = "img/perfil-padrao.png";
 
-    // Configuração de resize/compressão da imagem
     const IMAGE_MAX_WIDTH = 512;
     const IMAGE_MAX_HEIGHT = 512;
     const IMAGE_MIME_TYPE = "image/jpeg";
     const IMAGE_QUALITY_LIST = [0.75, 0.65, 0.55, 0.45, 0.35];
     const MAX_BASE64_LENGTH = 900000;
 
-    // ─── Estados e cidades ────────────────────────────────────────────────
-
     const BR_STATES = [
-      { uf: "AC", name: "Acre" },       { uf: "AL", name: "Alagoas" },
-      { uf: "AP", name: "Amapá" },      { uf: "AM", name: "Amazonas" },
-      { uf: "BA", name: "Bahia" },      { uf: "CE", name: "Ceará" },
+      { uf: "AC", name: "Acre" }, { uf: "AL", name: "Alagoas" },
+      { uf: "AP", name: "Amapá" }, { uf: "AM", name: "Amazonas" },
+      { uf: "BA", name: "Bahia" }, { uf: "CE", name: "Ceará" },
       { uf: "DF", name: "Distrito Federal" }, { uf: "ES", name: "Espírito Santo" },
-      { uf: "GO", name: "Goiás" },      { uf: "MA", name: "Maranhão" },
+      { uf: "GO", name: "Goiás" }, { uf: "MA", name: "Maranhão" },
       { uf: "MT", name: "Mato Grosso" }, { uf: "MS", name: "Mato Grosso do Sul" },
       { uf: "MG", name: "Minas Gerais" }, { uf: "PA", name: "Pará" },
-      { uf: "PB", name: "Paraíba" },    { uf: "PR", name: "Paraná" },
+      { uf: "PB", name: "Paraíba" }, { uf: "PR", name: "Paraná" },
       { uf: "PE", name: "Pernambuco" }, { uf: "PI", name: "Piauí" },
       { uf: "RJ", name: "Rio de Janeiro" }, { uf: "RN", name: "Rio Grande do Norte" },
       { uf: "RS", name: "Rio Grande do Sul" }, { uf: "RO", name: "Rondônia" },
-      { uf: "RR", name: "Roraima" },    { uf: "SC", name: "Santa Catarina" },
-      { uf: "SP", name: "São Paulo" },  { uf: "SE", name: "Sergipe" },
+      { uf: "RR", name: "Roraima" }, { uf: "SC", name: "Santa Catarina" },
+      { uf: "SP", name: "São Paulo" }, { uf: "SE", name: "Sergipe" },
       { uf: "TO", name: "Tocantins" }
     ];
 
@@ -71,42 +65,38 @@
       TO: ["Palmas","Araguaína","Gurupi","Porto Nacional","Paraíso do Tocantins"]
     };
 
-    // ─── Referências ──────────────────────────────────────────────────────
-
     const el = {
-      form:                document.getElementById("profileForm"),
-      displayName:         document.getElementById("displayName"),
-      email:               document.getElementById("email"),
-      phone:               document.getElementById("phone"),
-      country:             document.getElementById("country"),
-      stateLabel:          document.getElementById("stateLabel"),
-      cityLabel:           document.getElementById("cityLabel"),
-      state:               document.getElementById("state"),
-      city:                document.getElementById("city"),
-      gender:              document.getElementById("gender"),
-      birthDate:           document.getElementById("birthDate"),
-      height:              document.getElementById("height"),
-      weight:              document.getElementById("weight"),
-      photoFile:           document.getElementById("photoFile"),
-      avatarPreview:       document.getElementById("avatarPreview"),
-      photoFileName:       document.getElementById("photoFileName"),
-      removePhotoBtn:      document.getElementById("removePhotoBtn"),
-      msg:                 document.getElementById("profileMsg"),
-      clearBtn:            document.getElementById("clearProfileBtn"),
-      // Senha
-      currentPassword:     document.getElementById("currentPassword"),
-      newPassword:         document.getElementById("newPassword"),
-      confirmPassword:     document.getElementById("confirmPassword"),
-      changePasswordBtn:   document.getElementById("changePasswordBtn"),
+      form: document.getElementById("profileForm"),
+      displayName: document.getElementById("displayName"),
+      email: document.getElementById("email"),
+      phone: document.getElementById("phone"),
+      country: document.getElementById("country"),
+      stateLabel: document.getElementById("stateLabel"),
+      cityLabel: document.getElementById("cityLabel"),
+      state: document.getElementById("state"),
+      city: document.getElementById("city"),
+      gender: document.getElementById("gender"),
+      birthDate: document.getElementById("birthDate"),
+      height: document.getElementById("height"),
+      weight: document.getElementById("weight"),
+      photoFile: document.getElementById("photoFile"),
+      avatarPreview: document.getElementById("avatarPreview"),
+      photoFileName: document.getElementById("photoFileName"),
+      removePhotoBtn: document.getElementById("removePhotoBtn"),
+      msg: document.getElementById("profileMsg"),
+      clearBtn: document.getElementById("clearProfileBtn"),
+      currentPassword: document.getElementById("currentPassword"),
+      newPassword: document.getElementById("newPassword"),
+      confirmPassword: document.getElementById("confirmPassword"),
+      changePasswordBtn: document.getElementById("changePasswordBtn"),
       generatePasswordBtn: document.getElementById("generatePasswordBtn"),
-      passwordMsg:         document.getElementById("passwordMsg"),
-      // Deletar conta
-      deleteAccountBtn:    document.getElementById("deleteAccountBtn"),
-      deleteModalOverlay:  document.getElementById("deleteModalOverlay"),
-      deleteConfirmInput:  document.getElementById("deleteConfirmInput"),
-      confirmDeleteBtn:    document.getElementById("confirmDeleteBtn"),
-      cancelDeleteBtn:     document.getElementById("cancelDeleteBtn"),
-      deleteMsg:           document.getElementById("deleteMsg")
+      passwordMsg: document.getElementById("passwordMsg"),
+      deleteAccountBtn: document.getElementById("deleteAccountBtn"),
+      deleteModalOverlay: document.getElementById("deleteModalOverlay"),
+      deleteConfirmInput: document.getElementById("deleteConfirmInput"),
+      confirmDeleteBtn: document.getElementById("confirmDeleteBtn"),
+      cancelDeleteBtn: document.getElementById("cancelDeleteBtn"),
+      deleteMsg: document.getElementById("deleteMsg")
     };
 
     let currentUser = null;
@@ -114,7 +104,33 @@
     let previousDisplayName = "";
     let removePhotoRequested = false;
 
-    // ─── Mensagens ────────────────────────────────────────────────────────
+    function hasAdminSession() {
+      return localStorage.getItem(ADMIN_KEY) === "1";
+    }
+
+    function hasBiometricSession() {
+      return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
+    }
+
+    function getBiometricUid() {
+      return localStorage.getItem(BIOMETRIC_UID_KEY) || "";
+    }
+
+    function getCurrentBiometricUser() {
+      try {
+        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          uid: parsed.uid || "",
+          email: parsed.email || "",
+          displayName: parsed.displayName || ""
+        };
+      } catch (_) {
+        return null;
+      }
+    }
 
     function setMsg(text, type = "info") {
       if (!el.msg) return;
@@ -138,36 +154,6 @@
       if (!el.deleteMsg) return;
       el.deleteMsg.textContent = text || "";
       el.deleteMsg.style.color = type === "success" ? "#86efac" : "#fca5a5";
-    }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────
-
-    function hasAdminSession() {
-      return localStorage.getItem(ADMIN_KEY) === "1";
-    }
-
-    function hasBiometricSession() {
-      return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
-    }
-
-    function getBiometricUid() {
-      return localStorage.getItem(BIOMETRIC_UID_KEY) || "";
-    }
-
-    function getBiometricCurrentUser() {
-      try {
-        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return null;
-        return {
-          uid: parsed.uid || "",
-          email: parsed.email || "",
-          displayName: parsed.displayName || ""
-        };
-      } catch (_) {
-        return null;
-      }
     }
 
     function getRadioValue(name) {
@@ -208,7 +194,7 @@
     function toggleLocationFields(country, uf = "", city = "") {
       const isBR = country === "BR";
       if (el.stateLabel) el.stateLabel.style.display = isBR ? "" : "none";
-      if (el.cityLabel)  el.cityLabel.style.display  = isBR ? "" : "none";
+      if (el.cityLabel) el.cityLabel.style.display = isBR ? "" : "none";
       if (isBR) {
         populateStates(uf);
         if (uf) populateCities(uf, city);
@@ -219,12 +205,10 @@
       const hasMinLength = password.length >= 8;
       const hasUppercase = /[A-Z]/.test(password);
       const hasLowercase = /[a-z]/.test(password);
-      const hasNumber    = /\d/.test(password);
-      const hasSpecial   = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
       return hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
     }
-
-    // ─── Imagem ───────────────────────────────────────────────────────────
 
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
@@ -232,7 +216,6 @@
 
         reader.onload = (event) => {
           const img = new Image();
-
           img.onload = () => {
             let width = img.width;
             let height = img.height;
@@ -291,17 +274,15 @@
       setMsg("Foto removida. Clique em salvar para confirmar a alteração.", "info");
     }
 
-    // ─── Preenche formulário ──────────────────────────────────────────────
-
     function fillForm(data) {
       if (el.displayName) el.displayName.value = data.displayName || "";
-      if (el.phone)       el.phone.value       = data.phone       || "";
-      if (el.gender)      el.gender.value      = data.gender      || "";
-      if (el.birthDate)   el.birthDate.value   = data.birthDate   || "";
-      if (el.height)      el.height.value      = data.height      || "";
-      if (el.weight)      el.weight.value      = data.weight      || "";
-      if (data.forehand)  setRadioValue("forehand", data.forehand);
-      if (data.backhand)  setRadioValue("backhand", data.backhand);
+      if (el.phone) el.phone.value = data.phone || "";
+      if (el.gender) el.gender.value = data.gender || "";
+      if (el.birthDate) el.birthDate.value = data.birthDate || "";
+      if (el.height) el.height.value = data.height || "";
+      if (el.weight) el.weight.value = data.weight || "";
+      if (data.forehand) setRadioValue("forehand", data.forehand);
+      if (data.backhand) setRadioValue("backhand", data.backhand);
 
       if (el.country && data.country) {
         el.country.value = data.country;
@@ -318,47 +299,10 @@
       }
     }
 
-    // ─── Carrega perfil ───────────────────────────────────────────────────
-
-    async function resolveCurrentUser(user) {
-      if (user) return user;
-
-      const biometricCurrent = getBiometricCurrentUser();
-      if (biometricCurrent?.uid) {
-        return biometricCurrent;
-      }
-
-      if (hasAdminSession() || hasBiometricSession()) {
-        const uid = getBiometricUid();
-        if (uid) {
-          const fallback = { uid, email: "", displayName: "" };
-
-          try {
-            const db = getDb();
-            const profileSnap = await db.collection("profiles").doc(uid).get();
-            const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
-
-            const userSnap = await db.collection("users").doc(uid).get();
-            const userData = userSnap.exists ? (userSnap.data() || {}) : {};
-
-            fallback.email = userData.email || profileData.email || "";
-            fallback.displayName = profileData.displayName || userData.displayName || "";
-          } catch (err) {
-            console.warn("Falha ao reconstruir usuário biométrico:", err);
-          }
-
-          return fallback;
-        }
-      }
-
-      return null;
-    }
-
     async function loadProfile(user) {
       try {
-        if (el.email)       el.email.value       = user.email       || "";
+        if (el.email) el.email.value = user.email || "";
         if (el.displayName) el.displayName.value = user.displayName || "";
-
         previousDisplayName = user.displayName || "";
 
         const doc = await getDb().collection("profiles").doc(user.uid).get();
@@ -376,7 +320,34 @@
       }
     }
 
-    // ─── Salva perfil ─────────────────────────────────────────────────────
+    async function buildBiometricFallbackUser(user) {
+      const uid = user?.uid || getBiometricUid();
+      if (!uid) return null;
+
+      const fallbackUser = {
+        uid,
+        email: user?.email || "",
+        displayName: user?.displayName || ""
+      };
+
+      try {
+        const db = getDb();
+        if (!db) return fallbackUser;
+
+        const profileSnap = await db.collection("profiles").doc(uid).get();
+        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+        const userSnap = await db.collection("users").doc(uid).get();
+        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+        fallbackUser.email = user?.email || userData.email || profileData.email || "";
+        fallbackUser.displayName = profileData.displayName || userData.displayName || user?.displayName || "";
+      } catch (err) {
+        console.warn("Firestore indisponível para biometria, usando fallback mínimo.", err);
+      }
+
+      return fallbackUser;
+    }
 
     async function saveProfile(e) {
       e.preventDefault();
@@ -409,24 +380,24 @@
 
         const data = {
           displayName: newDisplayName,
-          email:       currentUser.email || "",
-          phone:       el.phone?.value.trim()  || "",
-          country:     el.country?.value       || "",
-          state:       el.state?.value         || "",
-          city:        el.city?.value          || "",
-          gender:      el.gender?.value        || "",
-          birthDate:   el.birthDate?.value     || "",
-          height:      el.height?.value        || "",
-          weight:      el.weight?.value        || "",
-          forehand:    getRadioValue("forehand"),
-          backhand:    getRadioValue("backhand"),
+          email: currentUser.email || "",
+          phone: el.phone?.value.trim() || "",
+          country: el.country?.value || "",
+          state: el.state?.value || "",
+          city: el.city?.value || "",
+          gender: el.gender?.value || "",
+          birthDate: el.birthDate?.value || "",
+          height: el.height?.value || "",
+          weight: el.weight?.value || "",
+          forehand: getRadioValue("forehand"),
+          backhand: getRadioValue("backhand"),
           photoBase64,
-          updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         await getDb().collection("profiles").doc(currentUser.uid).set(data, { merge: true });
 
-        if (newDisplayName && newDisplayName !== currentUser.displayName && currentUser.updateProfile) {
+        if (newDisplayName && newDisplayName !== currentUser.displayName) {
           await currentUser.updateProfile({ displayName: newDisplayName });
           previousDisplayName = newDisplayName;
         }
@@ -447,18 +418,16 @@
       }
     }
 
-    // ─── Gerar senha forte ────────────────────────────────────────────────
-
     function generatePassword() {
-      const upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const lower   = "abcdefghijklmnopqrstuvwxyz";
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const lower = "abcdefghijklmnopqrstuvwxyz";
       const numbers = "0123456789";
       const symbols = "!@#$%^&*()_+-=[]{}|:,.<>?";
-      const all     = upper + lower + numbers + symbols;
+      const all = upper + lower + numbers + symbols;
 
       const pwd = [
-        upper  [Math.floor(Math.random() * upper.length)],
-        lower  [Math.floor(Math.random() * lower.length)],
+        upper[Math.floor(Math.random() * upper.length)],
+        lower[Math.floor(Math.random() * lower.length)],
         numbers[Math.floor(Math.random() * numbers.length)],
         symbols[Math.floor(Math.random() * symbols.length)],
         ...Array.from({ length: 10 }, () => all[Math.floor(Math.random() * all.length)])
@@ -471,7 +440,7 @@
 
       const generated = pwd.join("");
 
-      if (el.newPassword)     el.newPassword.value     = generated;
+      if (el.newPassword) el.newPassword.value = generated;
       if (el.confirmPassword) el.confirmPassword.value = generated;
 
       if (navigator.clipboard?.writeText) {
@@ -490,54 +459,41 @@
       }
     }
 
-    // ─── Alterar senha ────────────────────────────────────────────────────
-
     async function changePassword() {
       const current = el.currentPassword?.value || "";
-      const next    = el.newPassword?.value     || "";
+      const next = el.newPassword?.value || "";
       const confirm = el.confirmPassword?.value || "";
 
-      if (!current)         return setPasswordMsg("Informe a senha atual.", "error");
-      if (!next)            return setPasswordMsg("Informe a nova senha.", "error");
+      if (!current) return setPasswordMsg("Informe a senha atual.", "error");
+      if (!next) return setPasswordMsg("Informe a nova senha.", "error");
       if (next !== confirm) return setPasswordMsg("As senhas não coincidem.", "error");
 
       if (!isStrongPassword(next)) {
-        return setPasswordMsg(
-          "A nova senha deve ter no mínimo 8 caracteres, com letras maiúsculas, minúsculas, número e caractere especial.",
-          "error"
-        );
+        return setPasswordMsg("A nova senha deve ter no mínimo 8 caracteres, com letras maiúsculas, minúsculas, número e caractere especial.", "error");
       }
 
       setPasswordMsg("Alterando senha...", "info");
 
       try {
-        const credential = firebase.auth.EmailAuthProvider.credential(
-          currentUser.email,
-          current
-        );
-
+        const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, current);
         await currentUser.reauthenticateWithCredential(credential);
         await currentUser.updatePassword(next);
 
         if (el.currentPassword) el.currentPassword.value = "";
-        if (el.newPassword)     el.newPassword.value     = "";
+        if (el.newPassword) el.newPassword.value = "";
         if (el.confirmPassword) el.confirmPassword.value = "";
 
         setPasswordMsg("✅ Senha alterada com sucesso!", "success");
       } catch (err) {
         console.error("Erro ao alterar senha:", err);
-
         const msg =
-          err.code === "auth/wrong-password"        ? "Senha atual incorreta." :
-          err.code === "auth/weak-password"         ? "A nova senha é muito fraca." :
-          err.code === "auth/requires-recent-login"  ? "Faça login novamente para alterar a senha." :
+          err.code === "auth/wrong-password" ? "Senha atual incorreta." :
+          err.code === "auth/weak-password" ? "A nova senha é muito fraca." :
+          err.code === "auth/requires-recent-login" ? "Faça login novamente para alterar a senha." :
           err.message || "Erro ao alterar senha.";
-
         setPasswordMsg(msg, "error");
       }
     }
-
-    // ─── Deletar conta ────────────────────────────────────────────────────
 
     function openDeleteModal() {
       if (el.deleteModalOverlay) {
@@ -545,7 +501,7 @@
         el.deleteModalOverlay.setAttribute("aria-hidden", "false");
       }
       if (el.deleteConfirmInput) el.deleteConfirmInput.value = "";
-      if (el.confirmDeleteBtn)   el.confirmDeleteBtn.disabled = true;
+      if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = true;
       setDeleteMsg("");
     }
 
@@ -563,32 +519,23 @@
       if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = true;
 
       try {
-        const db  = getDb();
+        const db = getDb();
         const uid = currentUser.uid;
 
-        const password = prompt(
-          "Por segurança, confirme sua senha atual para excluir a conta:"
-        );
+        const password = prompt("Por segurança, confirme sua senha atual para excluir a conta:");
         if (!password) {
           setDeleteMsg("Operação cancelada.", "error");
           if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = false;
           return;
         }
 
-        const credential = firebase.auth.EmailAuthProvider.credential(
-          currentUser.email,
-          password
-        );
+        const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, password);
         await currentUser.reauthenticateWithCredential(credential);
 
         await db.collection("profiles").doc(uid).delete();
         await db.collection("users").doc(uid).delete();
 
-        const matchesSnap = await db
-          .collection("matches")
-          .where("ownerId", "==", uid)
-          .get();
-
+        const matchesSnap = await db.collection("matches").where("ownerId", "==", uid).get();
         if (!matchesSnap.empty) {
           const batch = db.batch();
           matchesSnap.forEach((doc) => batch.delete(doc.ref));
@@ -597,50 +544,42 @@
 
         await currentUser.delete();
 
-        localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
-        localStorage.removeItem(BIOMETRIC_UID_KEY);
-        localStorage.removeItem(BIOMETRIC_SESSION_KEY);
-        localStorage.removeItem(ADMIN_KEY);
+        localStorage.clear();
         sessionStorage.clear();
         window.location.replace("login.html");
       } catch (err) {
         console.error("Erro ao deletar conta:", err);
 
         const errMsg =
-          err.code === "auth/requires-recent-login"
-            ? "Sessão expirada. Faça login novamente antes de deletar a conta." :
-          err.code === "auth/wrong-password"
-            ? "Senha incorreta. Não foi possível confirmar sua identidade." :
-          err.code === "permission-denied"
-            ? "Sem permissão. Verifique as regras do Firestore." :
-            err.message || "Erro ao deletar a conta.";
+          err.code === "auth/requires-recent-login" ? "Sessão expirada. Faça login novamente antes de deletar a conta." :
+          err.code === "auth/wrong-password" ? "Senha incorreta. Não foi possível confirmar sua identidade." :
+          err.code === "permission-denied" ? "Sem permissão. Verifique as regras do Firestore." :
+          err.message || "Erro ao deletar a conta.";
 
         setDeleteMsg(errMsg, "error");
         if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = false;
       }
     }
 
-    // ─── Limpa formulário ──────────────────────────────────────────────────
-
     function clearForm() {
       if (!confirm("Deseja limpar os dados do formulário?")) return;
 
-      if (el.phone)      el.phone.value      = "";
-      if (el.gender)     el.gender.value     = "";
-      if (el.birthDate)   el.birthDate.value  = "";
-      if (el.height)     el.height.value     = "";
-      if (el.weight)     el.weight.value     = "";
-      if (el.country)    el.country.value    = "";
+      if (el.phone) el.phone.value = "";
+      if (el.gender) el.gender.value = "";
+      if (el.birthDate) el.birthDate.value = "";
+      if (el.height) el.height.value = "";
+      if (el.weight) el.weight.value = "";
+      if (el.country) el.country.value = "";
 
       if (el.stateLabel) el.stateLabel.style.display = "none";
-      if (el.cityLabel)  el.cityLabel.style.display  = "none";
+      if (el.cityLabel) el.cityLabel.style.display = "none";
       if (el.state) el.state.innerHTML = `<option value="">Selecione o estado</option>`;
-      if (el.city)  el.city.innerHTML  = `<option value="">Selecione a cidade</option>`;
+      if (el.city) el.city.innerHTML = `<option value="">Selecione a cidade</option>`;
 
       document.querySelectorAll('input[name="forehand"], input[name="backhand"]')
         .forEach((r) => r.checked = false);
 
-      if (el.photoFile)     el.photoFile.value = "";
+      if (el.photoFile) el.photoFile.value = "";
       if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
 
       savedPhotoBase64 = "";
@@ -648,8 +587,6 @@
       setDefaultAvatar();
       setMsg("Formulário limpo.", "info");
     }
-
-    // ─── Eventos ───────────────────────────────────────────────────────────
 
     function bindEvents() {
       el.form?.addEventListener("submit", saveProfile);
@@ -718,12 +655,10 @@
 
       document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
         try {
-          const auth = getAuth();
-          if (auth) await auth.signOut();
+          await getAuth().signOut();
           localStorage.removeItem(ADMIN_KEY);
           localStorage.removeItem(BIOMETRIC_SESSION_KEY);
-          localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
-          localStorage.removeItem(BIOMETRIC_UID_KEY);
+          localStorage.clear();
           sessionStorage.clear();
           window.location.replace("login.html");
         } catch (err) {
@@ -733,48 +668,52 @@
       });
     }
 
-    // ─── Init ──────────────────────────────────────────────────────────────
-
     async function initUser(user) {
-      const resolvedUser = await resolveCurrentUser(user);
-
-      if (!resolvedUser || !resolvedUser.uid) {
-        setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
-        setDefaultAvatar();
+      if (user) {
+        currentUser = user;
+        const fullUser = await buildBiometricFallbackUser(user);
+        currentUser = fullUser || user;
+        if (el.email) el.email.value = currentUser.email || "";
+        if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        previousDisplayName = currentUser.displayName || "";
+        await loadProfile(currentUser);
         return;
       }
 
-      currentUser = resolvedUser;
+      if (hasAdminSession() || hasBiometricSession()) {
+        const fallbackUser = await buildBiometricFallbackUser(getCurrentBiometricUser());
+        if (!fallbackUser?.uid) {
+          setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
+          setDefaultAvatar();
+          return;
+        }
 
-      if (el.email)       el.email.value       = currentUser.email || "";
-      if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        currentUser = fallbackUser;
+        if (el.email) el.email.value = currentUser.email || "";
+        if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        previousDisplayName = currentUser.displayName || "";
+        await loadProfile(currentUser);
+        return;
+      }
 
-      previousDisplayName = currentUser.displayName || "";
-      await loadProfile(currentUser);
+      setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
+      setDefaultAvatar();
     }
 
     function init() {
       if (el.stateLabel) el.stateLabel.style.display = "none";
-      if (el.cityLabel)  el.cityLabel.style.display  = "none";
+      if (el.cityLabel) el.cityLabel.style.display = "none";
 
       if (el.photoFile) {
         el.photoFile.setAttribute("accept", "image/*");
         el.photoFile.setAttribute("capture", "environment");
       }
 
-      if (el.avatarPreview) {
-        el.avatarPreview.src = DEFAULT_AVATAR;
-      }
+      if (el.avatarPreview) el.avatarPreview.src = DEFAULT_AVATAR;
 
       bindEvents();
 
-      const auth = getAuth();
-      if (!auth) {
-        setMsg("Firebase Auth não carregado corretamente.", "error");
-        return;
-      }
-
-      auth.onAuthStateChanged(async (user) => {
+      getAuth().onAuthStateChanged(async (user) => {
         await initUser(user);
       });
     }
