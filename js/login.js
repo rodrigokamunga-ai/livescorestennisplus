@@ -10,20 +10,20 @@ const rememberMe     = document.getElementById("rememberMe");
 const biometricBtn   = document.getElementById("biometricLoginBtn");
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 
-const REDIRECT_URL       = "menu.html";
-const SESSION_KEY        = "lsts_admin_session";
-const REMEMBER_EMAIL_KEY = "rememberedEmail";
-const BIOMETRIC_KEY      = "lsts_biometric_uid";
-const BIOMETRIC_CRED_KEY = "lsts_biometric_credId";
+const REDIRECT_URL          = "menu.html";
+const SESSION_KEY           = "lsts_admin_session";
+const REMEMBER_EMAIL_KEY    = "rememberedEmail";
+const BIOMETRIC_KEY         = "lsts_biometric_uid";
+const BIOMETRIC_CRED_KEY    = "lsts_biometric_credId";
 const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
 
 // ─── Verificação de ambiente ──────────────────────────────────────────────────
 
-const IS_FILE    = location.protocol === "file:";
-const IS_HTTPS   = location.protocol === "https:";
-const IS_LOCAL   = location.hostname === "localhost" ||
-                   location.hostname === "127.0.0.1";
-const IS_SECURE  = window.isSecureContext;
+const IS_FILE   = location.protocol === "file:";
+const IS_HTTPS  = location.protocol === "https:";
+const IS_LOCAL  = location.hostname === "localhost" ||
+                  location.hostname === "127.0.0.1";
+const IS_SECURE = window.isSecureContext;
 
 const CAN_USE_FIREBASE  = !IS_FILE;
 const CAN_USE_GOOGLE    = !IS_FILE && (IS_HTTPS || IS_LOCAL);
@@ -459,12 +459,13 @@ function initBiometricLogin() {
         return;
       }
 
+      // Se o Firestore falhar, não bloqueia o login biométrico
       if (isBlocked === null) {
+        console.warn("Não foi possível validar a conta no Firestore. Liberando pela biometria.");
         setMsg(
-          "⚠️ Não foi possível validar sua conta agora. Tente novamente.",
-          "error"
+          "✅ Biometria validada. Validação da conta indisponível no momento.",
+          "success"
         );
-        return;
       }
 
       saveSession();
