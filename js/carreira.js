@@ -6,6 +6,11 @@
 
     const getDb = () => (typeof __db !== "undefined" ? __db : firebase.firestore());
 
+    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
+    const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
+    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
+    const SESSION_KEY = "lsts_admin_session";
+
     const state = {
       allMatches: [],
       filteredMatches: [],
@@ -656,8 +661,14 @@
 
     logoutBtnBottom?.addEventListener("click", async () => {
       try {
-        localStorage.removeItem("lsts_admin_session");
-        await __auth.signOut();
+        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(BIOMETRIC_SESSION_KEY);
+        localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
+        localStorage.removeItem(BIOMETRIC_UID_KEY);
+
+        const auth = typeof __auth !== "undefined" && __auth ? __auth : firebase.auth();
+        await auth.signOut();
+
         window.location.replace("login.html");
       } catch (err) {
         console.error("Erro ao sair:", err);
@@ -676,6 +687,55 @@
         }
       } catch {
         state.currentProfileName = user.displayName || "";
+      }
+    }
+
+    function hasBiometricSession() {
+      return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
+    }
+
+    function getBiometricCurrentUser() {
+      try {
+        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          uid: parsed.uid || "",
+          email: parsed.email || "",
+          displayName: parsed.displayName || ""
+        };
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function resolveFallbackUser() {
+      const biometricCurrent = getBiometricCurrentUser();
+      if (biometricCurrent?.uid) return biometricCurrent;
+
+      const legacyUid = localStorage.getItem(BIOMETRIC_UID_KEY) || "";
+      if (!legacyUid) return null;
+
+      try {
+        const profileDoc = await getDb().collection("profiles").doc(legacyUid).get();
+        const profileData = profileDoc.exists ? (profileDoc.data() || {}) : {};
+
+        const userDoc = await getDb().collection("users").doc(legacyUid).get();
+        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
+
+        return {
+          uid: legacyUid,
+          email: userData.email || profileData.email || "",
+          displayName: profileData.displayName || userData.displayName || ""
+        };
+      } catch (err) {
+        console.warn("Erro ao reconstruir usuário legado:", err);
+        return {
+          uid: legacyUid,
+          email: "",
+          displayName: ""
+        };
       }
     }
 
@@ -719,7 +779,13 @@
       bindEvents();
 
       __auth.onAuthStateChanged(async (user) => {
-        if (!user) {
+        let finalUser = user;
+
+        if (!finalUser) {
+          finalUser = await resolveFallbackUser();
+        }
+
+        if (!finalUser || !finalUser.uid) {
           state.currentUser = null;
           state.currentProfileName = "";
           setSummaryMessage("Usuário não autenticado.");
@@ -727,10 +793,10 @@
           return;
         }
 
-        state.currentUser = user;
+        state.currentUser = finalUser;
 
         // Carrega o nome mais atual do perfil (Firestore > Auth)
-        await loadCurrentProfileName(user);
+        await loadCurrentProfileName(finalUser);
 
         setDefaultFields(state.currentProfileName);
         listenMatches();
