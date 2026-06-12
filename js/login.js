@@ -415,14 +415,31 @@ function initBiometricLogin() {
   console.log("Biometria - UID salvo:", uid);
   console.log("Biometria - credencial salva:", !!credIdB64);
 
-  if (!CAN_USE_BIOMETRIC || !uid || !credIdB64 || !window.PublicKeyCredential) {
+  // Se o navegador não suporta biometria, esconde o botão
+  if (!CAN_USE_BIOMETRIC || !window.PublicKeyCredential) {
     if (biometricBtn) biometricBtn.style.display = "none";
     return;
   }
 
-  if (biometricBtn) biometricBtn.style.display = "flex";
+  // Mostra o botão sempre que houver suporte
+  if (biometricBtn) {
+    biometricBtn.style.display = "flex";
+
+    const hasBiometricData = !!uid && !!credIdB64;
+    biometricBtn.disabled = !hasBiometricData;
+    biometricBtn.title = hasBiometricData
+      ? "Entrar com biometria"
+      : "Biometria ainda não cadastrada neste aparelho";
+    biometricBtn.style.opacity = hasBiometricData ? "1" : "0.55";
+    biometricBtn.style.cursor = hasBiometricData ? "pointer" : "not-allowed";
+  }
 
   biometricBtn?.addEventListener("click", async () => {
+    if (!uid || !credIdB64) {
+      setMsg("Biometria não cadastrada neste aparelho.", "error");
+      return;
+    }
+
     try {
       setMsg("Aguardando biometria...", "info");
 
