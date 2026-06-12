@@ -6,15 +6,20 @@
     const getDb   = () => (typeof __db   !== "undefined" ? __db   : firebase.firestore());
     const getAuth = () => (typeof __auth !== "undefined" ? __auth : firebase.auth());
 
+    // Sessões
+    const ADMIN_KEY = "lsts_admin_session";
+    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
+    const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
+
     // Imagem padrão do avatar
     const DEFAULT_AVATAR = "img/perfil-padrao.png";
 
     // Configuração de resize/compressão da imagem
-    const IMAGE_MAX_WIDTH  = 512;
+    const IMAGE_MAX_WIDTH = 512;
     const IMAGE_MAX_HEIGHT = 512;
-    const IMAGE_MIME_TYPE  = "image/jpeg";
+    const IMAGE_MIME_TYPE = "image/jpeg";
     const IMAGE_QUALITY_LIST = [0.75, 0.65, 0.55, 0.45, 0.35];
-    const MAX_BASE64_LENGTH = 900000; // limite seguro para Firestore
+    const MAX_BASE64_LENGTH = 900000;
 
     // ─── Estados e cidades ────────────────────────────────────────────────
 
@@ -135,6 +140,18 @@
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────
+
+    function hasAdminSession() {
+      return localStorage.getItem(ADMIN_KEY) === "1";
+    }
+
+    function hasBiometricSession() {
+      return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
+    }
+
+    function getBiometricUid() {
+      return localStorage.getItem(BIOMETRIC_UID_KEY) || "";
+    }
 
     function getRadioValue(name) {
       const checked = document.querySelector(`input[name="${name}"]:checked`);
@@ -267,7 +284,7 @@
       if (el.height)      el.height.value      = data.height      || "";
       if (el.weight)      el.weight.value      = data.weight      || "";
       if (data.forehand)  setRadioValue("forehand", data.forehand);
-      if (data.backhand)   setRadioValue("backhand", data.backhand);
+      if (data.backhand)  setRadioValue("backhand", data.backhand);
 
       if (el.country && data.country) {
         el.country.value = data.country;
@@ -285,6 +302,34 @@
     }
 
     // ─── Carrega perfil ───────────────────────────────────────────────────
+
+    async function buildBiometricFallbackUser(user) {
+      const uid = user?.uid || getBiometricUid();
+      if (!uid) return null;
+
+      const fallbackUser = {
+        uid,
+        email: "",
+        displayName: ""
+      };
+
+      try {
+        if (typeof __db === "undefined") return fallbackUser;
+
+        const profileSnap = await __db.collection("profiles").doc(uid).get();
+        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+        const userSnap = await __db.collection("users").doc(uid).get();
+        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+        fallbackUser.email = user?.email || userData.email || profileData.email || "";
+        fallbackUser.displayName = profileData.displayName || userData.displayName || user?.displayName || "";
+      } catch (err) {
+        console.warn("Firestore indisponível para biometria, usando fallback mínimo.", err);
+      }
+
+      return fallbackUser;
+    }
 
     async function loadProfile(user) {
       try {
@@ -389,10 +434,10 @@
       const all     = upper + lower + numbers + symbols;
 
       const pwd = [
-        upper   [Math.floor(Math.random() * upper.length)],
-        lower   [Math.floor(Math.random() * lower.length)],
-        numbers [Math.floor(Math.random() * numbers.length)],
-        symbols [Math.floor(Math.random() * symbols.length)],
+        upper  [Math.floor(Math.random() * upper.length)],
+        lower  [Math.floor(Math.random() * lower.length)],
+        numbers[Math.floor(Math.random() * numbers.length)],
+        symbols[Math.floor(Math.random() * symbols.length)],
         ...Array.from({ length: 10 }, () => all[Math.floor(Math.random() * all.length)])
       ];
 
@@ -431,7 +476,7 @@
 
       if (!current)         return setPasswordMsg("Informe a senha atual.", "error");
       if (!next)            return setPasswordMsg("Informe a nova senha.", "error");
-      if (next !== confirm)  return setPasswordMsg("As senhas não coincidem.", "error");
+      if (next !== confirm) return setPasswordMsg("As senhas não coincidem.", "error");
 
       if (!isStrongPassword(next)) {
         return setPasswordMsg(
@@ -460,9 +505,9 @@
         console.error("Erro ao alterar senha:", err);
 
         const msg =
-          err.code === "auth/wrong-password"        ? "Senha atual incorreta." :
-          err.code === "auth/weak-password"         ? "A nova senha é muito fraca." :
-          err.code === "auth/requires-recent-login"  ? "Faça login novamente para alterar a senha." :
+          err.code === "auth/wrong-password"       ? "Senha atual incorreta." :
+          err.code === "auth/weak-password"        ? "A nova senha é muito fraca." :
+          err.code === "auth/requires-recent-login" ? "Faça login novamente para alterar a senha." :
           err.message || "Erro ao alterar senha.";
 
         setPasswordMsg(msg, "error");
@@ -648,6 +693,8 @@
       document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
         try {
           await getAuth().signOut();
+          localStorage.removeItem(ADMIN_KEY);
+          localStorage.removeItem(BIOMETRIC_SESSION_KEY);
           localStorage.clear();
           sessionStorage.clear();
           window.location.replace("login.html");
@@ -659,6 +706,66 @@
     }
 
     // ─── Init ──────────────────────────────────────────────────────────────
+
+    async function buildFallbackUser(user) {
+      const uid = user?.uid || getBiometricUid();
+      if (!uid) return null;
+
+      const fallbackUser = {
+        uid,
+        email: user?.email || "",
+        displayName: user?.displayName || ""
+      };
+
+      try {
+        if (typeof __db === "undefined") return fallbackUser;
+
+        const profileSnap = await __db.collection("profiles").doc(uid).get();
+        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+        const userSnap = await __db.collection("users").doc(uid).get();
+        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+        fallbackUser.email = user?.email || userData.email || profileData.email || "";
+        fallbackUser.displayName = profileData.displayName || userData.displayName || user?.displayName || "";
+      } catch (err) {
+        console.warn("Firestore indisponível para carregar perfil, usando fallback mínimo.", err);
+      }
+
+      return fallbackUser;
+    }
+
+    async function initUser(user) {
+      if (user) {
+        currentUser = user;
+        const fullUser = await buildFallbackUser(user);
+        currentUser = fullUser || user;
+        if (el.email)       el.email.value       = currentUser.email || "";
+        if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        previousDisplayName = currentUser.displayName || "";
+        await loadProfile(currentUser);
+        return;
+      }
+
+      if (hasAdminSession() || hasBiometricSession()) {
+        const fallbackUser = await buildFallbackUser(null);
+        if (!fallbackUser) {
+          setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
+          setDefaultAvatar();
+          return;
+        }
+
+        currentUser = fallbackUser;
+        if (el.email)       el.email.value       = currentUser.email || "";
+        if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        previousDisplayName = currentUser.displayName || "";
+        await loadProfile(currentUser);
+        return;
+      }
+
+      setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
+      setDefaultAvatar();
+    }
 
     function init() {
       if (el.stateLabel) el.stateLabel.style.display = "none";
@@ -676,14 +783,7 @@
       bindEvents();
 
       getAuth().onAuthStateChanged(async (user) => {
-        if (!user) {
-          setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
-          setDefaultAvatar();
-          return;
-        }
-
-        currentUser = user;
-        await loadProfile(user);
+        await initUser(user);
       });
     }
 
