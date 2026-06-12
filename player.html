@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Jogador | Live Scores Tennis</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/player.css" />
 </head>
 
 <body class="player-page">
@@ -18,22 +19,47 @@
             <span class="section-kicker">Controle da Partida</span>
             <h2 id="matchTitle">Partida</h2>
             <div class="match-meta-top">
-              <div class="meta-line">Data e hora: <strong id="matchDateTimeTop">-</strong></div>
               <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
             </div>
           </div>
         </div>
+
+        <!-- Botão de compartilhar -->
+        <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida">
+          <span class="share-match-icon">🔗</span>
+        </button>
       </div>
 
-      <!-- Timer + Status -->
-      <div class="player-timer-bar">
+      <!-- Cards de informações -->
+      <div class="player-info-grid">
+        <div class="timer-line">
+          <span>Data e hora</span>
+          <strong id="matchDateTimeTop">-</strong>
+        </div>
+
+        <div class="timer-line">
+          <span>Modalidade</span>
+          <strong id="matchMode">-</strong>
+        </div>
+
+        <div class="timer-line">
+          <span>Formato</span>
+          <strong id="matchFormat">-</strong>
+        </div>
+
         <div class="timer-line">
           <span>Duração</span>
           <strong id="duration">00:00:00</strong>
         </div>
+
         <div class="timer-line">
           <span>Situação</span>
           <strong id="statusLabel">Não Iniciada</strong>
+        </div>
+
+        <div class="timer-line">
+          <span>Placar da partida</span>
+          <strong id="matchScore">0x0 0x0</strong>
         </div>
       </div>
 
@@ -139,6 +165,7 @@
       <input type="hidden" id="editGames2" />
       <span style="display:none" id="games1Label"></span>
       <span style="display:none" id="games2Label"></span>
+
       <!-- Labels legados para compatibilidade com player.js -->
       <span style="display:none" id="servePlayer1Label">Jogador 1</span>
       <span style="display:none" id="servePlayer2Label">Jogador 2</span>
@@ -149,7 +176,7 @@
 
   <!-- Bottom Nav -->
   <nav class="player-bottom-nav">
-    <a href="admin.html" class="player-bottom-btn">
+    <a href="admin.html" class="player-bottom-btn" id="matchPageBtn">
       <span class="player-bottom-icon">🎾</span>
       <span class="player-bottom-label">Partida</span>
     </a>
