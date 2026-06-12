@@ -421,22 +421,20 @@ function initBiometricLogin() {
     return;
   }
 
-  // Mostra o botão sempre que houver suporte
+  // Sempre deixa o botão visível e clicável
   if (biometricBtn) {
     biometricBtn.style.display = "flex";
-
-    const hasBiometricData = !!uid && !!credIdB64;
-    biometricBtn.disabled = !hasBiometricData;
-    biometricBtn.title = hasBiometricData
+    biometricBtn.disabled = false;
+    biometricBtn.title = uid && credIdB64
       ? "Entrar com biometria"
       : "Biometria ainda não cadastrada neste aparelho";
-    biometricBtn.style.opacity = hasBiometricData ? "1" : "0.55";
-    biometricBtn.style.cursor = hasBiometricData ? "pointer" : "not-allowed";
+    biometricBtn.style.opacity = "1";
+    biometricBtn.style.cursor = "pointer";
   }
 
   biometricBtn?.addEventListener("click", async () => {
     if (!uid || !credIdB64) {
-      setMsg("Biometria não cadastrada neste aparelho.", "error");
+      setMsg("Biometria ainda não cadastrada neste aparelho.", "error");
       return;
     }
 
