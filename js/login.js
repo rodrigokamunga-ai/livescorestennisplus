@@ -13,14 +13,9 @@ const googleLoginBtn = document.getElementById("googleLoginBtn");
 const REDIRECT_URL          = "menu.html";
 const SESSION_KEY           = "lsts_admin_session";
 const REMEMBER_EMAIL_KEY    = "rememberedEmail";
-
-// legado
 const BIOMETRIC_KEY         = "lsts_biometric_uid";
 const BIOMETRIC_CRED_KEY    = "lsts_biometric_credId";
 const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
-
-// novo formato multiusuário
-const BIOMETRIC_STORE_KEY   = "lsts_biometric_store";
 
 // ─── Verificação de ambiente ──────────────────────────────────────────────────
 
@@ -65,31 +60,17 @@ function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-function markBiometricSession() {
-  localStorage.setItem(BIOMETRIC_SESSION_KEY, "1");
+function saveBiometricData(uid, credIdB64) {
+  if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
+  if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
 }
 
 function clearBiometricSessionFlags() {
   localStorage.removeItem(BIOMETRIC_SESSION_KEY);
 }
 
-// legado
-function saveLegacyBiometricData(uid, credIdB64) {
-  if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
-  if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
-}
-
-function normalizeEmail(email = "") {
-  return String(email).trim().toLowerCase();
-}
-
-function bytesToB64(bytes) {
-  const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-  let binary = "";
-  for (let i = 0; i < arr.length; i++) {
-    binary += String.fromCharCode(arr[i]);
-  }
-  return btoa(binary);
+function markBiometricSession() {
+  localStorage.setItem(BIOMETRIC_SESSION_KEY, "1");
 }
 
 function b64ToBytes(b64) {
@@ -99,77 +80,6 @@ function b64ToBytes(b64) {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;
-}
-
-function bytesToBase64Url(bytes) {
-  const base64 = bytesToB64(bytes);
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-function base64UrlToBytes(input) {
-  let base64 = String(input || "").replace(/-/g, "+").replace(/_/g, "/");
-  while (base64.length % 4) base64 += "=";
-  return b64ToBytes(base64);
-}
-
-function getDb() {
-  if (typeof __db !== "undefined" && __db) return __db;
-  if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
-  return null;
-}
-
-function getAuth() {
-  if (typeof __auth !== "undefined" && __auth) return __auth;
-  if (typeof firebase !== "undefined" && firebase.auth) return firebase.auth();
-  return null;
-}
-
-function getBiometricStore() {
-  try {
-    const raw = localStorage.getItem(BIOMETRIC_STORE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch (_) {
-    return {};
-  }
-}
-
-function saveBiometricStore(store) {
-  localStorage.setItem(BIOMETRIC_STORE_KEY, JSON.stringify(store || {}));
-}
-
-function saveBiometricRecord({ uid, email, credIdB64, credentialId = "" }) {
-  if (!uid || !credIdB64) return;
-
-  const store = getBiometricStore();
-  store[uid] = {
-    uid,
-    email: normalizeEmail(email || ""),
-    credIdB64,
-    credentialId,
-    updatedAt: Date.now()
-  };
-  saveBiometricStore(store);
-
-  // compatibilidade com o modelo antigo
-  saveLegacyBiometricData(uid, credIdB64);
-}
-
-function getBiometricRecordByUid(uid) {
-  const store = getBiometricStore();
-  return store[uid] || null;
-}
-
-function getAllBiometricRecords() {
-  const store = getBiometricStore();
-  return Object.values(store);
-}
-
-function getBiometricRecordByEmail(email) {
-  const normalized = normalizeEmail(email);
-  const records = getAllBiometricRecords();
-  return records.find((r) => normalizeEmail(r.email) === normalized) || null;
 }
 
 // ─── Aviso de ambiente inseguro ───────────────────────────────────────────────
@@ -203,7 +113,7 @@ function getAuthErrorMsg(code) {
     "auth/user-disabled":          "Esta conta foi desativada. Entre em contato com o suporte.",
     "auth/requires-recent-login":  "Por segurança, faça login novamente para continuar.",
     "auth/user-token-expired":     "Sua sessão expirou. Faça login novamente.",
-    "auth/network-request-failed":  "Falha de conexão. Verifique sua internet.",
+    "auth/network-request-failed": "Falha de conexão. Verifique sua internet.",
     "auth/timeout":                "A requisição demorou muito. Tente novamente.",
     "auth/too-many-requests":      "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
     "auth/quota-exceeded":         "Limite de requisições atingido. Tente novamente mais tarde.",
@@ -222,19 +132,19 @@ function getAuthErrorMsg(code) {
 }
 
 // ─── Verifica bloqueio no Firestore ──────────────────────────────────────────
-// true => bloqueado
-// false => liberado
+// Retornos:
+// true => usuário bloqueado
+// false => usuário liberado
 // null => não foi possível verificar
 
 async function checkUserBlocked(uid) {
   try {
-    const db = getDb();
-    if (!db) {
-      console.warn("Firestore não inicializado.");
+    if (!window.__db) {
+      console.warn("Firestore (__db) não inicializado.");
       return null;
     }
 
-    const doc = await db.collection("users").doc(uid).get();
+    const doc = await __db.collection("users").doc(uid).get();
 
     if (!doc.exists) {
       console.warn("Documento do usuário não encontrado:", uid);
@@ -251,10 +161,9 @@ async function checkUserBlocked(uid) {
 
 async function ensureUserDoc(user) {
   try {
-    const db = getDb();
-    if (!db || !user) return;
+    if (!window.__db || !user) return;
 
-    const docRef = db.collection("users").doc(user.uid);
+    const docRef = __db.collection("users").doc(user.uid);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
@@ -262,7 +171,7 @@ async function ensureUserDoc(user) {
         uid:         user.uid,
         ownerId:     user.uid,
         displayName: user.displayName || "",
-        email:       normalizeEmail(user.email || ""),
+        email:       user.email || "",
         role:        "user",
         blocked:     false,
         createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
@@ -286,158 +195,8 @@ async function forceLogout() {
   try {
     clearSession();
     clearBiometricSessionFlags();
-    const auth = getAuth();
-    if (auth) await auth.signOut();
+    await __auth.signOut();
   } catch (_) {}
-}
-
-async function findUserByEmail(email) {
-  try {
-    const db = getDb();
-    if (!db || !email) return null;
-
-    const normalized = normalizeEmail(email);
-
-    let snap = await db.collection("users")
-      .where("email", "==", normalized)
-      .limit(1)
-      .get();
-
-    if (!snap.empty) {
-      const doc = snap.docs[0];
-      return { uid: doc.id, ...(doc.data() || {}) };
-    }
-
-    snap = await db.collection("users")
-      .where("email", "==", email)
-      .limit(1)
-      .get();
-
-    if (!snap.empty) {
-      const doc = snap.docs[0];
-      return { uid: doc.id, ...(doc.data() || {}) };
-    }
-
-    return null;
-  } catch (err) {
-    console.warn("Não foi possível localizar usuário por e-mail:", err);
-    return null;
-  }
-}
-
-// ─── Registro biométrico automático ──────────────────────────────────────────
-
-async function createBiometricCredentialForUser(user) {
-  if (!user) throw new Error("Usuário inválido.");
-  if (!window.PublicKeyCredential || !navigator.credentials?.create) {
-    throw new Error("Este navegador não suporta cadastro biométrico.");
-  }
-
-  const db = getDb();
-
-  const challenge = new Uint8Array(32);
-  crypto.getRandomValues(challenge);
-
-  const userIdBytes = new TextEncoder().encode(String(user.uid));
-
-  const credential = await navigator.credentials.create({
-    publicKey: {
-      challenge,
-      rp: {
-        name: "Live Scores Tennis"
-      },
-      user: {
-        id: userIdBytes.slice(0, 64),
-        name: normalizeEmail(user.email || ""),
-        displayName: user.displayName || user.email || "Usuário"
-      },
-      pubKeyCredParams: [
-        { type: "public-key", alg: -7 },    // ES256
-        { type: "public-key", alg: -257 }   // RS256
-      ],
-      authenticatorSelection: {
-        authenticatorAttachment: "platform",
-        userVerification: "required",
-        residentKey: "preferred"
-      },
-      timeout: 60000,
-      attestation: "none"
-    }
-  });
-
-  if (!credential) {
-    throw new Error("Não foi possível criar a credencial biométrica.");
-  }
-
-  const credIdB64 = bytesToBase64Url(new Uint8Array(credential.rawId));
-
-  saveBiometricRecord({
-    uid: user.uid,
-    email: user.email || "",
-    credIdB64,
-    credentialId: credIdB64
-  });
-
-  if (db) {
-    await db.collection("biometrics").doc(user.uid).set({
-      uid: user.uid,
-      email: normalizeEmail(user.email || ""),
-      credIdB64,
-      credentialId: credIdB64,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-  }
-
-  return credIdB64;
-}
-
-async function ensureBiometricEnrollment(user) {
-  if (!user) return;
-
-  const existingLocal = getBiometricRecordByUid(user.uid);
-  if (existingLocal?.credIdB64) return;
-
-  const db = getDb();
-
-  // tenta recuperar do Firestore
-  try {
-    if (db) {
-      const snap = await db.collection("biometrics").doc(user.uid).get();
-      if (snap.exists) {
-        const data = snap.data() || {};
-        if (data.credIdB64) {
-          saveBiometricRecord({
-            uid: user.uid,
-            email: data.email || user.email || "",
-            credIdB64: data.credIdB64,
-            credentialId: data.credentialId || data.credIdB64
-          });
-          return;
-        }
-      }
-    }
-  } catch (err) {
-    console.warn("Não foi possível carregar biometria do Firestore:", err);
-  }
-
-  // se não existe, cria automaticamente no primeiro login
-  try {
-    await createBiometricCredentialForUser(user);
-    console.log("Biometria cadastrada automaticamente para:", user.uid);
-  } catch (err) {
-    console.warn("Cadastro automático de biometria não realizado:", err.message || err);
-  }
-}
-
-function resolveBiometricRecordFromLoginEmail(email) {
-  const normalized = normalizeEmail(email);
-
-  // 1) procura no localStorage multiusuário pelo email
-  const byEmail = getBiometricRecordByEmail(normalized);
-  if (byEmail) return byEmail;
-
-  // 2) tenta localizar usuário no Firestore e usar o UID
-  return null;
 }
 
 // ─── Inicializa Firebase Auth ────────────────────────────────────────────────
@@ -448,15 +207,9 @@ function initFirebaseAuth() {
     return;
   }
 
-  const auth = getAuth();
-  if (!auth) {
-    setMsg("Firebase Auth não carregado corretamente.", "error");
-    return;
-  }
-
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  __auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => {
-      auth.onAuthStateChanged(async (user) => {
+      __auth.onAuthStateChanged(async (user) => {
         if (!user) return;
 
         const isBlocked = await checkUserBlocked(user.uid);
@@ -475,10 +228,6 @@ function initFirebaseAuth() {
         }
 
         await ensureUserDoc(user);
-
-        // auto-registro biométrico no primeiro login
-        await ensureBiometricEnrollment(user);
-
         saveSession();
         clearBiometricSessionFlags();
         goHome();
@@ -516,8 +265,7 @@ form?.addEventListener("submit", async (e) => {
   if (!password) return setMsg("Informe a senha.", "error");
 
   try {
-    const auth = getAuth();
-    const credential = await auth.signInWithEmailAndPassword(email, password);
+    const credential = await __auth.signInWithEmailAndPassword(email, password);
     const user = credential.user;
 
     if (!user) {
@@ -547,16 +295,13 @@ form?.addEventListener("submit", async (e) => {
 
     await ensureUserDoc(user);
 
-    // auto-registro biométrico no primeiro login
-    await ensureBiometricEnrollment(user);
-
     if (rememberMe?.checked) {
       localStorage.setItem(REMEMBER_EMAIL_KEY, email);
     } else {
       localStorage.removeItem(REMEMBER_EMAIL_KEY);
     }
 
-    saveLegacyBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
+    saveBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
     saveSession();
     clearBiometricSessionFlags();
     goHome();
@@ -592,10 +337,7 @@ async function finishGoogleLogin(user) {
 
   await ensureUserDoc(user);
 
-  // auto-registro biométrico no primeiro login
-  await ensureBiometricEnrollment(user);
-
-  saveLegacyBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
+  saveBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
   saveSession();
   clearBiometricSessionFlags();
   setMsg("✅ Login com Google realizado!", "success");
@@ -608,8 +350,7 @@ async function handleGoogleRedirectResult() {
   if (!CAN_USE_GOOGLE) return;
 
   try {
-    const auth = getAuth();
-    const result = await auth.getRedirectResult();
+    const result = await __auth.getRedirectResult();
     if (!result || !result.user) return;
 
     setMsg("Finalizando login com Google...", "info");
@@ -631,7 +372,6 @@ function initGoogleLogin() {
   googleLoginBtn?.addEventListener("click", async () => {
     setMsg("Abrindo Google...", "info");
 
-    const auth = getAuth();
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
 
@@ -639,7 +379,7 @@ function initGoogleLogin() {
       let result;
 
       try {
-        result = await auth.signInWithPopup(provider);
+        result = await __auth.signInWithPopup(provider);
       } catch (popupErr) {
         if (
           popupErr.code === "auth/operation-not-supported-in-this-environment" ||
@@ -647,7 +387,7 @@ function initGoogleLogin() {
           popupErr.code === "auth/popup-closed-by-user"
         ) {
           setMsg("Redirecionando para o Google...", "info");
-          await auth.signInWithRedirect(provider);
+          await __auth.signInWithRedirect(provider);
           return;
         }
         throw popupErr;
@@ -669,82 +409,42 @@ function initGoogleLogin() {
 // ─── Biometria ────────────────────────────────────────────────────────────────
 
 function initBiometricLogin() {
+  const uid = localStorage.getItem(BIOMETRIC_KEY);
+  const credIdB64 = localStorage.getItem(BIOMETRIC_CRED_KEY);
+
+  console.log("Biometria - UID salvo:", uid);
+  console.log("Biometria - credencial salva:", !!credIdB64);
+
+  // Se o navegador não suporta biometria, esconde o botão
   if (!CAN_USE_BIOMETRIC || !window.PublicKeyCredential) {
     if (biometricBtn) biometricBtn.style.display = "none";
     return;
   }
 
+  // Sempre deixa o botão visível e clicável
   if (biometricBtn) {
     biometricBtn.style.display = "flex";
     biometricBtn.disabled = false;
-    biometricBtn.title = "Entrar com biometria";
+    biometricBtn.title = uid && credIdB64
+      ? "Entrar com biometria"
+      : "Biometria ainda não cadastrada neste aparelho";
     biometricBtn.style.opacity = "1";
     biometricBtn.style.cursor = "pointer";
   }
 
   biometricBtn?.addEventListener("click", async () => {
+    if (!uid || !credIdB64) {
+      setMsg("Biometria ainda não cadastrada neste aparelho.", "error");
+      return;
+    }
+
     try {
-      const email = normalizeEmail(emailInput?.value || "");
-
-      let biometricRecord = null;
-      let targetUser = null;
-
-      if (email) {
-        targetUser = await findUserByEmail(email);
-
-        // 1) tenta achar biometria pelo email
-        biometricRecord = getBiometricRecordByEmail(email);
-
-        // 2) se existe usuário, tenta biometria por uid
-        if (!biometricRecord && targetUser?.uid) {
-          biometricRecord = getBiometricRecordByUid(targetUser.uid);
-        }
-      }
-
-      // fallback: se só tiver 1 usuário cadastrado no aparelho, usa ele
-      if (!biometricRecord) {
-        const records = getAllBiometricRecords();
-        if (records.length === 1) {
-          biometricRecord = records[0];
-          targetUser = targetUser || await findUserByEmail(biometricRecord.email || "");
-        }
-      }
-
-      // fallback legado
-      if (!biometricRecord) {
-        const legacyUid = localStorage.getItem(BIOMETRIC_KEY);
-        const legacyCred = localStorage.getItem(BIOMETRIC_CRED_KEY);
-        if (legacyUid && legacyCred) {
-          biometricRecord = {
-            uid: legacyUid,
-            email: "",
-            credIdB64: legacyCred
-          };
-        }
-      }
-
-      if (!biometricRecord?.credIdB64) {
-        setMsg(
-          email
-            ? "Biometria não cadastrada para este e-mail neste aparelho."
-            : "Digite seu e-mail para localizar a biometria cadastrada.",
-          "error"
-        );
-        return;
-      }
-
-      const uid = biometricRecord.uid || targetUser?.uid;
-      if (!uid) {
-        setMsg("Não foi possível identificar o usuário biométrico.", "error");
-        return;
-      }
-
       setMsg("Aguardando biometria...", "info");
 
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
-      const credIdBytes = base64UrlToBytes(biometricRecord.credIdB64);
+      const credIdBytes = b64ToBytes(credIdB64);
 
       const assertion = await navigator.credentials.get({
         publicKey: {
@@ -774,6 +474,7 @@ function initBiometricLogin() {
         return;
       }
 
+      // Se o Firestore falhar, não bloqueia o login biométrico
       if (isBlocked === null) {
         console.warn("Não foi possível validar a conta no Firestore. Liberando pela biometria.");
         setMsg(
@@ -796,6 +497,7 @@ function initBiometricLogin() {
         setMsg("Biometria cancelada. Use e-mail e senha.", "error");
       } else if (err.name === "NotSupportedError") {
         setMsg("Biometria não suportada neste dispositivo.", "error");
+        if (biometricBtn) biometricBtn.style.display = "none";
       } else {
         setMsg("Não foi possível autenticar pela biometria.", "error");
       }
