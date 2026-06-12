@@ -5,11 +5,18 @@
     const ADMIN_EMAIL = "rodrigokamunga@hotmail.com";
     const COLLECTION_NAME = "matches";
     const READ_ALERTS_KEY = "lsts_menu_alerts_read_signature";
-    const PUBLIC_URL = `${window.location.origin}/index.html`;
     const SESSION_KEY = "lsts_admin_session";
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
     const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
+
+    // URL pública gerada de forma relativa, evitando 404 em hospedagem em subpasta
+    function getPublicUrl() {
+      return new URL("index.html", window.location.href).href;
+    }
+
+    // Imagem padrão sempre com URL absoluta
+    const DEFAULT_AVATAR_URL = new URL("img/perfil-padrao.png", window.location.href).href;
 
     const el = {
       welcomeTitle: document.getElementById("welcomeTitle"),
@@ -115,12 +122,26 @@
 
     // ─── Foto do perfil ───────────────────────────────────────────────────
 
+    function setDefaultAvatar() {
+      if (el.profileAvatar) {
+        el.profileAvatar.src = DEFAULT_AVATAR_URL;
+      }
+    }
+
     async function loadProfileAvatar(user) {
       if (!el.profileAvatar || !user?.uid) return;
 
       try {
         const db = getDb();
-        if (!db) return;
+        if (!db) {
+          setDefaultAvatar();
+          return;
+        }
+
+        // garante fallback antes de tentar carregar a foto real
+        el.profileAvatar.onerror = () => {
+          el.profileAvatar.src = DEFAULT_AVATAR_URL;
+        };
 
         const doc = await db.collection("profiles").doc(user.uid).get();
 
@@ -132,10 +153,10 @@
           }
         }
 
-        el.profileAvatar.src = "img/perfil-padrao.png";
+        setDefaultAvatar();
       } catch (err) {
         console.warn("Foto de perfil não carregada:", err.message);
-        el.profileAvatar.src = "img/perfil-padrao.png";
+        setDefaultAvatar();
       }
     }
 
@@ -161,6 +182,9 @@
 
     async function sharePublicLink() {
       try {
+        // aqui a URL é montada corretamente conforme a pasta atual do site
+        const PUBLIC_URL = getPublicUrl();
+
         const shareData = {
           title: "Live Scores Tennis",
           text: "Acesse a tela pública do sistema:",
@@ -436,6 +460,9 @@
     async function init() {
       bindEvents();
 
+      // já deixa uma imagem padrão visível no carregamento
+      setDefaultAvatar();
+
       const auth = getAuth();
       if (!auth) {
         console.warn("Firebase Auth não encontrado.");
@@ -488,7 +515,7 @@
           if (el.welcomeText) el.welcomeText.textContent = "Acesso liberado pela biometria.";
           if (el.headerUserTitle) el.headerUserTitle.textContent = "Menu";
           if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
-          if (el.profileAvatar) el.profileAvatar.src = "img/perfil-padrao.png";
+          setDefaultAvatar();
           if (el.usersAdminBtn) el.usersAdminBtn.style.display = "none";
           if (el.usersAdminMenuItem) el.usersAdminMenuItem.style.display = "none";
           return;
