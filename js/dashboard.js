@@ -2,13 +2,11 @@
   "use strict";
 
   const DashboardApp = (() => {
-    const db = firebase.firestore();
     const PAGE_SIZE = 5;
 
-    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
-    const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
-    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const SESSION_KEY = "lsts_admin_session";
+    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
+    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 
     const state = {
       currentUser: null,
@@ -38,14 +36,19 @@
       applyFilterBtn:   document.getElementById("applyFilterBtn"),
       clearFilterBtn:   document.getElementById("clearFilterBtn"),
       filtersWrap:      document.querySelector(".dashboard-filters"),
-      tableWrap:        document.querySelector(".dashboard-table-wrap")
+      tableWrap:        document.querySelector(".dashboard-table-wrap"),
+      logoutBtnBottom:  document.getElementById("logoutBtnBottom")
     };
 
     // ─── Utilitários ──────────────────────────────────────────────────────
 
     const U = {
       normalizeText(value = "") {
-        return String(value || "").trim().toLowerCase();
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
       },
 
       escapeHtml(str = "") {
@@ -76,6 +79,37 @@
       getMatchYear(match) {
         const d = U.toDate(match.matchDateTime);
         return d ? String(d.getFullYear()) : "";
+      },
+
+      normalizeScore(score = {}) {
+        return {
+          points1: Number(score.points1 || 0),
+          points2: Number(score.points2 || 0),
+          games1: Number(score.games1 || 0),
+          games2: Number(score.games2 || 0),
+          sets1: Number(score.sets1 || 0),
+          sets2: Number(score.sets2 || 0),
+          tieBreakMode:
+            score.tieBreakMode === "tb7" || score.tieBreakMode === "super10"
+              ? score.tieBreakMode
+              : null,
+          tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
+          tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
+          lastTieBreakMode:
+            score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10"
+              ? score.lastTieBreakMode
+              : null,
+          lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
+          lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+          setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
+          server: score.server || "player1",
+          totalPoints1: Number(score.totalPoints1 || 0),
+          totalPoints2: Number(score.totalPoints2 || 0),
+          breakPointsWon1: Number(score.breakPointsWon1 || 0),
+          breakPointsWon2: Number(score.breakPointsWon2 || 0),
+          breakPointsChances1: Number(score.breakPointsChances1 || 0),
+          breakPointsChances2: Number(score.breakPointsChances2 || 0)
+        };
       },
 
       getCurrentUserProfile(user) {
@@ -119,10 +153,10 @@
 
       isUserInMatch(match, userName) {
         const current   = U.normalizeText(userName);
-        const p1        = U.normalizeText(match.player1 || "");
-        const p2        = U.normalizeText(match.player2 || "");
-        const p3        = U.normalizeText(match.player3 || "");
-        const p4        = U.normalizeText(match.player4 || "");
+        const p1        = U.normalizeText(match.player1   || "");
+        const p2        = U.normalizeText(match.player2   || "");
+        const p3        = U.normalizeText(match.player3   || "");
+        const p4        = U.normalizeText(match.player4   || "");
         const ownerName = U.normalizeText(match.ownerName || "");
         return p1 === current || p2 === current ||
                p3 === current || p4 === current ||
@@ -206,19 +240,22 @@
 
       isMobile() {
         return window.matchMedia("(max-width: 768px)").matches;
+      },
+
+      isAdmin(user) {
+        const adminEmail = "rodrigokamunga@hotmail.com";
+        return U.normalizeText(user?.email) === U.normalizeText(adminEmail);
       }
     };
 
-    function setMessage(text) {
-      if (el.dashboardMessage) el.dashboardMessage.textContent = text || "";
+    // ─── Sessão biométrica ────────────────────────────────────────────────
+
+    function hasAdminSession() {
+      return localStorage.getItem(SESSION_KEY) === "1";
     }
 
     function hasBiometricSession() {
       return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
-    }
-
-    function hasAdminSession() {
-      return localStorage.getItem(SESSION_KEY) === "1";
     }
 
     function getBiometricCurrentUser() {
@@ -227,7 +264,6 @@
         if (!raw) return null;
         const parsed = JSON.parse(raw);
         if (!parsed || typeof parsed !== "object") return null;
-
         return {
           uid: parsed.uid || "",
           email: parsed.email || "",
@@ -236,39 +272,6 @@
       } catch (_) {
         return null;
       }
-    }
-
-    async function buildFallbackUser(user) {
-      if (user?.uid) return user;
-
-      const biometricCurrent = getBiometricCurrentUser();
-      if (biometricCurrent?.uid) return biometricCurrent;
-
-      const legacyUid = localStorage.getItem(BIOMETRIC_UID_KEY) || "";
-      if (legacyUid) {
-        try {
-          const profileSnap = await db.collection("profiles").doc(legacyUid).get();
-          const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
-
-          const userSnap = await db.collection("users").doc(legacyUid).get();
-          const userData = userSnap.exists ? (userSnap.data() || {}) : {};
-
-          return {
-            uid: legacyUid,
-            email: userData.email || profileData.email || "",
-            displayName: profileData.displayName || userData.displayName || ""
-          };
-        } catch (err) {
-          console.warn("Falha ao reconstruir usuário legado:", err);
-          return {
-            uid: legacyUid,
-            email: "",
-            displayName: ""
-          };
-        }
-      }
-
-      return null;
     }
 
     // ─── Helpers de canvas ────────────────────────────────────────────────
@@ -284,13 +287,19 @@
       ctx.closePath();
     }
 
+    function setMessage(text) {
+      if (el.dashboardMessage) el.dashboardMessage.textContent = text || "";
+    }
+
+    // ─── Mobile cards container ───────────────────────────────────────────
+
     function ensureMobileCardsContainer() {
       if (state.mobileCardsContainer || !el.tableWrap) return;
       const container = document.createElement("div");
       container.id = "dashboardMobileCards";
-      container.style.display       = "none";
-      container.style.marginTop     = "12px";
-      container.style.gap           = "12px";
+      container.style.display = "none";
+      container.style.marginTop = "12px";
+      container.style.gap = "12px";
       container.style.flexDirection = "column";
       el.tableWrap.appendChild(container);
       state.mobileCardsContainer = container;
@@ -301,7 +310,7 @@
       if (!state.mobileCardsContainer) return;
       const table = el.tableWrap?.querySelector("table");
       state.mobileCardsContainer.style.display = state.isMobile ? "flex" : "none";
-      if (table) table.style.display = state.isMobile ? "none" : "";
+      if (table) table.style.display = "none";
     }
 
     // ─── Filtros de opções ────────────────────────────────────────────────
@@ -335,30 +344,28 @@
         const winner = U.getMatchWinner(m);
         if (!winner) return;
 
-        const currentTeam = U.getCurrentTeamPlayers(m, state.currentUserName);
+        const currentTeam     = U.getCurrentTeamPlayers(m, state.currentUserName);
         const currentTeamNorm = currentTeam.map((p) => U.normalizeText(p));
 
         if (U.isDoubles(m)) {
           const winnerTeam = winner === 1
             ? [String(m.player1 || "").trim(), String(m.player2 || "").trim()]
             : [String(m.player3 || "").trim(), String(m.player4 || "").trim()];
-
-          const winnerTeamNorm = winnerTeam.map((p) => U.normalizeText(p));
-          const currentTeamWon = currentTeamNorm.some((p) => winnerTeamNorm.includes(p));
-          if (currentTeamWon) wins += 1;
-          else losses += 1;
+          const winnerTeamNorm  = winnerTeam.map((p) => U.normalizeText(p));
+          const currentTeamWon  = currentTeamNorm.some((p) => winnerTeamNorm.includes(p));
+          if (currentTeamWon) wins += 1; else losses += 1;
           return;
         }
 
-        const p1 = U.normalizeText(m.player1 || "");
-        const p2 = U.normalizeText(m.player2 || "");
+        const p1      = U.normalizeText(m.player1 || "");
+        const p2      = U.normalizeText(m.player2 || "");
         const current = U.normalizeText(state.currentUserName);
 
         if (winner === 1) {
-          if (p1 === current) wins += 1;
+          if (p1 === current)      wins   += 1;
           else if (p2 === current) losses += 1;
         } else if (winner === 2) {
-          if (p2 === current) wins += 1;
+          if (p2 === current)      wins   += 1;
           else if (p1 === current) losses += 1;
         }
       });
@@ -483,8 +490,10 @@
         }
 
         const slices = [
-          { value: wins,   color1: "#4da3ff", color2: "#1f6feb", pct: Math.round((wins / total) * 100) },
-          { value: losses, color1: "#ff8a8a", color2: "#e55353", pct: Math.round((losses / total) * 100) }
+          { value: wins,   color1: "#4da3ff", color2: "#1f6feb",
+            pct: Math.round((wins   / total) * 100) },
+          { value: losses, color1: "#ff8a8a", color2: "#e55353",
+            pct: Math.round((losses / total) * 100) }
         ];
 
         const onlyOne  = slices.filter((s) => s.value > 0).length === 1;
@@ -496,6 +505,7 @@
           const animatedAngle = (slice.value * progress / total) * Math.PI * 2;
           const endAngle      = startAngle + animatedAngle;
           const midAngle      = startAngle + animatedAngle / 2;
+
           const isFull = onlyOne && progress >= 0.99;
 
           drawSlice(startAngle, endAngle, slice.color1, slice.color2, isFull);
@@ -701,7 +711,7 @@
           const modality      = U.getModalidade(m) || "-";
           const format        = U.getGameFormat(m) || "-";
 
-          return ` <article class="dashboard-mobile-card"> <div class="dashboard-mobile-card-head"> <div class="dashboard-mobile-date">${U.escapeHtml(date)}</div> <div class="dashboard-mobile-winner">${U.escapeHtml(winnerText)}</div> </div> <div class="dashboard-mobile-confrontation">${U.escapeHtml(confrontation)}</div> <div class="dashboard-mobile-meta"> <span><strong>Modalidade:</strong> ${U.escapeHtml(modality)}</span> <span><strong>Formato:</strong> ${U.escapeHtml(format)}</span> </div> </article> `;
+          return ` <article class="dashboard-mobile-card"> <div class="dashboard-mobile-card-head"> <div class="dashboard-mobile-date">${U.escapeHtml(date)}</div> <div class="dashboard-mobile-winner">${U.escapeHtml(winnerText)}</div> </div> <div class="dashboard-mobile-confrontation">${U.escapeHtml(confrontation)}</div> <div class="dashboard-mobile-meta"> <span><strong>Modalidade:</strong> ${U.escapeHtml(modality)}</span> <span><strong>Formato:</strong> ${U.escapeHtml(format)}</span> </div> </article>`;
         })
         .join("");
     }
@@ -764,7 +774,7 @@
 
       if (el.totalMatches) el.totalMatches.textContent = String(filtered.length);
       if (el.totalWins)    el.totalWins.textContent    = String(stats.wins);
-      if (el.totalLosses)   el.totalLosses.textContent  = String(stats.losses);
+      if (el.totalLosses)  el.totalLosses.textContent  = String(stats.losses);
 
       drawPieChart(stats.wins, stats.losses);
       drawBarChart(stats.wins, stats.losses);
@@ -782,7 +792,17 @@
     // ─── Firestore listener ───────────────────────────────────────────────
 
     function listenMatches() {
-      if (state.unsubscribe) { state.unsubscribe(); state.unsubscribe = null; }
+      if (state.unsubscribe) {
+        state.unsubscribe();
+        state.unsubscribe = null;
+      }
+
+      if (!state.currentUser?.uid) {
+        setMessage("Usuário não autenticado.");
+        return;
+      }
+
+      const db = firebase.firestore();
 
       state.unsubscribe = db.collection("matches")
         .where("ownerId", "==", state.currentUser.uid)
@@ -832,14 +852,14 @@
         applyFilters();
       });
 
-      document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
+      el.logoutBtnBottom?.addEventListener("click", async () => {
         try {
-          const auth = typeof __auth !== "undefined" && __auth ? __auth : firebase.auth();
-          await auth.signOut();
-
           localStorage.removeItem(SESSION_KEY);
           localStorage.removeItem(BIOMETRIC_SESSION_KEY);
+          localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
 
+          const auth = typeof __auth !== "undefined" ? __auth : firebase.auth();
+          await auth.signOut();
           window.location.href = "login.html";
         } catch (err) {
           console.error(err);
@@ -857,13 +877,25 @@
       });
     }
 
+    // ─── Estilos mobile injetados ─────────────────────────────────────────
+
     function injectMobileStyles() {
       if (document.getElementById("dashboardMobileStyles")) return;
 
       const style = document.createElement("style");
-      style.id = "dashboardMobileStyles";
+      style.id    = "dashboardMobileStyles";
       style.textContent = ` .dashboard-mobile-card { padding: 14px; border-radius: 18px; background: linear-gradient(180deg, rgba(44,54,74,.96), rgba(30,39,58,.98)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 10px; } .dashboard-mobile-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; } .dashboard-mobile-date { font-size: 0.8rem; color: rgba(232,238,252,0.75); font-weight: 800; } .dashboard-mobile-winner { font-size: 0.78rem; color: #f4f8ff; font-weight: 900; padding: 6px 10px; border-radius: 999px; background: rgba(96,165,250,0.14); border: 1px solid rgba(96,165,250,0.18); } .dashboard-mobile-confrontation { font-size: 0.95rem; font-weight: 800; color: #f4f8ff; line-height: 1.35; word-break: break-word; } .dashboard-mobile-meta { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 0.82rem; color: rgba(232,238,252,0.82); } .dashboard-mobile-meta strong { color: #fff; } `;
       document.head.appendChild(style);
+    }
+
+    // ─── Carrega perfil biométrico ────────────────────────────────────────
+
+    async function buildBiometricFallbackUser() {
+      const current = getBiometricCurrentUser();
+      if (current?.uid) return current;
+
+      // fallback mais básico
+      return null;
     }
 
     // ─── Init ─────────────────────────────────────────────────────────────
@@ -880,28 +912,42 @@
       const label = el.toggleFiltersBtn?.querySelector(".career-bottom-label");
       if (label) label.textContent = "Filtros";
 
-      if (typeof __auth === "undefined" || typeof __db === "undefined") {
+      if (typeof __db === "undefined" && typeof firebase === "undefined") {
         setMessage("Firebase não carregado corretamente.");
         return;
       }
 
-      __auth.onAuthStateChanged(async (user) => {
-        let finalUser = user;
+      const auth = typeof __auth !== "undefined" ? __auth : firebase.auth();
+      if (!auth) {
+        setMessage("Firebase Auth não carregado corretamente.");
+        return;
+      }
 
-        if (!finalUser) {
-          finalUser = await buildFallbackUser(null);
-        }
-
-        if (!finalUser || !finalUser.uid) {
+      auth.onAuthStateChanged(async (user) => {
+        if (!user && !hasAdminSession() && !hasBiometricSession()) {
           state.currentUser = null;
+          state.currentUserName = "";
           setMessage("Usuário não autenticado.");
           return;
         }
 
-        state.currentUser = finalUser;
-        state.currentUserName = U.getCurrentUserProfile(finalUser);
+        if (user) {
+          state.currentUser = user;
+          state.currentUserName = U.getCurrentUserProfile(user);
+          listenMatches();
+          return;
+        }
 
-        listenMatches();
+        // sessão biométrica sem Firebase user
+        const biometricUser = await buildBiometricFallbackUser();
+        if (biometricUser?.uid) {
+          state.currentUser = biometricUser;
+          state.currentUserName = U.getCurrentUserProfile(biometricUser);
+          listenMatches();
+          return;
+        }
+
+        setMessage("Usuário não autenticado.");
       });
     }
 
