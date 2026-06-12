@@ -12,11 +12,11 @@ const googleLoginBtn = document.getElementById("googleLoginBtn");
 
 const REDIRECT_URL          = "menu.html";
 const SESSION_KEY           = "lsts_admin_session";
-const REMEMBER_EMAIL_KEY    = "rememberedEmail";
-const BIOMETRIC_KEY         = "lsts_biometric_uid";
-const BIOMETRIC_CRED_KEY    = "lsts_biometric_credId";
-const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
-const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
+const REMEMBER_EMAIL_KEY     = "rememberedEmail";
+const BIOMETRIC_KEY          = "lsts_biometric_uid";        // compatibilidade antiga
+const BIOMETRIC_CRED_KEY     = "lsts_biometric_credId";     // compatibilidade antiga
+const BIOMETRIC_SESSION_KEY  = "lsts_biometric_session";
+const BIOMETRIC_CURRENT_KEY  = "lsts_biometric_current";    // novo formato multiusuário
 
 // ─── Verificação de ambiente ──────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ const CAN_USE_BIOMETRIC = IS_SECURE && (IS_HTTPS || IS_LOCAL);
 
 const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
 if (savedEmail && emailInput && rememberMe) {
-  emailInput.value   = savedEmail;
+  emailInput.value = savedEmail;
   rememberMe.checked = true;
 }
 
@@ -73,19 +73,54 @@ function normalizeEmail(email = "") {
   return String(email).trim().toLowerCase();
 }
 
+function getDb() {
+  if (typeof __db !== "undefined" && __db) return __db;
+  if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  return null;
+}
+
+function getAuth() {
+  if (typeof __auth !== "undefined" && __auth) return __auth;
+  if (typeof firebase !== "undefined" && firebase.auth) return firebase.auth();
+  return null;
+}
+
 // compatibilidade antiga
 function saveLegacyBiometricData(uid, credIdB64) {
   if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
   if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
 }
 
+// novo formato: salva usuário completo
 function setCurrentBiometricUser(user) {
   if (!user) return;
-  localStorage.setItem(BIOMETRIC_CURRENT_KEY, JSON.stringify({
-    uid: user.uid || "",
-    email: normalizeEmail(user.email || ""),
-    displayName: user.displayName || ""
-  }));
+
+  localStorage.setItem(
+    BIOMETRIC_CURRENT_KEY,
+    JSON.stringify({
+      uid: user.uid || "",
+      email: normalizeEmail(user.email || ""),
+      displayName: user.displayName || ""
+    })
+  );
+}
+
+function getCurrentBiometricUser() {
+  try {
+    const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+
+    return {
+      uid: parsed.uid || "",
+      email: parsed.email || "",
+      displayName: parsed.displayName || ""
+    };
+  } catch (_) {
+    return null;
+  }
 }
 
 function b64ToBytes(b64) {
@@ -113,18 +148,6 @@ function base64UrlToBytes(input) {
   let base64 = String(input || "").replace(/-/g, "+").replace(/_/g, "/");
   while (base64.length % 4) base64 += "=";
   return b64ToBytes(base64);
-}
-
-function getDb() {
-  if (typeof __db !== "undefined" && __db) return __db;
-  if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
-  return null;
-}
-
-function getAuth() {
-  if (typeof __auth !== "undefined" && __auth) return __auth;
-  if (typeof firebase !== "undefined" && firebase.auth) return firebase.auth();
-  return null;
 }
 
 // ─── Aviso de ambiente inseguro ───────────────────────────────────────────────
@@ -171,7 +194,7 @@ function getAuthErrorMsg(code) {
       "Este e-mail já está vinculado a outro método de login.",
     "auth/unauthorized-domain":
       "Domínio não autorizado. Adicione-o no Firebase Console.",
-    "auth/internal-error":         "Erro interno. Tente novamente.",
+    "auth/internal-error":         "Erro interno. Tente novamente."
   };
   return errors[code] || "Ocorreu um erro inesperado. Tente novamente.";
 }
@@ -218,14 +241,14 @@ async function ensureUserDoc(user) {
         role:        "user",
         blocked:     false,
         createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt:   firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     } else {
       const data = docSnap.data() || {};
       if (typeof data.blocked === "undefined") {
         await docRef.set({
           blocked: false,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
       }
     }
@@ -243,30 +266,21 @@ async function forceLogout() {
   } catch (_) {}
 }
 
-// ─── Biometria: recuperar registro único ─────────────────────────────────────
+// ─── Recupera biometria salva ────────────────────────────────────────────────
 
 function getBiometricRecord() {
-  const uid = localStorage.getItem(BIOMETRIC_KEY) || "";
+  const current = getCurrentBiometricUser();
+  const uid = current?.uid || localStorage.getItem(BIOMETRIC_KEY) || "";
   const credIdB64 = localStorage.getItem(BIOMETRIC_CRED_KEY) || "";
-  const currentRaw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
 
-  let current = null;
-  try {
-    current = currentRaw ? JSON.parse(currentRaw) : null;
-  } catch (_) {
-    current = null;
-  }
+  if (!uid || !credIdB64) return null;
 
-  if (uid && credIdB64) {
-    return {
-      uid,
-      credIdB64,
-      email: current?.email || "",
-      displayName: current?.displayName || ""
-    };
-  }
-
-  return null;
+  return {
+    uid,
+    credIdB64,
+    email: current?.email || "",
+    displayName: current?.displayName || ""
+  };
 }
 
 // ─── Inicializa Firebase Auth ────────────────────────────────────────────────
@@ -306,6 +320,7 @@ function initFirebaseAuth() {
         await ensureUserDoc(user);
         saveSession();
         clearBiometricSessionFlags();
+        setCurrentBiometricUser(user);
         goHome();
       });
     })
