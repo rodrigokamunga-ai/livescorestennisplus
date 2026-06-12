@@ -5,6 +5,7 @@
     const ADMIN_KEY = "lsts_admin_session";
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
+    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
     const ADMIN_EMAIL = "rodrigokamunga@hotmail.com";
     const PAGE_SIZE = 5;
     const MOBILE_QUERY = "(max-width: 768px)";
@@ -303,6 +304,22 @@
 
     function getBiometricUid() {
       return localStorage.getItem(BIOMETRIC_UID_KEY) || "";
+    }
+
+    function getBiometricCurrentUser() {
+      try {
+        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          uid: parsed.uid || "",
+          email: parsed.email || "",
+          displayName: parsed.displayName || ""
+        };
+      } catch (_) {
+        return null;
+      }
     }
 
     function fillPlayer1Field() {
@@ -692,7 +709,8 @@
     }
 
     async function buildBiometricFallbackUser() {
-      const uid = getBiometricUid();
+      const biometricCurrent = getBiometricCurrentUser();
+      const uid = biometricCurrent?.uid || getBiometricUid();
       if (!uid || typeof __db === "undefined") return null;
 
       try {
@@ -704,15 +722,15 @@
 
         return {
           uid,
-          email: userData.email || profileData.email || "",
-          displayName: profileData.displayName || userData.displayName || ""
+          email: biometricCurrent?.email || userData.email || profileData.email || "",
+          displayName: biometricCurrent?.displayName || profileData.displayName || userData.displayName || ""
         };
       } catch (err) {
         console.error("Erro ao montar usuário biométrico:", err);
         return {
           uid,
-          email: "",
-          displayName: ""
+          email: biometricCurrent?.email || "",
+          displayName: biometricCurrent?.displayName || ""
         };
       }
     }
@@ -833,11 +851,15 @@
         try {
           localStorage.removeItem(ADMIN_KEY);
           localStorage.removeItem(BIOMETRIC_SESSION_KEY);
+          localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
+          localStorage.removeItem(BIOMETRIC_UID_KEY);
+
           if (!state.biometricMode) {
             await __auth.signOut();
           } else if (__auth?.currentUser) {
             await __auth.signOut();
           }
+
           goLogin();
         } catch (err) {
           console.error(err);
@@ -1056,6 +1078,77 @@
 
       window.addEventListener("resize", onResize, { passive: true });
       window.addEventListener("orientationchange", onResize, { passive: true });
+    }
+
+    async function buildBiometricFallbackUser() {
+      const biometricCurrent = getBiometricCurrentUser();
+      const uid = biometricCurrent?.uid || getBiometricUid();
+      if (!uid || typeof __db === "undefined") return null;
+
+      try {
+        const profileSnap = await __db.collection("profiles").doc(uid).get();
+        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+        const userSnap = await __db.collection("users").doc(uid).get();
+        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+        return {
+          uid,
+          email: biometricCurrent?.email || userData.email || profileData.email || "",
+          displayName: biometricCurrent?.displayName || profileData.displayName || userData.displayName || ""
+        };
+      } catch (err) {
+        console.error("Erro ao montar usuário biométrico:", err);
+        return {
+          uid,
+          email: biometricCurrent?.email || "",
+          displayName: biometricCurrent?.displayName || ""
+        };
+      }
+    }
+
+    async function updateAuthState(user) {
+      const localSession = hasAdminSession();
+      const biometricSession = hasBiometricSession();
+
+      if (!user && !localSession && !biometricSession) {
+        state.currentUser = null;
+        state.currentProfileName = "";
+        if (el.tbody) el.tbody.innerHTML = renderEmpty("Usuário não autenticado.");
+        setMsg("Usuário não autenticado.");
+        goLogin();
+        return;
+      }
+
+      if (!user && biometricSession) {
+        state.biometricMode = true;
+        const fallbackUser = await buildBiometricFallbackUser();
+
+        if (!fallbackUser || !fallbackUser.uid) {
+          state.currentUser = null;
+          state.currentProfileName = "";
+          if (el.tbody) el.tbody.innerHTML = renderEmpty("Usuário não autenticado.");
+          setMsg("Usuário não autenticado.");
+          goLogin();
+          return;
+        }
+
+        state.currentUser = fallbackUser;
+        state.currentProfileName = String(fallbackUser.displayName || "").trim() || "Usuário";
+
+        fillPlayer1Field();
+        listenMatches();
+        refreshList();
+        return;
+      }
+
+      state.biometricMode = false;
+      state.currentUser = user;
+      state.currentProfileName = String(user.displayName || "").trim() || user.email || "";
+
+      fillPlayer1Field();
+      listenMatches();
+      refreshList();
     }
 
     function init() {
