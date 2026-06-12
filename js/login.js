@@ -16,6 +16,7 @@ const REMEMBER_EMAIL_KEY    = "rememberedEmail";
 const BIOMETRIC_KEY         = "lsts_biometric_uid";
 const BIOMETRIC_CRED_KEY    = "lsts_biometric_credId";
 const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
+const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 
 // ─── Verificação de ambiente ──────────────────────────────────────────────────
 
@@ -60,17 +61,31 @@ function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-function saveBiometricData(uid, credIdB64) {
-  if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
-  if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
+function markBiometricSession() {
+  localStorage.setItem(BIOMETRIC_SESSION_KEY, "1");
 }
 
 function clearBiometricSessionFlags() {
   localStorage.removeItem(BIOMETRIC_SESSION_KEY);
 }
 
-function markBiometricSession() {
-  localStorage.setItem(BIOMETRIC_SESSION_KEY, "1");
+function normalizeEmail(email = "") {
+  return String(email).trim().toLowerCase();
+}
+
+// compatibilidade antiga
+function saveLegacyBiometricData(uid, credIdB64) {
+  if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
+  if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
+}
+
+function setCurrentBiometricUser(user) {
+  if (!user) return;
+  localStorage.setItem(BIOMETRIC_CURRENT_KEY, JSON.stringify({
+    uid: user.uid || "",
+    email: normalizeEmail(user.email || ""),
+    displayName: user.displayName || ""
+  }));
 }
 
 function b64ToBytes(b64) {
@@ -80,6 +95,36 @@ function b64ToBytes(b64) {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;
+}
+
+function bytesToBase64Url(bytes) {
+  let binary = "";
+  const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  for (let i = 0; i < arr.length; i++) {
+    binary += String.fromCharCode(arr[i]);
+  }
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function base64UrlToBytes(input) {
+  let base64 = String(input || "").replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) base64 += "=";
+  return b64ToBytes(base64);
+}
+
+function getDb() {
+  if (typeof __db !== "undefined" && __db) return __db;
+  if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  return null;
+}
+
+function getAuth() {
+  if (typeof __auth !== "undefined" && __auth) return __auth;
+  if (typeof firebase !== "undefined" && firebase.auth) return firebase.auth();
+  return null;
 }
 
 // ─── Aviso de ambiente inseguro ───────────────────────────────────────────────
@@ -113,7 +158,7 @@ function getAuthErrorMsg(code) {
     "auth/user-disabled":          "Esta conta foi desativada. Entre em contato com o suporte.",
     "auth/requires-recent-login":  "Por segurança, faça login novamente para continuar.",
     "auth/user-token-expired":     "Sua sessão expirou. Faça login novamente.",
-    "auth/network-request-failed": "Falha de conexão. Verifique sua internet.",
+    "auth/network-request-failed":  "Falha de conexão. Verifique sua internet.",
     "auth/timeout":                "A requisição demorou muito. Tente novamente.",
     "auth/too-many-requests":      "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
     "auth/quota-exceeded":         "Limite de requisições atingido. Tente novamente mais tarde.",
@@ -132,19 +177,16 @@ function getAuthErrorMsg(code) {
 }
 
 // ─── Verifica bloqueio no Firestore ──────────────────────────────────────────
-// Retornos:
-// true => usuário bloqueado
-// false => usuário liberado
-// null => não foi possível verificar
 
 async function checkUserBlocked(uid) {
   try {
-    if (!window.__db) {
-      console.warn("Firestore (__db) não inicializado.");
+    const db = getDb();
+    if (!db) {
+      console.warn("Firestore não inicializado.");
       return null;
     }
 
-    const doc = await __db.collection("users").doc(uid).get();
+    const doc = await db.collection("users").doc(uid).get();
 
     if (!doc.exists) {
       console.warn("Documento do usuário não encontrado:", uid);
@@ -161,9 +203,10 @@ async function checkUserBlocked(uid) {
 
 async function ensureUserDoc(user) {
   try {
-    if (!window.__db || !user) return;
+    const db = getDb();
+    if (!db || !user) return;
 
-    const docRef = __db.collection("users").doc(user.uid);
+    const docRef = db.collection("users").doc(user.uid);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
@@ -171,7 +214,7 @@ async function ensureUserDoc(user) {
         uid:         user.uid,
         ownerId:     user.uid,
         displayName: user.displayName || "",
-        email:       user.email || "",
+        email:       normalizeEmail(user.email || ""),
         role:        "user",
         blocked:     false,
         createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
@@ -195,8 +238,35 @@ async function forceLogout() {
   try {
     clearSession();
     clearBiometricSessionFlags();
-    await __auth.signOut();
+    const auth = getAuth();
+    if (auth) await auth.signOut();
   } catch (_) {}
+}
+
+// ─── Biometria: recuperar registro único ─────────────────────────────────────
+
+function getBiometricRecord() {
+  const uid = localStorage.getItem(BIOMETRIC_KEY) || "";
+  const credIdB64 = localStorage.getItem(BIOMETRIC_CRED_KEY) || "";
+  const currentRaw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+
+  let current = null;
+  try {
+    current = currentRaw ? JSON.parse(currentRaw) : null;
+  } catch (_) {
+    current = null;
+  }
+
+  if (uid && credIdB64) {
+    return {
+      uid,
+      credIdB64,
+      email: current?.email || "",
+      displayName: current?.displayName || ""
+    };
+  }
+
+  return null;
 }
 
 // ─── Inicializa Firebase Auth ────────────────────────────────────────────────
@@ -207,9 +277,15 @@ function initFirebaseAuth() {
     return;
   }
 
-  __auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  const auth = getAuth();
+  if (!auth) {
+    setMsg("Firebase Auth não carregado corretamente.", "error");
+    return;
+  }
+
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => {
-      __auth.onAuthStateChanged(async (user) => {
+      auth.onAuthStateChanged(async (user) => {
         if (!user) return;
 
         const isBlocked = await checkUserBlocked(user.uid);
@@ -265,7 +341,8 @@ form?.addEventListener("submit", async (e) => {
   if (!password) return setMsg("Informe a senha.", "error");
 
   try {
-    const credential = await __auth.signInWithEmailAndPassword(email, password);
+    const auth = getAuth();
+    const credential = await auth.signInWithEmailAndPassword(email, password);
     const user = credential.user;
 
     if (!user) {
@@ -301,7 +378,9 @@ form?.addEventListener("submit", async (e) => {
       localStorage.removeItem(REMEMBER_EMAIL_KEY);
     }
 
-    saveBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
+    saveLegacyBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
+    setCurrentBiometricUser(user);
+
     saveSession();
     clearBiometricSessionFlags();
     goHome();
@@ -337,7 +416,9 @@ async function finishGoogleLogin(user) {
 
   await ensureUserDoc(user);
 
-  saveBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
+  saveLegacyBiometricData(user.uid, localStorage.getItem(BIOMETRIC_CRED_KEY));
+  setCurrentBiometricUser(user);
+
   saveSession();
   clearBiometricSessionFlags();
   setMsg("✅ Login com Google realizado!", "success");
@@ -350,7 +431,8 @@ async function handleGoogleRedirectResult() {
   if (!CAN_USE_GOOGLE) return;
 
   try {
-    const result = await __auth.getRedirectResult();
+    const auth = getAuth();
+    const result = await auth.getRedirectResult();
     if (!result || !result.user) return;
 
     setMsg("Finalizando login com Google...", "info");
@@ -372,6 +454,7 @@ function initGoogleLogin() {
   googleLoginBtn?.addEventListener("click", async () => {
     setMsg("Abrindo Google...", "info");
 
+    const auth = getAuth();
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
 
@@ -379,7 +462,7 @@ function initGoogleLogin() {
       let result;
 
       try {
-        result = await __auth.signInWithPopup(provider);
+        result = await auth.signInWithPopup(provider);
       } catch (popupErr) {
         if (
           popupErr.code === "auth/operation-not-supported-in-this-environment" ||
@@ -387,7 +470,7 @@ function initGoogleLogin() {
           popupErr.code === "auth/popup-closed-by-user"
         ) {
           setMsg("Redirecionando para o Google...", "info");
-          await __auth.signInWithRedirect(provider);
+          await auth.signInWithRedirect(provider);
           return;
         }
         throw popupErr;
@@ -409,27 +492,34 @@ function initGoogleLogin() {
 // ─── Biometria ────────────────────────────────────────────────────────────────
 
 function initBiometricLogin() {
-  const uid = localStorage.getItem(BIOMETRIC_KEY);
-  const credIdB64 = localStorage.getItem(BIOMETRIC_CRED_KEY);
-
-  console.log("Biometria - UID salvo:", uid);
-  console.log("Biometria - credencial salva:", !!credIdB64);
-
-  if (!CAN_USE_BIOMETRIC || !uid || !credIdB64 || !window.PublicKeyCredential) {
+  if (!CAN_USE_BIOMETRIC || !window.PublicKeyCredential) {
     if (biometricBtn) biometricBtn.style.display = "none";
     return;
   }
 
-  if (biometricBtn) biometricBtn.style.display = "flex";
+  if (biometricBtn) {
+    biometricBtn.style.display = "flex";
+    biometricBtn.disabled = false;
+    biometricBtn.title = "Entrar com biometria";
+    biometricBtn.style.opacity = "1";
+    biometricBtn.style.cursor = "pointer";
+  }
 
   biometricBtn?.addEventListener("click", async () => {
+    const record = getBiometricRecord();
+
+    if (!record?.uid || !record?.credIdB64) {
+      setMsg("Biometria ainda não cadastrada neste aparelho.", "error");
+      return;
+    }
+
     try {
       setMsg("Aguardando biometria...", "info");
 
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
-      const credIdBytes = b64ToBytes(credIdB64);
+      const credIdBytes = base64UrlToBytes(record.credIdB64);
 
       const assertion = await navigator.credentials.get({
         publicKey: {
@@ -449,7 +539,7 @@ function initBiometricLogin() {
         return;
       }
 
-      const isBlocked = await checkUserBlocked(uid);
+      const isBlocked = await checkUserBlocked(record.uid);
 
       if (isBlocked === true) {
         setMsg(
@@ -459,7 +549,6 @@ function initBiometricLogin() {
         return;
       }
 
-      // Se o Firestore falhar, não bloqueia o login biométrico
       if (isBlocked === null) {
         console.warn("Não foi possível validar a conta no Firestore. Liberando pela biometria.");
         setMsg(
@@ -470,6 +559,12 @@ function initBiometricLogin() {
 
       saveSession();
       markBiometricSession();
+      setCurrentBiometricUser({
+        uid: record.uid,
+        email: record.email || "",
+        displayName: record.displayName || ""
+      });
+
       setMsg("✅ Acesso liberado pela biometria!", "success");
       setTimeout(goHome, 800);
 
@@ -482,7 +577,6 @@ function initBiometricLogin() {
         setMsg("Biometria cancelada. Use e-mail e senha.", "error");
       } else if (err.name === "NotSupportedError") {
         setMsg("Biometria não suportada neste dispositivo.", "error");
-        if (biometricBtn) biometricBtn.style.display = "none";
       } else {
         setMsg("Não foi possível autenticar pela biometria.", "error");
       }
