@@ -64,11 +64,11 @@ function getFirebaseErrorMsg(code) {
 // ─── Força da senha ───────────────────────────────────────────────────────────
 
 const PASSWORD_RULES = [
-  { re: /.{8,}/,         label: "mínimo 8 caracteres"       },
-  { re: /[A-Z]/,         label: "letra maiúscula"            },
-  { re: /[a-z]/,         label: "letra minúscula"            },
-  { re: /[0-9]/,         label: "número"                     },
-  { re: /[^A-Za-z0-9]/, label: "caractere especial (!@#…)"  }
+  { re: /.{8,}/,        label: "mínimo 8 caracteres"      },
+  { re: /[A-Z]/,        label: "letra maiúscula"          },
+  { re: /[a-z]/,        label: "letra minúscula"          },
+  { re: /[0-9]/,        label: "número"                   },
+  { re: /[^A-Za-z0-9]/, label: "caractere especial (!@#…)" }
 ];
 
 function getPasswordStrength(password) {
@@ -142,74 +142,7 @@ async function saveUserProfile(user, displayName, email) {
   }, { merge: true });
 }
 
-// ─── Biometria ────────────────────────────────────────────────────────────────
-
-function offerBiometricRegistration(uid) {
-  if (!window.PublicKeyCredential) return;
-  if (!biometricRegisterBtn)       return;
-
-  biometricRegisterBtn.style.display = "flex";
-  biometricRegisterBtn.onclick = () => registerBiometric(uid);
-}
-
-async function registerBiometric(uid) {
-  if (!window.PublicKeyCredential) {
-    setMsg("Seu dispositivo não suporta biometria.", "error");
-    return;
-  }
-
-  try {
-    setMsg("Aguardando biometria...", "info");
-
-    const challenge = new Uint8Array(32);
-    crypto.getRandomValues(challenge);
-
-    const credential = await navigator.credentials.create({
-      publicKey: {
-        challenge,
-        rp: {
-          name: "Live Scores Tennis",
-          id:   location.hostname || "localhost"
-        },
-        user: {
-          id:          new TextEncoder().encode(uid),
-          name:        emailInput?.value || uid,
-          displayName: displayNameInput?.value || uid
-        },
-        pubKeyCredParams: [
-          { type: "public-key", alg: -7   },
-          { type: "public-key", alg: -257 }
-        ],
-        authenticatorSelection: {
-          authenticatorAttachment: "platform",
-          userVerification:        "required"
-        },
-        timeout:     60000,
-        attestation: "none"
-      }
-    });
-
-    if (credential) {
-      localStorage.setItem(BIOMETRIC_KEY, uid);
-      localStorage.setItem(
-        BIOMETRIC_CRED_KEY,
-        btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
-      );
-
-      setMsg("✅ Biometria registrada! Você pode usá-la no login.", "success");
-      if (biometricRegisterBtn) biometricRegisterBtn.style.display = "none";
-      setTimeout(goLogin, 1500);
-    }
-
-  } catch (err) {
-    console.warn("Biometria cancelada ou não disponível:", err);
-    if (err.name === "NotAllowedError") {
-      setMsg("Biometria cancelada pelo usuário.", "error");
-    } else {
-      setMsg("Não foi possível registrar a biometria.", "error");
-    }
-  }
-}
+/* // ─── Biometria ──────────────────────────────────────────────────────────────── function offerBiometricRegistration(uid) { if (!window.PublicKeyCredential) return; if (!biometricRegisterBtn) return; biometricRegisterBtn.style.display = "flex"; biometricRegisterBtn.onclick = () => registerBiometric(uid); } async function registerBiometric(uid) { if (!window.PublicKeyCredential) { setMsg("Seu dispositivo não suporta biometria.", "error"); return; } try { setMsg("Aguardando biometria...", "info"); const challenge = new Uint8Array(32); crypto.getRandomValues(challenge); const credential = await navigator.credentials.create({ publicKey: { challenge, rp: { name: "Live Scores Tennis", id: location.hostname || "localhost" }, user: { id: new TextEncoder().encode(uid), name: emailInput?.value || uid, displayName: displayNameInput?.value || uid }, pubKeyCredParams: [ { type: "public-key", alg: -7 }, { type: "public-key", alg: -257 } ], authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }, timeout: 60000, attestation: "none" } }); if (credential) { localStorage.setItem(BIOMETRIC_KEY, uid); localStorage.setItem( BIOMETRIC_CRED_KEY, btoa(String.fromCharCode(...new Uint8Array(credential.rawId))) ); setMsg("✅ Biometria registrada! Você pode usá-la no login.", "success"); if (biometricRegisterBtn) biometricRegisterBtn.style.display = "none"; setTimeout(goLogin, 1500); } } catch (err) { console.warn("Biometria cancelada ou não disponível:", err); if (err.name === "NotAllowedError") { setMsg("Biometria cancelada pelo usuário.", "error"); } else { setMsg("Não foi possível registrar a biometria.", "error"); } } } */
 
 // ─── Google: finaliza cadastro após redirect ou popup ────────────────────────
 
@@ -223,20 +156,10 @@ async function finishGoogleRegister(user) {
   localStorage.removeItem(GOOGLE_PENDING_KEY);
 
   setMsg("✅ Conta Google vinculada com sucesso!", "success");
-  offerBiometricRegistration(user.uid);
 
-  if (!window.PublicKeyCredential) {
-    setTimeout(goLogin, 1500);
-    return;
-  }
+  /* offerBiometricRegistration(user.uid); if (!window.PublicKeyCredential) { setTimeout(goLogin, 1500); return; } // Se biometria disponível, aguarda clique no botão setTimeout(() => { if (!biometricRegisterBtn || biometricRegisterBtn.style.display === "none") { goLogin(); } }, 8000); // redireciona em 8s se não registrar biometria */
 
-  // Se biometria disponível, aguarda clique no botão
-  setTimeout(() => {
-    if (!biometricRegisterBtn ||
-        biometricRegisterBtn.style.display === "none") {
-      goLogin();
-    }
-  }, 8000); // redireciona em 8s se não registrar biometria
+  setTimeout(goLogin, 1500);
 }
 
 // ─── ✅ Trata retorno do signInWithRedirect (Google) ──────────────────────────
@@ -341,12 +264,9 @@ form?.addEventListener("submit", async (e) => {
     localStorage.setItem(SESSION_KEY, "1");
     setMsg("✅ Cadastro criado com sucesso!", "success");
 
-    // 4️⃣ Oferece biometria
-    offerBiometricRegistration(user.uid);
+    /* // 4️⃣ Oferece biometria offerBiometricRegistration(user.uid); if (!window.PublicKeyCredential) { setTimeout(goLogin, 1200); } */
 
-    if (!window.PublicKeyCredential) {
-      setTimeout(goLogin, 1200);
-    }
+    setTimeout(goLogin, 1200);
 
   } catch (err) {
     console.error("Erro no cadastro:", err);
