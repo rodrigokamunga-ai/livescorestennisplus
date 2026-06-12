@@ -10,6 +10,7 @@
     const ADMIN_KEY = "lsts_admin_session";
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
+    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 
     // Imagem padrão do avatar
     const DEFAULT_AVATAR = "img/perfil-padrao.png";
@@ -151,6 +152,22 @@
 
     function getBiometricUid() {
       return localStorage.getItem(BIOMETRIC_UID_KEY) || "";
+    }
+
+    function getBiometricCurrentUser() {
+      try {
+        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          uid: parsed.uid || "",
+          email: parsed.email || "",
+          displayName: parsed.displayName || ""
+        };
+      } catch (_) {
+        return null;
+      }
     }
 
     function getRadioValue(name) {
@@ -303,32 +320,38 @@
 
     // ─── Carrega perfil ───────────────────────────────────────────────────
 
-    async function buildBiometricFallbackUser(user) {
-      const uid = user?.uid || getBiometricUid();
-      if (!uid) return null;
+    async function resolveCurrentUser(user) {
+      if (user) return user;
 
-      const fallbackUser = {
-        uid,
-        email: "",
-        displayName: ""
-      };
-
-      try {
-        if (typeof __db === "undefined") return fallbackUser;
-
-        const profileSnap = await __db.collection("profiles").doc(uid).get();
-        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
-
-        const userSnap = await __db.collection("users").doc(uid).get();
-        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
-
-        fallbackUser.email = user?.email || userData.email || profileData.email || "";
-        fallbackUser.displayName = profileData.displayName || userData.displayName || user?.displayName || "";
-      } catch (err) {
-        console.warn("Firestore indisponível para biometria, usando fallback mínimo.", err);
+      const biometricCurrent = getBiometricCurrentUser();
+      if (biometricCurrent?.uid) {
+        return biometricCurrent;
       }
 
-      return fallbackUser;
+      if (hasAdminSession() || hasBiometricSession()) {
+        const uid = getBiometricUid();
+        if (uid) {
+          const fallback = { uid, email: "", displayName: "" };
+
+          try {
+            const db = getDb();
+            const profileSnap = await db.collection("profiles").doc(uid).get();
+            const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+            const userSnap = await db.collection("users").doc(uid).get();
+            const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+            fallback.email = userData.email || profileData.email || "";
+            fallback.displayName = profileData.displayName || userData.displayName || "";
+          } catch (err) {
+            console.warn("Falha ao reconstruir usuário biométrico:", err);
+          }
+
+          return fallback;
+        }
+      }
+
+      return null;
     }
 
     async function loadProfile(user) {
@@ -403,7 +426,7 @@
 
         await getDb().collection("profiles").doc(currentUser.uid).set(data, { merge: true });
 
-        if (newDisplayName && newDisplayName !== currentUser.displayName) {
+        if (newDisplayName && newDisplayName !== currentUser.displayName && currentUser.updateProfile) {
           await currentUser.updateProfile({ displayName: newDisplayName });
           previousDisplayName = newDisplayName;
         }
@@ -505,9 +528,9 @@
         console.error("Erro ao alterar senha:", err);
 
         const msg =
-          err.code === "auth/wrong-password"       ? "Senha atual incorreta." :
-          err.code === "auth/weak-password"        ? "A nova senha é muito fraca." :
-          err.code === "auth/requires-recent-login" ? "Faça login novamente para alterar a senha." :
+          err.code === "auth/wrong-password"        ? "Senha atual incorreta." :
+          err.code === "auth/weak-password"         ? "A nova senha é muito fraca." :
+          err.code === "auth/requires-recent-login"  ? "Faça login novamente para alterar a senha." :
           err.message || "Erro ao alterar senha.";
 
         setPasswordMsg(msg, "error");
@@ -574,7 +597,10 @@
 
         await currentUser.delete();
 
-        localStorage.clear();
+        localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
+        localStorage.removeItem(BIOMETRIC_UID_KEY);
+        localStorage.removeItem(BIOMETRIC_SESSION_KEY);
+        localStorage.removeItem(ADMIN_KEY);
         sessionStorage.clear();
         window.location.replace("login.html");
       } catch (err) {
@@ -601,7 +627,7 @@
 
       if (el.phone)      el.phone.value      = "";
       if (el.gender)     el.gender.value     = "";
-      if (el.birthDate)  el.birthDate.value  = "";
+      if (el.birthDate)   el.birthDate.value  = "";
       if (el.height)     el.height.value     = "";
       if (el.weight)     el.weight.value     = "";
       if (el.country)    el.country.value    = "";
@@ -692,10 +718,12 @@
 
       document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
         try {
-          await getAuth().signOut();
+          const auth = getAuth();
+          if (auth) await auth.signOut();
           localStorage.removeItem(ADMIN_KEY);
           localStorage.removeItem(BIOMETRIC_SESSION_KEY);
-          localStorage.clear();
+          localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
+          localStorage.removeItem(BIOMETRIC_UID_KEY);
           sessionStorage.clear();
           window.location.replace("login.html");
         } catch (err) {
@@ -707,64 +735,22 @@
 
     // ─── Init ──────────────────────────────────────────────────────────────
 
-    async function buildFallbackUser(user) {
-      const uid = user?.uid || getBiometricUid();
-      if (!uid) return null;
-
-      const fallbackUser = {
-        uid,
-        email: user?.email || "",
-        displayName: user?.displayName || ""
-      };
-
-      try {
-        if (typeof __db === "undefined") return fallbackUser;
-
-        const profileSnap = await __db.collection("profiles").doc(uid).get();
-        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
-
-        const userSnap = await __db.collection("users").doc(uid).get();
-        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
-
-        fallbackUser.email = user?.email || userData.email || profileData.email || "";
-        fallbackUser.displayName = profileData.displayName || userData.displayName || user?.displayName || "";
-      } catch (err) {
-        console.warn("Firestore indisponível para carregar perfil, usando fallback mínimo.", err);
-      }
-
-      return fallbackUser;
-    }
-
     async function initUser(user) {
-      if (user) {
-        currentUser = user;
-        const fullUser = await buildFallbackUser(user);
-        currentUser = fullUser || user;
-        if (el.email)       el.email.value       = currentUser.email || "";
-        if (el.displayName) el.displayName.value = currentUser.displayName || "";
-        previousDisplayName = currentUser.displayName || "";
-        await loadProfile(currentUser);
+      const resolvedUser = await resolveCurrentUser(user);
+
+      if (!resolvedUser || !resolvedUser.uid) {
+        setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
+        setDefaultAvatar();
         return;
       }
 
-      if (hasAdminSession() || hasBiometricSession()) {
-        const fallbackUser = await buildFallbackUser(null);
-        if (!fallbackUser) {
-          setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
-          setDefaultAvatar();
-          return;
-        }
+      currentUser = resolvedUser;
 
-        currentUser = fallbackUser;
-        if (el.email)       el.email.value       = currentUser.email || "";
-        if (el.displayName) el.displayName.value = currentUser.displayName || "";
-        previousDisplayName = currentUser.displayName || "";
-        await loadProfile(currentUser);
-        return;
-      }
+      if (el.email)       el.email.value       = currentUser.email || "";
+      if (el.displayName) el.displayName.value = currentUser.displayName || "";
 
-      setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
-      setDefaultAvatar();
+      previousDisplayName = currentUser.displayName || "";
+      await loadProfile(currentUser);
     }
 
     function init() {
@@ -782,7 +768,13 @@
 
       bindEvents();
 
-      getAuth().onAuthStateChanged(async (user) => {
+      const auth = getAuth();
+      if (!auth) {
+        setMsg("Firebase Auth não carregado corretamente.", "error");
+        return;
+      }
+
+      auth.onAuthStateChanged(async (user) => {
         await initUser(user);
       });
     }
