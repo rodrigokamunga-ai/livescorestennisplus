@@ -788,7 +788,7 @@
     function bindEvents() {
       el.toggleFiltersBtn?.addEventListener("click", toggleFilters);
       el.applyFilterBtn?.addEventListener("click",  applyFilters);
-
+    
       el.clearFilterBtn?.addEventListener("click", () => {
         if (el.yearFilter)       el.yearFilter.value       = "";
         if (el.modalityFilter)   el.modalityFilter.value   = "";
@@ -796,7 +796,17 @@
         if (el.player2Filter)    el.player2Filter.value    = "";
         applyFilters();
       });
-
+    
+      document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
+        try {
+          await firebase.auth().signOut();
+          window.location.href = "login.html";
+        } catch (err) {
+          console.error(err);
+          setMessage("Erro ao sair.");
+        }
+      });
+    
       window.addEventListener("resize", () => {
         const wasMobile = state.isMobile;
         state.isMobile  = U.isMobile();
