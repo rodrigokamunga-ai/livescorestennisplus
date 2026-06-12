@@ -531,7 +531,7 @@
       if (el.matchFormat) el.matchFormat.textContent = fmt || "-";
 
       if (el.matchSubTitle) {
-        el.matchSubTitle.textContent = "";
+        el.matchSubTitle.textContent = "Acompanhe e atualize o placar em tempo real";
       }
 
       if (el.statusLabel) {
