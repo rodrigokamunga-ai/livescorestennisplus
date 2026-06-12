@@ -21,10 +21,10 @@ const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 // ─── Verificação de ambiente ──────────────────────────────────────────────────
 
 const IS_FILE   = location.protocol === "file:";
-const IS_HTTPS  = location.protocol === "https:";
-const IS_LOCAL  = location.hostname === "localhost" ||
-                  location.hostname === "127.0.0.1";
-const IS_SECURE = window.isSecureContext;
+const IS_HTTPS   = location.protocol === "https:";
+const IS_LOCAL   = location.hostname === "localhost" ||
+                   location.hostname === "127.0.0.1";
+const IS_SECURE  = window.isSecureContext;
 
 const CAN_USE_FIREBASE  = !IS_FILE;
 const CAN_USE_GOOGLE    = !IS_FILE && (IS_HTTPS || IS_LOCAL);
@@ -34,7 +34,7 @@ const CAN_USE_BIOMETRIC = IS_SECURE && (IS_HTTPS || IS_LOCAL);
 
 const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
 if (savedEmail && emailInput && rememberMe) {
-  emailInput.value   = savedEmail;
+  emailInput.value = savedEmail;
   rememberMe.checked = true;
 }
 
@@ -73,7 +73,6 @@ function normalizeEmail(email = "") {
   return String(email).trim().toLowerCase();
 }
 
-// compatibilidade antiga
 function saveLegacyBiometricData(uid, credIdB64) {
   if (uid) localStorage.setItem(BIOMETRIC_KEY, uid);
   if (credIdB64) localStorage.setItem(BIOMETRIC_CRED_KEY, credIdB64);
@@ -81,11 +80,14 @@ function saveLegacyBiometricData(uid, credIdB64) {
 
 function setCurrentBiometricUser(user) {
   if (!user) return;
-  localStorage.setItem(BIOMETRIC_CURRENT_KEY, JSON.stringify({
-    uid: user.uid || "",
-    email: normalizeEmail(user.email || ""),
-    displayName: user.displayName || ""
-  }));
+  localStorage.setItem(
+    BIOMETRIC_CURRENT_KEY,
+    JSON.stringify({
+      uid: user.uid || "",
+      email: normalizeEmail(user.email || ""),
+      displayName: user.displayName || ""
+    })
+  );
 }
 
 function b64ToBytes(b64) {
@@ -158,10 +160,10 @@ function getAuthErrorMsg(code) {
     "auth/user-disabled":          "Esta conta foi desativada. Entre em contato com o suporte.",
     "auth/requires-recent-login":   "Por segurança, faça login novamente para continuar.",
     "auth/user-token-expired":      "Sua sessão expirou. Faça login novamente.",
-    "auth/network-request-failed":  "Falha de conexão. Verifique sua internet.",
-    "auth/timeout":                "A requisição demorou muito. Tente novamente.",
-    "auth/too-many-requests":      "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
-    "auth/quota-exceeded":         "Limite de requisições atingido. Tente novamente mais tarde.",
+    "auth/network-request-failed":   "Falha de conexão. Verifique sua internet.",
+    "auth/timeout":                 "A requisição demorou muito. Tente novamente.",
+    "auth/too-many-requests":       "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+    "auth/quota-exceeded":          "Limite de requisições atingido. Tente novamente mais tarde.",
     "auth/operation-not-allowed":   "Este método de login não está habilitado.",
     "auth/operation-not-supported-in-this-environment":
       "Abra o sistema via https://localhost:8443.",
