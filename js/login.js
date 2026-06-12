@@ -21,10 +21,10 @@ const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
 // ─── Verificação de ambiente ──────────────────────────────────────────────────
 
 const IS_FILE   = location.protocol === "file:";
-const IS_HTTPS   = location.protocol === "https:";
-const IS_LOCAL   = location.hostname === "localhost" ||
-                   location.hostname === "127.0.0.1";
-const IS_SECURE  = window.isSecureContext;
+const IS_HTTPS  = location.protocol === "https:";
+const IS_LOCAL  = location.hostname === "localhost" ||
+                  location.hostname === "127.0.0.1";
+const IS_SECURE = window.isSecureContext;
 
 const CAN_USE_FIREBASE  = !IS_FILE;
 const CAN_USE_GOOGLE    = !IS_FILE && (IS_HTTPS || IS_LOCAL);
@@ -34,7 +34,7 @@ const CAN_USE_BIOMETRIC = IS_SECURE && (IS_HTTPS || IS_LOCAL);
 
 const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
 if (savedEmail && emailInput && rememberMe) {
-  emailInput.value = savedEmail;
+  emailInput.value   = savedEmail;
   rememberMe.checked = true;
 }
 
@@ -160,7 +160,7 @@ function getAuthErrorMsg(code) {
     "auth/user-disabled":          "Esta conta foi desativada. Entre em contato com o suporte.",
     "auth/requires-recent-login":   "Por segurança, faça login novamente para continuar.",
     "auth/user-token-expired":      "Sua sessão expirou. Faça login novamente.",
-    "auth/network-request-failed":   "Falha de conexão. Verifique sua internet.",
+    "auth/network-request-failed":  "Falha de conexão. Verifique sua internet.",
     "auth/timeout":                 "A requisição demorou muito. Tente novamente.",
     "auth/too-many-requests":       "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
     "auth/quota-exceeded":          "Limite de requisições atingido. Tente novamente mais tarde.",
@@ -246,30 +246,8 @@ async function forceLogout() {
 }
 
 // ─── Biometria: recuperar registro único ─────────────────────────────────────
-
-function getBiometricRecord() {
-  const uid = localStorage.getItem(BIOMETRIC_KEY) || "";
-  const credIdB64 = localStorage.getItem(BIOMETRIC_CRED_KEY) || "";
-  const currentRaw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
-
-  let current = null;
-  try {
-    current = currentRaw ? JSON.parse(currentRaw) : null;
-  } catch (_) {
-    current = null;
-  }
-
-  if (uid && credIdB64) {
-    return {
-      uid,
-      credIdB64,
-      email: current?.email || "",
-      displayName: current?.displayName || ""
-    };
-  }
-
-  return null;
-}
+// DESATIVADO TEMPORARIAMENTE
+/* function getBiometricRecord() { const uid = localStorage.getItem(BIOMETRIC_KEY) || ""; const credIdB64 = localStorage.getItem(BIOMETRIC_CRED_KEY) || ""; const currentRaw = localStorage.getItem(BIOMETRIC_CURRENT_KEY); let current = null; try { current = currentRaw ? JSON.parse(currentRaw) : null; } catch (_) { current = null; } if (uid && credIdB64) { return { uid, credIdB64, email: current?.email || "", displayName: current?.displayName || "" }; } return null; } */
 
 // ─── Inicializa Firebase Auth ────────────────────────────────────────────────
 
@@ -317,7 +295,7 @@ function initFirebaseAuth() {
     });
 
   handleGoogleRedirectResult();
-  initBiometricLogin();
+  // initBiometricLogin(); // DESATIVADO
   initGoogleLogin();
 }
 
@@ -492,99 +470,8 @@ function initGoogleLogin() {
 }
 
 // ─── Biometria ────────────────────────────────────────────────────────────────
-
-function initBiometricLogin() {
-  if (!CAN_USE_BIOMETRIC || !window.PublicKeyCredential) {
-    if (biometricBtn) biometricBtn.style.display = "none";
-    return;
-  }
-
-  if (biometricBtn) {
-    biometricBtn.style.display = "flex";
-    biometricBtn.disabled = false;
-    biometricBtn.title = "Entrar com biometria";
-    biometricBtn.style.opacity = "1";
-    biometricBtn.style.cursor = "pointer";
-  }
-
-  biometricBtn?.addEventListener("click", async () => {
-    const record = getBiometricRecord();
-
-    if (!record?.uid || !record?.credIdB64) {
-      setMsg("Biometria ainda não cadastrada neste aparelho.", "error");
-      return;
-    }
-
-    try {
-      setMsg("Aguardando biometria...", "info");
-
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-
-      const credIdBytes = base64UrlToBytes(record.credIdB64);
-
-      const assertion = await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          allowCredentials: [{
-            type: "public-key",
-            id: credIdBytes,
-            transports: ["internal"]
-          }],
-          userVerification: "required",
-          timeout: 60000
-        }
-      });
-
-      if (!assertion) {
-        setMsg("Biometria não reconhecida. Tente novamente.", "error");
-        return;
-      }
-
-      const isBlocked = await checkUserBlocked(record.uid);
-
-      if (isBlocked === true) {
-        setMsg(
-          "⛔ Sua conta está bloqueada. Entre em contato com o administrador.",
-          "error"
-        );
-        return;
-      }
-
-      if (isBlocked === null) {
-        console.warn("Não foi possível validar a conta no Firestore. Liberando pela biometria.");
-        setMsg(
-          "✅ Biometria validada. Validação da conta indisponível no momento.",
-          "success"
-        );
-      }
-
-      saveSession();
-      markBiometricSession();
-      setCurrentBiometricUser({
-        uid: record.uid,
-        email: record.email || "",
-        displayName: record.displayName || ""
-      });
-
-      setMsg("✅ Acesso liberado pela biometria!", "success");
-      setTimeout(goHome, 800);
-
-    } catch (err) {
-      console.warn("Biometria falhou:", err);
-
-      if (err.name === "SecurityError") {
-        setMsg("⚠️ Biometria bloqueada. Acesse via https://localhost:8443", "error");
-      } else if (err.name === "NotAllowedError") {
-        setMsg("Biometria cancelada. Use e-mail e senha.", "error");
-      } else if (err.name === "NotSupportedError") {
-        setMsg("Biometria não suportada neste dispositivo.", "error");
-      } else {
-        setMsg("Não foi possível autenticar pela biometria.", "error");
-      }
-    }
-  });
-}
+// DESATIVADO TEMPORARIAMENTE
+/* function initBiometricLogin() { if (!CAN_USE_BIOMETRIC || !window.PublicKeyCredential) { if (biometricBtn) biometricBtn.style.display = "none"; return; } if (biometricBtn) { biometricBtn.style.display = "flex"; biometricBtn.disabled = false; biometricBtn.title = "Entrar com biometria"; biometricBtn.style.opacity = "1"; biometricBtn.style.cursor = "pointer"; } biometricBtn?.addEventListener("click", async () => { const record = getBiometricRecord(); if (!record?.uid || !record?.credIdB64) { setMsg("Biometria ainda não cadastrada neste aparelho.", "error"); return; } try { setMsg("Aguardando biometria...", "info"); const challenge = new Uint8Array(32); crypto.getRandomValues(challenge); const credIdBytes = base64UrlToBytes(record.credIdB64); const assertion = await navigator.credentials.get({ publicKey: { challenge, allowCredentials: [{ type: "public-key", id: credIdBytes, transports: ["internal"] }], userVerification: "required", timeout: 60000 } }); if (!assertion) { setMsg("Biometria não reconhecida. Tente novamente.", "error"); return; } const isBlocked = await checkUserBlocked(record.uid); if (isBlocked === true) { setMsg( "⛔ Sua conta está bloqueada. Entre em contato com o administrador.", "error" ); return; } if (isBlocked === null) { console.warn("Não foi possível validar a conta no Firestore. Liberando pela biometria."); setMsg( "✅ Biometria validada. Validação da conta indisponível no momento.", "success" ); } saveSession(); markBiometricSession(); setCurrentBiometricUser({ uid: record.uid, email: record.email || "", displayName: record.displayName || "" }); setMsg("✅ Acesso liberado pela biometria!", "success"); setTimeout(goHome, 800); } catch (err) { console.warn("Biometria falhou:", err); if (err.name === "SecurityError") { setMsg("⚠️ Biometria bloqueada. Acesse via https://localhost:8443", "error"); } else if (err.name === "NotAllowedError") { setMsg("Biometria cancelada. Use e-mail e senha.", "error"); } else if (err.name === "NotSupportedError") { setMsg("Biometria não suportada neste dispositivo.", "error"); } else { setMsg("Não foi possível autenticar pela biometria.", "error"); } } }); } */
 
 // ─── Inicialização ────────────────────────────────────────────────────────────
 
