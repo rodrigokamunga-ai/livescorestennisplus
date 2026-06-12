@@ -22,12 +22,20 @@
 
       <!-- Foto de perfil -->
       <div class="profile-avatar-wrap">
-        <img id="avatarPreview" class="profile-avatar-img" src="https://via.placeholder.com/80x80/1a2540/88a4d8?text=👤" alt="Foto de perfil" />
+        <img id="avatarPreview" class="profile-avatar-img" src="img/perfil-padrao.png" alt="Foto de perfil" />
+
         <div class="profile-avatar-info">
           <span>Foto de perfil (máx. 2MB)</span>
+
           <label class="btn-upload" for="photoFile">📷 Escolher foto</label>
-          <input type="file" id="photoFile" accept="image/*" style="display:none" />
+
+          <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none" />
+
           <span id="photoFileName">Nenhum arquivo selecionado</span>
+
+          <button type="button" id="removePhotoBtn" class="btn" style="margin-top:8px;" >
+            🗑️ Excluir foto
+          </button>
         </div>
       </div>
 
@@ -208,16 +216,20 @@
         Todos os seus dados serão excluídos:<br>
         perfil, partidas, histórico e configurações.
       </p>
+
       <label class="delete-modal-confirm-label" for="deleteConfirmInput">
         Digite <strong style="color:#f87171;">DELETAR</strong> para confirmar:
       </label>
+
       <input type="text" id="deleteConfirmInput" class="delete-modal-confirm-input" placeholder="DELETAR" autocomplete="off" />
+
       <div class="delete-modal-actions">
         <button type="button" id="cancelDeleteBtn" class="btn">Cancelar</button>
         <button type="button" id="confirmDeleteBtn" class="btn btn-confirm-delete" disabled>
           🗑️ Confirmar exclusão
         </button>
       </div>
+
       <div id="deleteMsg" style="margin-top:12px;font-size:0.84rem;color:#fca5a5; text-align:center;min-height:18px;" ></div>
     </div>
   </div>
