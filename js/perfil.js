@@ -6,6 +6,15 @@
     const getDb   = () => (typeof __db   !== "undefined" ? __db   : firebase.firestore());
     const getAuth = () => (typeof __auth !== "undefined" ? __auth : firebase.auth());
 
+    // Imagem padrão do avatar
+    const DEFAULT_AVATAR = "img/perfil-padrao.png";
+
+    // Configuração de resize da imagem
+    const IMAGE_MAX_WIDTH  = 800;
+    const IMAGE_MAX_HEIGHT = 800;
+    const IMAGE_MIME_TYPE  = "image/jpeg";
+    const IMAGE_QUALITY    = 0.85;
+
     // ─── Estados e cidades ────────────────────────────────────────────────
 
     const BR_STATES = [
@@ -14,8 +23,8 @@
       { uf: "BA", name: "Bahia" },      { uf: "CE", name: "Ceará" },
       { uf: "DF", name: "Distrito Federal" }, { uf: "ES", name: "Espírito Santo" },
       { uf: "GO", name: "Goiás" },      { uf: "MA", name: "Maranhão" },
-      { uf: "MT", name: "Mato Grosso" },{ uf: "MS", name: "Mato Grosso do Sul" },
-      { uf: "MG", name: "Minas Gerais" },{ uf: "PA", name: "Pará" },
+      { uf: "MT", name: "Mato Grosso" }, { uf: "MS", name: "Mato Grosso do Sul" },
+      { uf: "MG", name: "Minas Gerais" }, { uf: "PA", name: "Pará" },
       { uf: "PB", name: "Paraíba" },    { uf: "PR", name: "Paraná" },
       { uf: "PE", name: "Pernambuco" }, { uf: "PI", name: "Piauí" },
       { uf: "RJ", name: "Rio de Janeiro" }, { uf: "RN", name: "Rio Grande do Norte" },
@@ -74,6 +83,7 @@
       photoFile:           document.getElementById("photoFile"),
       avatarPreview:       document.getElementById("avatarPreview"),
       photoFileName:       document.getElementById("photoFileName"),
+      removePhotoBtn:      document.getElementById("removePhotoBtn"),
       msg:                 document.getElementById("profileMsg"),
       clearBtn:            document.getElementById("clearProfileBtn"),
       // Senha
@@ -92,10 +102,10 @@
       deleteMsg:           document.getElementById("deleteMsg")
     };
 
-    let currentUser      = null;
+    let currentUser = null;
     let savedPhotoBase64 = "";
-    // ✅ Guarda o nome anterior para não alterar as partidas
     let previousDisplayName = "";
+    let removePhotoRequested = false;
 
     // ─── Mensagens ────────────────────────────────────────────────────────
 
@@ -123,7 +133,7 @@
       el.deleteMsg.style.color = type === "success" ? "#86efac" : "#fca5a5";
     }
 
-    // ─── Radio helpers ────────────────────────────────────────────────────
+    // ─── Helpers ──────────────────────────────────────────────────────────
 
     function getRadioValue(name) {
       const checked = document.querySelector(`input[name="${name}"]:checked`);
@@ -134,8 +144,6 @@
       const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
       if (radio) radio.checked = true;
     }
-
-    // ─── Estados e cidades ────────────────────────────────────────────────
 
     function populateStates(selectedUf = "") {
       if (!el.state) return;
@@ -172,6 +180,75 @@
       }
     }
 
+    function isStrongPassword(password) {
+      const hasMinLength = password.length >= 8;
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasLowercase = /[a-z]/.test(password);
+      const hasNumber    = /\d/.test(password);
+      const hasSpecial   = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+      return hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
+    }
+
+    // ─── Imagem ───────────────────────────────────────────────────────────
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          const img = new Image();
+
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > IMAGE_MAX_WIDTH) {
+                height = Math.round((height * IMAGE_MAX_WIDTH) / width);
+                width = IMAGE_MAX_WIDTH;
+              }
+            } else {
+              if (height > IMAGE_MAX_HEIGHT) {
+                width = Math.round((width * IMAGE_MAX_HEIGHT) / height);
+                height = IMAGE_MAX_HEIGHT;
+              }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const dataUrl = canvas.toDataURL(IMAGE_MIME_TYPE, IMAGE_QUALITY);
+            resolve(dataUrl);
+          };
+
+          img.onerror = reject;
+          img.src = event.target.result;
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function setDefaultAvatar() {
+      if (el.avatarPreview) el.avatarPreview.src = DEFAULT_AVATAR;
+    }
+
+    function removePhoto() {
+      removePhotoRequested = true;
+      savedPhotoBase64 = "";
+
+      if (el.photoFile) el.photoFile.value = "";
+      if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
+      setDefaultAvatar();
+
+      setMsg("Foto removida. Clique em salvar para confirmar a alteração.", "info");
+    }
+
     // ─── Preenche formulário ──────────────────────────────────────────────
 
     function fillForm(data) {
@@ -182,14 +259,20 @@
       if (el.height)      el.height.value      = data.height      || "";
       if (el.weight)      el.weight.value      = data.weight      || "";
       if (data.forehand)  setRadioValue("forehand", data.forehand);
-      if (data.backhand)  setRadioValue("backhand",  data.backhand);
+      if (data.backhand)  setRadioValue("backhand", data.backhand);
+
       if (el.country && data.country) {
         el.country.value = data.country;
         toggleLocationFields(data.country, data.state || "", data.city || "");
       }
+
       if (data.photoBase64) {
         savedPhotoBase64 = data.photoBase64;
+        removePhotoRequested = false;
         if (el.avatarPreview) el.avatarPreview.src = data.photoBase64;
+      } else {
+        savedPhotoBase64 = "";
+        setDefaultAvatar();
       }
     }
 
@@ -200,31 +283,24 @@
         if (el.email)       el.email.value       = user.email       || "";
         if (el.displayName) el.displayName.value = user.displayName || "";
 
-        // ✅ Guarda o nome atual para referência
         previousDisplayName = user.displayName || "";
 
         const doc = await getDb().collection("profiles").doc(user.uid).get();
-        if (doc.exists) fillForm(doc.data());
-
+        if (doc.exists) {
+          fillForm(doc.data());
+        } else {
+          savedPhotoBase64 = "";
+          removePhotoRequested = false;
+          setDefaultAvatar();
+        }
       } catch (err) {
         console.error("Erro ao carregar perfil:", err);
         setMsg("Erro ao carregar perfil.", "error");
+        setDefaultAvatar();
       }
     }
 
-    // ─── Foto ─────────────────────────────────────────────────────────────
-
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload  = (e) => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
     // ─── Salva perfil ─────────────────────────────────────────────────────
-    // ✅ NÃO atualiza player1/player2 nas partidas — preserva histórico
 
     async function saveProfile(e) {
       e.preventDefault();
@@ -234,8 +310,18 @@
       try {
         let photoBase64 = savedPhotoBase64;
         const file = el.photoFile?.files?.[0];
-        if (file) {
-          if (file.size > 2 * 1024 * 1024) return setMsg("A foto deve ter no máximo 2MB.", "error");
+
+        if (removePhotoRequested) {
+          photoBase64 = "";
+        } else if (file) {
+          if (!file.type.startsWith("image/")) {
+            return setMsg("Selecione uma imagem válida.", "error");
+          }
+
+          if (file.size > 10 * 1024 * 1024) {
+            return setMsg("A imagem original está muito grande. Escolha uma menor.", "error");
+          }
+
           photoBase64 = await fileToBase64(file);
         }
 
@@ -258,11 +344,8 @@
           updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        // ✅ Salva somente no Firestore profiles — NÃO toca nas partidas
         await getDb().collection("profiles").doc(currentUser.uid).set(data, { merge: true });
 
-        // ✅ Atualiza displayName no Firebase Auth (apenas para exibição no sistema)
-        // As partidas continuam com o nome antigo — isso é intencional
         if (newDisplayName && newDisplayName !== currentUser.displayName) {
           await currentUser.updateProfile({ displayName: newDisplayName });
           previousDisplayName = newDisplayName;
@@ -270,11 +353,14 @@
 
         if (photoBase64 && el.avatarPreview) {
           el.avatarPreview.src = photoBase64;
-          savedPhotoBase64     = photoBase64;
+          savedPhotoBase64 = photoBase64;
+        } else {
+          savedPhotoBase64 = "";
+          setDefaultAvatar();
         }
 
-        setMsg("✅ Perfil salvo! As partidas existentes mantêm o nome anterior.", "success");
-
+        removePhotoRequested = false;
+        setMsg("✅ Perfil salvo com sucesso!", "success");
       } catch (err) {
         console.error("Erro ao salvar perfil:", err);
         setMsg(err.message || "Erro ao salvar perfil.", "error");
@@ -287,18 +373,17 @@
       const upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       const lower   = "abcdefghijklmnopqrstuvwxyz";
       const numbers = "0123456789";
-      const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+      const symbols = "!@#$%^&*()_+-=[]{}|:,.<>?";
       const all     = upper + lower + numbers + symbols;
 
       const pwd = [
-        upper  [Math.floor(Math.random() * upper.length)],
-        lower  [Math.floor(Math.random() * lower.length)],
-        numbers[Math.floor(Math.random() * numbers.length)],
-        symbols[Math.floor(Math.random() * symbols.length)],
+        upper   [Math.floor(Math.random() * upper.length)],
+        lower   [Math.floor(Math.random() * lower.length)],
+        numbers [Math.floor(Math.random() * numbers.length)],
+        symbols [Math.floor(Math.random() * symbols.length)],
         ...Array.from({ length: 10 }, () => all[Math.floor(Math.random() * all.length)])
       ];
 
-      // Embaralha
       for (let i = pwd.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
@@ -309,7 +394,6 @@
       if (el.newPassword)     el.newPassword.value     = generated;
       if (el.confirmPassword) el.confirmPassword.value = generated;
 
-      // Copia para o clipboard
       if (navigator.clipboard?.writeText) {
         navigator.clipboard.writeText(generated)
           .then(() => setPasswordMsg(`✅ Senha gerada e copiada: ${generated}`, "success"))
@@ -318,7 +402,6 @@
         setPasswordMsg(`✅ Senha gerada: ${generated}`, "success");
       }
 
-      // Mostra a senha por 3 segundos
       if (el.newPassword) {
         el.newPassword.type = "text";
         setTimeout(() => {
@@ -334,17 +417,25 @@
       const next    = el.newPassword?.value     || "";
       const confirm = el.confirmPassword?.value || "";
 
-      if (!current)        return setPasswordMsg("Informe a senha atual.", "error");
-      if (!next)           return setPasswordMsg("Informe a nova senha.", "error");
-      if (next.length < 6) return setPasswordMsg("A nova senha deve ter pelo menos 6 caracteres.", "error");
-      if (next !== confirm) return setPasswordMsg("As senhas não coincidem.", "error");
+      if (!current)         return setPasswordMsg("Informe a senha atual.", "error");
+      if (!next)            return setPasswordMsg("Informe a nova senha.", "error");
+      if (next !== confirm)  return setPasswordMsg("As senhas não coincidem.", "error");
+
+      if (!isStrongPassword(next)) {
+        return setPasswordMsg(
+          "A nova senha deve ter no mínimo 8 caracteres, com letras maiúsculas, minúsculas, número e caractere especial.",
+          "error"
+        );
+      }
 
       setPasswordMsg("Alterando senha...", "info");
 
       try {
         const credential = firebase.auth.EmailAuthProvider.credential(
-          currentUser.email, current
+          currentUser.email,
+          current
         );
+
         await currentUser.reauthenticateWithCredential(credential);
         await currentUser.updatePassword(next);
 
@@ -355,11 +446,13 @@
         setPasswordMsg("✅ Senha alterada com sucesso!", "success");
       } catch (err) {
         console.error("Erro ao alterar senha:", err);
+
         const msg =
           err.code === "auth/wrong-password"       ? "Senha atual incorreta." :
-          err.code === "auth/weak-password"         ? "A nova senha é muito fraca." :
+          err.code === "auth/weak-password"        ? "A nova senha é muito fraca." :
           err.code === "auth/requires-recent-login" ? "Faça login novamente para alterar a senha." :
           err.message || "Erro ao alterar senha.";
+
         setPasswordMsg(msg, "error");
       }
     }
@@ -385,15 +478,14 @@
 
     async function deleteAccount() {
       if (!currentUser) return;
-    
+
       setDeleteMsg("Excluindo conta...", "error");
       if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = true;
-    
+
       try {
         const db  = getDb();
         const uid = currentUser.uid;
-    
-        // ✅ 1. Reautentica ANTES de tudo para evitar auth/requires-recent-login
+
         const password = prompt(
           "Por segurança, confirme sua senha atual para excluir a conta:"
         );
@@ -402,42 +494,35 @@
           if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = false;
           return;
         }
-    
+
         const credential = firebase.auth.EmailAuthProvider.credential(
           currentUser.email,
           password
         );
         await currentUser.reauthenticateWithCredential(credential);
-    
-        // ✅ 2. Deleta o perfil estendido (/profiles)
+
         await db.collection("profiles").doc(uid).delete();
-    
-        // ✅ 3. Deleta o documento do usuário (/users)
         await db.collection("users").doc(uid).delete();
-    
-        // ✅ 4. Deleta todas as partidas do usuário em batch
+
         const matchesSnap = await db
           .collection("matches")
           .where("ownerId", "==", uid)
           .get();
-    
+
         if (!matchesSnap.empty) {
           const batch = db.batch();
           matchesSnap.forEach((doc) => batch.delete(doc.ref));
           await batch.commit();
         }
-    
-        // ✅ 5. Deleta a conta do Firebase Auth POR ÚLTIMO
+
         await currentUser.delete();
-    
-        // ✅ 6. Limpa storage e redireciona
+
         localStorage.clear();
         sessionStorage.clear();
         window.location.replace("login.html");
-    
       } catch (err) {
         console.error("Erro ao deletar conta:", err);
-    
+
         const errMsg =
           err.code === "auth/requires-recent-login"
             ? "Sessão expirada. Faça login novamente antes de deletar a conta." :
@@ -446,7 +531,7 @@
           err.code === "permission-denied"
             ? "Sem permissão. Verifique as regras do Firestore." :
             err.message || "Erro ao deletar a conta.";
-    
+
         setDeleteMsg(errMsg, "error");
         if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = false;
       }
@@ -456,22 +541,28 @@
 
     function clearForm() {
       if (!confirm("Deseja limpar os dados do formulário?")) return;
-      if (el.phone)     el.phone.value     = "";
-      if (el.gender)    el.gender.value    = "";
-      if (el.birthDate) el.birthDate.value = "";
-      if (el.height)    el.height.value    = "";
-      if (el.weight)    el.weight.value    = "";
-      if (el.country)   el.country.value   = "";
+
+      if (el.phone)      el.phone.value      = "";
+      if (el.gender)     el.gender.value     = "";
+      if (el.birthDate)  el.birthDate.value  = "";
+      if (el.height)     el.height.value     = "";
+      if (el.weight)     el.weight.value     = "";
+      if (el.country)    el.country.value    = "";
+
       if (el.stateLabel) el.stateLabel.style.display = "none";
       if (el.cityLabel)  el.cityLabel.style.display  = "none";
       if (el.state) el.state.innerHTML = `<option value="">Selecione o estado</option>`;
       if (el.city)  el.city.innerHTML  = `<option value="">Selecione a cidade</option>`;
+
       document.querySelectorAll('input[name="forehand"], input[name="backhand"]')
         .forEach((r) => r.checked = false);
-      if (el.photoFile)     el.photoFile.value           = "";
+
+      if (el.photoFile)     el.photoFile.value = "";
       if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
-      if (el.avatarPreview) el.avatarPreview.src =
-        "https://via.placeholder.com/80x80/1a2540/88a4d8?text=👤";
+
+      savedPhotoBase64 = "";
+      removePhotoRequested = false;
+      setDefaultAvatar();
       setMsg("Formulário limpo.", "info");
     }
 
@@ -480,6 +571,7 @@
     function bindEvents() {
       el.form?.addEventListener("submit", saveProfile);
       el.clearBtn?.addEventListener("click", clearForm);
+      el.removePhotoBtn?.addEventListener("click", removePhoto);
 
       el.country?.addEventListener("change", function () {
         toggleLocationFields(this.value);
@@ -489,22 +581,40 @@
         populateCities(this.value);
       });
 
-      el.photoFile?.addEventListener("change", function () {
-        const file = this.files[0];
-        if (!file) return;
+      el.photoFile?.addEventListener("change", async function () {
+        const file = this.files?.[0];
+
+        if (!file) {
+          if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
+          setDefaultAvatar();
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          setMsg("Selecione uma imagem válida.", "error");
+          this.value = "";
+          if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
+          setDefaultAvatar();
+          return;
+        }
+
         if (el.photoFileName) el.photoFileName.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = (e) => { if (el.avatarPreview) el.avatarPreview.src = e.target.result; };
-        reader.readAsDataURL(file);
+        removePhotoRequested = false;
+
+        try {
+          const resizedBase64 = await fileToBase64(file);
+          if (el.avatarPreview) el.avatarPreview.src = resizedBase64;
+          if (el.avatarPreview) el.avatarPreview.dataset.newPhoto = resizedBase64;
+        } catch (err) {
+          console.error("Erro ao processar imagem:", err);
+          setMsg("Erro ao processar a imagem.", "error");
+          setDefaultAvatar();
+        }
       });
 
-      // ✅ Gerar senha forte
       el.generatePasswordBtn?.addEventListener("click", generatePassword);
-
-      // ✅ Alterar senha
       el.changePasswordBtn?.addEventListener("click", changePassword);
 
-      // ✅ Deletar conta
       el.deleteAccountBtn?.addEventListener("click", openDeleteModal);
       el.cancelDeleteBtn?.addEventListener("click", closeDeleteModal);
 
@@ -524,7 +634,6 @@
         if (e.key === "Escape") closeDeleteModal();
       });
 
-      // ✅ Botão sair
       document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
         try {
           await getAuth().signOut();
@@ -544,13 +653,24 @@
       if (el.stateLabel) el.stateLabel.style.display = "none";
       if (el.cityLabel)  el.cityLabel.style.display  = "none";
 
+      if (el.photoFile) {
+        el.photoFile.setAttribute("accept", "image/*");
+        el.photoFile.setAttribute("capture", "environment");
+      }
+
+      if (el.avatarPreview) {
+        el.avatarPreview.src = DEFAULT_AVATAR;
+      }
+
       bindEvents();
 
       getAuth().onAuthStateChanged(async (user) => {
         if (!user) {
           setMsg("Usuário não autenticado. Faça login para editar o perfil.", "error");
+          setDefaultAvatar();
           return;
         }
+
         currentUser = user;
         await loadProfile(user);
       });
