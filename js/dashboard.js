@@ -5,6 +5,11 @@
     const db = firebase.firestore();
     const PAGE_SIZE = 5;
 
+    const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
+    const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
+    const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
+    const SESSION_KEY = "lsts_admin_session";
+
     const state = {
       currentUser: null,
       currentUserName: "",
@@ -114,10 +119,10 @@
 
       isUserInMatch(match, userName) {
         const current   = U.normalizeText(userName);
-        const p1        = U.normalizeText(match.player1   || "");
-        const p2        = U.normalizeText(match.player2   || "");
-        const p3        = U.normalizeText(match.player3   || "");
-        const p4        = U.normalizeText(match.player4   || "");
+        const p1        = U.normalizeText(match.player1 || "");
+        const p2        = U.normalizeText(match.player2 || "");
+        const p3        = U.normalizeText(match.player3 || "");
+        const p4        = U.normalizeText(match.player4 || "");
         const ownerName = U.normalizeText(match.ownerName || "");
         return p1 === current || p2 === current ||
                p3 === current || p4 === current ||
@@ -204,6 +209,68 @@
       }
     };
 
+    function setMessage(text) {
+      if (el.dashboardMessage) el.dashboardMessage.textContent = text || "";
+    }
+
+    function hasBiometricSession() {
+      return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1";
+    }
+
+    function hasAdminSession() {
+      return localStorage.getItem(SESSION_KEY) === "1";
+    }
+
+    function getBiometricCurrentUser() {
+      try {
+        const raw = localStorage.getItem(BIOMETRIC_CURRENT_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+
+        return {
+          uid: parsed.uid || "",
+          email: parsed.email || "",
+          displayName: parsed.displayName || ""
+        };
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function buildFallbackUser(user) {
+      if (user?.uid) return user;
+
+      const biometricCurrent = getBiometricCurrentUser();
+      if (biometricCurrent?.uid) return biometricCurrent;
+
+      const legacyUid = localStorage.getItem(BIOMETRIC_UID_KEY) || "";
+      if (legacyUid) {
+        try {
+          const profileSnap = await db.collection("profiles").doc(legacyUid).get();
+          const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+          const userSnap = await db.collection("users").doc(legacyUid).get();
+          const userData = userSnap.exists ? (userSnap.data() || {}) : {};
+
+          return {
+            uid: legacyUid,
+            email: userData.email || profileData.email || "",
+            displayName: profileData.displayName || userData.displayName || ""
+          };
+        } catch (err) {
+          console.warn("Falha ao reconstruir usuário legado:", err);
+          return {
+            uid: legacyUid,
+            email: "",
+            displayName: ""
+          };
+        }
+      }
+
+      return null;
+    }
+
     // ─── Helpers de canvas ────────────────────────────────────────────────
 
     function roundRect(ctx, x, y, width, height, radius) {
@@ -216,12 +283,6 @@
       ctx.arcTo(x,         y,          x + width, y,          r);
       ctx.closePath();
     }
-
-    function setMessage(text) {
-      if (el.dashboardMessage) el.dashboardMessage.textContent = text || "";
-    }
-
-    // ─── Mobile cards container ───────────────────────────────────────────
 
     function ensureMobileCardsContainer() {
       if (state.mobileCardsContainer || !el.tableWrap) return;
@@ -240,7 +301,7 @@
       if (!state.mobileCardsContainer) return;
       const table = el.tableWrap?.querySelector("table");
       state.mobileCardsContainer.style.display = state.isMobile ? "flex" : "none";
-      if (table) table.style.display = "none";
+      if (table) table.style.display = state.isMobile ? "none" : "";
     }
 
     // ─── Filtros de opções ────────────────────────────────────────────────
@@ -274,28 +335,30 @@
         const winner = U.getMatchWinner(m);
         if (!winner) return;
 
-        const currentTeam     = U.getCurrentTeamPlayers(m, state.currentUserName);
+        const currentTeam = U.getCurrentTeamPlayers(m, state.currentUserName);
         const currentTeamNorm = currentTeam.map((p) => U.normalizeText(p));
 
         if (U.isDoubles(m)) {
           const winnerTeam = winner === 1
             ? [String(m.player1 || "").trim(), String(m.player2 || "").trim()]
             : [String(m.player3 || "").trim(), String(m.player4 || "").trim()];
-          const winnerTeamNorm  = winnerTeam.map((p) => U.normalizeText(p));
-          const currentTeamWon  = currentTeamNorm.some((p) => winnerTeamNorm.includes(p));
-          if (currentTeamWon) wins += 1; else losses += 1;
+
+          const winnerTeamNorm = winnerTeam.map((p) => U.normalizeText(p));
+          const currentTeamWon = currentTeamNorm.some((p) => winnerTeamNorm.includes(p));
+          if (currentTeamWon) wins += 1;
+          else losses += 1;
           return;
         }
 
-        const p1      = U.normalizeText(m.player1 || "");
-        const p2      = U.normalizeText(m.player2 || "");
+        const p1 = U.normalizeText(m.player1 || "");
+        const p2 = U.normalizeText(m.player2 || "");
         const current = U.normalizeText(state.currentUserName);
 
         if (winner === 1) {
-          if (p1 === current)      wins   += 1;
+          if (p1 === current) wins += 1;
           else if (p2 === current) losses += 1;
         } else if (winner === 2) {
-          if (p2 === current)      wins   += 1;
+          if (p2 === current) wins += 1;
           else if (p1 === current) losses += 1;
         }
       });
@@ -320,7 +383,6 @@
       const duration    = 900;
       const startTime   = performance.now();
 
-      // Gradiente radial sólido — usado quando fatia ocupa 100%
       function makeSolidRadialGrad(color1, color2) {
         const g = ctx.createRadialGradient(cx, cy, innerRadius, cx, cy, outerRadius);
         g.addColorStop(0, color1);
@@ -328,14 +390,12 @@
         return g;
       }
 
-      // Gradiente linear seguro — pontos calculados no interior do arco
       function makeLinearGrad(startAngle, endAngle, color1, color2) {
         const gx1 = cx + Math.cos(startAngle) * outerRadius * 0.6;
         const gy1 = cy + Math.sin(startAngle) * outerRadius * 0.6;
         const gx2 = cx + Math.cos(endAngle)   * outerRadius * 0.6;
         const gy2 = cy + Math.sin(endAngle)   * outerRadius * 0.6;
 
-        // Se os pontos forem muito próximos, usa gradiente radial como fallback
         if (Math.abs(gx1 - gx2) < 2 && Math.abs(gy1 - gy2) < 2) {
           return makeSolidRadialGrad(color1, color2);
         }
@@ -345,9 +405,7 @@
         return g;
       }
 
-      // Desenha uma fatia (ou círculo completo quando isFull = true)
       function drawSlice(startAngle, endAngle, color1, color2, isFull) {
-        // Preenchimento com sombra
         ctx.save();
         ctx.shadowColor   = "rgba(0,0,0,0.35)";
         ctx.shadowBlur    = 14;
@@ -359,7 +417,6 @@
 
         ctx.beginPath();
         if (isFull) {
-          // Círculo completo — sem moveTo para evitar triângulo degenerado
           ctx.arc(cx, cy, outerRadius, 0, Math.PI * 2);
         } else {
           ctx.moveTo(cx, cy);
@@ -370,7 +427,6 @@
         ctx.fill();
         ctx.restore();
 
-        // Borda sutil (sem sombra)
         ctx.save();
         ctx.beginPath();
         if (isFull) {
@@ -392,20 +448,17 @@
 
         ctx.clearRect(0, 0, w, h);
 
-        // Fundo
         const bg = ctx.createRadialGradient(cx, cy, 10, cx, cy, outerRadius * 2);
         bg.addColorStop(0, "#182235");
         bg.addColorStop(1, "#0f1726");
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, w, h);
 
-        // Halo externo
         ctx.beginPath();
         ctx.arc(cx, cy, outerRadius + 12, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(255,255,255,0.03)";
         ctx.fill();
 
-        // Estado vazio
         if (total === 0) {
           ctx.beginPath();
           ctx.arc(cx, cy, outerRadius, 0, Math.PI * 2);
@@ -429,15 +482,11 @@
           return;
         }
 
-        // Fatias
         const slices = [
-          { value: wins,   color1: "#4da3ff", color2: "#1f6feb",
-            pct: Math.round((wins   / total) * 100) },
-          { value: losses, color1: "#ff8a8a", color2: "#e55353",
-            pct: Math.round((losses / total) * 100) }
+          { value: wins,   color1: "#4da3ff", color2: "#1f6feb", pct: Math.round((wins / total) * 100) },
+          { value: losses, color1: "#ff8a8a", color2: "#e55353", pct: Math.round((losses / total) * 100) }
         ];
 
-        // Detecta se apenas uma fatia tem valor (100%)
         const onlyOne  = slices.filter((s) => s.value > 0).length === 1;
         let startAngle = -Math.PI / 2;
 
@@ -447,13 +496,10 @@
           const animatedAngle = (slice.value * progress / total) * Math.PI * 2;
           const endAngle      = startAngle + animatedAngle;
           const midAngle      = startAngle + animatedAngle / 2;
-
-          // isFull só ativa no último frame para evitar artefatos na animação
           const isFull = onlyOne && progress >= 0.99;
 
           drawSlice(startAngle, endAngle, slice.color1, slice.color2, isFull);
 
-          // Percentual dentro da fatia
           if (progress > 0.75 && slice.pct >= 5) {
             const tx = cx + Math.cos(midAngle) * (outerRadius * 0.68);
             const ty = cy + Math.sin(midAngle) * (outerRadius * 0.68);
@@ -473,7 +519,6 @@
           startAngle = endAngle;
         });
 
-        // Buraco central (donut)
         const centerGrad = ctx.createRadialGradient(cx, cy - 8, 8, cx, cy, innerRadius + 12);
         centerGrad.addColorStop(0, "#1b2940");
         centerGrad.addColorStop(1, "#0f1726");
@@ -489,7 +534,6 @@
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.stroke();
 
-        // Texto central
         const displayedTotal = Math.round(total * progress);
 
         ctx.save();
@@ -504,7 +548,6 @@
         ctx.fillText("partidas", cx, cy + 18);
         ctx.restore();
 
-        // Legenda
         const legendY = h - 34;
         const boxW    = 114;
         const boxH    = 22;
@@ -523,14 +566,12 @@
         ];
 
         legendItems.forEach((item) => {
-          // Caixa de fundo
           ctx.save();
           ctx.fillStyle = "rgba(255,255,255,0.07)";
           roundRect(ctx, item.x, legendY, boxW, boxH, 999);
           ctx.fill();
           ctx.restore();
 
-          // Bolinha colorida
           ctx.save();
           ctx.fillStyle = item.color;
           ctx.beginPath();
@@ -538,7 +579,6 @@
           ctx.fill();
           ctx.restore();
 
-          // Texto
           ctx.save();
           ctx.fillStyle    = "#e8eefc";
           ctx.font         = "700 11px Inter, Arial, sans-serif";
@@ -600,7 +640,6 @@
         ctx.textBaseline = "middle";
         ctx.fillText(item.label, 18, y + barH / 2);
 
-        // Trilha de fundo
         const trackGrad = ctx.createLinearGradient(padLeft, y, padLeft + chartW, y);
         trackGrad.addColorStop(0, "rgba(255,255,255,0.06)");
         trackGrad.addColorStop(1, "rgba(255,255,255,0.03)");
@@ -609,7 +648,6 @@
         ctx.fillStyle = trackGrad;
         ctx.fill();
 
-        // Barra colorida
         const barGrad = ctx.createLinearGradient(padLeft, y, padLeft + width, y);
         barGrad.addColorStop(0, item.c1);
         barGrad.addColorStop(1, item.c2);
@@ -624,7 +662,6 @@
         ctx.fill();
         ctx.restore();
 
-        // Valor e percentual
         const pct = Math.round((item.value / Math.max(1, wins + losses)) * 100);
         ctx.fillStyle = "#f4f8ff";
         ctx.font      = "800 13px Inter, Arial, sans-serif";
@@ -632,7 +669,6 @@
         ctx.fillText(`${item.value} (${pct}%)`, w - 12, y + barH / 2);
       });
 
-      // Eixo mínimo / máximo
       ctx.fillStyle = "rgba(232,238,252,0.55)";
       ctx.font      = "700 11px Inter, Arial, sans-serif";
       ctx.textAlign = "left";
@@ -665,7 +701,7 @@
           const modality      = U.getModalidade(m) || "-";
           const format        = U.getGameFormat(m) || "-";
 
-          return ` <article class="dashboard-mobile-card"> <div class="dashboard-mobile-card-head"> <div class="dashboard-mobile-date">${U.escapeHtml(date)}</div> <div class="dashboard-mobile-winner">${U.escapeHtml(winnerText)}</div> </div> <div class="dashboard-mobile-confrontation">${U.escapeHtml(confrontation)}</div> <div class="dashboard-mobile-meta"> <span><strong>Modalidade:</strong> ${U.escapeHtml(modality)}</span> <span><strong>Formato:</strong> ${U.escapeHtml(format)}</span> </div> </article>`;
+          return ` <article class="dashboard-mobile-card"> <div class="dashboard-mobile-card-head"> <div class="dashboard-mobile-date">${U.escapeHtml(date)}</div> <div class="dashboard-mobile-winner">${U.escapeHtml(winnerText)}</div> </div> <div class="dashboard-mobile-confrontation">${U.escapeHtml(confrontation)}</div> <div class="dashboard-mobile-meta"> <span><strong>Modalidade:</strong> ${U.escapeHtml(modality)}</span> <span><strong>Formato:</strong> ${U.escapeHtml(format)}</span> </div> </article> `;
         })
         .join("");
     }
@@ -675,7 +711,7 @@
     function updatePagination() {
       state.totalPages = Math.max(1, Math.ceil(state.filteredMatches.length / PAGE_SIZE));
       if (state.currentPage > state.totalPages) state.currentPage = state.totalPages;
-      if (state.currentPage < 1)                state.currentPage = 1;
+      if (state.currentPage < 1) state.currentPage = 1;
 
       const pageInfoEl  = document.getElementById("pageInfo");
       const tableMetaEl = document.getElementById("tableMeta");
@@ -728,7 +764,7 @@
 
       if (el.totalMatches) el.totalMatches.textContent = String(filtered.length);
       if (el.totalWins)    el.totalWins.textContent    = String(stats.wins);
-      if (el.totalLosses)  el.totalLosses.textContent  = String(stats.losses);
+      if (el.totalLosses)   el.totalLosses.textContent  = String(stats.losses);
 
       drawPieChart(stats.wins, stats.losses);
       drawBarChart(stats.wins, stats.losses);
@@ -780,15 +816,14 @@
 
       const label = el.toggleFiltersBtn?.querySelector(".career-bottom-label");
       if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
-      
     }
 
     // ─── Eventos ──────────────────────────────────────────────────────────
 
     function bindEvents() {
       el.toggleFiltersBtn?.addEventListener("click", toggleFilters);
-      el.applyFilterBtn?.addEventListener("click",  applyFilters);
-    
+      el.applyFilterBtn?.addEventListener("click", applyFilters);
+
       el.clearFilterBtn?.addEventListener("click", () => {
         if (el.yearFilter)       el.yearFilter.value       = "";
         if (el.modalityFilter)   el.modalityFilter.value   = "";
@@ -796,17 +831,22 @@
         if (el.player2Filter)    el.player2Filter.value    = "";
         applyFilters();
       });
-    
+
       document.getElementById("logoutBtnBottom")?.addEventListener("click", async () => {
         try {
-          await firebase.auth().signOut();
+          const auth = typeof __auth !== "undefined" && __auth ? __auth : firebase.auth();
+          await auth.signOut();
+
+          localStorage.removeItem(SESSION_KEY);
+          localStorage.removeItem(BIOMETRIC_SESSION_KEY);
+
           window.location.href = "login.html";
         } catch (err) {
           console.error(err);
           setMessage("Erro ao sair.");
         }
       });
-    
+
       window.addEventListener("resize", () => {
         const wasMobile = state.isMobile;
         state.isMobile  = U.isMobile();
@@ -817,13 +857,11 @@
       });
     }
 
-    // ─── Estilos mobile injetados ─────────────────────────────────────────
-
     function injectMobileStyles() {
       if (document.getElementById("dashboardMobileStyles")) return;
 
       const style = document.createElement("style");
-      style.id    = "dashboardMobileStyles";
+      style.id = "dashboardMobileStyles";
       style.textContent = ` .dashboard-mobile-card { padding: 14px; border-radius: 18px; background: linear-gradient(180deg, rgba(44,54,74,.96), rgba(30,39,58,.98)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 10px; } .dashboard-mobile-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; } .dashboard-mobile-date { font-size: 0.8rem; color: rgba(232,238,252,0.75); font-weight: 800; } .dashboard-mobile-winner { font-size: 0.78rem; color: #f4f8ff; font-weight: 900; padding: 6px 10px; border-radius: 999px; background: rgba(96,165,250,0.14); border: 1px solid rgba(96,165,250,0.18); } .dashboard-mobile-confrontation { font-size: 0.95rem; font-weight: 800; color: #f4f8ff; line-height: 1.35; word-break: break-word; } .dashboard-mobile-meta { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 0.82rem; color: rgba(232,238,252,0.82); } .dashboard-mobile-meta strong { color: #fff; } `;
       document.head.appendChild(style);
     }
@@ -847,15 +885,22 @@
         return;
       }
 
-      __auth.onAuthStateChanged((user) => {
-        if (!user) {
+      __auth.onAuthStateChanged(async (user) => {
+        let finalUser = user;
+
+        if (!finalUser) {
+          finalUser = await buildFallbackUser(null);
+        }
+
+        if (!finalUser || !finalUser.uid) {
           state.currentUser = null;
           setMessage("Usuário não autenticado.");
           return;
         }
 
-        state.currentUser     = user;
-        state.currentUserName = U.getCurrentUserProfile(user);
+        state.currentUser = finalUser;
+        state.currentUserName = U.getCurrentUserProfile(finalUser);
+
         listenMatches();
       });
     }
