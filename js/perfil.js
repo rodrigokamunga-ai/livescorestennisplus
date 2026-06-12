@@ -9,11 +9,12 @@
     // Imagem padrão do avatar
     const DEFAULT_AVATAR = "img/perfil-padrao.png";
 
-    // Configuração de resize da imagem
-    const IMAGE_MAX_WIDTH  = 800;
-    const IMAGE_MAX_HEIGHT = 800;
+    // Configuração de resize/compressão da imagem
+    const IMAGE_MAX_WIDTH  = 512;
+    const IMAGE_MAX_HEIGHT = 512;
     const IMAGE_MIME_TYPE  = "image/jpeg";
-    const IMAGE_QUALITY    = 0.85;
+    const IMAGE_QUALITY_LIST = [0.75, 0.65, 0.55, 0.45, 0.35];
+    const MAX_BASE64_LENGTH = 900000; // limite seguro para Firestore
 
     // ─── Estados e cidades ────────────────────────────────────────────────
 
@@ -221,8 +222,15 @@
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
 
-            const dataUrl = canvas.toDataURL(IMAGE_MIME_TYPE, IMAGE_QUALITY);
-            resolve(dataUrl);
+            for (const quality of IMAGE_QUALITY_LIST) {
+              const dataUrl = canvas.toDataURL(IMAGE_MIME_TYPE, quality);
+              if (dataUrl.length <= MAX_BASE64_LENGTH) {
+                resolve(dataUrl);
+                return;
+              }
+            }
+
+            reject(new Error("A imagem continua muito grande após a compressão."));
           };
 
           img.onerror = reject;
@@ -259,7 +267,7 @@
       if (el.height)      el.height.value      = data.height      || "";
       if (el.weight)      el.weight.value      = data.weight      || "";
       if (data.forehand)  setRadioValue("forehand", data.forehand);
-      if (data.backhand)  setRadioValue("backhand", data.backhand);
+      if (data.backhand)   setRadioValue("backhand", data.backhand);
 
       if (el.country && data.country) {
         el.country.value = data.country;
@@ -323,6 +331,10 @@
           }
 
           photoBase64 = await fileToBase64(file);
+
+          if (photoBase64.length > MAX_BASE64_LENGTH) {
+            return setMsg("A foto ainda está muito grande. Escolha uma imagem menor.", "error");
+          }
         }
 
         const newDisplayName = el.displayName?.value.trim() || "";
@@ -448,9 +460,9 @@
         console.error("Erro ao alterar senha:", err);
 
         const msg =
-          err.code === "auth/wrong-password"       ? "Senha atual incorreta." :
-          err.code === "auth/weak-password"        ? "A nova senha é muito fraca." :
-          err.code === "auth/requires-recent-login" ? "Faça login novamente para alterar a senha." :
+          err.code === "auth/wrong-password"        ? "Senha atual incorreta." :
+          err.code === "auth/weak-password"         ? "A nova senha é muito fraca." :
+          err.code === "auth/requires-recent-login"  ? "Faça login novamente para alterar a senha." :
           err.message || "Erro ao alterar senha.";
 
         setPasswordMsg(msg, "error");
@@ -604,7 +616,6 @@
         try {
           const resizedBase64 = await fileToBase64(file);
           if (el.avatarPreview) el.avatarPreview.src = resizedBase64;
-          if (el.avatarPreview) el.avatarPreview.dataset.newPhoto = resizedBase64;
         } catch (err) {
           console.error("Erro ao processar imagem:", err);
           setMsg("Erro ao processar a imagem.", "error");
