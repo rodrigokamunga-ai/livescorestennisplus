@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Live Scores Tennis Plus - tela pública de partidas" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Tela Pública - TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style> .mobile-filters-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; } .back-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.08); color: #fff; cursor: pointer; font-size: 1rem; transition: 0.2s ease; flex: 0 0 auto; } .back-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); } .mobile-filters-label { flex: 1; } </style>
+</head>
+<body class="public-page public-dashboard-page">
+  <main class="container dashboard-container">
+
+    <div class="mobile-filters">
+      <div class="mobile-filters-header">
+        <button type="button" class="back-btn" id="backToMenuBtn" aria-label="Voltar para o menu">
+          ←
+        </button>
+      </div>
+    
+      <label for="liveStatusFilter" class="filter-label mobile-filters-label">
+        Filtrar partidas
+      </label>
+    
+      <select id="liveStatusFilter" class="filter-select">
+        <option value="all">Todos</option>
+        <option value="scheduled">Jogos do dia</option>
+        <option value="live">Jogos em andamento</option>
+        <option value="finished">Jogos finalizados</option>
+      </select>
+    </div>
+
+    <section class="public-grid board-grid dashboard-grid" id="gamesGrid">
+      <div class="panel panel-glass column-panel dashboard-column">
+        <div class="dashboard-title">
+          <div class="title-with-icon">
+            <span class="section-icon">🗓️</span>
+            <h3>Jogos do dia</h3>
+          </div>
+          <span class="badge" id="countScheduled">0</span>
+        </div>
+        <div id="scheduledList" class="cards compact-cards column-scroll dashboard-list"></div>
+      </div>
+
+      <div class="panel panel-glass column-panel dashboard-column">
+        <div class="dashboard-title">
+          <div class="title-with-icon">
+            <span class="section-icon live">⚡</span>
+            <h3>Em andamento</h3>
+          </div>
+          <span class="badge" id="countLive">0</span>
+        </div>
+        <div id="liveList" class="cards compact-cards column-scroll dashboard-list"></div>
+      </div>
+
+      <div class="panel panel-glass column-panel dashboard-column">
+        <div class="dashboard-title">
+          <div class="title-with-icon">
+            <span class="section-icon finished">🏁</span>
+            <h3>Finalizados</h3>
+          </div>
+          <span class="badge" id="countFinished">0</span>
+        </div>
+        <div id="finishedList" class="cards compact-cards column-scroll dashboard-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/public.js"></script>
+
+  <script> document.getElementById("backToMenuBtn").addEventListener("click", () => { window.location.href = "menu.html"; }); </script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
+</body>
+</html>

@@ -3,10 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0f1726" />
-  <title>Menu | Live Scores Tennis</title>
+  <meta name="description" content="Live Scores Tennis Plus - menu principal do aplicativo" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Menu | TennisPro</title>
   <link rel="stylesheet" href="css/menu.css" />
 </head>
 
@@ -26,14 +33,14 @@
         </div>
 
         <button type="button" id="alertBtnTop" class="header-btn" aria-label="Alertas">
-          <span class="header-icon">⚠️</span>
+          <span class="header-icon">🔔</span>
           <span class="header-alert-badge" id="alertBadge" aria-hidden="true" style="display:none;">0</span>
         </button>
       </div>
 
       <div class="menu-grid">
 
-        <a href="index.html" class="menu-app-btn" target="_blank" rel="noopener noreferrer">
+        <a href="public.html" class="menu-app-btn">
           <div class="menu-app-icon">📺</div>
           <div>
             <div class="menu-app-title">Visualização</div>
@@ -159,7 +166,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
   <script src="js/firebase.js"></script>
   <script src="js/menu.js"></script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
 </html>

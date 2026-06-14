@@ -3,7 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Perfil | Live Scores Tennis</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Live Scores Tennis Plus - perfil do usuário" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Perfil | TennisPro</title>
   <link rel="stylesheet" href="css/perfil.css" />
 </head>
 
@@ -33,7 +43,7 @@
 
           <span id="photoFileName">Nenhum arquivo selecionado</span>
 
-          <button type="button" id="removePhotoBtn" class="btn" style="margin-top:8px;" >
+          <button type="button" id="removePhotoBtn" class="btn" style="margin-top:8px;">
             🗑️ Excluir foto
           </button>
         </div>
@@ -165,7 +175,7 @@
         <label>Nova senha
           <div style="position:relative;">
             <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="padding-right:90px;" />
-            <button type="button" id="generatePasswordBtn" title="Gerar senha forte" style="position:absolute;right:8px;top:50%; transform:translateY(-50%); background:rgba(216,255,99,0.12); border:1px solid rgba(216,255,99,0.22); color:#d8ff63;border-radius:8px; padding:5px 10px;cursor:pointer; font-size:0.76rem;font-weight:900; white-space:nowrap;line-height:1;" >
+            <button type="button" id="generatePasswordBtn" title="Gerar senha forte" style="position:absolute;right:8px;top:50%; transform:translateY(-50%); background:rgba(216,255,99,0.12); border:1px solid rgba(216,255,99,0.22); color:#d8ff63;border-radius:8px; padding:5px 10px;cursor:pointer; font-size:0.76rem;font-weight:900; white-space:nowrap;line-height:1;">
               🔑 Gerar
             </button>
           </div>
@@ -230,7 +240,7 @@
         </button>
       </div>
 
-      <div id="deleteMsg" style="margin-top:12px;font-size:0.84rem;color:#fca5a5; text-align:center;min-height:18px;" ></div>
+      <div id="deleteMsg" style="margin-top:12px;font-size:0.84rem;color:#fca5a5; text-align:center;min-height:18px;"></div>
     </div>
   </div>
 
@@ -256,8 +266,6 @@
       <span class="profile-bottom-label">Partida</span>
     </a>
 
-   
-
     <button type="button" id="logoutBtnBottom" class="profile-bottom-btn logout">
       <span class="profile-bottom-icon">🚪</span>
       <span class="profile-bottom-label">Sair</span>
@@ -267,7 +275,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
   <script src="js/firebase.js"></script>
   <script src="js/perfil.js"></script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
 </html>

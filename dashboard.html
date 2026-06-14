@@ -3,7 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard | Live Scores Tennis</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Live Scores Tennis Plus - dashboard com resumo geral" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Dashboard | TennisPro</title>
   <link rel="stylesheet" href="css/style.css" />
 
   <style> body.dashboard-page { background: radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%), linear-gradient(180deg, #121b2d 0%, #0f1726 100%); color: #e8eefc; padding-bottom: 92px; } .dashboard-hero { padding: 22px; border-radius: 24px; background: linear-gradient(180deg, rgba(31, 40, 60, 0.94), rgba(15, 22, 36, 0.98)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 16px 36px rgba(0,0,0,0.24); } .dashboard-header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; } .dashboard-header h1 { margin: 0; font-size: 1.6rem; font-weight: 950; letter-spacing: -0.02em; } .dashboard-header p { margin: 8px 0 0; color: rgba(232, 238, 252, 0.72); font-size: 0.95rem; line-height: 1.35; } .dashboard-filters { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; } .dashboard-filters label { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 700; color: rgba(232, 238, 252, 0.86); } .dashboard-filters input, .dashboard-filters select { width: 100%; padding: 12px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(12, 18, 30, 0.62); color: #f4f8ff; outline: none; } .dashboard-actions { display: flex; gap: 10px; flex-wrap: wrap; grid-column: 1 / -1; margin-top: 4px; } .dashboard-actions .btn { min-width: 128px; padding: 12px 16px; flex: 0 0 auto; } .dashboard-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; } .dash-card { border-radius: 22px; padding: 18px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; } .dash-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 48%); pointer-events: none; } .dash-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; z-index: 1; } .dash-card-icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-size: 1.25rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); flex: 0 0 auto; } .dash-card span { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(232,238,252,0.62); font-weight: 800; } .dash-card strong { font-size: 2.9rem; line-height: 1; font-weight: 950; color: #f4f8ff; margin-top: 10px; position: relative; z-index: 1; } .dash-card .capsule { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 800; color: rgba(232,238,252,0.88); width: fit-content; position: relative; z-index: 1; } .dash-card.total { border-top: 3px solid #60a5fa; } .dash-card.win { border-top: 3px solid #d8ff63; } .dash-card.loss { border-top: 3px solid #ff7b7b; } .dashboard-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; } .dashboard-panel { padding: 18px; border-radius: 22px; background: linear-gradient(180deg, rgba(44,54,74,.92), rgba(30,39,58,.95)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.22); } .dashboard-panel h2 { margin: 0 0 10px; font-size: 1rem; font-weight: 900; color: #f4f8ff; } .chart-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; } .legend-item { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 800; color: rgba(232,238,252,0.88); } .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; } .chart-box { display: flex; justify-content: center; align-items: center; min-height: 280px; } .chart-box canvas { max-width: 100%; max-height: 280px; } .dashboard-message { margin-top: 14px; color: rgba(232, 238, 252, 0.82); font-size: 0.95rem; } @media (max-width: 900px) { .dashboard-filters, .dashboard-cards, .dashboard-grid { grid-template-columns: 1fr; } } @media (max-width: 768px) { .dashboard-hero { padding: 16px; border-radius: 20px; } .dashboard-header { flex-direction: column; } .dash-card { min-height: 118px; padding: 16px; } .dash-card strong { font-size: 2.2rem; } .dashboard-panel { padding: 14px; } .chart-box { min-height: 240px; } .chart-box canvas { width: 100% !important; height: auto !important; } .dashboard-actions { flex-direction: column; } .dashboard-actions .btn { width: 100%; min-width: 0; } } @media (max-width: 430px) { .dashboard-hero { padding: 14px; } .dash-card { min-height: 112px; padding: 14px; } .dash-card strong { font-size: 2rem; } .dashboard-panel { padding: 14px; } } .dashboard-mobile-card { padding: 14px; border-radius: 18px; background: linear-gradient(180deg, rgba(44,54,74,.96), rgba(30,39,58,.98)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 12px 30px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 10px; } .dashboard-mobile-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; } .dashboard-mobile-date { font-size: 0.8rem; color: rgba(232,238,252,0.75); font-weight: 800; } .dashboard-mobile-winner { font-size: 0.78rem; color: #f4f8ff; font-weight: 900; padding: 6px 10px; border-radius: 999px; background: rgba(96,165,250,0.14); border: 1px solid rgba(96,165,250,0.18); } .dashboard-mobile-confrontation { font-size: 0.95rem; font-weight: 800; color: #f4f8ff; line-height: 1.35; word-break: break-word; } .dashboard-mobile-meta { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 0.82rem; color: rgba(232,238,252,0.82); } .dashboard-mobile-meta strong { color: #fff; } </style>
@@ -58,7 +68,6 @@
           <div class="dash-card-top">
             <div>
               <span>Total de partidas</span>
-             
             </div>
             <div class="dash-card-icon">📊</div>
           </div>
@@ -69,7 +78,6 @@
           <div class="dash-card-top">
             <div>
               <span>Vitórias</span>
-              
             </div>
             <div class="dash-card-icon">✅</div>
           </div>
@@ -80,7 +88,6 @@
           <div class="dash-card-top">
             <div>
               <span>Derrotas</span>
-              
             </div>
             <div class="dash-card-icon">📉</div>
           </div>
@@ -127,7 +134,6 @@
       <span class="career-bottom-label">Filtros</span>
     </button>
 
-    
     <a href="admin.html" class="career-bottom-btn">
       <span class="career-bottom-icon">🎾</span>
       <span class="career-bottom-label">Partida</span>
@@ -138,16 +144,19 @@
       <span class="career-bottom-label">Carreira</span>
     </a>
 
-    <button type="button" id="logoutBtnBottom" class="menu-bottom-btn logout">
-      <span class="menu-bottom-icon">🚪</span>
-      <span class="menu-bottom-label">Sair</span>
+    <button type="button" id="logoutBtnBottom" class="career-bottom-btn logout">
+      <span class="career-bottom-icon">🚪</span>
+      <span class="career-bottom-label">Sair</span>
     </button>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
   <script src="js/firebase.js"></script>
   <script src="js/dashboard.js"></script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
 </html>

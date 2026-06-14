@@ -3,11 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Carreira | Live Scores Tennis</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Live Scores Tennis Plus - carreira e histórico do atleta" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Carreira | TennisPro</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/carreira.css" />
-
-  
 </head>
 
 <body class="career-page">
@@ -22,28 +30,17 @@
         </div>
       </div>
 
-      
-
       <!-- ── RESUMO ── -->
-
-      
       <div class="career-summary">
-        
-        
         <div class="career-summary-card total matches">
           <span>Total de partidas</span>
           <strong id="totalMatches">0</strong>
         </div>
 
-       
-
-         
-         <div class="career-summary-card tournament">
+        <div class="career-summary-card tournament">
           <span>Torneios Disputados</span>
           <strong id="totalTournaments">0</strong>
         </div>
-
-        
 
         <div class="career-summary-card win">
           <span>Vitórias</span>
@@ -55,8 +52,6 @@
           <strong id="totalLosses">0</strong>
         </div>
 
-       
-
         <div class="career-summary-card champion">
           <span>Conquistas</span>
           <strong id="totalChampion">0</strong>
@@ -66,10 +61,7 @@
           <span>Vice-campeonatos</span>
           <strong id="totalRunnerup">0</strong>
         </div>
-     
       </div>
-
-      
 
       <!-- ── FILTROS ── -->
       <div id="careerFiltersSection" class="career-filters">
@@ -84,7 +76,6 @@
           <input type="text" id="playerName" placeholder="Filtrar pelo Jogador 2" />
         </label>
 
-        <!-- ✅ NOVO: Modalidade -->
         <label>
           Modalidade
           <select id="modalityFilter">
@@ -94,7 +85,6 @@
           </select>
         </label>
 
-        <!-- ✅ NOVO: Formato do Jogo -->
         <label>
           Formato do Jogo
           <select id="gameFormatFilter">
@@ -105,7 +95,6 @@
           </select>
         </label>
 
-        <!-- ✅ NOVO: Torneio -->
         <label>
           Torneio
           <input type="text" id="tournamentFilter" placeholder="Filtrar pelo nome do torneio" />
@@ -221,7 +210,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
   <script src="js/firebase.js"></script>
   <script src="js/carreira.js"></script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
 </html>

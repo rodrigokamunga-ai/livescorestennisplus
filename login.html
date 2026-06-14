@@ -3,8 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login | Live Scores Tennis</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Live Scores Tennis Plus - acesso ao aplicativo" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Login | TennisPro</title>
   <link rel="stylesheet" href="css/style.css" />
+
   <style> /* ── Links ───────────────────────────────────────────────── */ .auth-links { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; } .auth-link { color: #d8ff63; font-weight: 700; font-size: 0.92rem; text-decoration: none; } .auth-link:hover { text-decoration: underline; } /* ── Separador ────────────────────────────────────────────── */ .auth-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: rgba(255,255,255,.4); font-size: .8rem; } .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.15); } /* ── Botão Google ─────────────────────────────────────────── */ .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 11px 16px; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; background: rgba(255,255,255,.07); color: inherit; font-size: .95rem; font-weight: 500; cursor: pointer; transition: background .2s; margin-bottom: 4px; } .btn-google:hover { background: rgba(255,255,255,.14); } .btn-google img { width: 20px; height: 20px; } /* ── Botão Biometria ──────────────────────────────────────── */ .btn-biometric { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 16px; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; background: rgba(255,255,255,.05); color: inherit; font-size: .9rem; font-weight: 500; cursor: pointer; transition: background .2s; margin-bottom: 4px; } .btn-biometric:hover { background: rgba(255,255,255,.1); } /* ── Wrapper mostrar/ocultar senha ────────────────────────── */ .password-wrapper { position: relative; } .password-wrapper input { width: 100%; padding-right: 42px; box-sizing: border-box; } .toggle-pw { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: .55; padding: 0; line-height: 1; } .toggle-pw:hover { opacity: 1; } </style>
 </head>
 
@@ -18,7 +29,7 @@
           <img src="img/logo.png" alt="Live Scores Tennis +" class="app-logo-img" />
         </div>
         <div>
-          <h1>LiveScoreTennis</h1>
+          <h1>TennisPro</h1>
           <p class="muted">Faça login para continuar</p>
         </div>
       </div>
@@ -72,10 +83,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
   <script src="js/firebase.js"></script>
   <script src="js/login.js"></script>
 
   <!-- ── Mostrar/ocultar senha ────────────────────────────────── -->
   <script> document.querySelectorAll(".toggle-pw").forEach(btn => { btn.addEventListener("click", () => { const input = document.getElementById(btn.dataset.target); if (!input) return; const hidden = input.type === "password"; input.type = hidden ? "text" : "password"; btn.textContent = hidden ? "🙈" : "👁️"; }); }); </script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
 </html>
