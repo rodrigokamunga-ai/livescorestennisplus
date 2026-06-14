@@ -1,4 +1,4 @@
-const CACHE_NAME = "live-scores-tennis-plus-v1";
+const CACHE_NAME = "tennispro-v2";
 
 const ASSETS_TO_CACHE = [
   "./",
@@ -21,7 +21,6 @@ const ASSETS_TO_CACHE = [
   "./css/carreira.css",
   "./css/admin.css",
   "./css/users-admin.css",
-  "./css/dashboard.css",
   "./js/firebase.js",
   "./js/login.js",
   "./js/register.js",
@@ -44,11 +43,8 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
-
   self.skipWaiting();
 });
 
@@ -64,7 +60,6 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
-
   self.clients.claim();
 });
 
@@ -73,19 +68,17 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          return networkResponse;
-        })
-        .catch(() => {
-          if (event.request.mode === "navigate") {
-            return caches.match("./login.html");
-          }
+      return fetch(event.request).catch(() => {
+        if (event.request.mode === "navigate") {
+          return caches.match("./login.html");
+        }
+        return new Response("", {
+          status: 503,
+          statusText: "Offline"
         });
+      });
     })
   );
 });
