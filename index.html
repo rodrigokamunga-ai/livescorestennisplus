@@ -1,66 +1,53 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Tela Pública - Live Scores Tennis</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d6efd" />
+  <meta name="description" content="Live Scores Tennis Plus - aplicativo em formato PWA" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <title>Live Scores Tennis Plus</title>
 </head>
-<body class="public-page public-dashboard-page">
-  <main class="container dashboard-container">
+<body>
+  <header class="topbar">
+    <h1>TennisPro</h1>
+    <p>Versão PWA para testes</p>
+  </header>
 
-    <div class="mobile-filters">
-      <label for="liveStatusFilter" class="filter-label">Filtrar partidas</label>
-      <select id="liveStatusFilter" class="filter-select">
-        <option value="all">Todos</option>
-        <option value="scheduled">Jogos do dia</option>
-        <option value="live">Jogos em andamento</option>
-        <option value="finished">Jogos finalizados</option>
-      </select>
-    </div>
+  <main class="container">
+    <section class="card">
+      <h2>Bem-vindo</h2>
+      <p>
+        Este aplicativo está preparado como PWA, com instalação, cache básico e suporte offline.
+      </p>
 
-    <section class="public-grid board-grid dashboard-grid" id="gamesGrid">
-      <div class="panel panel-glass column-panel dashboard-column">
-        <div class="dashboard-title">
-          <div class="title-with-icon">
-            <span class="section-icon">🗓️</span>
-            <h3>Jogos do dia</h3>
-          </div>
-          <span class="badge" id="countScheduled">0</span>
-        </div>
-        <div id="scheduledList" class="cards compact-cards column-scroll dashboard-list"></div>
+      <div class="actions">
+        <button id="btnTeste">Clique aqui</button>
+        <button id="btnInstalar" class="secondary" hidden>Instalar app</button>
       </div>
 
-      <div class="panel panel-glass column-panel dashboard-column">
-        <div class="dashboard-title">
-          <div class="title-with-icon">
-            <span class="section-icon live">⚡</span>
-            <h3>Em andamento</h3>
-          </div>
-          <span class="badge" id="countLive">0</span>
-        </div>
-        <div id="liveList" class="cards compact-cards column-scroll dashboard-list"></div>
-      </div>
+      <p id="status" class="status">Status: aguardando interação...</p>
+    </section>
 
-      <div class="panel panel-glass column-panel dashboard-column">
-        <div class="dashboard-title">
-          <div class="title-with-icon">
-            <span class="section-icon finished">🏁</span>
-            <h3>Finalizados</h3>
-          </div>
-          <span class="badge" id="countFinished">0</span>
-        </div>
-        <div id="finishedList" class="cards compact-cards column-scroll dashboard-list"></div>
-      </div>
+    <section class="card">
+      <h2>Funcionalidades</h2>
+      <ul>
+        <li>Instalação como app</li>
+        <li>Funcionamento offline básico</li>
+        <li>Interface simples para testes</li>
+      </ul>
     </section>
   </main>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="js/firebase.js"></script>
-  <script src="js/public.js"></script>
+  <footer class="footer">
+    <small>Live Scores Tennis Plus</small>
+  </footer>
+
+  <script src="js/app.js"></script>
 </body>
 </html>
