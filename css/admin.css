@@ -138,13 +138,7 @@ body.admin-page .actions.full {
   margin-top: 6px;
 }
 
-body.admin-page .admin-form-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-/* ========================= BOTÕES PADRÃO ========================= */
+/* ========================= BOTÕES ========================= */
 body.admin-page .btn,
 body.admin-page .admin-bottom-btn,
 body.admin-page .admin-page-btn,
@@ -196,18 +190,20 @@ body.admin-page .admin-page-btn:disabled {
   box-shadow: none;
 }
 
-/* ========================= BOTÕES PADRONIZADOS ========================= */
-body.admin-page .admin-form-actions .admin-form-btn,
+/* ========================= BOTÕES PADRÃO DO TIPO “LIMPAR FILTROS” ========================= */
 body.admin-page .btn-clear-filters,
 body.admin-page .admin-page-btn,
 body.admin-page .admin-bottom-btn,
-body.admin-page .icon-btn {
+body.admin-page .icon-btn,
+body.admin-page .admin-form-actions .admin-form-btn {
   min-height: 44px;
-  border-radius: 14px;
+  min-width: 0;
   padding: 0 14px;
+  border-radius: 14px;
   background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
   color: #eef4ff;
   font-weight: 800;
+  font-size: 0.88rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -216,14 +212,21 @@ body.admin-page .icon-btn {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
 }
 
-body.admin-page .admin-form-actions .admin-form-btn:hover,
 body.admin-page .btn-clear-filters:hover,
 body.admin-page .admin-page-btn:hover,
 body.admin-page .admin-bottom-btn:hover,
-body.admin-page .icon-btn:hover {
+body.admin-page .icon-btn:hover,
+body.admin-page .admin-form-actions .admin-form-btn:hover {
   border-color: rgba(216, 255, 99, 0.22);
   background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.05));
   box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+}
+
+body.admin-page .admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 body.admin-page .admin-form-actions .admin-form-btn.primary {
@@ -232,6 +235,8 @@ body.admin-page .admin-form-actions .admin-form-btn.primary {
 
 body.admin-page .admin-form-actions .admin-form-btn .admin-bottom-icon,
 body.admin-page .admin-form-actions .admin-form-btn .admin-bottom-label {
+  font-size: 0.88rem;
+  line-height: 1;
   pointer-events: none;
 }
 
@@ -255,24 +260,6 @@ body.admin-page .filters-bar {
 body.admin-page .filters-bar input,
 body.admin-page .filters-bar select {
   min-height: 44px;
-}
-
-body.admin-page .btn-clear-filters {
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
-  color: #eef4ff;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-body.admin-page .btn-clear-filters:hover {
-  border-color: rgba(216, 255, 99, 0.22);
 }
 
 /* ========================= TABELA DESKTOP ========================= */
@@ -325,7 +312,6 @@ body.admin-page .players-cell {
 }
 
 /* ========================= AÇÕES NO DESKTOP ========================= */
-/* aqui está a correção principal dos botões desalinhados */
 body.admin-page .action-cell {
   display: grid;
   grid-template-columns: repeat(2, max-content);
@@ -395,6 +381,12 @@ body.admin-page .status-wo {
   background: rgba(248, 113, 113, 0.10);
   border: 1px solid rgba(248, 113, 113, 0.18);
   color: #fca5a5;
+}
+
+body.admin-page .status-suspended {
+  background: rgba(251, 146, 60, 0.10);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+  color: #fdba74;
 }
 
 /* ========================= PAGINAÇÃO ========================= */
@@ -539,6 +531,7 @@ body.admin-page .detail-section-subtitle {
   color: rgba(232, 238, 252, 0.58);
 }
 
+/* 2 colunas por padrão */
 body.admin-page .detail-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -624,6 +617,7 @@ body.admin-page .winner-badge {
   box-shadow: 0 0 12px rgba(216, 255, 99, 0.18);
 }
 
+body.admin-page .winner-badge.loser-badge,
 body.admin-page .winner-badge.lose {
   background: linear-gradient(180deg, #ff7b7b, #e44f4f);
   color: #fff;
@@ -652,12 +646,6 @@ body.admin-page .detail-score-line strong {
   color: #d8ff63;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-}
-
-body.admin-page .detail-score-line strong.lose,
-body.admin-page .detail-pill strong.lose,
-body.admin-page .detail-summary-line strong.lose {
-  color: #ff7b7b;
 }
 
 body.admin-page .detail-pill {
@@ -721,28 +709,6 @@ body.admin-page .detail-summary-line strong {
   color: #d8ff63;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-}
-
-body.admin-page .detail-link-box {
-  padding: 12px;
-  border-radius: 14px;
-  background: rgba(12, 18, 30, 0.58);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-}
-
-body.admin-page .detail-link-box a {
-  display: block;
-  color: #8fb7ff;
-  font-size: 0.92rem;
-  font-weight: 700;
-  word-break: break-all;
-  line-height: 1.45;
-}
-
-body.admin-page .detail-link-box a:hover {
-  color: #cfe0ff;
-  text-decoration: underline;
 }
 
 /* ========================= BOTÕES FIXOS INFERIORES ========================= */
@@ -863,7 +829,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
     width: 100%;
   }
 
-  /* tabela vira cards */
   body.admin-page .admin-table {
     min-width: 0 !important;
     width: 100%;
@@ -927,7 +892,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
     font-weight: 700;
   }
 
-  /* nomes em 2 linhas no celular */
   body.admin-page .mobile-match-players {
     font-size: 0.92rem;
     font-weight: 900;
@@ -950,10 +914,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
   body.admin-page .mobile-match-players .vs-separator {
     display: inline;
     margin: 0 4px;
-  }
-
-  body.admin-page .mobile-match-players br {
-    display: block;
   }
 
   body.admin-page .mobile-match-meta {
@@ -980,7 +940,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
     font-weight: 800;
   }
 
-  /* botões em linha */
   body.admin-page .mobile-match-actions {
     display: flex;
     flex-direction: row;
@@ -1019,7 +978,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
   }
 
-  /* paginação */
   body.admin-page .admin-pagination {
     gap: 6px;
     padding: 12px 16px 0;
@@ -1051,7 +1009,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
     font-size: 0.7rem;
   }
 
-  /* botões do formulário */
   body.admin-page .admin-form-actions {
     flex-direction: column;
     gap: 8px;
@@ -1062,7 +1019,6 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
     min-height: 48px;
   }
 
-  /* botões fixos inferiores */
   body.admin-page .admin-bottom-nav {
     width: 100%;
     max-width: 100%;
@@ -1149,6 +1105,22 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
   body.admin-page .detail-section-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  /* 2 colunas no celular para os detalhes */
+  body.admin-page .detail-info-grid,
+  body.admin-page .detail-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.admin-page .detail-info-item,
+  body.admin-page .detail-summary-card {
+    min-width: 0;
+  }
+
+  body.admin-page .detail-info-item strong,
+  body.admin-page .detail-summary-card strong {
+    word-break: break-word;
   }
 }
 
