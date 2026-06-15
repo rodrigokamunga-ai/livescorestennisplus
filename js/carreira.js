@@ -26,14 +26,12 @@
     const el = {
       profileName: document.getElementById("profileName"),
       playerName: document.getElementById("playerName"),
-      modalityFilter: document.getElementById("modalityFilter"),
       gameFormatFilter: document.getElementById("gameFormatFilter"),
       tournamentFilter: document.getElementById("tournamentFilter"),
       stageFilter: document.getElementById("stageFilter"),
       resultFilter: document.getElementById("resultFilter"),
       tournamentSituationFilter: document.getElementById("tournamentSituationFilter"),
-      fromDate: document.getElementById("fromDate"),
-      toDate: document.getElementById("toDate"),
+      yearFilter: document.getElementById("yearFilter"),
       applyFilterBtn: document.getElementById("applyFilterBtn"),
       clearFilterBtn: document.getElementById("clearFilterBtn"),
       totalMatches: document.getElementById("totalMatches"),
@@ -52,8 +50,6 @@
       nextPageBtn: document.getElementById("nextPageBtn"),
       pageInfo: document.getElementById("pageInfo")
     };
-
-    // ─── Utilitários ──────────────────────────────────────────────────────────
 
     const U = {
       escapeHtml(str = "") {
@@ -259,8 +255,11 @@
       getScoreLabel(match) {
         const score = U.normalizeScore(match.score || {});
         const status = U.normalizeText(match.status);
+
         if (status === "wo") return "WO";
+
         const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+
         if (history.length) {
           return history
             .map((setObj) => {
@@ -270,14 +269,21 @@
               const tb2 = Number(setObj?.tieBreakPoints2 || 0);
               const isTB =
                 setObj?.tieBreakMode === "tb7" || setObj?.tieBreakMode === "super10";
-              if (isTB && (tb1 > 0 || tb2 > 0)) {
-                const p1Won = tb1 > tb2;
-                return `${p1Won ? 7 : 6}x${p1Won ? 6 : 7} (${tb1}-${tb2})`;
+
+              if (isTB && setObj?.tieBreakMode === "tb7") {
+                const setWinnerIsP1 = tb1 > tb2;
+                return `${setWinnerIsP1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
               }
+
+              if (isTB && setObj?.tieBreakMode === "super10") {
+                return `${tb1}-${tb2}`;
+              }
+
               return `${g1}x${g2}`;
             })
             .join(" ");
         }
+
         return `${score.sets1}x${score.sets2}`;
       },
 
@@ -286,30 +292,12 @@
         return Boolean(currentUser && ownerId && ownerId === currentUser.uid);
       },
 
-      applyDateFilter(matches, from, to) {
-        const fromTs = from ? new Date(`${from}T00:00:00`).getTime() : null;
-        const toTs = to ? new Date(`${to}T23:59:59`).getTime() : null;
-        return matches.filter((m) => {
-          const dt = U.toDate(m.matchDateTime);
-          if (!dt) return false;
-          const ts = dt.getTime();
-          if (fromTs !== null && ts < fromTs) return false;
-          if (toTs !== null && ts > toTs) return false;
-          return true;
-        });
-      },
-
       matchOpponentFilter(match, opponentText) {
         if (!opponentText) return true;
         const query = U.normalizeText(opponentText);
         return [match.player1, match.player2, match.player3, match.player4].some((p) =>
           U.normalizeText(p || "").includes(query)
         );
-      },
-
-      matchModalidadeFilter(match, modalityText) {
-        if (!modalityText) return true;
-        return U.normalizeText(U.getModalidade(match)) === U.normalizeText(modalityText);
       },
 
       matchGameFormatFilter(match, gameFormatText) {
@@ -362,7 +350,36 @@
       }
     };
 
-    // ─── UI helpers ───────────────────────────────────────────────────────────
+    function getAvailableYears(matches) {
+      const years = new Set();
+
+      matches.forEach((m) => {
+        const d = U.toDate(m.matchDateTime);
+        if (d) years.add(String(d.getFullYear()));
+      });
+
+      return Array.from(years).sort((a, b) => Number(b) - Number(a));
+    }
+
+    function populateYearFilter(matches) {
+      if (!el.yearFilter) return;
+
+      const currentValue = el.yearFilter.value;
+      const years = getAvailableYears(matches);
+
+      el.yearFilter.innerHTML = `<option value="">Todos os anos</option>`;
+
+      years.forEach((year) => {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        el.yearFilter.appendChild(option);
+      });
+
+      if (years.includes(currentValue)) {
+        el.yearFilter.value = currentValue;
+      }
+    }
 
     function setSummaryMessage(text) {
       if (el.summaryMessage) el.summaryMessage.textContent = text || "";
@@ -374,26 +391,25 @@
         el.profileName.readOnly = true;
       }
       if (el.playerName) el.playerName.value = "";
-      if (el.modalityFilter) el.modalityFilter.value = "";
       if (el.gameFormatFilter) el.gameFormatFilter.value = "";
       if (el.tournamentFilter) el.tournamentFilter.value = "";
+      if (el.stageFilter) el.stageFilter.value = "";
+      if (el.resultFilter) el.resultFilter.value = "";
+      if (el.tournamentSituationFilter) el.tournamentSituationFilter.value = "";
+      if (el.yearFilter) el.yearFilter.value = "";
     }
 
     function getFilters() {
       return {
         player: el.playerName?.value?.trim() || "",
-        modality: el.modalityFilter?.value?.trim() || "",
         gameFormat: el.gameFormatFilter?.value?.trim() || "",
         tournament: el.tournamentFilter?.value?.trim() || "",
         stage: el.stageFilter?.value?.trim() || "",
         result: el.resultFilter?.value?.trim() || "",
         tournamentSituation: el.tournamentSituationFilter?.value?.trim() || "",
-        from: el.fromDate?.value || "",
-        to: el.toDate?.value || ""
+        year: el.yearFilter?.value?.trim() || ""
       };
     }
-
-    // ─── Estatísticas ─────────────────────────────────────────────────────────
 
     function computeStats(matches) {
       let wins = 0,
@@ -410,8 +426,6 @@
       return { wins, losses, wo };
     }
 
-    // ─── Torneios ─────────────────────────────────────────────────────────────
-
     const TOURNAMENT_STAGES = new Set([
       "primeira rodada",
       "segunda rodada",
@@ -423,31 +437,34 @@
       "grupos"
     ]);
 
-    function isTournamentStage(match) {
-      return TOURNAMENT_STAGES.has(U.normalizeText(match.tournamentStage || ""));
-    }
-
     function computeTournamentStats(matches) {
-      const tournamentsWithName = new Set();
-      let tournamentsWithoutName = 0;
+      const tournaments = new Set();
       let champion = 0;
       let runnerup = 0;
 
       matches.forEach((m) => {
-        if (!isTournamentStage(m)) return;
-        const tName = U.normalizeText(String(m.tournamentName || "").trim());
-        if (tName) {
-          tournamentsWithName.add(tName);
-        } else {
-          tournamentsWithoutName++;
-        }
+        const stage = U.normalizeText(m.tournamentStage || "");
+        if (!TOURNAMENT_STAGES.has(stage)) return;
+
+        // Conta o torneio considerando:
+        // - fase do torneio válida
+        // - ano
+        // - nome do torneio
+        // - formato do jogo (Simples / Duplas / Duplas Mistas)
+        const tournamentName = U.normalizeText(String(m.tournamentName || "").trim());
+        const year = U.toDate(m.matchDateTime)?.getFullYear() || "";
+        const gameFormat = U.normalizeText(U.getGameFormat(m));
+
+        const tournamentKey = `${tournamentName || "sem-nome"}::${year}::${gameFormat || "sem-formato"}`;
+        tournaments.add(tournamentKey);
+
         const situation = U.getTournamentSituation(m);
         if (situation === "champion") champion++;
         if (situation === "runnerup") runnerup++;
       });
 
       return {
-        tournaments: tournamentsWithName.size + tournamentsWithoutName,
+        tournaments: tournaments.size,
         champion,
         runnerup
       };
@@ -458,9 +475,20 @@
       const stats = computeStats(matches);
       const tStats = computeTournamentStats(matches);
 
+      const totalPlayed = stats.wins + stats.losses;
+      const winPct = totalPlayed > 0 ? Math.round((stats.wins / totalPlayed) * 100) : 0;
+      const lossPct = totalPlayed > 0 ? Math.round((stats.losses / totalPlayed) * 100) : 0;
+
       if (el.totalMatches) el.totalMatches.textContent = String(total);
-      if (el.totalWins) el.totalWins.textContent = String(stats.wins);
-      if (el.totalLosses) el.totalLosses.textContent = String(stats.losses);
+
+      if (el.totalWins) {
+        el.totalWins.textContent = `${stats.wins} - ${winPct}%`;
+      }
+
+      if (el.totalLosses) {
+        el.totalLosses.textContent = `${stats.losses} - ${lossPct}%`;
+      }
+
       if (el.totalWo) el.totalWo.textContent = String(stats.wo);
       if (el.totalTournaments) el.totalTournaments.textContent = String(tStats.tournaments);
       if (el.totalChampion) el.totalChampion.textContent = String(tStats.champion);
@@ -476,8 +504,6 @@
           : `Nenhuma partida finalizada encontrada para ${player}.`;
       }
     }
-
-    // ─── Renderização dos cards ───────────────────────────────────────────────
 
     function formatTeamName(match) {
       const team1 = U.getTeam1Line(match);
@@ -545,25 +571,20 @@
       if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
     }
 
-    // ─── Filtros ──────────────────────────────────────────────────────────────
-
     function applyFiltersAndRender() {
       const {
         player,
-        modality,
         gameFormat,
         tournament,
         stage,
         result,
         tournamentSituation,
-        from,
-        to
+        year
       } = getFilters();
 
       let filtered = state.allMatches.filter((m) => U.isMatchForLoggedUser(m, state.currentUser));
 
       if (player) filtered = filtered.filter((m) => U.matchOpponentFilter(m, player));
-      if (modality) filtered = filtered.filter((m) => U.matchModalidadeFilter(m, modality));
       if (gameFormat) filtered = filtered.filter((m) => U.matchGameFormatFilter(m, gameFormat));
       if (tournament) filtered = filtered.filter((m) => U.matchTournamentFilter(m, tournament));
 
@@ -581,7 +602,12 @@
         filtered = filtered.filter((m) => U.getTournamentSituation(m) === "runnerup");
       }
 
-      filtered = U.applyDateFilter(filtered, from, to);
+      if (year) {
+        filtered = filtered.filter((m) => {
+          const d = U.toDate(m.matchDateTime);
+          return d && String(d.getFullYear()) === year;
+        });
+      }
 
       filtered.sort((a, b) => {
         const da = U.toDate(a.matchDateTime)?.getTime() || 0;
@@ -594,8 +620,6 @@
       renderSummary(filtered);
       renderPagedHistory(filtered);
     }
-
-    // ─── Toggle filtros ───────────────────────────────────────────────────────
 
     function updateToggleButtonUI() {
       const btn = el.toggleFiltersBtn;
@@ -620,19 +644,11 @@
       updateToggleButtonUI();
     }
 
-    // ─── Eventos ──────────────────────────────────────────────────────────────
-
     function bindEvents() {
       el.applyFilterBtn?.addEventListener("click", applyFiltersAndRender);
 
       el.clearFilterBtn?.addEventListener("click", () => {
         setDefaultFields(state.currentProfileName);
-        if (el.stageFilter) el.stageFilter.value = "";
-        if (el.resultFilter) el.resultFilter.value = "";
-        if (el.tournamentSituationFilter) el.tournamentSituationFilter.value = "";
-        if (el.fromDate) el.fromDate.value = "";
-        if (el.toDate) el.toDate.value = "";
-        if (el.tournamentFilter) el.tournamentFilter.value = "";
         state.currentPage = 1;
         applyFiltersAndRender();
       });
@@ -655,8 +671,6 @@
       bindToggleFilters();
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────────
-
     const logoutBtnBottom = document.getElementById("logoutBtnBottom");
 
     logoutBtnBottom?.addEventListener("click", async () => {
@@ -669,8 +683,6 @@
         console.error("Erro ao sair:", err);
       }
     });
-
-    // ─── Firestore / sessão ────────────────────────────────────────────────────
 
     function getBiometricCurrentUser() {
       try {
@@ -751,6 +763,8 @@
                 const status = U.normalizeText(m.status);
                 return status === "finished" || status === "wo";
               });
+
+            populateYearFilter(state.allMatches);
             applyFiltersAndRender();
           },
           (err) => {
@@ -759,8 +773,6 @@
           }
         );
     }
-
-    // ─── Init ─────────────────────────────────────────────────────────────────
 
     function init() {
       if (typeof __auth === "undefined") {
@@ -794,7 +806,8 @@
 
         if (fallbackUser?.uid) {
           state.currentUser = fallbackUser;
-          state.currentProfileName = String(fallbackUser.displayName || "").trim() || fallbackUser.email || "";
+          state.currentProfileName =
+            String(fallbackUser.displayName || "").trim() || fallbackUser.email || "";
           setDefaultFields(state.currentProfileName);
           listenMatches();
           return;
