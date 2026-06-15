@@ -30,20 +30,43 @@
     flex: 1;
   }
   
-  /* ───────────────────────────────────────────────────────────── Ajustes da tela pública Objetivo: partidas em andamento com tamanho visual próximo das partidas suspensas no celular ───────────────────────────────────────────────────────────── */
+  /* ───────────────────────────────────────────────────────────── Jogos do dia Nome dos jogadores maior Fase/Data um pouco menores ───────────────────────────────────────────────────────────── */
   
-  /* Nome dos jogadores e placares com visual mais uniforme */
-  .public-card .team-name-compact {
-    font-size: 0.86rem;
+  .match-board.scheduled-match .team-name-compact {
+    font-size: 1.15rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  
+  .match-board.scheduled-match .scheduled-footer {
+    font-size: 0.88rem;
     line-height: 1.15;
   }
   
-  .public-card .score {
-    font-size: 0.86rem;
-    line-height: 1.15;
+  .match-board.scheduled-match .scheduled-footer strong {
+    font-size: 0.88rem;
+    font-weight: 800;
   }
   
-  /* Partidas suspensas e em andamento com aparência equivalente */
+  /* ───────────────────────────────────────────────────────────── Jogos em andamento e suspensos Não altera os jogos finalizados ───────────────────────────────────────────────────────────── */
+  
+  .match-board[data-status="live"] .team-name-compact,
+  .match-board[data-status="suspended"] .team-name-compact {
+    font-size: 1.05rem;
+    line-height: 1.2;
+    white-space: pre-line;
+    word-break: normal;
+    overflow-wrap: normal;
+    font-weight: 700;
+  }
+  
+  .match-board[data-status="live"] .score,
+  .match-board[data-status="suspended"] .score {
+    font-size: 1.9rem;
+    line-height: 1;
+    font-weight: 900;
+  }
+  
   .match-board[data-status="live"],
   .match-board[data-status="suspended"] {
     align-items: stretch;
@@ -51,48 +74,125 @@
   
   .match-board[data-status="live"] .match-player-row,
   .match-board[data-status="suspended"] .match-player-row {
-    min-height: 32px;
+    min-height: 44px;
   }
   
   .match-board[data-status="live"] .player-name,
   .match-board[data-status="suspended"] .player-name {
-    font-size: 0.86rem;
-    line-height: 1.15;
+    white-space: pre-line !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
   }
   
-  /* Ajuste específico do bloco de placar no celular */
+  /* ───────────────────────────────────────────────────────────── Jogos finalizados - bloco um pouco maior - cabeçalho e colunas alinhados - JOGADOR à esquerda - nome dos jogadores 1 tamanho menor ───────────────────────────────────────────────────────────── */
+  
+  .match-board[data-status="finished"] {
+    transform: scale(1.03);
+    transform-origin: top center;
+  }
+  
+  .match-board[data-status="finished"] .match-table-head {
+    align-items: center;
+  }
+  
+  .match-board[data-status="finished"] .match-table-head > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .match-board[data-status="finished"] .match-table-head .team-label {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center;
+    text-align: left !important;
+    padding-left: 8px;
+  }
+  
+  .match-board[data-status="finished"] .match-player-row {
+    align-items: center;
+  }
+  
+  .match-board[data-status="finished"] .match-player-row > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .match-board[data-status="finished"] .player-name {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    font-size: 0.98rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  
+  .match-board[data-status="finished"] .score {
+    font-size: 1.05rem;
+    font-weight: 900;
+  }
+  
+  /* ───────────────────────────────────────────────────────────── Mobile ───────────────────────────────────────────────────────────── */
+  
   @media (max-width: 768px) {
-    .public-card .team-name-compact {
-      font-size: 0.72rem;
+    /* Jogos do dia */
+    .match-board.scheduled-match .team-name-compact {
+      font-size: 1.05rem;
+      line-height: 1.15;
+    }
+  
+    .match-board.scheduled-match .scheduled-footer {
+      font-size: 0.82rem;
       line-height: 1.1;
     }
   
-    .public-card .score {
-      font-size: 0.72rem;
-      line-height: 1.1;
+    .match-board.scheduled-match .scheduled-footer strong {
+      font-size: 0.82rem;
     }
   
+    /* Jogos em andamento / suspensos */
     .match-board[data-status="live"] .team-name-compact,
-    .match-board[data-status="suspended"] .team-name-compact,
+    .match-board[data-status="suspended"] .team-name-compact {
+      font-size: 0.98rem;
+      line-height: 1.15;
+    }
+  
     .match-board[data-status="live"] .score,
     .match-board[data-status="suspended"] .score {
-      font-size: 0.72rem !important;
-      line-height: 1.1 !important;
+      font-size: 1.8rem !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
     }
   
     .match-board[data-status="live"] .match-player-row,
     .match-board[data-status="suspended"] .match-player-row {
-      min-height: 34px;
+      min-height: 46px;
     }
   
     .match-board[data-status="live"] .player-name,
     .match-board[data-status="suspended"] .player-name {
-      font-size: 0.72rem !important;
-      line-height: 1.1 !important;
+      white-space: pre-line !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
     }
   
-    .match-board[data-status="live"] .score,
-    .match-board[data-status="suspended"] .score {
-      font-size: 0.72rem !important;
+    /* Finalizados no mobile */
+    .match-board[data-status="finished"] {
+      transform: scale(1.02);
+    }
+  
+    .match-board[data-status="finished"] .player-name {
+      font-size: 0.92rem;
+      line-height: 1.15;
+    }
+  
+    .match-board[data-status="finished"] .score {
+      font-size: 1rem;
+    }
+  
+    .match-board[data-status="finished"] .match-table-head .team-label {
+      padding-left: 6px;
     }
   }
