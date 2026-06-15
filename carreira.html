@@ -64,99 +64,88 @@
       </div>
 
       <!-- ── FILTROS ── -->
-      <div id="careerFiltersSection" class="career-filters">
+<div id="careerFiltersSection" class="career-filters">
 
-        <label>
-          Nome do Jogador 1
-          <input type="text" id="profileName" readonly />
-        </label>
+  <label>
+    Nome do Jogador 1
+    <input type="text" id="profileName" readonly />
+  </label>
 
-        <label>
-          Jogador 2
-          <input type="text" id="playerName" placeholder="Filtrar pelo Jogador 2" />
-        </label>
+  <label>
+    Jogador 2
+    <input type="text" id="playerName" placeholder="Filtrar pelo Jogador 2" />
+  </label>
 
-        <label>
-          Modalidade
-          <select id="modalityFilter">
-            <option value="">Todas</option>
-            <option value="Tênis">Tênis</option>
-            <option value="Beach Tênis">Beach Tênis</option>
-          </select>
-        </label>
+ 
+  <label>
+    Formato do Jogo
+    <select id="gameFormatFilter">
+      <option value="">Todos</option>
+      <option value="Simples">Simples</option>
+      <option value="Duplas">Duplas</option>
+      <option value="Duplas Mistas">Duplas Mistas</option>
+    </select>
+  </label>
 
-        <label>
-          Formato do Jogo
-          <select id="gameFormatFilter">
-            <option value="">Todos</option>
-            <option value="Simples">Simples</option>
-            <option value="Duplas">Duplas</option>
-            <option value="Duplas Mistas">Duplas Mistas</option>
-          </select>
-        </label>
+  <label>
+    Torneio
+    <input type="text" id="tournamentFilter" placeholder="Filtrar pelo nome do torneio" />
+  </label>
 
-        <label>
-          Torneio
-          <input type="text" id="tournamentFilter" placeholder="Filtrar pelo nome do torneio" />
-        </label>
+  <label>
+    Fase do Torneio
+    <select id="stageFilter">
+      <option value="">Todas</option>
+      <option value="Primeira Rodada">Primeira Rodada</option>
+      <option value="Segunda Rodada">Segunda Rodada</option>
+      <option value="Terceira Rodada">Terceira Rodada</option>
+      <option value="Oitavas de Final">Oitavas de Final</option>
+      <option value="Quartas de Final">Quartas de Final</option>
+      <option value="Semifinais">Semifinais</option>
+      <option value="Final">Final</option>
+      <option value="Grupos">Grupos</option>
+      <option value="Treino">Treino</option>
+      <option value="Ranking">Ranking</option>
+    </select>
+  </label>
 
-        <label>
-          Fase do Torneio
-          <select id="stageFilter">
-            <option value="">Todas</option>
-            <option value="Primeira Rodada">Primeira Rodada</option>
-            <option value="Segunda Rodada">Segunda Rodada</option>
-            <option value="Terceira Rodada">Terceira Rodada</option>
-            <option value="Oitavas de Final">Oitavas de Final</option>
-            <option value="Quartas de Final">Quartas de Final</option>
-            <option value="Semifinais">Semifinais</option>
-            <option value="Final">Final</option>
-            <option value="Grupos">Grupos</option>
-            <option value="Treino">Treino</option>
-            <option value="Ranking">Ranking</option>
-          </select>
-        </label>
+  <label>
+    Resultado
+    <select id="resultFilter">
+      <option value="">Todos</option>
+      <option value="wins">Vitórias</option>
+      <option value="losses">Derrotas</option>
+    </select>
+  </label>
 
-        <label>
-          Resultado
-          <select id="resultFilter">
-            <option value="">Todos</option>
-            <option value="wins">Vitórias</option>
-            <option value="losses">Derrotas</option>
-          </select>
-        </label>
+  <label>
+    Situação do torneio
+    <select id="tournamentSituationFilter">
+      <option value="">Todas</option>
+      <option value="champion">Campeão</option>
+      <option value="runnerup">Vice - Campeão</option>
+    </select>
+  </label>
 
-        <label>
-          Situação do torneio
-          <select id="tournamentSituationFilter">
-            <option value="">Todas</option>
-            <option value="champion">Campeão</option>
-            <option value="runnerup">Vice - Campeão</option>
-          </select>
-        </label>
+  <label>
+    Ano
+    <select id="yearFilter">
+      <option value="">Todos os anos</option>
+    </select>
+  </label>
 
-        <label>
-          Data início
-          <input type="date" id="fromDate" />
-        </label>
+  <div class="career-filter-actions">
+    <button type="button" class="btn primary career-filter-btn" id="applyFilterBtn">
+      <span class="career-btn-icon">🔎</span>
+      <span>Filtrar</span>
+    </button>
 
-        <label>
-          Data fim
-          <input type="date" id="toDate" />
-        </label>
-
-        <div class="career-filter-actions">
-          <button type="button" class="btn primary career-filter-btn" id="applyFilterBtn">
-            <span class="career-btn-icon">🔎</span>
-            <span>Filtrar</span>
-          </button>
-
-          <button type="button" class="btn career-filter-btn" id="clearFilterBtn">
-            <span class="career-btn-icon">🧹</span>
-            <span>Limpar</span>
-          </button>
-        </div>
-      </div>
+    <button type="button" class="btn career-filter-btn" id="clearFilterBtn">
+      <span class="career-btn-icon">🧹</span>
+      <span>Limpar</span>
+    </button>
+  </div>
+</div>
 
       <div id="summaryMessage" class="career-message"></div>
 
