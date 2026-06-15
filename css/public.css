@@ -30,12 +30,15 @@
     flex: 1;
   }
   
-  /* ───────────────────────────────────────────────────────────── Jogos do dia Nome dos jogadores maior Fase/Data um pouco menores ───────────────────────────────────────────────────────────── */
+  /* ───────────────────────────────────────────────────────────── Jogos do dia Regra forte para aumentar nome dos jogadores ───────────────────────────────────────────────────────────── */
   
-  .match-board.scheduled-match .team-name-compact {
-    font-size: 1.15rem;
-    line-height: 1.2;
-    font-weight: 700;
+  .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+    font-size: 1.22rem !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
   }
   
   .match-board.scheduled-match .scheduled-footer {
@@ -138,9 +141,9 @@
   
   @media (max-width: 768px) {
     /* Jogos do dia */
-    .match-board.scheduled-match .team-name-compact {
-      font-size: 1.05rem;
-      line-height: 1.15;
+    .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+      font-size: 1.12rem !important;
+      line-height: 1.15 !important;
     }
   
     .match-board.scheduled-match .scheduled-footer {
@@ -176,6 +179,41 @@
       white-space: pre-line !important;
       word-break: normal !important;
       overflow-wrap: normal !important;
+    }
+  
+    /* Mais espaço para o nome do jogador nos jogos em andamento/suspensos */
+    .match-board[data-status="live"] .match-table-head,
+    .match-board[data-status="suspended"] .match-table-head,
+    .match-board[data-status="live"] .match-player-row,
+    .match-board[data-status="suspended"] .match-player-row {
+      column-gap: 4px;
+    }
+  
+    .match-board[data-status="live"] .match-table-head > div:not(.team-label),
+    .match-board[data-status="suspended"] .match-table-head > div:not(.team-label),
+    .match-board[data-status="live"] .match-player-row > div:not(.player-name),
+    .match-board[data-status="suspended"] .match-player-row > div:not(.player-name) {
+      justify-content: flex-start !important;
+      text-align: left !important;
+    }
+  
+    .match-board[data-status="live"] .player-name,
+    .match-board[data-status="suspended"] .player-name {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+  
+    .match-board[data-status="live"] .team-name-compact,
+    .match-board[data-status="suspended"] .team-name-compact {
+      white-space: normal !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
+    }
+  
+    .match-board[data-status="live"] .score,
+    .match-board[data-status="suspended"] .score {
+      flex: 0 0 auto;
+      min-width: 26px;
     }
   
     /* Finalizados no mobile */
