@@ -6,6 +6,7 @@
 
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0f1726" />
   <meta name="description" content="Live Scores Tennis Plus - administração das partidas" />
 
@@ -17,6 +18,8 @@
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/admin.css" />
+
+  <style> .admin-form-btn { min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; } .admin-form-btn .admin-bottom-icon, .admin-form-btn .admin-bottom-label { pointer-events: none; } .admin-form-btn.primary { background: #0d6efd; color: #fff; } .admin-form-btn.primary:hover { background: #0b5ed7; } </style>
 </head>
 
 <body class="admin-page">
@@ -34,10 +37,8 @@
         <input type="hidden" id="docId" />
 
         <label>Modalidade
-          <select id="modality" required>
-            <option value="">Informe uma modalidade</option>
-            <option value="Tênis">Tênis</option>
-            <option value="Beach Tênis">Beach Tênis</option>
+          <select id="modality" required disabled>
+            <option value="Tênis" selected>Tênis</option>
           </select>
         </label>
 
@@ -148,17 +149,17 @@
         </label>
 
         <div class="actions full admin-form-actions">
-          <button type="submit" class="admin-bottom-btn admin-form-btn primary">
+          <button type="submit" class="btn btn-clear-filters admin-form-btn primary">
             <span class="admin-bottom-icon">💾</span>
-            <span class="admin-bottom-label">Salvar</span>
+            <span class="admin-bottom-label">Salvar Partida</span>
           </button>
 
-          <button type="button" id="clearBtn" class="admin-bottom-btn admin-form-btn">
+          <button type="button" id="clearBtn" class="btn btn-clear-filters admin-form-btn">
             <span class="admin-bottom-icon">🧹</span>
             <span class="admin-bottom-label">Limpar</span>
           </button>
 
-          <button type="button" id="cancelBtn" class="admin-bottom-btn admin-form-btn">
+          <button type="button" id="cancelBtn" class="btn btn-clear-filters admin-form-btn">
             <span class="admin-bottom-icon">❌</span>
             <span class="admin-bottom-label">Cancelar</span>
           </button>
@@ -181,20 +182,12 @@
         <div class="filters-bar" id="filtersBar">
           <input type="text" id="filterPlayers" placeholder="Pesquisar por jogador" />
 
-          <select id="filterModality">
-            <option value="">Todas as modalidades</option>
-            <option value="Tênis">Tênis</option>
-            <option value="Beach Tênis">Beach Tênis</option>
-          </select>
-
           <select id="filterGameFormat">
             <option value="">Todos os formatos</option>
             <option value="Simples">Simples</option>
             <option value="Duplas">Duplas</option>
             <option value="Duplas Mistas">Duplas Mistas</option>
           </select>
-
-          <input type="text" id="filterCategory" placeholder="Pesquisar por categoria" />
 
           <input type="text" id="filterTournament" placeholder="Pesquisar por torneio" />
 
@@ -203,7 +196,12 @@
             <option value="scheduled">Jogos do dia</option>
             <option value="live">Em andamento</option>
             <option value="finished">Finalizada</option>
+            <option value="suspended">Suspensa</option>
             <option value="wo">WO</option>
+          </select>
+
+          <select id="filterYear">
+            <option value="">Todos os anos</option>
           </select>
 
           <button type="button" id="clearFiltersBtn" class="btn btn-clear-filters">
@@ -216,9 +214,7 @@
             <thead>
               <tr>
                 <th class="col-players">Jogadores</th>
-                <th class="col-modality">Modalidade</th>
                 <th class="col-game-format">Formato do jogo</th>
-                <th class="col-category">Categoria</th>
                 <th class="col-tournament">Torneio</th>
                 <th class="col-status">Situação</th>
                 <th class="col-actions">Opções</th>
