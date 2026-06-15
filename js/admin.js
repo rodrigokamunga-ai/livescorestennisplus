@@ -19,11 +19,6 @@
       "1 set pro de 8 games no AD + um super tie-break"
     ];
 
-    const ALLOWED_FORMATS_BEACH = [
-      "1 set no AD + um super tie-break",
-      "2 sets sem vantagem + um super tie-break"
-    ];
-
     const ALLOWED_SURFACES = ["Rápida", "Saibro", "Grama"];
 
     const state = {
@@ -77,14 +72,11 @@
       winnerByWO: document.getElementById("winnerByWO"),
       status: document.getElementById("status"),
       formTitle: document.getElementById("formTitle"),
-      logoutBtn: document.getElementById("logoutBtn"),
       clearBtn: document.getElementById("clearBtn"),
       cancelBtn: document.getElementById("cancelBtn"),
       closeDialogBtn: document.getElementById("closeDialogBtn"),
       filterPlayers: document.getElementById("filterPlayers"),
-      filterModality: document.getElementById("filterModality"),
       filterGameFormat: document.getElementById("filterGameFormat"),
-      filterCategory: document.getElementById("filterCategory"),
       filterTournament: document.getElementById("filterTournament"),
       filterStatus: document.getElementById("filterStatus"),
       clearFiltersBtn: document.getElementById("clearFiltersBtn"),
@@ -271,18 +263,23 @@
         return `${U.escapeHtml(team1)} <span class="vs-separator">X</span> ${U.escapeHtml(team2)}`;
       },
 
-      getMatchSetCount(d) {
-        const mf = U.normalizeText(U.formatMatchFormat(d?.matchFormat || ""));
-        if (mf.includes("3 sets")) return 3;
-        if (mf.includes("2 sets")) return 2;
-        return 1;
-      },
-
       getSetCountFromMatch(d) {
         const text = U.normalizeText(U.formatMatchFormat(d?.matchFormat || ""));
         if (text.includes("3 sets")) return 3;
         if (text.includes("2 sets")) return 2;
         return 1;
+      },
+
+      getStatusLabel(status = "") {
+        const s = String(status || "").trim().toLowerCase();
+        const map = {
+          scheduled: "Jogos do dia",
+          live: "Em andamento",
+          finished: "Finalizada",
+          wo: "WO",
+          suspended: "Suspensa"
+        };
+        return map[s] || status || "Jogos do dia";
       }
     };
 
@@ -324,18 +321,11 @@
 
     function fillPlayer1Field() {
       if (!el.player1) return;
-      if (U.isAdmin(state.currentUser)) {
-        el.player1.readOnly = false;
-        el.player1.removeAttribute("readonly");
-        el.player1.placeholder = "Nome do Jogador 1";
-        if (!el.player1.value.trim()) {
-          el.player1.value = state.currentProfileName || state.currentUser?.displayName || "";
-        }
-      } else {
-        el.player1.value = state.currentProfileName || state.currentUser?.displayName || "";
-        el.player1.readOnly = true;
-        el.player1.setAttribute("readonly", "readonly");
-      }
+      el.player1.value = state.currentProfileName || state.currentUser?.displayName || "";
+      el.player1.readOnly = true;
+      el.player1.setAttribute("readonly", "readonly");
+      el.player1.style.pointerEvents = "none";
+      el.player1.style.opacity = "0.95";
     }
 
     function setFieldVisible(wrapper, visible) {
@@ -369,22 +359,22 @@
     }
 
     function updateMatchFormatOptions() {
-      const modality = String(el.modality?.value || "").trim();
       if (!el.matchFormat) return;
-      const options = modality === "Beach Tênis" ? ALLOWED_FORMATS_BEACH : ALLOWED_FORMATS_TENNIS;
+
       const current = el.matchFormat.value;
+      const options = ALLOWED_FORMATS_TENNIS;
+
       el.matchFormat.innerHTML =
         `<option value="">Selecione o formato da partida</option>` +
         options.map(opt => `<option value="${opt}">${opt}</option>`).join("");
+
       if (options.includes(current)) el.matchFormat.value = current;
     }
 
     function updateSurfaceVisibility() {
-      const beach = String(el.modality?.value || "").trim() === "Beach Tênis";
-      setFieldVisible(el.surfaceTypeWrapper, !beach);
+      setFieldVisible(el.surfaceTypeWrapper, true);
       if (el.surfaceType) {
-        el.surfaceType.required = !beach;
-        if (beach) el.surfaceType.value = "";
+        el.surfaceType.required = true;
       }
     }
 
@@ -408,6 +398,31 @@
       if (el.matchFormWrapper) el.matchFormWrapper.style.display = "none";
     }
 
+    function defaultScore() {
+      return {
+        points1: 0,
+        points2: 0,
+        games1: 0,
+        games2: 0,
+        sets1: 0,
+        sets2: 0,
+        tieBreakMode: null,
+        tieBreakPoints1: 0,
+        tieBreakPoints2: 0,
+        lastTieBreakMode: null,
+        lastTieBreakPoints1: 0,
+        lastTieBreakPoints2: 0,
+        setHistory: [],
+        server: "player1",
+        totalPoints1: 0,
+        totalPoints2: 0,
+        breakPointsWon1: 0,
+        breakPointsWon2: 0,
+        breakPointsChances1: 0,
+        breakPointsChances2: 0
+      };
+    }
+
     function clearForm() {
       if (el.form) el.form.reset();
       if (el.docId) el.docId.value = "";
@@ -420,7 +435,10 @@
       if (el.player2) el.player2.value = "";
       if (el.player3) el.player3.value = "";
       if (el.player4) el.player4.value = "";
-      if (el.modality) el.modality.value = "";
+      if (el.modality) {
+        el.modality.value = "Tênis";
+        el.modality.disabled = true;
+      }
       if (el.gameFormat) el.gameFormat.value = "";
       fillPlayer1Field();
       handleModalityChange();
@@ -430,9 +448,7 @@
 
     function clearFilters() {
       if (el.filterPlayers) el.filterPlayers.value = "";
-      if (el.filterModality) el.filterModality.value = "";
       if (el.filterGameFormat) el.filterGameFormat.value = "";
-      if (el.filterCategory) el.filterCategory.value = "";
       if (el.filterTournament) el.filterTournament.value = "";
       if (el.filterStatus) el.filterStatus.value = "";
       refreshList();
@@ -440,7 +456,12 @@
 
     function fillForm(data, id) {
       if (el.docId) el.docId.value = id || "";
-      if (el.modality) el.modality.value = data?.modality || "";
+
+      if (el.modality) {
+        el.modality.value = "Tênis";
+        el.modality.disabled = true;
+      }
+
       if (el.categoryName) el.categoryName.value = data?.categoryName || "";
       if (el.tournamentName) el.tournamentName.value = data?.tournamentName || "";
       if (el.surfaceType) el.surfaceType.value = data?.surfaceType || "";
@@ -452,13 +473,10 @@
 
       if (el.player1) {
         el.player1.value = data?.player1 || state.currentProfileName || "";
-        if (U.isAdmin(state.currentUser)) {
-          el.player1.readOnly = false;
-          el.player1.removeAttribute("readonly");
-        } else {
-          el.player1.readOnly = true;
-          el.player1.setAttribute("readonly", "readonly");
-        }
+        el.player1.readOnly = true;
+        el.player1.setAttribute("readonly", "readonly");
+        el.player1.style.pointerEvents = "none";
+        el.player1.style.opacity = "0.95";
       }
 
       if (el.player2) el.player2.value = data?.player2 || "";
@@ -485,7 +503,7 @@
     }
 
     function renderEmpty(message) {
-      return `<tr><td colspan="7" class="empty-card">${U.escapeHtml(message)}</td></tr>`;
+      return `<tr><td colspan="5" class="empty-card">${U.escapeHtml(message)}</td></tr>`;
     }
 
     function sortLocalMatches() {
@@ -499,9 +517,7 @@
 
     function applyFilters() {
       const p = el.filterPlayers?.value.trim().toLowerCase() || "";
-      const m = el.filterModality?.value.trim().toLowerCase() || "";
       const g = el.filterGameFormat?.value.trim().toLowerCase() || "";
-      const c = el.filterCategory?.value.trim().toLowerCase() || "";
       const t = el.filterTournament?.value.trim().toLowerCase() || "";
       const s = el.filterStatus?.value.trim().toLowerCase() || "";
 
@@ -517,17 +533,13 @@
         if (!shouldShow) return false;
 
         const playerText = `${data.player1 || ""} ${data.player2 || ""} ${data.player3 || ""} ${data.player4 || ""}`.toLowerCase();
-        const modalityText = String(data.modality || "").toLowerCase();
-        const gameFormatText = String(data.gameFormat || "").toLowerCase();
-        const categoryText = String(data.categoryName || "").toLowerCase();
+        const gameFormatText = String(data.gameFormat || "").trim().toLowerCase();
         const tournamentText = String(data.tournamentName || "").toLowerCase();
-        const statusText = String(data.status || "scheduled").toLowerCase();
+        const statusText = String(data.status || "scheduled").trim().toLowerCase();
 
         return (
           (!p || playerText.includes(p)) &&
-          (!m || modalityText === m) &&
           (!g || gameFormatText === g) &&
-          (!c || categoryText.includes(c)) &&
           (!t || tournamentText.includes(t)) &&
           (!s || statusText === s)
         );
@@ -581,10 +593,10 @@
     function renderGeneralBlock(d) {
       const teamHTML = U.getMatchDisplayHTML(d);
       const statusText = String(d?.status || "").trim().toLowerCase();
-      const situationLabel = statusText === "finished" ? "Finalizada"
-        : statusText === "wo" ? "Finalizada por WO"
-        : statusText === "live" ? "Em andamento"
-        : "Jogos do dia";
+      const situationLabel =
+        statusText === "wo"
+          ? "Finalizada por WO"
+          : U.getStatusLabel(statusText);
       const woWinner = U.getWONumberOrName(d);
 
       return ` <section class="detail-section detail-section-general"> <div class="detail-section-header"> <h4>Dados gerais</h4> <span class="detail-section-subtitle">Informações da partida</span> </div> <div class="detail-info-grid"> <div class="detail-info-item"><span>Modalidade</span><strong>${U.escapeHtml(d.modality || "-")}</strong></div> <div class="detail-info-item"><span>Formato do jogo</span><strong>${U.escapeHtml(d.gameFormat || "-")}</strong></div> <div class="detail-info-item"><span>Categoria</span><strong>${U.escapeHtml(d.categoryName || "-")}</strong></div> <div class="detail-info-item"><span>Torneio</span><strong>${U.escapeHtml(d.tournamentName || "-")}</strong></div> <div class="detail-info-item"><span>Tipo de piso</span><strong>${U.escapeHtml(d.surfaceType || "-")}</strong></div> <div class="detail-info-item"><span>Formato</span><strong>${U.escapeHtml(U.formatMatchFormat(d.matchFormat || "-"))}</strong></div> <div class="detail-info-item"><span>Data e hora</span><strong>${U.escapeHtml(d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-")}</strong></div> <div class="detail-info-item"><span>Quadra</span><strong>${U.escapeHtml(d.court || "-")}</strong></div> <div class="detail-info-item"><span>Fase</span><strong>${U.escapeHtml(d.tournamentStage || "-")}</strong></div> <div class="detail-info-item"><span>Situação</span><strong>${U.escapeHtml(situationLabel)}</strong></div> <div class="detail-info-item"><span>Jogadores</span><strong style="white-space:pre-line;">${teamHTML}</strong></div> <div class="detail-info-item"><span>Vencedor por WO</span><strong>${U.escapeHtml(woWinner)}</strong></div> </div> </section> `;
@@ -605,7 +617,7 @@
 
       const pointsText =
         (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10" ||
-         score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")
+          score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")
           ? `${Number(score.tieBreakPoints1 || score.lastTieBreakPoints1 || 0)}x${Number(score.tieBreakPoints2 || score.lastTieBreakPoints2 || 0)}`
           : `${Number(score.points1 || 0)}x${Number(score.points2 || 0)}`;
 
@@ -628,7 +640,7 @@
         resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
       }
 
-      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? `<div class="detail-score-line"><span>Situação</span><strong>FINALIZADA POR WO</strong></div>` : ` ${setsHtml} <div class="detail-pill" style="margin-top:10px;"> <span>Pontos</span><strong>${U.escapeHtml(pointsText)}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span><strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
+      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${isWO ? `<div class="detail-score-line"><span>Situação</span><strong>FINALIZADA POR WO</strong></div>` : ` ${setsHtml} <div class="detail-pill" style="margin-top:10px;"> <span>Pontos</span><strong>${U.escapeHtml(pointsText)}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span><strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
     }
 
     function renderSummaryBlock(d) {
@@ -676,6 +688,7 @@
     function refreshList() {
       sortLocalMatches();
       applyFilters();
+
       if (!state.filteredMatches.length && state.currentUser) {
         const playerName = state.currentProfileName || state.currentUser?.displayName || "este usuário";
         setMsg(`Nenhuma partida encontrada para ${playerName}.`);
@@ -781,31 +794,19 @@
 
     function rowHTML(docSnap) {
       const d = docSnap.data();
-      const statusText = String(d.status || "scheduled").toLowerCase();
-      const labelMap = {
-        scheduled: "Jogos do dia",
-        live: "Em andamento",
-        finished: "Finalizada",
-        wo: "WO"
-      };
-      const label = labelMap[statusText] || (d.status || "scheduled");
+      const statusText = String(d.status || "scheduled").trim().toLowerCase();
+      const label = U.getStatusLabel(statusText);
 
-      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.modality || "-")}</td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.categoryName || "-")}">${U.escapeHtml(d.categoryName || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td><span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span></td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir partida">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr> `;
+      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td><span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span></td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir partida">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr> `;
     }
 
     function mobileCardHTML(docSnap) {
       const d = docSnap.data();
-      const statusText = String(d.status || "scheduled").toLowerCase();
-      const labelMap = {
-        scheduled: "Jogos do dia",
-        live: "Em andamento",
-        finished: "Finalizada",
-        wo: "WO"
-      };
-      const label = labelMap[statusText] || (d.status || "scheduled");
+      const statusText = String(d.status || "scheduled").trim().toLowerCase();
+      const label = U.getStatusLabel(statusText);
       const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
 
-      return ` <tr class="mobile-match-row"> <td colspan="7"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Modalidade:</strong> ${U.escapeHtml(d.modality || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Categoria:</strong> ${U.escapeHtml(d.categoryName || "-")}</div> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Fase:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir link">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr> `;
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Fase:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir link">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr> `;
     }
 
     function renderCurrentPage() {
@@ -854,9 +855,7 @@
           localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
           localStorage.removeItem(BIOMETRIC_UID_KEY);
 
-          if (!state.biometricMode) {
-            await __auth.signOut();
-          } else if (__auth?.currentUser) {
+          if (__auth?.currentUser) {
             await __auth.signOut();
           }
 
@@ -867,7 +866,6 @@
         }
       };
 
-      el.logoutBtn?.addEventListener("click", logout);
       el.logoutBtnBottom?.addEventListener("click", logout);
 
       el.clearBtn?.addEventListener("click", clearForm);
@@ -882,13 +880,10 @@
       el.clearFiltersBtn?.addEventListener("click", clearFilters);
 
       el.filterPlayers?.addEventListener("input", refreshList);
-      el.filterModality?.addEventListener("change", refreshList);
       el.filterGameFormat?.addEventListener("change", refreshList);
-      el.filterCategory?.addEventListener("input", refreshList);
       el.filterTournament?.addEventListener("input", refreshList);
       el.filterStatus?.addEventListener("change", refreshList);
 
-      el.modality?.addEventListener("change", handleModalityChange);
       el.gameFormat?.addEventListener("change", handleGameFormatChange);
 
       el.prevPageBtn?.addEventListener("click", () => {
@@ -912,98 +907,95 @@
         e.preventDefault();
         setMsg("Salvando...");
 
-        const selectedModality = String(el.modality?.value || "").trim();
+        const selectedModality = "Tênis";
         const selectedGameFormat = String(el.gameFormat?.value || "").trim();
         const selectedFormat = String(el.matchFormat?.value || "").trim();
         const selectedSurface = String(el.surfaceType?.value || "").trim();
-
-        if (!["Tênis", "Beach Tênis"].includes(selectedModality)) {
-          return setMsg("Selecione uma modalidade válida.");
-        }
 
         if (!["Simples", "Duplas", "Duplas Mistas"].includes(selectedGameFormat)) {
           return setMsg("Selecione um formato de jogo válido.");
         }
 
-        const allowedFormats = selectedModality === "Beach Tênis" ? ALLOWED_FORMATS_BEACH : ALLOWED_FORMATS_TENNIS;
-        if (!allowedFormats.includes(selectedFormat)) {
+        if (!ALLOWED_FORMATS_TENNIS.includes(selectedFormat)) {
           return setMsg("Formato inválido para a modalidade selecionada.");
         }
 
-        if (selectedModality !== "Beach Tênis" && !ALLOWED_SURFACES.includes(selectedSurface)) {
+        if (!ALLOWED_SURFACES.includes(selectedSurface)) {
           return setMsg("Selecione um tipo de piso válido.");
         }
 
         const isDoubles = selectedGameFormat === "Duplas" || selectedGameFormat === "Duplas Mistas";
         const woWinner = String(el.winnerByWO?.value || "").trim();
-        const player1Name = U.isAdmin(state.currentUser)
-          ? (el.player1?.value.trim() || state.currentProfileName || "")
-          : (state.currentProfileName || state.currentUser?.displayName || "");
-
-        const data = {
-          ownerId: state.currentUser?.uid || "",
-          ownerEmail: state.currentUser?.email || "",
-          ownerName: player1Name,
-
-          modality: selectedModality,
-          categoryName: el.categoryName?.value.trim() || "",
-          tournamentName: el.tournamentName?.value.trim() || "",
-          surfaceType: selectedModality === "Beach Tênis" ? "" : selectedSurface,
-          gameFormat: selectedGameFormat,
-          matchFormat: selectedFormat,
-          matchDateTime: el.matchDateTime?.value || "",
-          court: el.court?.value.trim() || "",
-          tournamentStage: el.tournamentStage?.value.trim() || "",
-
-          player1: player1Name,
-          player2: el.player2?.value.trim() || "",
-          player3: isDoubles ? (el.player3?.value.trim() || "") : "",
-          player4: isDoubles ? (el.player4?.value.trim() || "") : "",
-
-          probPlayer1: 50,
-          probPlayer2: 50,
-
-          winnerByWO: woWinner,
-          status: woWinner ? "wo" : (el.status?.value || "scheduled"),
-
-          score: {
-            points1: 0,
-            points2: 0,
-            games1: 0,
-            games2: 0,
-            sets1: 0,
-            sets2: 0,
-            tieBreakMode: null,
-            tieBreakPoints1: 0,
-            tieBreakPoints2: 0,
-            lastTieBreakMode: null,
-            lastTieBreakPoints1: 0,
-            lastTieBreakPoints2: 0,
-            setHistory: [],
-            server: "player1",
-            totalPoints1: 0,
-            totalPoints2: 0,
-            breakPointsWon1: 0,
-            breakPointsWon2: 0,
-            breakPointsChances1: 0,
-            breakPointsChances2: 0
-          },
-
-          durationSeconds: 0,
-          startedAt: null,
-          finishedAt: null,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        const player1Name = state.currentProfileName || state.currentUser?.displayName || "";
 
         try {
-          if (el.docId?.value) {
-            await __db.collection("matches").doc(el.docId.value).update(data);
+          const isEditing = Boolean(el.docId?.value);
+          const ref = isEditing
+            ? __db.collection("matches").doc(el.docId.value)
+            : null;
+
+          let previousData = null;
+
+          if (isEditing) {
+            const snap = await ref.get();
+            if (!snap.exists) {
+              return setMsg("Partida não encontrada para edição.");
+            }
+            previousData = snap.data() || {};
+          }
+
+          const preserveScore = previousData?.score || defaultScore();
+
+          const data = {
+            ownerId: state.currentUser?.uid || "",
+            ownerEmail: state.currentUser?.email || "",
+            ownerName: player1Name,
+
+            modality: selectedModality,
+            categoryName: el.categoryName?.value.trim() || "",
+            tournamentName: el.tournamentName?.value.trim() || "",
+            surfaceType: selectedSurface,
+            gameFormat: selectedGameFormat,
+            matchFormat: selectedFormat,
+            matchDateTime: el.matchDateTime?.value || "",
+            court: el.court?.value.trim() || "",
+            tournamentStage: el.tournamentStage?.value.trim() || "",
+
+            player1: player1Name,
+            player2: el.player2?.value.trim() || "",
+            player3: isDoubles ? (el.player3?.value.trim() || "") : "",
+            player4: isDoubles ? (el.player4?.value.trim() || "") : "",
+
+            probPlayer1: 50,
+            probPlayer2: 50,
+
+            winnerByWO: woWinner,
+            status: woWinner ? "wo" : (el.status?.value || "scheduled"),
+
+            score: isEditing ? preserveScore : defaultScore(),
+
+            durationSeconds: isEditing ? (previousData.durationSeconds || 0) : 0,
+            startedAt: isEditing ? (previousData.startedAt || null) : null,
+            finishedAt: isEditing ? (previousData.finishedAt || null) : null,
+            accumulatedSeconds: isEditing ? (previousData.accumulatedSeconds || 0) : 0,
+
+            matchId: isEditing
+              ? (previousData.matchId || `JOGO-${Date.now().toString().slice(-6)}`)
+              : `JOGO-${Date.now().toString().slice(-6)}`,
+
+            publicLinkId: isEditing
+              ? (previousData.publicLinkId || (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8)))
+              : (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8)),
+
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+
+          if (isEditing) {
+            await ref.update(data);
             setMsg(woWinner ? "Partida salva como WO." : "Partida atualizada com sucesso!");
           } else {
             await __db.collection("matches").add({
               ...data,
-              matchId: `JOGO-${Date.now().toString().slice(-6)}`,
-              publicLinkId: crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8),
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             setMsg(woWinner ? "Partida cadastrada como WO." : "Partida cadastrada com sucesso!");
@@ -1026,7 +1018,7 @@
         const ref = __db.collection("matches").doc(id);
 
         try {
-          if (action === "delete" && confirm("Excluir esta partida?")) {
+          if (action === "delete" && confirm("Deseja excluir a partida?")) {
             await ref.delete();
             setMsg("Partida excluída.");
             return;
@@ -1078,77 +1070,6 @@
 
       window.addEventListener("resize", onResize, { passive: true });
       window.addEventListener("orientationchange", onResize, { passive: true });
-    }
-
-    async function buildBiometricFallbackUser() {
-      const biometricCurrent = getBiometricCurrentUser();
-      const uid = biometricCurrent?.uid || getBiometricUid();
-      if (!uid || typeof __db === "undefined") return null;
-
-      try {
-        const profileSnap = await __db.collection("profiles").doc(uid).get();
-        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
-
-        const userSnap = await __db.collection("users").doc(uid).get();
-        const userData = userSnap.exists ? (userSnap.data() || {}) : {};
-
-        return {
-          uid,
-          email: biometricCurrent?.email || userData.email || profileData.email || "",
-          displayName: biometricCurrent?.displayName || profileData.displayName || userData.displayName || ""
-        };
-      } catch (err) {
-        console.error("Erro ao montar usuário biométrico:", err);
-        return {
-          uid,
-          email: biometricCurrent?.email || "",
-          displayName: biometricCurrent?.displayName || ""
-        };
-      }
-    }
-
-    async function updateAuthState(user) {
-      const localSession = hasAdminSession();
-      const biometricSession = hasBiometricSession();
-
-      if (!user && !localSession && !biometricSession) {
-        state.currentUser = null;
-        state.currentProfileName = "";
-        if (el.tbody) el.tbody.innerHTML = renderEmpty("Usuário não autenticado.");
-        setMsg("Usuário não autenticado.");
-        goLogin();
-        return;
-      }
-
-      if (!user && biometricSession) {
-        state.biometricMode = true;
-        const fallbackUser = await buildBiometricFallbackUser();
-
-        if (!fallbackUser || !fallbackUser.uid) {
-          state.currentUser = null;
-          state.currentProfileName = "";
-          if (el.tbody) el.tbody.innerHTML = renderEmpty("Usuário não autenticado.");
-          setMsg("Usuário não autenticado.");
-          goLogin();
-          return;
-        }
-
-        state.currentUser = fallbackUser;
-        state.currentProfileName = String(fallbackUser.displayName || "").trim() || "Usuário";
-
-        fillPlayer1Field();
-        listenMatches();
-        refreshList();
-        return;
-      }
-
-      state.biometricMode = false;
-      state.currentUser = user;
-      state.currentProfileName = String(user.displayName || "").trim() || user.email || "";
-
-      fillPlayer1Field();
-      listenMatches();
-      refreshList();
     }
 
     function init() {
