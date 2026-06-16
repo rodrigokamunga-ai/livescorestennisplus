@@ -6840,8 +6840,8 @@ body.profile-page {
   body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
   body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
   body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row {
-    grid-template-columns: minmax(0, 2.3fr) minmax(26px, 0.34fr) minmax(26px, 0.34fr) minmax(26px, 0.34fr) minmax(34px, 0.46fr) !important;
-    column-gap: 2px !important;
+    grid-template-columns: minmax(0, 2.2fr) minmax(42px, 0.62fr) minmax(52px, 0.62fr) minmax(52px, 0.62fr) minmax(58px, 0.68fr) !important;
+    column-gap: 6px !important;
   }
 
   body.public-page #liveList .public-card[data-status="live"] .player-name,
@@ -6871,10 +6871,9 @@ body.profile-page {
   body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
   body.public-page #liveList .public-card[data-status="suspended"] .points-col,
   body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col {
-    justify-self: start !important;
-    text-align: left !important;
+    justify-self: center !important;
+    text-align: center !important;
   }
 }
-
 
  
