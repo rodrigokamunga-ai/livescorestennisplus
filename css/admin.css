@@ -531,7 +531,7 @@ body.admin-page .detail-section-subtitle {
   color: rgba(232, 238, 252, 0.58);
 }
 
-/* 2 colunas por padrão */
+/* ========================= GRID DOS DETALHES ========================= */
 body.admin-page .detail-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -564,6 +564,77 @@ body.admin-page .detail-info-item strong {
   word-break: break-word;
 }
 
+/* ========================= PLACAR DOS SETS COM TIE-BREAK ========================= */
+body.admin-page .detail-set-block {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+body.admin-page .detail-set-title {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #f4f8ff;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body.admin-page .detail-set-title small {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: rgba(232, 238, 252, 0.62);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.admin-page .detail-set-grid {
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+}
+
+body.admin-page .detail-set-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.admin-page .detail-set-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+body.admin-page .detail-set-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+body.admin-page .detail-set-col span {
+  font-size: 0.74rem;
+  color: rgba(232, 238, 252, 0.66);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+body.admin-page .detail-set-col strong {
+  margin-top: 6px;
+  font-size: 1rem;
+  color: #d8ff63;
+  font-weight: 900;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
 body.admin-page .single-score-card {
   display: grid;
   gap: 12px;
@@ -574,6 +645,8 @@ body.admin-page .single-score-card {
 }
 
 body.admin-page .detail-score-row {
+  display: grid;
+  gap: 10px;
   padding: 14px;
   border-radius: 16px;
   background: rgba(12, 18, 30, 0.58);
@@ -628,7 +701,8 @@ body.admin-page .detail-score-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 9px 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
@@ -646,6 +720,7 @@ body.admin-page .detail-score-line strong {
   color: #d8ff63;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 body.admin-page .detail-pill {
@@ -1122,10 +1197,30 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
   body.admin-page .detail-summary-card strong {
     word-break: break-word;
   }
+
+  body.admin-page .detail-set-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.admin-page .detail-set-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.admin-page .detail-set-col {
+    padding: 9px 6px;
+  }
+
+  body.admin-page .detail-set-col strong {
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 420px) {
   body.admin-page .admin-panel {
     border-radius: 18px;
+  }
+
+  body.admin-page .detail-set-grid-4 {
+    grid-template-columns: 1fr 1fr;
   }
 }
