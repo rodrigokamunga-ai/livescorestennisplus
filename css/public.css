@@ -183,14 +183,16 @@
   }
 
   /* Nome do jogador live e suspended */
-  .match-board[data-status="live"] .match-player-row > div:first-child,
-  .match-board[data-status="suspended"] .match-player-row > div:first-child {
-    text-align: left;
-    font-size: 16px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.match-board[data-status="live"] .match-player-row > div:first-child,
+.match-board[data-status="suspended"] .match-player-row > div:first-child {
+  text-align: left;
+  font-size: 16px !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word;
+  line-height: 1.2;
+}
 
   .match-board[data-status="live"] .match-table-head > div,
   .match-board[data-status="suspended"] .match-table-head > div,
