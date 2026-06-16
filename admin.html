@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/admin.css" />
 
-  <style> .admin-form-btn { min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; } .admin-form-btn .admin-bottom-icon, .admin-form-btn .admin-bottom-label { pointer-events: none; } .admin-form-btn.primary { background: #0d6efd; color: #fff; } .admin-form-btn.primary:hover { background: #0b5ed7; } </style>
+  <style> .admin-form-btn { min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; } .admin-form-btn .admin-bottom-icon, .admin-form-btn .admin-bottom-label { pointer-events: none; } .admin-form-btn.primary { background: #0d6efd; color: #fff; } .admin-form-btn.primary:hover { background: #0b5ed7; } .score-block { grid-column: 1 / -1; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-top: 8px; background: rgba(255,255,255,0.03); } .score-block h4 { margin: 0 0 12px; } .score-set { margin-bottom: 12px; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); } .score-set strong { display: block; margin-bottom: 8px; } .score-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media (max-width: 768px) { .score-grid-2 { grid-template-columns: 1fr; } } </style>
 </head>
 
 <body class="admin-page">
@@ -42,11 +42,27 @@
           </select>
         </label>
 
-        <label>Nome do torneio
+        <label>Fase do torneio, treino ou ranking.
+          <select id="tournamentStage" required>
+            <option value="">Selecione uma opção</option>
+            <option value="Primeira Rodada">Primeira Rodada</option>
+            <option value="Segunda Rodada">Segunda Rodada</option>
+            <option value="Terceira Rodada">Terceira Rodada</option>
+            <option value="Oitavas de Final">Oitavas de Final</option>
+            <option value="Quartas de Final">Quartas de Final</option>
+            <option value="Semifinais">Semifinais</option>
+            <option value="Final">Final</option>
+            <option value="Grupos">Grupos</option>
+            <option value="Treino">Treino</option>
+            <option value="Ranking">Ranking</option>
+          </select>
+        </label>
+
+        <label id="tournamentNameWrapper">Nome do torneio
           <input type="text" id="tournamentName" placeholder="Informe o nome do torneio" />
         </label>
 
-        <label>Nome da categoria
+        <label id="categoryNameWrapper">Nome da categoria
           <input type="text" id="categoryName" required placeholder="Informe o nome da categoria" />
         </label>
 
@@ -88,32 +104,6 @@
           <input type="text" id="court" required placeholder="Informe local ou quadra de jogo" />
         </label>
 
-        <label>Fase do torneio
-          <select id="tournamentStage" required>
-            <option value="">Informe a fase do torneio</option>
-            <option value="Primeira Rodada">Primeira Rodada</option>
-            <option value="Segunda Rodada">Segunda Rodada</option>
-            <option value="Terceira Rodada">Terceira Rodada</option>
-            <option value="Oitavas de Final">Oitavas de Final</option>
-            <option value="Quartas de Final">Quartas de Final</option>
-            <option value="Semifinais">Semifinais</option>
-            <option value="Final">Final</option>
-            <option value="Grupos">Grupos</option>
-            <option value="Treino">Treino</option>
-            <option value="Ranking">Ranking</option>
-          </select>
-        </label>
-
-        <label>Status inicial
-          <select id="status">
-            <option value="scheduled">Informe o status da partida</option>
-            <option value="scheduled">Jogos do dia</option>
-            <option value="live">Em andamento</option>
-            <option value="finished">Finalizada</option>
-            <option value="wo">Finalizada por WO</option>
-          </select>
-        </label>
-
         <label>Nome do jogador 1
           <input type="text" id="player1" required />
         </label>
@@ -147,6 +137,104 @@
             <option value="player2">Jogador 2</option>
           </select>
         </label>
+
+        <label>Status inicial
+          <select id="status">
+            <option value="scheduled">Informe o status da partida</option>
+            <option value="scheduled">Jogos do dia</option>
+            <option value="live">Em andamento</option>
+            <option value="finished">Finalizada</option>
+            <option value="wo">Finalizada por WO</option>
+          </select>
+        </label>
+
+        <div id="scoreFieldsWrapper" class="score-block" style="display:none;">
+          <h4>Placar da partida</h4>
+
+          <div id="scoreSet1Wrapper" class="score-set" style="display:none;">
+            <strong>1º set</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="set1Player1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="set1Player2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+
+          <div id="scoreTieBreakSet1Wrapper" class="score-set" style="display:none;">
+            <strong>Tie-break 1º set</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="tbSet1Player1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="tbSet1Player2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+
+          <div id="scoreSet2Wrapper" class="score-set" style="display:none;">
+            <strong>2º set</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="set2Player1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="set2Player2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+
+          <div id="scoreTieBreakSet2Wrapper" class="score-set" style="display:none;">
+            <strong>Tie-break 2º set</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="tbSet2Player1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="tbSet2Player2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+
+          <div id="scoreSet3Wrapper" class="score-set" style="display:none;">
+            <strong>3º set</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="set3Player1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="set3Player2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+
+          <div id="scoreTieBreakSet3Wrapper" class="score-set" style="display:none;">
+            <strong>Tie-break 3º set</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="tbSet3Player1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="tbSet3Player2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+
+          <div id="scoreSuperTieBreakWrapper" class="score-set" style="display:none;">
+            <strong>Super tie-break</strong>
+            <div class="score-grid-2">
+              <label>Jogador 1
+                <input type="number" id="tbSuperPlayer1" min="0" step="1" placeholder="0" />
+              </label>
+              <label>Jogador 2
+                <input type="number" id="tbSuperPlayer2" min="0" step="1" placeholder="0" />
+              </label>
+            </div>
+          </div>
+        </div>
 
         <div class="actions full admin-form-actions">
           <button type="submit" class="btn btn-clear-filters admin-form-btn primary">
