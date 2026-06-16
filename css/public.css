@@ -139,45 +139,63 @@
   
   /* ───────────────────────────────────────────────────────────── Mobile ───────────────────────────────────────────────────────────── */
   
-  @media (max-width: 768px) {
-    body.public-page #liveList .public-card[data-status="live"] .match-table-head,
-    body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
-    body.public-page #liveList .public-card[data-status="live"] .match-player-row,
-    body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row {
-      grid-template-columns:
-        minmax(0, 2.35fr)
-        minmax(38px, 0.45fr)
-        minmax(38px, 0.45fr)
-        minmax(38px, 0.45fr)
-        minmax(44px, 0.52fr) !important;
-      column-gap: 5px !important;
-    }
-  
-    body.public-page #liveList .public-card[data-status="live"] .player-name,
-    body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
-    body.public-page #liveList .public-card[data-status="live"] .team-name-compact,
-    body.public-dashboard-page #liveList .public-card[data-status="live"] .team-name-compact {
-      font-size: 16px !important;
-      line-height: 1.15 !important;
-      white-space: normal !important;
-      overflow: visible !important;
-      text-overflow: unset !important;
-      overflow-wrap: anywhere !important;
-      word-break: break-word !important;
-      min-width: 0 !important;
-      padding-right: 0 !important;
-    }
-  
-    body.public-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
-    body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child {
-      min-width: 0 !important;
-      padding-right: 4px !important;
-    }
-  
-    body.public-page #liveList .public-card[data-status="live"] .score,
-    body.public-dashboard-page #liveList .public-card[data-status="live"] .score {
-      font-size: 20px !important;
-      line-height: 1 !important;
-      min-width: 22px !important;
-    }
+  /* ========================================================= FINISHED MATCHES — MOBILE: corrige a coluna PONTOS ========================================================= */
+@media (max-width: 768px) {
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    display: grid !important;
+    grid-template-columns:
+      minmax(0, 2.35fr)
+      minmax(38px, 0.42fr)
+      minmax(38px, 0.42fr)
+      minmax(38px, 0.42fr)
+      minmax(52px, 0.56fr) !important;
+    column-gap: 4px !important;
+    align-items: center !important;
   }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .team-name-compact,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .team-name-compact {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    padding-right: 0 !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    min-width: 0 !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+    justify-self: center !important;
+    text-align: center !important;
+    min-width: 52px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 12px !important;
+    line-height: 1 !important;
+    min-width: 24px !important;
+    text-align: center !important;
+  }
+}
+
+  
