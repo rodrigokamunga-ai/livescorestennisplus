@@ -846,6 +846,50 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
   color: #ff7b7b;
 }
 
+/* ========================= AJUSTE DOS CAMPOS DO PLACAR ========================= */
+body.admin-page .score-block {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.admin-page .score-block h4 {
+  margin: 0 0 12px;
+}
+
+body.admin-page .score-set {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.admin-page .score-set strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Jogador 1 e Jogador 2 sempre na mesma linha */
+body.admin-page .score-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+body.admin-page .score-grid-2 label {
+  min-width: 0;
+}
+
+body.admin-page #scoreSet3Wrapper,
+body.admin-page #scoreTieBreakSet3Wrapper {
+  margin-top: 4px;
+}
+
 /* ========================= MOBILE: LISTA EM CARDS ========================= */
 @media (max-width: 768px) {
   html,
@@ -1112,6 +1156,16 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
   body.admin-page .admin-bottom-label {
     font-size: 0.66rem;
   }
+
+  /* Mantém os campos do placar lado a lado no mobile */
+  body.admin-page .score-grid-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  body.admin-page .score-grid-2 input {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1146,6 +1200,20 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
 
   body.admin-page .admin-page-btn {
     min-width: 96px;
+  }
+
+  body.admin-page .score-grid-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  body.admin-page .score-grid-2 label {
+    font-size: 0.82rem;
+  }
+
+  body.admin-page .score-grid-2 input {
+    width: 100%;
+    padding: 10px 8px;
   }
 }
 
@@ -1212,6 +1280,20 @@ body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
 
   body.admin-page .detail-set-col strong {
     font-size: 0.95rem;
+  }
+
+  /* Reforço extra dos campos do placar */
+  body.admin-page .score-set {
+    padding: 10px;
+  }
+
+  body.admin-page .score-set strong {
+    font-size: 0.88rem;
+  }
+
+  body.admin-page .score-grid-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 }
 
