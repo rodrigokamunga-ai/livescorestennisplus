@@ -598,16 +598,19 @@
       const duration = U.buildDuration(match);
       const winnerPos = U.getWinnerPosition(match, score);
       const isWO = String(match.status || "").toLowerCase() === "wo";
-      const ptDisp = U.getPointDisplay(score, match.matchFormat, true);
-
+    
+      const isThreeSetsFinished = setColumns.hasThreeSets;
+      const ptDisp = isThreeSetsFinished
+        ? { p1: "", p2: "" }
+        : U.getPointDisplay(score, match.matchFormat, true);
+    
       const footerParts = [];
       if (tournament) footerParts.push(`<span class="footer-item">Torneio: <strong>${tournament}</strong></span>`);
       if (stage) footerParts.push(`<span class="footer-item">Fase: <strong>${stage}</strong></span>`);
       if (duration) footerParts.push(`<span class="footer-item">Duração: <strong>${duration}</strong></span>`);
-
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article>`;
+    
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article> `;
     }
-
     // ─── Card ao vivo (inclui suspensa) ───────────────────────────────────
 
     function renderLiveCard(match) {
@@ -691,29 +694,18 @@
       const filter = getActiveFilter();
       const isMobile = U.isMobile();
       const now = Date.now();
-
+    
       const scheduled = [];
       const live = [];
       const finished = [];
-
+    
       matches.forEach((m) => {
         const rawStatus = String(m.status || "scheduled").trim().toLowerCase();
         const mid = m.id || m.matchId || "";
-
+    
         if (rawStatus === "finished") {
-          if (!state.finishedPending[mid]) {
-            const finishedAt = U.toDate(m.finishedAt)?.getTime() || now;
-            state.finishedPending[mid] = finishedAt;
-          }
-
-          const elapsed = now - state.finishedPending[mid];
-
-          if (elapsed < FINISHED_DELAY_MS) {
-            live.push({ match: m, forceStatus: "finished" });
-          } else {
-            delete state.finishedPending[mid];
-            finished.push({ match: m, forceStatus: null });
-          }
+          delete state.finishedPending[mid];
+          finished.push({ match: m, forceStatus: null });
         } else if (rawStatus === "wo") {
           delete state.finishedPending[mid];
           finished.push({ match: m, forceStatus: null });
@@ -727,57 +719,56 @@
           scheduled.push({ match: m, forceStatus: null });
         }
       });
-
+    
       scheduled.sort((a, b) =>
         (U.toDate(a.match.matchDateTime)?.getTime() || 0) -
         (U.toDate(b.match.matchDateTime)?.getTime() || 0)
       );
-
+    
       live.sort((a, b) =>
         (U.getStartedAtMs(a.match) || 0) - (U.getStartedAtMs(b.match) || 0)
       );
-
+    
       finished.sort((a, b) => {
         const fa = U.toDate(a.match.finishedAt)?.getTime() || U.getStartedAtMs(a.match) || 0;
         const fb = U.toDate(b.match.finishedAt)?.getTime() || U.getStartedAtMs(b.match) || 0;
         return fb - fa;
       });
-
+    
       const visScheduled = filter === "all" || filter === "scheduled"
         ? (isMobile ? scheduled : scheduled.slice(0, 7))
         : [];
-
+    
       const visLive = filter === "all" || filter === "live"
         ? (isMobile ? live : live.slice(0, 3))
         : [];
-
+    
       const visFinished = filter === "all" || filter === "finished"
         ? (isMobile ? finished : finished.slice(0, 4))
         : [];
-
+    
       if (el.countScheduled) el.countScheduled.textContent = scheduled.length;
       if (el.countLive) el.countLive.textContent = live.length;
       if (el.countFinished) el.countFinished.textContent = finished.length;
-
+    
       if (el.scheduledList) {
         el.scheduledList.innerHTML = visScheduled.length
           ? visScheduled.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
           : renderEmpty("Nenhum jogo do dia");
       }
-
+    
       if (el.liveList) {
         el.liveList.innerHTML = visLive.length
           ? visLive.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
           : renderEmpty("Nenhuma partida em andamento");
       }
-
+    
       if (el.finishedList) {
         el.finishedList.innerHTML = visFinished.length
           ? visFinished.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
           : renderEmpty("Nenhuma partida finalizada");
       }
     }
-
     function renderLists(matches) {
       applyFilterAndRender(matches);
     }
