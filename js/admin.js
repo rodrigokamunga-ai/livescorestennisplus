@@ -81,6 +81,7 @@
       filterGameFormat: document.getElementById("filterGameFormat"),
       filterTournament: document.getElementById("filterTournament"),
       filterStatus: document.getElementById("filterStatus"),
+      filterYear: document.getElementById("filterYear"),
       clearFiltersBtn: document.getElementById("clearFiltersBtn"),
       prevPageBtn: document.getElementById("prevPageBtn"),
       nextPageBtn: document.getElementById("nextPageBtn"),
@@ -289,7 +290,7 @@
     function getExpectedSetCount() {
       const format = U.normalizeText(getSelectedMatchFormat());
       if (format.includes("3 sets")) return 3;
-      if (format.includes("2 sets")) return 3; // 2 sets + super tie-break precisa do 3º bloco
+      if (format.includes("2 sets")) return 2;
       return 1;
     }
 
@@ -379,7 +380,7 @@
       const cfg = getMatchRuleConfig();
 
       if (cfg.oneSetAdSuper) {
-        if ((p1 === 7 && p2 === 6) || (p1 === 6 && p2 === 7)) return "super10";
+        if ((p1 === 7 && p2 === 6) || (p1 === 6 && p2 === 7)) return "tb7";
         return null;
       }
 
@@ -458,12 +459,33 @@
       const isFinished = getSelectedStatus() === "finished";
       const setCount = getExpectedSetCount();
       const matchDecided = isMatchAlreadyDecidedAfterTwoSets();
-
+    
+      const cfg = getMatchRuleConfig();
+    
+      const set1p1 = Number(el.set1Player1?.value || 0);
+      const set1p2 = Number(el.set1Player2?.value || 0);
+      const set2p1 = Number(el.set2Player1?.value || 0);
+      const set2p2 = Number(el.set2Player2?.value || 0);
+      const set3p1 = Number(el.set3Player1?.value || 0);
+      const set3p2 = Number(el.set3Player2?.value || 0);
+    
+      const mode1 = setCount >= 1 ? getTieBreakModeForSet(1, set1p1, set1p2) : null;
+      const mode2 = setCount >= 2 ? getTieBreakModeForSet(2, set2p1, set2p2) : null;
+      const mode3 = setCount >= 3 && !matchDecided ? getTieBreakModeForSet(3, set3p1, set3p2) : null;
+    
+      const splitSets =
+        (set1p1 > set1p2 && set2p2 > set2p1) ||
+        (set1p2 > set1p1 && set2p1 > set2p2);
+    
+      const needsSuperBecauseOneSetAdSuper = cfg.oneSetAdSuper && mode1 === "tb7";
+      const needsSuperBecauseTwoSetsSuper =
+        (cfg.twoSetsNoAdSuper || cfg.twoSetsAdSuper) && splitSets;
+    
       setFieldVisible(el.scoreFieldsWrapper, isFinished);
       setFieldVisible(el.scoreSet1Wrapper, isFinished && setCount >= 1);
       setFieldVisible(el.scoreSet2Wrapper, isFinished && setCount >= 2);
       setFieldVisible(el.scoreSet3Wrapper, isFinished && setCount >= 3 && !matchDecided);
-
+    
       if (!isFinished) {
         setFieldVisible(el.scoreTieBreakSet1Wrapper, false);
         setFieldVisible(el.scoreTieBreakSet2Wrapper, false);
@@ -472,39 +494,42 @@
         clearScoreFields();
         return;
       }
-
-      const set1p1 = Number(el.set1Player1?.value || 0);
-      const set1p2 = Number(el.set1Player2?.value || 0);
-      const set2p1 = Number(el.set2Player1?.value || 0);
-      const set2p2 = Number(el.set2Player2?.value || 0);
-      const set3p1 = Number(el.set3Player1?.value || 0);
-      const set3p2 = Number(el.set3Player2?.value || 0);
-
-      const mode1 = setCount >= 1 ? getTieBreakModeForSet(1, set1p1, set1p2) : null;
-      const mode2 = setCount >= 2 ? getTieBreakModeForSet(2, set2p1, set2p2) : null;
-      const mode3 = setCount >= 3 && !matchDecided ? getTieBreakModeForSet(3, set3p1, set3p2) : null;
-
-      setFieldVisible(el.scoreTieBreakSet1Wrapper, mode1 === "tb7");
-      setFieldVisible(el.scoreTieBreakSet2Wrapper, mode2 === "tb7");
-      setFieldVisible(el.scoreTieBreakSet3Wrapper, mode3 === "tb7");
-      setFieldVisible(el.scoreSuperTieBreakWrapper, mode1 === "super10" || mode2 === "super10" || mode3 === "super10");
-
-      if (el.tbSet1Player1) el.tbSet1Player1.required = mode1 === "tb7";
-      if (el.tbSet1Player2) el.tbSet1Player2.required = mode1 === "tb7";
-      if (el.tbSet2Player1) el.tbSet2Player1.required = mode2 === "tb7";
-      if (el.tbSet2Player2) el.tbSet2Player2.required = mode2 === "tb7";
-      if (el.tbSet3Player1) el.tbSet3Player1.required = mode3 === "tb7";
-      if (el.tbSet3Player2) el.tbSet3Player2.required = mode3 === "tb7";
-      if (el.tbSuperPlayer1) el.tbSuperPlayer1.required = mode1 === "super10" || mode2 === "super10" || mode3 === "super10";
-      if (el.tbSuperPlayer2) el.tbSuperPlayer2.required = mode1 === "super10" || mode2 === "super10" || mode3 === "super10";
-
+    
+      const showTieBreakSet1 = mode1 === "tb7" && !cfg.oneSetAdSuper;
+      const showTieBreakSet2 = mode2 === "tb7";
+      const showTieBreakSet3 = mode3 === "tb7";
+    
+      setFieldVisible(el.scoreTieBreakSet1Wrapper, showTieBreakSet1);
+      setFieldVisible(el.scoreTieBreakSet2Wrapper, showTieBreakSet2);
+      setFieldVisible(el.scoreTieBreakSet3Wrapper, showTieBreakSet3);
+    
+      const showSuperTieBreak =
+        mode1 === "super10" ||
+        mode2 === "super10" ||
+        mode3 === "super10" ||
+        needsSuperBecauseOneSetAdSuper ||
+        needsSuperBecauseTwoSetsSuper;
+    
+      setFieldVisible(el.scoreSuperTieBreakWrapper, showSuperTieBreak);
+    
+      if (el.tbSet1Player1) el.tbSet1Player1.required = showTieBreakSet1;
+      if (el.tbSet1Player2) el.tbSet1Player2.required = showTieBreakSet1;
+      if (el.tbSet2Player1) el.tbSet2Player1.required = showTieBreakSet2;
+      if (el.tbSet2Player2) el.tbSet2Player2.required = showTieBreakSet2;
+      if (el.tbSet3Player1) el.tbSet3Player1.required = showTieBreakSet3;
+      if (el.tbSet3Player2) el.tbSet3Player2.required = showTieBreakSet3;
+    
+      if (el.tbSuperPlayer1) el.tbSuperPlayer1.required = showSuperTieBreak;
+      if (el.tbSuperPlayer2) el.tbSuperPlayer2.required = showSuperTieBreak;
+    
       if (el.scoreTieBreakSet1Wrapper) el.scoreTieBreakSet1Wrapper.style.order = "11";
       if (el.scoreTieBreakSet2Wrapper) el.scoreTieBreakSet2Wrapper.style.order = "21";
       if (el.scoreTieBreakSet3Wrapper) el.scoreTieBreakSet3Wrapper.style.order = "31";
       if (el.scoreSuperTieBreakWrapper) el.scoreSuperTieBreakWrapper.style.order = "40";
-
+    
       placeTieBreakWrappers();
     }
+
     function normalizeGameScore(a, b) {
       const n1 = Number(a);
       const n2 = Number(b);
@@ -531,60 +556,127 @@
       return { tie: false };
     }
 
-    function validateScoreForm() {
-      const setCount = getExpectedSetCount();
-      const matchDecided = isMatchAlreadyDecidedAfterTwoSets();
-
-      if (setCount >= 1) {
-        const r1 = normalizeGameScore(el.set1Player1?.value, el.set1Player2?.value);
-        if (r1.error) return `1º set: ${r1.error}`;
+    
+    function validateTieBreakPoints(v1, v2, mode = "tb7") {
+      const a = Number(v1);
+      const b = Number(v2);
+    
+      if (Number.isNaN(a) || Number.isNaN(b)) {
+        return false;
       }
-
-      if (setCount >= 2) {
-        const r2 = normalizeGameScore(el.set2Player1?.value, el.set2Player2?.value);
-        if (r2.error) return `2º set: ${r2.error}`;
+    
+      if (a < 0 || b < 0) {
+        return false;
       }
-
-      if (setCount >= 3 && !matchDecided) {
-        const r3 = normalizeGameScore(el.set3Player1?.value, el.set3Player2?.value);
-        if (r3.error) return `3º set: ${r3.error}`;
+    
+      const max = Math.max(a, b);
+      const min = Math.min(a, b);
+      const diff = max - min;
+    
+      if (mode === "tb7") {
+        // Tie-break normal:
+        // 7x1 até 7x6 são válidos
+        // acima disso precisa diferença de 2
+        if (max < 7) return false;
+    
+        if (max === 7) {
+          return min <= 6;
+        }
+    
+        return diff >= 2;
       }
-
-      const s1 = getTieBreakModeForSet(1, Number(el.set1Player1?.value || 0), Number(el.set1Player2?.value || 0));
-      const s2 = setCount >= 2 ? getTieBreakModeForSet(2, Number(el.set2Player1?.value || 0), Number(el.set2Player2?.value || 0)) : null;
-      const s3 = setCount >= 3 && !matchDecided ? getTieBreakModeForSet(3, Number(el.set3Player1?.value || 0), Number(el.set3Player2?.value || 0)) : null;
-
-      const needsTB1 = s1 === "tb7";
-      const needsTB2 = s2 === "tb7";
-      const needsTB3 = s3 === "tb7";
-      const needsSuper = s1 === "super10" || s2 === "super10" || s3 === "super10";
-
-      if (needsTB1) {
-        const v1 = Number(el.tbSet1Player1?.value || 0);
-        const v2 = Number(el.tbSet1Player2?.value || 0);
-        if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do tie-break do 1º set.";
+    
+      if (mode === "super10") {
+        // Super tie-break:
+        // 10x4 até 10x9 são válidos
+        // 10x10 em diante precisa diferença de 2
+        if (max < 10) return false;
+    
+        if (max === 10) {
+          return min <= 9;
+        }
+    
+        return diff >= 2;
       }
-
-      if (needsTB2) {
-        const v1 = Number(el.tbSet2Player1?.value || 0);
-        const v2 = Number(el.tbSet2Player2?.value || 0);
-        if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do tie-break do 2º set.";
-      }
-
-      if (needsTB3) {
-        const v1 = Number(el.tbSet3Player1?.value || 0);
-        const v2 = Number(el.tbSet3Player2?.value || 0);
-        if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do tie-break do 3º set.";
-      }
-
-      if (needsSuper) {
-        const v1 = Number(el.tbSuperPlayer1?.value || 0);
-        const v2 = Number(el.tbSuperPlayer2?.value || 0);
-        if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do super tie-break.";
-      }
-
-      return null;
+    
+      return false;
     }
+
+
+    function validateScoreForm() {
+  const setCount = getExpectedSetCount();
+  const matchDecided = isMatchAlreadyDecidedAfterTwoSets();
+  const cfg = getMatchRuleConfig();
+
+  if (setCount >= 1) {
+    const r1 = normalizeGameScore(el.set1Player1?.value, el.set1Player2?.value);
+    if (r1.error) return `1º set: ${r1.error}`;
+  }
+
+  if (setCount >= 2) {
+    const r2 = normalizeGameScore(el.set2Player1?.value, el.set2Player2?.value);
+    if (r2.error) return `2º set: ${r2.error}`;
+  }
+
+  if (setCount >= 3 && !matchDecided) {
+    const r3 = normalizeGameScore(el.set3Player1?.value, el.set3Player2?.value);
+    if (r3.error) return `3º set: ${r3.error}`;
+  }
+
+  const s1 = getTieBreakModeForSet(1, Number(el.set1Player1?.value || 0), Number(el.set1Player2?.value || 0));
+  const s2 = setCount >= 2 ? getTieBreakModeForSet(2, Number(el.set2Player1?.value || 0), Number(el.set2Player2?.value || 0)) : null;
+  const s3 = setCount >= 3 && !matchDecided ? getTieBreakModeForSet(3, Number(el.set3Player1?.value || 0), Number(el.set3Player2?.value || 0)) : null;
+
+  const needsTB1 = s1 === "tb7" && !cfg.oneSetAdSuper;
+  const needsTB2 = s2 === "tb7";
+  const needsTB3 = s3 === "tb7";
+
+  const splitSets =
+    (Number(el.set1Player1?.value || 0) > Number(el.set1Player2?.value || 0) &&
+     Number(el.set2Player2?.value || 0) > Number(el.set2Player1?.value || 0)) ||
+    (Number(el.set1Player2?.value || 0) > Number(el.set1Player1?.value || 0) &&
+     Number(el.set2Player1?.value || 0) > Number(el.set2Player2?.value || 0));
+
+  const needsSuper =
+    cfg.oneSetAdSuper
+      ? true
+      : (cfg.twoSetsNoAdSuper || cfg.twoSetsAdSuper)
+        ? splitSets
+        : (s1 === "super10" || s2 === "super10" || s3 === "super10");
+
+  if (needsTB1) {
+    const v1 = Number(el.tbSet1Player1?.value || 0);
+    const v2 = Number(el.tbSet1Player2?.value || 0);
+    if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do tie-break do 1º set.";
+    if (!validateTieBreakPoints(v1, v2, "tb7")) return "Valor inválido.";
+  }
+
+  if (needsTB2) {
+    const v1 = Number(el.tbSet2Player1?.value || 0);
+    const v2 = Number(el.tbSet2Player2?.value || 0);
+    if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do tie-break do 2º set.";
+    if (!validateTieBreakPoints(v1, v2, "tb7")) return "Valor inválido.";
+  }
+
+  if (needsTB3) {
+    const v1 = Number(el.tbSet3Player1?.value || 0);
+    const v2 = Number(el.tbSet3Player2?.value || 0);
+    if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do tie-break do 3º set.";
+    if (!validateTieBreakPoints(v1, v2, "tb7")) return "Valor inválido.";
+  }
+
+  if (needsSuper) {
+    const v1 = Number(el.tbSuperPlayer1?.value || 0);
+    const v2 = Number(el.tbSuperPlayer2?.value || 0);
+    if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do super tie-break.";
+    if (!validateTieBreakPoints(v1, v2, "super10")) return "Valor inválido.";
+  }
+
+  return null;
+}
+
+
+
 
     function showForm() {
       if (el.matchFormWrapper) el.matchFormWrapper.style.display = "block";
@@ -651,8 +743,12 @@
         el.modality.disabled = true;
       }
 
+      if (el.gameFormat) el.gameFormat.disabled = false;
       if (el.gameFormat) el.gameFormat.value = "";
-      if (el.matchFormat) el.matchFormat.value = "";
+      if (el.matchFormat) {
+        el.matchFormat.value = "";
+        el.matchFormat.disabled = false;
+      }
       if (el.tournamentStage) el.tournamentStage.value = "";
 
       fillPlayer1Field();
@@ -668,20 +764,21 @@
       if (el.filterGameFormat) el.filterGameFormat.value = "";
       if (el.filterTournament) el.filterTournament.value = "";
       if (el.filterStatus) el.filterStatus.value = "";
+      if (el.filterYear) el.filterYear.value = "";
       refreshList();
     }
 
     function getFormattedSetFromInput(p1, p2, setIndex = 1) {
       const res = normalizeGameScore(p1, p2);
       if (res.error) return { error: res.error };
-
+    
       const n1 = Number(p1);
       const n2 = Number(p2);
       const mode = getTieBreakModeForSet(setIndex, n1, n2);
-
+    
       let tieBreakPoints1 = 0;
       let tieBreakPoints2 = 0;
-
+    
       if (mode === "tb7") {
         if (setIndex === 1) {
           tieBreakPoints1 = Number(el.tbSet1Player1?.value || 0);
@@ -694,12 +791,12 @@
           tieBreakPoints2 = Number(el.tbSet3Player2?.value || 0);
         }
       }
-
+    
       if (mode === "super10") {
         tieBreakPoints1 = Number(el.tbSuperPlayer1?.value || 0);
         tieBreakPoints2 = Number(el.tbSuperPlayer2?.value || 0);
       }
-
+    
       return {
         games1: n1,
         games2: n2,
@@ -712,35 +809,77 @@
     function buildSetHistoryFromForm() {
       const setCount = getExpectedSetCount();
       const history = [];
-
+      const cfg = getMatchRuleConfig();
+    
       if (setCount >= 1) {
         const set1 = getFormattedSetFromInput(el.set1Player1?.value, el.set1Player2?.value, 1);
         if (set1.error) return { error: set1.error };
-        history.push(set1);
+    
+        const isOneSetAdSuper = cfg.oneSetAdSuper;
+    
+        if (isOneSetAdSuper) {
+          const super1 = Number(el.tbSuperPlayer1?.value || 0);
+          const super2 = Number(el.tbSuperPlayer2?.value || 0);
+        
+          history.push({
+            games1: Number(set1.games1 || 0),
+            games2: Number(set1.games2 || 0),
+            tieBreakMode: "tb7",
+            tieBreakPoints1: super1,
+            tieBreakPoints2: super2,
+            lastTieBreakMode: "tb7",
+            lastTieBreakPoints1: super1,
+            lastTieBreakPoints2: super2
+          });
+        
+        
+        } else {
+          history.push({
+            games1: Number(set1.games1 || 0),
+            games2: Number(set1.games2 || 0),
+            tieBreakMode: set1.tieBreakMode || null,
+            tieBreakPoints1: Number(set1.tieBreakPoints1 || 0),
+            tieBreakPoints2: Number(set1.tieBreakPoints2 || 0)
+          });
+        }
       }
-
+    
       if (setCount >= 2) {
         const set2 = getFormattedSetFromInput(el.set2Player1?.value, el.set2Player2?.value, 2);
         if (set2.error) return { error: set2.error };
-        history.push(set2);
+    
+        history.push({
+          games1: Number(set2.games1 || 0),
+          games2: Number(set2.games2 || 0),
+          tieBreakMode: set2.tieBreakMode || null,
+          tieBreakPoints1: Number(set2.tieBreakPoints1 || 0),
+          tieBreakPoints2: Number(set2.tieBreakPoints2 || 0)
+        });
       }
-
+    
       if (setCount >= 3) {
         const set3 = getFormattedSetFromInput(el.set3Player1?.value, el.set3Player2?.value, 3);
         if (set3.error) return { error: set3.error };
-        history.push(set3);
+    
+        history.push({
+          games1: Number(set3.games1 || 0),
+          games2: Number(set3.games2 || 0),
+          tieBreakMode: set3.tieBreakMode || null,
+          tieBreakPoints1: Number(set3.tieBreakPoints1 || 0),
+          tieBreakPoints2: Number(set3.tieBreakPoints2 || 0)
+        });
       }
-
+    
       return { history };
     }
 
     function getSetWinner(setObj) {
       if (!setObj) return null;
-    
+
       const g1 = Number(setObj.games1 || 0);
       const g2 = Number(setObj.games2 || 0);
       const tbMode = String(setObj.tieBreakMode || "").trim();
-    
+
       if (tbMode === "super10" || tbMode === "tb7") {
         const tb1 = Number(setObj.tieBreakPoints1 || 0);
         const tb2 = Number(setObj.tieBreakPoints2 || 0);
@@ -748,7 +887,7 @@
         if (tb2 > tb1) return 2;
         return null;
       }
-    
+
       if (g1 > g2) return 1;
       if (g2 > g1) return 2;
       return null;
@@ -763,8 +902,14 @@
       if (el.categoryName) el.categoryName.value = data?.categoryName || "";
       if (el.tournamentName) el.tournamentName.value = data?.tournamentName || "";
       if (el.surfaceType) el.surfaceType.value = data?.surfaceType || "";
-      if (el.gameFormat) el.gameFormat.value = data?.gameFormat || "";
-      if (el.matchFormat) el.matchFormat.value = data?.matchFormat || "";
+      if (el.gameFormat) {
+        el.gameFormat.value = data?.gameFormat || "";
+        el.gameFormat.disabled = false;
+      }
+      if (el.matchFormat) {
+        el.matchFormat.value = data?.matchFormat || "";
+        el.matchFormat.disabled = String(data?.status || "").trim().toLowerCase() === "finished";
+      }
       if (el.matchDateTime) el.matchDateTime.value = data?.matchDateTime || "";
       if (el.court) el.court.value = data?.court || "";
       if (el.tournamentStage) el.tournamentStage.value = data?.tournamentStage || "";
@@ -814,6 +959,7 @@
       handleGameFormatChange();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
+      lockMatchFormatIfFinished();
     }
 
     function buildPublicLink(id) {
@@ -828,11 +974,41 @@
       state.allMatches.sort((a, b) => U.getCreatedAtMs(b.data) - U.getCreatedAtMs(a.data));
     }
 
+    function getMatchYear(d) {
+      const raw = d?.matchDateTime || d?.createdAt || d?.updatedAt || null;
+      if (!raw) return "";
+      if (typeof raw?.toDate === "function") {
+        const dt = raw.toDate();
+        return isNaN(dt.getTime()) ? "" : String(dt.getFullYear());
+      }
+      const dt = new Date(raw);
+      return isNaN(dt.getTime()) ? "" : String(dt.getFullYear());
+    }
+
+    function populateYearFilter() {
+      if (!el.filterYear) return;
+
+      const current = el.filterYear.value || "";
+      const years = [...new Set(
+        state.allMatches
+          .map(({ data }) => getMatchYear(data))
+          .filter(Boolean)
+      )].sort((a, b) => Number(b) - Number(a));
+
+      el.filterYear.innerHTML = `<option value="">Todos os anos</option>` +
+        years.map(y => `<option value="${y}">${y}</option>`).join("");
+
+      if (current && years.includes(current)) {
+        el.filterYear.value = current;
+      }
+    }
+
     function applyFilters() {
       const p = el.filterPlayers?.value.trim().toLowerCase() || "";
       const g = el.filterGameFormat?.value.trim().toLowerCase() || "";
       const t = el.filterTournament?.value.trim().toLowerCase() || "";
       const s = el.filterStatus?.value.trim().toLowerCase() || "";
+      const y = el.filterYear?.value.trim() || "";
 
       state.filteredMatches = state.allMatches.filter(({ data }) => {
         const ownerId = String(data.ownerId || "").trim();
@@ -848,11 +1024,13 @@
         const gameFormatText = String(data.gameFormat || "").trim().toLowerCase();
         const tournamentText = String(data.tournamentName || "").toLowerCase();
         const statusText = String(data.status || "scheduled").trim().toLowerCase();
+        const yearText = getMatchYear(data);
 
         return (!p || playerText.includes(p)) &&
                (!g || gameFormatText === g) &&
                (!t || tournamentText.includes(t)) &&
-               (!s || statusText === s);
+               (!s || statusText === s) &&
+               (!y || yearText === y);
       });
 
       state.currentPage = 1;
@@ -910,97 +1088,64 @@
       return ` <section class="detail-section detail-section-general"> <div class="detail-section-header"> <h4>Dados gerais</h4> <span class="detail-section-subtitle">Informações da partida</span> </div> <div class="detail-info-grid"> <div class="detail-info-item"><span>Modalidade</span><strong>${U.escapeHtml(d.modality || "-")}</strong></div> <div class="detail-info-item"><span>Formato do jogo</span><strong>${U.escapeHtml(d.gameFormat || "-")}</strong></div> <div class="detail-info-item"><span>Categoria</span><strong>${U.escapeHtml(d.categoryName || "-")}</strong></div> <div class="detail-info-item"><span>Torneio</span><strong>${U.escapeHtml(d.tournamentName || "-")}</strong></div> <div class="detail-info-item"><span>Tipo de piso</span><strong>${U.escapeHtml(d.surfaceType || "-")}</strong></div> <div class="detail-info-item"><span>Formato</span><strong>${U.escapeHtml(U.formatMatchFormat(d.matchFormat || "-"))}</strong></div> <div class="detail-info-item"><span>Data e hora</span><strong>${U.escapeHtml(d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-")}</strong></div> <div class="detail-info-item"><span>Quadra</span><strong>${U.escapeHtml(d.court || "-")}</strong></div> <div class="detail-info-item"><span>Fase</span><strong>${U.escapeHtml(d.tournamentStage || "-")}</strong></div> <div class="detail-info-item"><span>Situação</span><strong>${U.escapeHtml(situationLabel)}</strong></div> <div class="detail-info-item"><span>Jogadores</span><strong style="white-space:pre-line;">${teamHTML}</strong></div> <div class="detail-info-item"><span>Vencedor por WO</span><strong>${U.escapeHtml(woWinner)}</strong></div> </div> </section>`;
     }
 
-    function renderSetBlock(label, setObj, tbLabel = "") {
-      const hasTB = tbLabel && setObj && (setObj.tb1 !== null && setObj.tb2 !== null);
-    
-      if (!setObj) {
-        return ` <div class="detail-set-block"> <div class="detail-set-title">${U.escapeHtml(label)}</div> <div class="detail-set-grid detail-set-grid-2"> <div class="detail-set-col"> <span>Jogador 1</span> <strong>--</strong> </div> <div class="detail-set-col"> <span>Jogador 2</span> <strong>--</strong> </div> </div> </div> `;
-      }
-    
-      if (!hasTB) {
-        return ` <div class="detail-set-block"> <div class="detail-set-title">${U.escapeHtml(label)}</div> <div class="detail-set-grid detail-set-grid-2"> <div class="detail-set-col"> <span>Jogador 1</span> <strong>${U.escapeHtml(setObj.p1)}</strong> </div> <div class="detail-set-col"> <span>Jogador 2</span> <strong>${U.escapeHtml(setObj.p2)}</strong> </div> </div> </div> `;
-      }
-    
-      return ` <div class="detail-set-block"> <div class="detail-set-title"> ${U.escapeHtml(label)} <small>${U.escapeHtml(tbLabel)}</small> </div> <div class="detail-set-grid detail-set-grid-4"> <div class="detail-set-col"> <span>Jogador 1</span> <strong>${U.escapeHtml(setObj.p1)}</strong> </div> <div class="detail-set-col"> <span>Jogador 2</span> <strong>${U.escapeHtml(setObj.p2)}</strong> </div> <div class="detail-set-col"> <span>Jogador 1</span> <strong>${U.escapeHtml(setObj.tb1)}</strong> </div> <div class="detail-set-col"> <span>Jogador 2</span> <strong>${U.escapeHtml(setObj.tb2)}</strong> </div> </div> </div> `;
-    }
-
     function getSetDisplayFromHistory(setObj) {
-      if (!setObj) return { p1: "--", p2: "--", tb1: null, tb2: null };
-    
+      if (!setObj) return { text: "--" };
+
       const g1 = Number(setObj.games1 ?? 0);
       const g2 = Number(setObj.games2 ?? 0);
       const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
       const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
-      const isTB = setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10";
-    
-      if (isTB && (tb1 > 0 || tb2 > 0)) {
-        const p1Won = tb1 > tb2;
-    
-        if (setObj.tieBreakMode === "super10") {
-          return {
-            p1: String(tb1),
-            p2: String(tb2),
-            tb1: String(tb1),
-            tb2: String(tb2)
-          };
-        }
-    
+      const mode = String(setObj.tieBreakMode || "").trim();
+
+      if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
+        return { text: `${tb1}x${tb2} (super tie-break)` };
+      }
+
+      if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
         return {
-          p1: String(p1Won ? 7 : 6),
-          p2: String(p1Won ? 6 : 7),
-          tb1: String(tb1),
-          tb2: String(tb2)
+          text: `${g1}x${g2} (${tb1}-${tb2})`
         };
       }
-    
-      return { p1: String(g1), p2: String(g2), tb1: null, tb2: null };
+
+      return { text: `${g1}x${g2}` };
     }
 
     function renderScoreBlock(d) {
-  const score = U.normalizeScore(d.score || {});
-  const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+      const score = U.normalizeScore(d.score || {});
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
 
-  const set1 = getSetDisplayFromHistory(history[0]);
-  const set2 = getSetDisplayFromHistory(history[1]);
-  const set3 = getSetDisplayFromHistory(history[2]);
+      const set1 = getSetDisplayFromHistory(history[0]);
+      const set2 = getSetDisplayFromHistory(history[1]);
+      const set3 = getSetDisplayFromHistory(history[2]);
 
-  const duration = getMatchDuration(d);
-  const status = String(d?.status || "").trim().toLowerCase();
-  const isWO = status === "wo";
-  const winnerPos = U.getWinnerPosition(score, d);
-  const teamHTML = U.getMatchDisplayHTML(d);
-  const setCount = detectSetCountFromMatch(d);
+      const duration = getMatchDuration(d);
+      const status = String(d?.status || "").trim().toLowerCase();
+      const isWO = status === "wo";
+      const winnerPos = U.getWinnerPosition(score, d);
+      const teamHTML = U.getMatchDisplayHTML(d);
+      const setCount = detectSetCountFromMatch(d);
 
-  const pointsText =
-    (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10" ||
-     score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")
-      ? `${Number(score.tieBreakPoints1 || score.lastTieBreakPoints1 || 0)}x${Number(score.tieBreakPoints2 || score.lastTieBreakPoints2 || 0)}`
-      : `${Number(score.points1 || 0)}x${Number(score.points2 || 0)}`;
+      const sets = [];
+      if (setCount >= 1 && history[0]) sets.push(set1.text);
+      if (setCount >= 2 && history[1]) sets.push(set2.text);
+      if (setCount >= 3 && history[2]) sets.push(set3.text);
 
-  let setsHtml = "";
-  if (setCount >= 1) {
-    setsHtml += renderSetBlock("1º set", set1, set1.tb1 !== null ? "Tie-break 1º set" : "");
-  }
-  if (setCount >= 2) {
-    setsHtml += renderSetBlock("2º set", set2, set2.tb1 !== null ? "Tie-break 2º set" : "");
-  }
-  if (setCount >= 3) {
-    setsHtml += renderSetBlock("3º set", set3, set3.tb1 !== null ? "Tie-break 3º set" : "");
-  }
+      const placar = sets.join(" • ");
 
-  let resultBadge = "";
-  let rowClass = "";
+      let resultBadge = "";
+      let rowClass = "";
 
-  if (winnerPos === 1) {
-    rowClass = "winner-row";
-    resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
-  } else if (winnerPos === 2) {
-    rowClass = "loser-row";
-    resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
-  }
+      if (winnerPos === 1) {
+        rowClass = "winner-row";
+        resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
+      } else if (winnerPos === 2) {
+        rowClass = "loser-row";
+        resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
+      }
 
-  return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` ${setsHtml} <div class="detail-pill" style="margin-top:10px;"> <span>Pontos</span> <strong>${U.escapeHtml(pointsText)}</strong> </div> `} </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
-}
+      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
+    }
+
     function renderSummaryBlock(d) {
       const score = U.normalizeScore(d.score || {});
       const totalPoints1 = Number(score.totalPoints1 || 0);
@@ -1023,6 +1168,14 @@
         return `<div class="details-layout"><p>Erro ao carregar os detalhes da partida.</p></div>`;
       }
     }
+
+    function lockMatchFormatIfFinished() {
+      if (!el.matchFormat) return;
+      const isEditing = Boolean(el.docId?.value);
+      const isFinished = String(el.status?.value || "").trim().toLowerCase() === "finished";
+      el.matchFormat.disabled = isEditing && isFinished;
+    }
+
     function toggleFiltersBar() {
       state.filtersVisible = !state.filtersVisible;
       if (el.filtersBar) el.filtersBar.style.display = state.filtersVisible ? "" : "none";
@@ -1062,6 +1215,7 @@
       state.unsubscribe = query.onSnapshot(
         (snapshot) => {
           state.allMatches = snapshot.docs.map(docSnap => ({ docSnap, data: docSnap.data() }));
+          populateYearFilter();
           refreshList();
         },
         (err) => {
@@ -1181,6 +1335,7 @@
 
     function handleStatusChange() {
       updateScoreFieldsVisibility();
+      lockMatchFormatIfFinished();
     }
 
     function bindEvents() {
@@ -1227,6 +1382,7 @@
       el.filterGameFormat?.addEventListener("change", refreshList);
       el.filterTournament?.addEventListener("input", refreshList);
       el.filterStatus?.addEventListener("change", refreshList);
+      el.filterYear?.addEventListener("change", refreshList);
 
       el.gameFormat?.addEventListener("change", handleGameFormatChange);
       el.tournamentStage?.addEventListener("change", updateTournamentStageVisibility);
@@ -1301,14 +1457,14 @@
           if (selectedStatus === "finished") {
             const scoreValidation = validateScoreForm();
             if (scoreValidation) return setMsg(scoreValidation);
-
+          
             const built = buildSetHistoryFromForm();
             if (built?.error) return setMsg(built.error);
-
+          
             const history = built.history || [];
             const score = defaultScore();
             score.setHistory = history;
-
+          
             const lastWithTB = [...history].reverse().find(s => s.tieBreakMode);
             if (lastWithTB) {
               score.tieBreakMode = lastWithTB.tieBreakMode || null;
@@ -1318,28 +1474,29 @@
               score.lastTieBreakPoints1 = lastWithTB.tieBreakPoints1 || 0;
               score.lastTieBreakPoints2 = lastWithTB.tieBreakPoints2 || 0;
             }
-
+          
+            // Conta sets vencidos corretamente
             if (history[0]) {
               const w1 = getSetWinner(history[0]);
               if (w1 === 1) score.sets1 += 1;
               if (w1 === 2) score.sets2 += 1;
             }
-            
+          
             if (history[1]) {
               const w2 = getSetWinner(history[1]);
               if (w2 === 1) score.sets1 += 1;
               if (w2 === 2) score.sets2 += 1;
             }
-            
+          
             if (history[2]) {
               const w3 = getSetWinner(history[2]);
               if (w3 === 1) score.sets1 += 1;
               if (w3 === 2) score.sets2 += 1;
             }
-            
+          
             finalScore = score;
           }
-
+          
           const data = {
             ownerId: state.currentUser?.uid || "",
             ownerEmail: state.currentUser?.email || "",
@@ -1491,3 +1648,7 @@
 
   document.addEventListener("DOMContentLoaded", () => AdminApp.init());
 })();
+
+
+
+              
