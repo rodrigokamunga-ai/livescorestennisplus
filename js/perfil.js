@@ -35,36 +35,6 @@
       { uf: "TO", name: "Tocantins" }
     ];
 
-    const BR_CITIES = {
-      AC: ["Rio Branco","Cruzeiro do Sul","Sena Madureira","Tarauacá","Feijó"],
-      AL: ["Maceió","Arapiraca","Rio Largo","Palmeira dos Índios","União dos Palmares"],
-      AP: ["Macapá","Santana","Laranjal do Jari","Oiapoque","Mazagão"],
-      AM: ["Manaus","Parintins","Itacoatiara","Manacapuru","Coari"],
-      BA: ["Salvador","Feira de Santana","Vitória da Conquista","Camaçari","Juazeiro","Ilhéus","Itabuna"],
-      CE: ["Fortaleza","Caucaia","Juazeiro do Norte","Maracanaú","Sobral","Crato"],
-      DF: ["Brasília","Ceilândia","Taguatinga","Samambaia","Plano Piloto"],
-      ES: ["Vitória","Serra","Vila Velha","Cariacica","Cachoeiro de Itapemirim"],
-      GO: ["Goiânia","Aparecida de Goiânia","Anápolis","Rio Verde","Luziânia"],
-      MA: ["São Luís","Imperatriz","São José de Ribamar","Timon","Caxias"],
-      MT: ["Cuiabá","Várzea Grande","Rondonópolis","Sinop","Tangará da Serra"],
-      MS: ["Campo Grande","Dourados","Três Lagoas","Corumbá"],
-      MG: ["Belo Horizonte","Uberlândia","Contagem","Juiz de Fora","Betim","Montes Claros","Uberaba"],
-      PA: ["Belém","Ananindeua","Santarém","Marabá","Castanhal"],
-      PB: ["João Pessoa","Campina Grande","Santa Rita","Patos","Bayeux"],
-      PR: ["Curitiba","Londrina","Maringá","Ponta Grossa","Cascavel","São José dos Pinhais","Foz do Iguaçu"],
-      PE: ["Recife","Caruaru","Olinda","Jaboatão dos Guararapes","Petrolina","Paulista"],
-      PI: ["Teresina","Parnaíba","Picos","Piripiri","Floriano"],
-      RJ: ["Rio de Janeiro","Niterói","Duque de Caxias","Nova Iguaçu","São Gonçalo","Campos dos Goytacazes","Petrópolis"],
-      RN: ["Natal","Mossoró","Parnamirim","São Gonçalo do Amarante","Macaíba"],
-      RS: ["Porto Alegre","Caxias do Sul","Pelotas","Canoas","Santa Maria","Gravataí","Novo Hamburgo"],
-      RO: ["Porto Velho","Ji-Paraná","Ariquemes","Vilhena","Cacoal"],
-      RR: ["Boa Vista","Rorainópolis","Caracaraí","Alto Alegre","Mucajaí"],
-      SC: ["Florianópolis","Joinville","Blumenau","São José","Chapecó","Itajaí","Criciúma"],
-      SP: ["São Paulo","Campinas","Santos","Ribeirão Preto","São José dos Campos","Sorocaba","Osasco","Santo André","São Bernardo do Campo","Guarulhos"],
-      SE: ["Aracaju","Nossa Senhora do Socorro","Lagarto","Itabaiana","São Cristóvão"],
-      TO: ["Palmas","Araguaína","Gurupi","Porto Nacional","Paraíso do Tocantins"]
-    };
-
     const el = {
       form: document.getElementById("profileForm"),
       displayName: document.getElementById("displayName"),
@@ -72,9 +42,8 @@
       phone: document.getElementById("phone"),
       country: document.getElementById("country"),
       stateLabel: document.getElementById("stateLabel"),
-      cityLabel: document.getElementById("cityLabel"),
       state: document.getElementById("state"),
-      city: document.getElementById("city"),
+      equipment: document.getElementById("equipment"),
       gender: document.getElementById("gender"),
       birthDate: document.getElementById("birthDate"),
       height: document.getElementById("height"),
@@ -178,26 +147,11 @@
       });
     }
 
-    function populateCities(uf, selectedCity = "") {
-      if (!el.city) return;
-      el.city.innerHTML = `<option value="">Selecione a cidade</option>`;
-      const cities = BR_CITIES[uf] || [];
-      cities.forEach((c) => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        if (c === selectedCity) opt.selected = true;
-        el.city.appendChild(opt);
-      });
-    }
-
-    function toggleLocationFields(country, uf = "", city = "") {
+    function toggleLocationFields(country, uf = "") {
       const isBR = country === "BR";
       if (el.stateLabel) el.stateLabel.style.display = isBR ? "" : "none";
-      if (el.cityLabel) el.cityLabel.style.display = isBR ? "" : "none";
       if (isBR) {
         populateStates(uf);
-        if (uf) populateCities(uf, city);
       }
     }
 
@@ -281,12 +235,13 @@
       if (el.birthDate) el.birthDate.value = data.birthDate || "";
       if (el.height) el.height.value = data.height || "";
       if (el.weight) el.weight.value = data.weight || "";
+      if (el.equipment) el.equipment.value = data.equipment || "";
       if (data.forehand) setRadioValue("forehand", data.forehand);
       if (data.backhand) setRadioValue("backhand", data.backhand);
 
       if (el.country && data.country) {
         el.country.value = data.country;
-        toggleLocationFields(data.country, data.state || "", data.city || "");
+        toggleLocationFields(data.country, data.state || "");
       }
 
       if (data.photoBase64) {
@@ -384,7 +339,7 @@
           phone: el.phone?.value.trim() || "",
           country: el.country?.value || "",
           state: el.state?.value || "",
-          city: el.city?.value || "",
+          equipment: el.equipment?.value.trim() || "",
           gender: el.gender?.value || "",
           birthDate: el.birthDate?.value || "",
           height: el.height?.value || "",
@@ -569,12 +524,11 @@
       if (el.birthDate) el.birthDate.value = "";
       if (el.height) el.height.value = "";
       if (el.weight) el.weight.value = "";
+      if (el.equipment) el.equipment.value = "";
       if (el.country) el.country.value = "";
 
       if (el.stateLabel) el.stateLabel.style.display = "none";
-      if (el.cityLabel) el.cityLabel.style.display = "none";
       if (el.state) el.state.innerHTML = `<option value="">Selecione o estado</option>`;
-      if (el.city) el.city.innerHTML = `<option value="">Selecione a cidade</option>`;
 
       document.querySelectorAll('input[name="forehand"], input[name="backhand"]')
         .forEach((r) => r.checked = false);
@@ -595,10 +549,6 @@
 
       el.country?.addEventListener("change", function () {
         toggleLocationFields(this.value);
-      });
-
-      el.state?.addEventListener("change", function () {
-        populateCities(this.value);
       });
 
       el.photoFile?.addEventListener("change", async function () {
@@ -702,7 +652,6 @@
 
     function init() {
       if (el.stateLabel) el.stateLabel.style.display = "none";
-      if (el.cityLabel) el.cityLabel.style.display = "none";
 
       if (el.photoFile) {
         el.photoFile.setAttribute("accept", "image/*");
