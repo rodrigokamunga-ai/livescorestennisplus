@@ -369,100 +369,67 @@
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
       const matchFormat = String(data.matchFormat || data.format || "").toLowerCase();
     
-      const isSuperTieBreakMatch =
-        matchFormat.includes("super tie") ||
-        matchFormat.includes("super-tie") ||
-        matchFormat.includes("super tiebreak") ||
-        matchFormat.includes("super-tie-break");
+      const isOneSetAdSuper =
+        matchFormat.includes("1 set no ad + um super tie-break") ||
+        matchFormat.includes("1 set com vantagem") ||
+        matchFormat.includes("1 set no ad") ||
+        matchFormat.includes("1 set com vantagem + um super tie-break") ||
+        matchFormat.includes("1 set no ad + um super tie-break");
     
-      function getSetScore(setItem) {
-        const g1 = Number(setItem?.games1 ?? setItem?.p1 ?? setItem?.player1 ?? 0);
-        const g2 = Number(setItem?.games2 ?? setItem?.p2 ?? setItem?.player2 ?? 0);
+      function formatSetText(setItem) {
+        const g1 = Number(setItem?.games1 ?? 0);
+        const g2 = Number(setItem?.games2 ?? 0);
+        const tb1 = Number(setItem?.tieBreakPoints1 ?? 0);
+        const tb2 = Number(setItem?.tieBreakPoints2 ?? 0);
+        const mode = String(setItem?.tieBreakMode || "").trim();
     
-        const tb1 = Number(setItem?.tieBreakPoints1 ?? setItem?.tb1 ?? 0);
-        const tb2 = Number(setItem?.tieBreakPoints2 ?? setItem?.tb2 ?? 0);
-    
-        const stb1 = Number(setItem?.superTieBreakPoints1 ?? setItem?.stb1 ?? 0);
-        const stb2 = Number(setItem?.superTieBreakPoints2 ?? setItem?.stb2 ?? 0);
-    
-        const hasSuperTB =
-          setItem?.type === "super10" ||
-          setItem?.superTieBreak === true ||
-          setItem?.isSuperTieBreak === true ||
-          stb1 > 0 ||
-          stb2 > 0 ||
-          (isSuperTieBreakMatch && (stb1 > 0 || stb2 > 0)) ||
-          (tb1 >= 10 || tb2 >= 10);
-    
-        const hasTieBreak =
-          !hasSuperTB &&
-          (setItem?.type === "tb7" ||
-            setItem?.tieBreak === true ||
-            setItem?.isTieBreak === true ||
-            tb1 > 0 ||
-            tb2 > 0);
-    
-        // SUPER TIE-BREAK: mostrar SOMENTE o placar real, ex: 10-4
-        if (hasSuperTB) {
-          const a = stb1 > 0 ? stb1 : tb1;
-          const b = stb2 > 0 ? stb2 : tb2;
-          if (a === 0 && b === 0) return "";
-          return `${a}-${b}`;
+        // Super tie-break
+        if (mode === "super10") {
+          if (tb1 > 0 || tb2 > 0) {
+            return `${tb1}-${tb2}`;
+          }
+          return "";
         }
     
-        // TIE-BREAK NORMAL: 6x7 (5-7)
-        if (hasTieBreak) {
-          const setScore = tb1 > tb2 ? "7x6" : "6x7";
-          return `${setScore} (${tb1}-${tb2})`;
+        // Tie-break normal
+        if (mode === "tb7") {
+          if (tb1 > 0 || tb2 > 0) {
+            const setScore = tb1 > tb2 ? "7x6" : "6x7";
+            return `${setScore} (${tb1}-${tb2})`;
+          }
+    
+          // fallback quando o tie-break foi salvo sem os pontos no item
+          if (g1 === 7 && g2 === 6) return "7x6";
+          if (g1 === 6 && g2 === 7) return "6x7";
+          return "";
         }
     
-        if (g1 === 0 && g2 === 0) return "";
-        return `${g1}x${g2}`;
+        // Set normal
+        if (g1 > 0 || g2 > 0) {
+          return `${g1}x${g2}`;
+        }
+    
+        return "";
       }
     
-      // Histórico dos sets
       history.forEach((setItem) => {
-        const value = getSetScore(setItem);
-        if (value) parts.push(value);
+        const text = formatSetText(setItem);
+        if (text) parts.push(text);
       });
     
-      // Set atual em andamento
-      const isLive = data.status === "live" || data.status === "suspended";
-      const hasCurrentSet = Number(score.games1 || 0) > 0 || Number(score.games2 || 0) > 0;
+      // Fallback para o caso de um set + super tie-break quando o histórico vier incompleto
+      if (parts.length === 1 && isOneSetAdSuper) {
+        const g1 = Number(score.games1 || 0);
+        const g2 = Number(score.games2 || 0);
+        const tb1 = Number(score.tieBreakPoints1 || score.lastTieBreakPoints1 || 0);
+        const tb2 = Number(score.tieBreakPoints2 || score.lastTieBreakPoints2 || 0);
     
-      if (isLive && hasCurrentSet) {
-        if (score.tieBreakMode === "super10" || Number(score.tieBreakPoints1) >= 10 || Number(score.tieBreakPoints2) >= 10) {
-          const stb1 = Number(
-            score.tieBreakPoints1 ??
-            score.lastTieBreakPoints1 ??
-            score.superTieBreakPoints1 ??
-            0
-          );
+        if (g1 > 0 || g2 > 0) {
+          const setText = (tb1 > 0 || tb2 > 0)
+            ? (tb1 > tb2 ? `7x6 (${tb1}-${tb2})` : `6x7 (${tb1}-${tb2})`)
+            : `${g1}x${g2}`;
     
-          const stb2 = Number(
-            score.tieBreakPoints2 ??
-            score.lastTieBreakPoints2 ??
-            score.superTieBreakPoints2 ??
-            0
-          );
-    
-          if (stb1 > 0 || stb2 > 0) {
-            parts.push(`${stb1}-${stb2}`);
-          }
-        } else if (score.tieBreakMode === "tb7") {
-          const tb1 = Number(score.tieBreakPoints1 || 0);
-          const tb2 = Number(score.tieBreakPoints2 || 0);
-    
-          if (tb1 > 0 || tb2 > 0) {
-            parts.push(`6x7 (${tb1}-${tb2})`);
-          }
-        } else {
-          const g1 = Number(score.games1 || 0);
-          const g2 = Number(score.games2 || 0);
-    
-          if (!(g1 === 0 && g2 === 0)) {
-            parts.push(`${g1}x${g2}`);
-          }
+          if (!parts.includes(setText)) parts.unshift(setText);
         }
       }
     
