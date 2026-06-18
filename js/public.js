@@ -4,15 +4,17 @@
   const PublicApp = (() => {
     const db = firebase.firestore();
 
+    const params = new URLSearchParams(window.location.search);
+    const ownerId = params.get("ownerId") || "";
+    const shareToken = params.get("shareToken") || "";
+
     const state = {
       cachedMatches: [],
       timer: null,
-      unsubscribe: null,
-      finishedPending: {}
+      unsubscribe: null
     };
 
     const FILTER_KEY = "lsts_live_status_filter";
-    const FINISHED_DELAY_MS = 60_000;
 
     const el = {
       filter: document.getElementById("liveStatusFilter"),
@@ -23,8 +25,6 @@
       countLive: document.getElementById("countLive"),
       countFinished: document.getElementById("countFinished")
     };
-
-    // ─── Utilitários ──────────────────────────────────────────────────────
 
     const U = {
       escapeHtml(str = "") {
@@ -371,17 +371,13 @@
       }
     };
 
-    // ─── Estilos inline ───────────────────────────────────────────────────
-
     function injectInlineStyles() {
       if (document.getElementById("publicAppInlineStyles")) return;
       const style = document.createElement("style");
       style.id = "publicAppInlineStyles";
-      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: rgba(251,191,36,0.14); border: 1px solid rgba(251,191,36,0.28); color: #fbbf24; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; } .suspended-duration { text-align: center; font-size: 11px; font-weight: 800; color: rgba(251,191,36,0.85); padding: 2px 0 4px; letter-spacing: 0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width: 0; } .set-col { text-align: center; } .points-col { text-align: center; } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } } `;
+      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } } `;
       document.head.appendChild(style);
     }
-
-    // ─── Helpers de partida ───────────────────────────────────────────────
 
     function formatDateTime(value) {
       if (!value) return "";
@@ -423,8 +419,6 @@
         : String(match.player2 || "Jogador 2").trim();
     }
 
-    // ─── Probabilidade de vitória ─────────────────────────────────────────
-
     function getWinProbabilitiesByScore(match) {
       const score = U.normalizeScore(match.score || {});
       let p1 = 50, p2 = 50;
@@ -464,7 +458,7 @@
           : String(match.player2 || "Jogador 2").trim()
       );
 
-      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%"> ${p1 > 12 ? `${p1}%` : ""} </div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%"> ${p2 > 12 ? `${p2}%` : ""} </div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div>`;
+      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%">${p1 > 12 ? `${p1}%` : ""}</div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%">${p2 > 12 ? `${p2}%` : ""}</div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div>`;
     }
 
     function renderMatchSummary(match) {
@@ -480,8 +474,6 @@
 
       return ` <div class="match-summary"> <div class="match-summary-title">Resumo da partida</div> <div class="match-summary-grid"> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team1)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints1}</strong></span> <span class="summary-value">Break points: <strong>${bp1}</strong></span> </div> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team2)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints2}</strong></span> <span class="summary-value">Break points: <strong>${bp2}</strong></span> </div> </div> </div>`;
     }
-
-    // ─── Live feed ────────────────────────────────────────────────────────
 
     function getLiveFeedMessage(match) {
       if (match.status === "suspended") return "";
@@ -545,12 +537,9 @@
       return "";
     }
 
-    // ─── Sacador ──────────────────────────────────────────────────────────
-
     function getServeBall(score, playerPos, isFinished = false, winnerPos = null) {
       if (isFinished && winnerPos) {
-        const showForWinner = playerPos === winnerPos;
-        return showForWinner ? `<span class="serve-ball" title="Vencedor"></span>` : "";
+        return playerPos === winnerPos ? `<span class="serve-ball" title="Vencedor"></span>` : "";
       }
 
       const server = score.server || "player1";
@@ -560,8 +549,6 @@
       return serving ? `<span class="serve-ball" title="Sacador"></span>` : "";
     }
 
-    // ─── Cabeçalho da tabela ──────────────────────────────────────────────
-
     function buildSetHead(setColumns) {
       const cls = setColumns.hasThreeSets ? "three-set-head"
         : setColumns.hasTwoSets ? "two-set-head"
@@ -569,8 +556,6 @@
 
       return ` <div class="match-table-head compact-head ${cls}"> <div class="team-label team-col">JOGADOR</div> <div class="set-col">1º SET</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="set-col">2º SET</div>` : ""} ${setColumns.hasThreeSets ? `<div class="set-col">3º SET</div>` : ""} <div class="points-col">PONTOS</div> </div>`;
     }
-
-    // ─── Linha de jogador ─────────────────────────────────────────────────
 
     function buildPlayerRow(teamName, setColumns, pts, playerPos, score, isWinner, isWO, isFinished = false, winnerPos = null) {
       const rowCls = setColumns.hasThreeSets ? "three-set-row"
@@ -584,8 +569,6 @@
       return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}" style="white-space:pre-line;"> ${serveBall}${U.escapeHtml(teamName)} </div> <div class="score green set-col">${setColumns.set1[setP]}</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set2?.[setP] ?? "--"}</div>` : ""} ${setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set3?.[setP] ?? "--"}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div>`;
     }
 
-    // ─── Card finalizado ──────────────────────────────────────────────────
-
     function renderFinalizedCard(match) {
       const team1 = getTeam1Name(match);
       const team2 = getTeam2Name(match);
@@ -598,20 +581,19 @@
       const duration = U.buildDuration(match);
       const winnerPos = U.getWinnerPosition(match, score);
       const isWO = String(match.status || "").toLowerCase() === "wo";
-    
+
       const isThreeSetsFinished = setColumns.hasThreeSets;
       const ptDisp = isThreeSetsFinished
         ? { p1: "", p2: "" }
         : U.getPointDisplay(score, match.matchFormat, true);
-    
+
       const footerParts = [];
       if (tournament) footerParts.push(`<span class="footer-item">Torneio: <strong>${tournament}</strong></span>`);
       if (stage) footerParts.push(`<span class="footer-item">Fase: <strong>${stage}</strong></span>`);
       if (duration) footerParts.push(`<span class="footer-item">Duração: <strong>${duration}</strong></span>`);
-    
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article> `;
+
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article>`;
     }
-    // ─── Card ao vivo (inclui suspensa) ───────────────────────────────────
 
     function renderLiveCard(match) {
       const team1 = getTeam1Name(match);
@@ -658,8 +640,6 @@
       return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} <div class="match-footer compact-footer match-footer-live"> ${row1Parts.length ? `<div class="match-footer-live-row">${row1Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} ${row2Parts.length ? `<div class="match-footer-live-row">${row2Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} </div> </article>`;
     }
 
-    // ─── Card agendado ────────────────────────────────────────────────────
-
     function createScheduledCard(match) {
       const team1 = getTeam1Name(match);
       const team2 = getTeam2Name(match);
@@ -671,18 +651,13 @@
       return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name team-name-compact">${U.escapeHtml(team1)}</span> <span class="vs-separator">X</span> <span class="player-name team-name-compact">${U.escapeHtml(team2)}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span>` : ""} </div> </article>`;
     }
 
-    // ─── Roteador de cards ────────────────────────────────────────────────
-
-    function createCard(match, forceStatus = null) {
+    function createCard(match) {
       const rawStatus = match.status || "scheduled";
-      const status = forceStatus || U.normalizeStatus(rawStatus);
-
+      const status = U.normalizeStatus(rawStatus);
       if (status === "finished") return renderFinalizedCard(match);
       if (status === "live" || rawStatus === "suspended") return renderLiveCard(match);
       return createScheduledCard(match);
     }
-
-    // ─── Filtro e renderização ────────────────────────────────────────────
 
     function getActiveFilter() {
       const saved = U.getSavedFilter();
@@ -693,113 +668,96 @@
     function applyFilterAndRender(matches) {
       const filter = getActiveFilter();
       const isMobile = U.isMobile();
-      const now = Date.now();
-    
+
       const scheduled = [];
       const live = [];
       const finished = [];
-    
+
       matches.forEach((m) => {
         const rawStatus = String(m.status || "scheduled").trim().toLowerCase();
-        const mid = m.id || m.matchId || "";
-    
-        if (rawStatus === "finished") {
-          delete state.finishedPending[mid];
-          finished.push({ match: m, forceStatus: null });
-        } else if (rawStatus === "wo") {
-          delete state.finishedPending[mid];
-          finished.push({ match: m, forceStatus: null });
-        } else if (rawStatus === "live") {
-          delete state.finishedPending[mid];
-          live.push({ match: m, forceStatus: null });
-        } else if (rawStatus === "suspended") {
-          delete state.finishedPending[mid];
-          live.push({ match: m, forceStatus: null });
-        } else {
-          scheduled.push({ match: m, forceStatus: null });
-        }
+
+        if (rawStatus === "finished" || rawStatus === "wo") finished.push(m);
+        else if (rawStatus === "live" || rawStatus === "suspended") live.push(m);
+        else scheduled.push(m);
       });
-    
-      scheduled.sort((a, b) =>
-        (U.toDate(a.match.matchDateTime)?.getTime() || 0) -
-        (U.toDate(b.match.matchDateTime)?.getTime() || 0)
-      );
-    
-      live.sort((a, b) =>
-        (U.getStartedAtMs(a.match) || 0) - (U.getStartedAtMs(b.match) || 0)
-      );
-    
+
+      scheduled.sort((a, b) => (U.toDate(a.matchDateTime)?.getTime() || 0) - (U.toDate(b.matchDateTime)?.getTime() || 0));
+      live.sort((a, b) => (U.getStartedAtMs(a) || 0) - (U.getStartedAtMs(b) || 0));
       finished.sort((a, b) => {
-        const fa = U.toDate(a.match.finishedAt)?.getTime() || U.getStartedAtMs(a.match) || 0;
-        const fb = U.toDate(b.match.finishedAt)?.getTime() || U.getStartedAtMs(b.match) || 0;
+        const fa = U.toDate(a.finishedAt)?.getTime() || U.getStartedAtMs(a) || 0;
+        const fb = U.toDate(b.finishedAt)?.getTime() || U.getStartedAtMs(b) || 0;
         return fb - fa;
       });
-    
+
       const visScheduled = filter === "all" || filter === "scheduled"
         ? (isMobile ? scheduled : scheduled.slice(0, 7))
         : [];
-    
+
       const visLive = filter === "all" || filter === "live"
         ? (isMobile ? live : live.slice(0, 3))
         : [];
-    
+
       const visFinished = filter === "all" || filter === "finished"
         ? (isMobile ? finished : finished.slice(0, 4))
         : [];
-    
+
       if (el.countScheduled) el.countScheduled.textContent = scheduled.length;
       if (el.countLive) el.countLive.textContent = live.length;
       if (el.countFinished) el.countFinished.textContent = finished.length;
-    
+
       if (el.scheduledList) {
         el.scheduledList.innerHTML = visScheduled.length
-          ? visScheduled.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
+          ? visScheduled.map((match) => createCard(match)).join("")
           : renderEmpty("Nenhum jogo do dia");
       }
-    
+
       if (el.liveList) {
         el.liveList.innerHTML = visLive.length
-          ? visLive.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
+          ? visLive.map((match) => createCard(match)).join("")
           : renderEmpty("Nenhuma partida em andamento");
       }
-    
+
       if (el.finishedList) {
         el.finishedList.innerHTML = visFinished.length
-          ? visFinished.map(({ match, forceStatus }) => createCard(match, forceStatus)).join("")
+          ? visFinished.map((match) => createCard(match)).join("")
           : renderEmpty("Nenhuma partida finalizada");
       }
     }
+
     function renderLists(matches) {
       applyFilterAndRender(matches);
     }
 
-    // ─── Firestore ────────────────────────────────────────────────────────
+    function listenPublicMatches() {
+      state.unsubscribe?.();
+      state.unsubscribe = null;
 
-    function listenMatches(currentUser) {
-      if (!currentUser) {
+      if (!ownerId) {
         [el.scheduledList, el.liveList, el.finishedList].forEach(
-          (e) => e && (e.innerHTML = renderEmpty("Usuário não autenticado"))
+          (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o identificador do usuário."))
         );
         return;
       }
 
-      state.unsubscribe?.();
-      state.unsubscribe = null;
+      if (!shareToken) {
+        [el.scheduledList, el.liveList, el.finishedList].forEach(
+          (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o token de compartilhamento."))
+        );
+        return;
+      }
 
       state.unsubscribe = db.collection("matches")
-        .where("ownerId", "==", currentUser.uid)
+        .where("ownerId", "==", ownerId)
+        .where("shareEnabled", "==", true)
         .onSnapshot(
           (snapshot) => {
             state.cachedMatches = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            state.cachedMatches.sort(
-              (a, b) => (U.getStartedAtMs(a) || 0) - (U.getStartedAtMs(b) || 0)
-            );
             renderLists(state.cachedMatches);
           },
           (err) => {
-            console.error("Erro ao carregar partidas:", err);
+            console.error("Erro ao carregar partidas públicas:", err);
             [el.scheduledList, el.liveList, el.finishedList].forEach(
-              (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos"))
+              (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos públicos"))
             );
           }
         );
@@ -808,8 +766,6 @@
     function refreshLiveDurations() {
       if (state.cachedMatches.length) renderLists(state.cachedMatches);
     }
-
-    // ─── Filtro ───────────────────────────────────────────────────────────
 
     function initFilter() {
       if (!el.filter) return;
@@ -820,27 +776,10 @@
       });
     }
 
-    // ─── Init ─────────────────────────────────────────────────────────────
-
     function init() {
       injectInlineStyles();
       initFilter();
-
-      if (typeof __auth === "undefined") {
-        console.error("Firebase Auth não carregado.");
-        return;
-      }
-
-      __auth.onAuthStateChanged((user) => {
-        if (!user) {
-          [el.scheduledList, el.liveList, el.finishedList].forEach(
-            (e) => e && (e.innerHTML = renderEmpty("Usuário não autenticado"))
-          );
-          return;
-        }
-        listenMatches(user);
-      });
-
+      listenPublicMatches();
       state.timer = setInterval(refreshLiveDurations, 1000);
     }
 
