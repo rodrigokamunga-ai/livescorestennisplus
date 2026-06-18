@@ -254,8 +254,8 @@
   .match-board[data-status="finished"] .match-footer-finalized,
   .match-board[data-status="finished"] .match-footer-finalized .footer-item,
   .match-board[data-status="finished"] .match-footer-finalized strong {
-    font-size: 12px !important;
-    line-height: 1.25 !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
   }
 
   /* Em andamento/suspenso: textos do rodapé */
@@ -263,8 +263,8 @@
   .match-board[data-status="suspended"] .match-footer-live,
   .match-board[data-status="live"] .match-footer-live strong,
   .match-board[data-status="suspended"] .match-footer-live strong {
-    font-size: 12px !important;
-    line-height: 1.25 !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
   }
 }
 
