@@ -1306,3 +1306,62 @@ body.admin-page #scoreTieBreakSet3Wrapper {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ========================================================= MOBILE — Resumo da partida com valores lado a lado ========================================================= */
+
+@media (max-width: 768px) {
+  body.admin-page .detail-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  body.admin-page .detail-summary-card {
+    min-width: 0;
+  }
+
+  body.admin-page .detail-summary-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  body.admin-page .detail-summary-line span {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.admin-page .detail-summary-line strong {
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (max-width: 480px) {
+  body.admin-page .detail-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  body.admin-page .detail-summary-card {
+    padding: 10px;
+  }
+
+  body.admin-page .detail-summary-line {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 7px 8px;
+  }
+
+  body.admin-page .detail-summary-line span {
+    font-size: 0.76rem;
+  }
+
+  body.admin-page .detail-summary-line strong {
+    font-size: 0.9rem;
+  }
+}
