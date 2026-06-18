@@ -21,12 +21,6 @@
   <main class="container dashboard-container">
 
     <div class="mobile-filters">
-      <div class="mobile-filters-header">
-        <button type="button" class="back-btn" id="backToMenuBtn" aria-label="Voltar para o menu">
-          ←
-        </button>
-      </div>
-
       <label for="liveStatusFilter" class="filter-label mobile-filters-label">
         Filtrar partidas
       </label>
@@ -81,8 +75,6 @@
 
   <script src="js/firebase.js"></script>
   <script src="js/public.js"></script>
-
-  <script> document.getElementById("backToMenuBtn").addEventListener("click", () => { window.location.href = "menu.html"; }); </script>
 
   <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
