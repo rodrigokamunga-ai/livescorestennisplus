@@ -531,29 +531,33 @@
 
     async function loadTodayAlerts(user) {
       if (!el.alertBadge || !el.alertModalBody || !user?.uid) return;
-
+    
       try {
         const db = getDb();
         if (!db) {
           renderAlerts([]);
           return;
         }
-
+    
         const now = new Date();
         const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
+    
         const matches = [];
-        const snapshot = await db.collection(COLLECTION_NAME).get();
-
+    
+        const snapshot = await db.collection(COLLECTION_NAME)
+          .where("ownerId", "==", user.uid)
+          .get();
+    
         snapshot.forEach((doc) => {
           const data = doc.data() || {};
-          if (data.ownerId !== user.uid) return;
-
+    
           const rawDate = pickDate(data);
           if (normalizeDateOnly(rawDate) !== today) return;
-
-          const normalizedTime = normalizeTime(pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : ""));
-
+    
+          const normalizedTime = normalizeTime(
+            pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : "")
+          );
+    
           matches.push({
             id: doc.id,
             jogador1: pickPlayer1(data),
@@ -567,7 +571,7 @@
             playersHTML: formatPlayersLine(data)
           });
         });
-
+    
         matches.sort((a, b) => a.horaPartida.localeCompare(b.horaPartida));
         currentAlertsSignature = getAlertsSignature(matches);
         renderAlerts(matches);
@@ -578,7 +582,6 @@
         renderAlerts([]);
       }
     }
-
     // ─── Eventos ──────────────────────────────────────────────────────────
 
     function bindEvents() {
