@@ -1090,51 +1090,88 @@
 
     function getSetDisplayFromHistory(setObj) {
       if (!setObj) return { text: "--" };
-
+    
       const g1 = Number(setObj.games1 ?? 0);
       const g2 = Number(setObj.games2 ?? 0);
       const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
       const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
       const mode = String(setObj.tieBreakMode || "").trim();
-
-      if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
-        return { text: `${tb1}x${tb2} (super tie-break)` };
+      const finalLabel = String(setObj.finalLabel || "").trim();
+    
+      if (finalLabel) {
+        return { text: finalLabel };
       }
-
-      if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
+    
+      // SUPER TIE-BREAK:
+      // exibe como set final, não como "7-10" solto
+      if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
+        const winnerIs1 = tb1 > tb2;
         return {
-          text: `${g1}x${g2} (${tb1}-${tb2})`
+          text: `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`
         };
       }
-
-      return { text: `${g1}x${g2}` };
+    
+      // TIE-BREAK NORMAL
+      if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
+        const winnerIs1 = tb1 > tb2;
+        return {
+          text: `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`
+        };
+      }
+    
+      if (g1 > 0 || g2 > 0) {
+        return { text: `${g1}x${g2}` };
+      }
+    
+      return { text: "--" };
     }
-
+    
+    function cleanSetHistory(setHistory) {
+      const history = Array.isArray(setHistory) ? setHistory : [];
+    
+      const normalizeText = (text) =>
+        String(text || "")
+          .replace(/\((\d+)-(\d+)\)/g, "$1-$2")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+    
+      const seen = new Set();
+      const cleaned = [];
+    
+      for (const item of history) {
+        const display = getSetDisplayFromHistory(item).text;
+        const norm = normalizeText(display);
+    
+        if (!norm || norm === "--") continue;
+        if (seen.has(norm)) continue;
+    
+        seen.add(norm);
+        cleaned.push(item);
+      }
+    
+      return cleaned;
+    }
+    
     function renderScoreBlock(d) {
       const score = U.normalizeScore(d.score || {});
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-
-      const set1 = getSetDisplayFromHistory(history[0]);
-      const set2 = getSetDisplayFromHistory(history[1]);
-      const set3 = getSetDisplayFromHistory(history[2]);
-
+      const history = cleanSetHistory(score.setHistory);
+    
+      const parts = history
+        .map((setObj) => getSetDisplayFromHistory(setObj).text)
+        .filter((t) => t && t !== "--");
+    
+      const placar = parts.join(" • ");
+    
       const duration = getMatchDuration(d);
       const status = String(d?.status || "").trim().toLowerCase();
       const isWO = status === "wo";
       const winnerPos = U.getWinnerPosition(score, d);
       const teamHTML = U.getMatchDisplayHTML(d);
-      const setCount = detectSetCountFromMatch(d);
-
-      const sets = [];
-      if (setCount >= 1 && history[0]) sets.push(set1.text);
-      if (setCount >= 2 && history[1]) sets.push(set2.text);
-      if (setCount >= 3 && history[2]) sets.push(set3.text);
-
-      const placar = sets.join(" • ");
-
+    
       let resultBadge = "";
       let rowClass = "";
-
+    
       if (winnerPos === 1) {
         rowClass = "winner-row";
         resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
@@ -1142,10 +1179,56 @@
         rowClass = "loser-row";
         resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
       }
-
+    
       return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
     }
 
+    function renderScoreBlock(d) {
+  const score = U.normalizeScore(d.score || {});
+  const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+
+  const normalizeText = (text) =>
+    String(text || "")
+      .replace(/\((\d+)-(\d+)\)/g, "$1-$2")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const parts = [];
+  const seen = new Set();
+
+  for (const setObj of history) {
+    const item = getSetDisplayFromHistory(setObj);
+    const text = String(item?.text || "--").trim();
+    if (!text || text === "--") continue;
+
+    const norm = normalizeText(text);
+    if (seen.has(norm)) continue;
+
+    seen.add(norm);
+    parts.push(text);
+  }
+
+  const placar = parts.join(" • ");
+
+  const duration = getMatchDuration(d);
+  const status = String(d?.status || "").trim().toLowerCase();
+  const isWO = status === "wo";
+  const winnerPos = U.getWinnerPosition(score, d);
+  const teamHTML = U.getMatchDisplayHTML(d);
+
+  let resultBadge = "";
+  let rowClass = "";
+
+  if (winnerPos === 1) {
+    rowClass = "winner-row";
+    resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
+  } else if (winnerPos === 2) {
+    rowClass = "loser-row";
+    resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
+  }
+
+  return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
+}
     function renderSummaryBlock(d) {
       const score = U.normalizeScore(d.score || {});
       const totalPoints1 = Number(score.totalPoints1 || 0);
