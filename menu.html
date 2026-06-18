@@ -40,12 +40,12 @@
 
       <div class="menu-grid">
 
-        <a href="public.html" class="menu-app-btn">
+        <a href="#" class="menu-app-btn" id="viewPublicBtn">
           <div class="menu-app-icon">📺</div>
           <div>
             <div class="menu-app-title">Visualização</div>
             <div class="menu-app-subtitle">
-              Tela pública com jogos do dia, em andamento e finalizados.
+              Tela pública com seus jogos do dia, em andamento e finalizados.
             </div>
           </div>
         </a>
@@ -65,7 +65,7 @@
           <div>
             <div class="menu-app-title">Compartilhar</div>
             <div class="menu-app-subtitle">
-              Envie o link da tela pública por WhatsApp, e-mail ou outro app.
+              Envie o link da sua tela pública por WhatsApp, e-mail ou outro app.
             </div>
           </div>
         </a>
@@ -170,6 +170,8 @@
   <script src="js/firebase.js"></script>
   <script src="js/menu.js"></script>
 
-  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
+  
+ 
+
 </body>
 </html>
