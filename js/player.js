@@ -362,79 +362,85 @@
       return labels[index] || `${index + 1}º set`;
     }
 
-    // AJUSTE AQUI
     function buildMatchScoreText(data) {
-      const score = normalizeScore(data.score);
-      const parts = [];
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-      const matchFormat = String(data.matchFormat || data.format || "").toLowerCase();
-    
-      const isOneSetAdSuper =
-        matchFormat.includes("1 set no ad + um super tie-break") ||
-        matchFormat.includes("1 set com vantagem") ||
-        matchFormat.includes("1 set no ad") ||
-        matchFormat.includes("1 set com vantagem + um super tie-break") ||
-        matchFormat.includes("1 set no ad + um super tie-break");
-    
-      function formatSetText(setItem) {
-        const g1 = Number(setItem?.games1 ?? 0);
-        const g2 = Number(setItem?.games2 ?? 0);
-        const tb1 = Number(setItem?.tieBreakPoints1 ?? 0);
-        const tb2 = Number(setItem?.tieBreakPoints2 ?? 0);
-        const mode = String(setItem?.tieBreakMode || "").trim();
-    
-        // Super tie-break
-        if (mode === "super10") {
-          if (tb1 > 0 || tb2 > 0) {
-            return `${tb1}-${tb2}`;
-          }
-          return "";
-        }
-    
-        // Tie-break normal
-        if (mode === "tb7") {
-          if (tb1 > 0 || tb2 > 0) {
-            const setScore = tb1 > tb2 ? "7x6" : "6x7";
-            return `${setScore} (${tb1}-${tb2})`;
-          }
-    
-          // fallback quando o tie-break foi salvo sem os pontos no item
-          if (g1 === 7 && g2 === 6) return "7x6";
-          if (g1 === 6 && g2 === 7) return "6x7";
-          return "";
-        }
-    
-        // Set normal
-        if (g1 > 0 || g2 > 0) {
-          return `${g1}x${g2}`;
-        }
-    
-        return "";
+  const score = normalizeScore(data.score);
+  const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+
+  const formatSetText = (setItem) => {
+    const g1 = Number(setItem?.games1 ?? 0);
+    const g2 = Number(setItem?.games2 ?? 0);
+    const tb1 = Number(setItem?.tieBreakPoints1 ?? 0);
+    const tb2 = Number(setItem?.tieBreakPoints2 ?? 0);
+    const mode = String(setItem?.tieBreakMode || "").trim();
+    const finalLabel = String(setItem?.finalLabel || "").trim();
+
+    if (finalLabel) return finalLabel;
+
+    if (mode === "super10") {
+      if (tb1 > 0 || tb2 > 0) {
+        const winnerIs1 = tb1 > tb2;
+        return `${winnerIs1 ? "7x6" : "6x7"} ${tb1}-${tb2}`;
       }
-    
-      history.forEach((setItem) => {
-        const text = formatSetText(setItem);
-        if (text) parts.push(text);
-      });
-    
-      // Fallback para o caso de um set + super tie-break quando o histórico vier incompleto
-      if (parts.length === 1 && isOneSetAdSuper) {
-        const g1 = Number(score.games1 || 0);
-        const g2 = Number(score.games2 || 0);
-        const tb1 = Number(score.tieBreakPoints1 || score.lastTieBreakPoints1 || 0);
-        const tb2 = Number(score.tieBreakPoints2 || score.lastTieBreakPoints2 || 0);
-    
-        if (g1 > 0 || g2 > 0) {
-          const setText = (tb1 > 0 || tb2 > 0)
-            ? (tb1 > tb2 ? `7x6 (${tb1}-${tb2})` : `6x7 (${tb1}-${tb2})`)
-            : `${g1}x${g2}`;
-    
-          if (!parts.includes(setText)) parts.unshift(setText);
-        }
-      }
-    
-      return parts.length ? parts.join(" • ") : "0x0";
+      return "";
     }
+
+    if (mode === "tb7") {
+      if (tb1 > 0 || tb2 > 0) {
+        const setScore = tb1 > tb2 ? "7x6" : "6x7";
+        return `${setScore} (${tb1}-${tb2})`;
+      }
+
+      if (g1 === 7 && g2 === 6) return "7x6";
+      if (g1 === 6 && g2 === 7) return "6x7";
+      return "";
+    }
+
+    if (g1 > 0 || g2 > 0) {
+      return `${g1}x${g2}`;
+    }
+
+    return "";
+  };
+
+  const parts = [];
+
+  for (const setItem of history) {
+    const text = formatSetText(setItem);
+    if (!text) continue;
+
+    // evita duplicação sequencial
+    if (parts.length && parts[parts.length - 1] === text) continue;
+
+    parts.push(text);
+  }
+
+  const isLive = data.status === "live" || data.status === "suspended";
+  const isTBActive = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
+
+  if (isLive) {
+    if (isTBActive) {
+      const tb1 = Number(score.tieBreakPoints1 || 0);
+      const tb2 = Number(score.tieBreakPoints2 || 0);
+
+      if (tb1 > 0 || tb2 > 0) {
+        if (score.tieBreakMode === "super10") {
+          parts.push(`${tb1}-${tb2}`);
+        } else {
+          parts.push(tb1 > tb2 ? `7x6 (${tb1}-${tb2})` : `6x7 (${tb1}-${tb2})`);
+        }
+      }
+    } else {
+      const g1 = Number(score.games1 || 0);
+      const g2 = Number(score.games2 || 0);
+
+      if (g1 > 0 || g2 > 0) {
+        parts.push(`${g1}x${g2}`);
+      }
+    }
+  }
+
+  return parts.length ? parts.join(" • ") : "0x0";
+}
     function buildLastActionSnapshot(data) {
       return {
         score: cloneDeep(data.score || defaultScore()),
@@ -650,6 +656,78 @@
       }
     }
 
+    function buildFinalSetHistory(score, data) {
+      const s = normalizeScore(score);
+      const history = Array.isArray(s.setHistory) ? [...s.setHistory] : [];
+
+      const dedupeKey = (item) => {
+        const mode = String(item?.tieBreakMode || "");
+        const g1 = Number(item?.games1 ?? 0);
+        const g2 = Number(item?.games2 ?? 0);
+        const tb1 = Number(item?.tieBreakPoints1 ?? 0);
+        const tb2 = Number(item?.tieBreakPoints2 ?? 0);
+        const label = String(item?.finalLabel || "");
+        return `${mode}|${g1}|${g2}|${tb1}|${tb2}|${label}`;
+      };
+
+      const seen = new Set();
+      const cleanedHistory = [];
+      for (const item of history) {
+        const key = dedupeKey(item);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        cleanedHistory.push(item);
+      }
+
+      const isSuperTB = s.lastTieBreakMode === "super10" || s.tieBreakMode === "super10";
+      const isTB7 = s.lastTieBreakMode === "tb7" || s.tieBreakMode === "tb7";
+
+      if (isSuperTB) {
+        const tb1 = Number(s.lastTieBreakPoints1 || s.tieBreakPoints1 || 0);
+        const tb2 = Number(s.lastTieBreakPoints2 || s.tieBreakPoints2 || 0);
+        const winnerIs1 = tb1 > tb2;
+
+        cleanedHistory.push({
+          games1: winnerIs1 ? 7 : 6,
+          games2: winnerIs1 ? 6 : 7,
+          tieBreakMode: "super10",
+          tieBreakPoints1: tb1,
+          tieBreakPoints2: tb2,
+          finalLabel: `${winnerIs1 ? "7x6" : "6x7"} ${tb1}-${tb2}`
+        });
+
+        return cleanedHistory;
+      }
+
+      if (isTB7) {
+        const tb1 = Number(s.lastTieBreakPoints1 || s.tieBreakPoints1 || 0);
+        const tb2 = Number(s.lastTieBreakPoints2 || s.tieBreakPoints2 || 0);
+
+        cleanedHistory.push({
+          games1: 7,
+          games2: 6,
+          tieBreakMode: "tb7",
+          tieBreakPoints1: tb1,
+          tieBreakPoints2: tb2,
+          finalLabel: `7x6 (${tb1}-${tb2})`
+        });
+
+        return cleanedHistory;
+      }
+
+      if (Number(s.games1 || 0) > 0 || Number(s.games2 || 0) > 0) {
+        cleanedHistory.push({
+          games1: Number(s.games1 || 0),
+          games2: Number(s.games2 || 0),
+          tieBreakMode: null,
+          tieBreakPoints1: 0,
+          tieBreakPoints2: 0
+        });
+      }
+
+      return cleanedHistory;
+    }
+
     async function registerPoint(winnerPos) {
       if (!id) return;
       const ref = __db.collection("matches").doc(id);
@@ -691,6 +769,10 @@
         const winner = typeof getMatchWinner === "function"
           ? getMatchWinner(score, data.matchFormat)
           : result.winner || 0;
+
+        if (finished) {
+          score.setHistory = buildFinalSetHistory(score, data);
+        }
 
         await ref.update({
           lastAction,
@@ -794,6 +876,10 @@
         const winner = typeof getMatchWinner === "function"
           ? getMatchWinner(score, data.matchFormat)
           : 0;
+
+        if (finished) {
+          score.setHistory = buildFinalSetHistory(score, data);
+        }
 
         await ref.update({
           lastAction,
@@ -1011,6 +1097,8 @@
           const score = normalizeScore(data.score);
           const finishedAt = firebase.firestore.Timestamp.now();
 
+          score.setHistory = buildFinalSetHistory(score, data);
+
           await ref.update({
             lastAction,
             status: data.winnerByWO ? "wo" : "finished",
@@ -1087,10 +1175,12 @@
             lastAction: null,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
+
           if (prev.status !== "live") {
             liveStartedAtMs = null;
             stopTimer();
           }
+
           setMsg("Última ação desfeita.", "info");
         } catch (err) {
           console.error(err);
