@@ -9,13 +9,8 @@
     const BIOMETRIC_SESSION_KEY = "lsts_biometric_session";
     const BIOMETRIC_UID_KEY = "lsts_biometric_uid";
     const BIOMETRIC_CURRENT_KEY = "lsts_biometric_current";
+    const SHARE_TOKEN_KEY_PREFIX = "lsts_share_token_";
 
-    // URL pública gerada de forma relativa, evitando 404 em hospedagem em subpasta
-    function getPublicUrl() {
-      return new URL("index.html", window.location.href).href;
-    }
-
-    // Imagem padrão sempre com URL absoluta
     const DEFAULT_AVATAR_URL = new URL("img/perfil-padrao.png", window.location.href).href;
 
     const el = {
@@ -33,12 +28,15 @@
       closeAlertModalBtn2: document.getElementById("closeAlertModalBtn2"),
       logoutBtnBottom: document.getElementById("logoutBtnBottom"),
       sharePublicBtn: document.getElementById("sharePublicBtn"),
-      profileAvatar: document.getElementById("menuProfileAvatar")
+      profileAvatar: document.getElementById("menuProfileAvatar"),
+      viewPublicBtn:
+        document.getElementById("viewPublicBtn") ||
+        document.querySelector('a[href="public.html"]')
     };
 
     let currentAlertsSignature = "";
 
-    // ─── Helpers ──────────────────────────────────────────────────────────
+    // ─── Helpers gerais ──────────────────────────────────────────────────
 
     function normalizeEmail(email = "") {
       return String(email).trim().toLowerCase();
@@ -120,8 +118,6 @@
       }
     }
 
-    // ─── Foto do perfil ───────────────────────────────────────────────────
-
     function setDefaultAvatar() {
       if (el.profileAvatar) {
         el.profileAvatar.src = DEFAULT_AVATAR_URL;
@@ -138,7 +134,6 @@
           return;
         }
 
-        // garante fallback antes de tentar carregar a foto real
         el.profileAvatar.onerror = () => {
           el.profileAvatar.src = DEFAULT_AVATAR_URL;
         };
@@ -160,8 +155,6 @@
       }
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────
-
     async function doLogout() {
       try {
         localStorage.removeItem(SESSION_KEY);
@@ -178,43 +171,197 @@
       }
     }
 
-    // ─── Compartilhar ─────────────────────────────────────────────────────
+    // ─── Token de compartilhamento ───────────────────────────────────────
 
-    async function sharePublicLink() {
+    function makeToken() {
+      if (window.crypto?.randomUUID) return crypto.randomUUID().replace(/-/g, "");
+      return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+    }
+
+    function getTokenCacheKey(uid) {
+      return `${SHARE_TOKEN_KEY_PREFIX}${uid}`;
+    }
+
+    function buildPublicUrl(user, shareToken) {
+      const url = new URL("public.html", window.location.href);
+      url.searchParams.set("ownerId", user.uid);
+      url.searchParams.set("shareToken", shareToken);
+      return url.href;
+    }
+
+    async function copySilently(text) {
       try {
-        // aqui a URL é montada corretamente conforme a pasta atual do site
-        const PUBLIC_URL = getPublicUrl();
-
-        const shareData = {
-          title: "Live Scores Tennis",
-          text: "Acesse a tela pública do sistema:",
-          url: PUBLIC_URL
-        };
-
-        if (navigator.share) {
-          await navigator.share(shareData);
-          return;
-        }
-
-        if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(PUBLIC_URL);
-          alert("Link da tela pública copiado!");
-          return;
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
         }
 
         const tmp = document.createElement("input");
-        tmp.value = PUBLIC_URL;
+        tmp.value = text;
         tmp.setAttribute("readonly", "");
-        tmp.style.cssText = "position:fixed;left:-9999px";
+        tmp.style.cssText = "position:fixed;left:-9999px;top:-9999px;opacity:0";
         document.body.appendChild(tmp);
         tmp.select();
-        tmp.setSelectionRange(0, 99999);
         document.execCommand("copy");
         document.body.removeChild(tmp);
-        alert("Link da tela pública copiado!");
+        return true;
       } catch (err) {
-        console.error("Erro ao compartilhar:", err);
-        alert("Não foi possível compartilhar o link.");
+        console.error("Erro ao copiar link:", err);
+        return false;
+      }
+    }
+
+    async function ensureShareTokenForUser(user) {
+      const db = getDb();
+      if (!db || !user?.uid) return null;
+
+      const cacheKey = getTokenCacheKey(user.uid);
+      const cachedToken = localStorage.getItem(cacheKey);
+      if (cachedToken) return cachedToken;
+
+      try {
+        // 1) tenta pegar de profiles/{uid}
+        const profileRef = db.collection("profiles").doc(user.uid);
+        const profileSnap = await profileRef.get();
+        const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
+
+        if (String(profileData.shareToken || "").trim()) {
+          const token = String(profileData.shareToken).trim();
+          localStorage.setItem(cacheKey, token);
+          return token;
+        }
+
+        // 2) tenta pegar de alguma partida pública do usuário
+        const matchesSnap = await db.collection(COLLECTION_NAME)
+          .where("ownerId", "==", user.uid)
+          .where("shareEnabled", "==", true)
+          .limit(1)
+          .get();
+
+        let token = String(profileData.shareToken || "").trim() || "";
+
+        if (!token && !matchesSnap.empty) {
+          const data = matchesSnap.docs[0].data() || {};
+          token = String(data.shareToken || "").trim();
+        }
+
+        // 3) se ainda não existir, cria um novo
+        if (!token) token = makeToken();
+
+        // grava em profiles/{uid} para persistir
+        await profileRef.set({
+          shareToken: token,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        // opcional: grava também nas partidas públicas do usuário sem token
+        const allPublicSnap = await db.collection(COLLECTION_NAME)
+          .where("ownerId", "==", user.uid)
+          .where("shareEnabled", "==", true)
+          .get();
+
+        if (!allPublicSnap.empty) {
+          const batch = db.batch();
+          allPublicSnap.forEach((doc) => {
+            const data = doc.data() || {};
+            if (!String(data.shareToken || "").trim()) {
+              batch.update(doc.ref, {
+                shareToken: token,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            }
+          });
+          await batch.commit();
+        }
+
+        localStorage.setItem(cacheKey, token);
+        return token;
+      } catch (error) {
+        console.error("Erro ao garantir shareToken:", error);
+        return null;
+      }
+    }
+
+    // ─── Botões da tela pública ───────────────────────────────────────────
+
+    async function setupPublicButtons(user) {
+      if (!el.sharePublicBtn && !el.viewPublicBtn) return;
+
+      if (!user) {
+        if (el.sharePublicBtn) {
+          el.sharePublicBtn.style.pointerEvents = "none";
+          el.sharePublicBtn.style.opacity = "0.6";
+          el.sharePublicBtn.title = "Você precisa estar autenticado para compartilhar";
+        }
+
+        if (el.viewPublicBtn) {
+          el.viewPublicBtn.style.pointerEvents = "none";
+          el.viewPublicBtn.style.opacity = "0.6";
+          el.viewPublicBtn.title = "Você precisa estar autenticado para visualizar sua tela pública";
+        }
+        return;
+      }
+
+      if (el.sharePublicBtn) {
+        el.sharePublicBtn.style.pointerEvents = "";
+        el.sharePublicBtn.style.opacity = "";
+        el.sharePublicBtn.title = "Compartilhar sua tela pública";
+      }
+
+      if (el.viewPublicBtn) {
+        el.viewPublicBtn.style.pointerEvents = "";
+        el.viewPublicBtn.style.opacity = "";
+        el.viewPublicBtn.title = "Abrir sua tela pública";
+      }
+
+      const token = await ensureShareTokenForUser(user);
+      if (!token) {
+        const fallbackUrl = new URL("public.html", window.location.href);
+        fallbackUrl.searchParams.set("ownerId", user.uid);
+
+        if (el.viewPublicBtn) {
+          el.viewPublicBtn.href = fallbackUrl.href;
+        }
+
+        if (el.sharePublicBtn) {
+          el.sharePublicBtn.onclick = async (e) => {
+            e.preventDefault();
+            await copySilently(fallbackUrl.href);
+          };
+        }
+        return;
+      }
+
+      const publicUrl = buildPublicUrl(user, token);
+
+      if (el.viewPublicBtn) {
+        el.viewPublicBtn.href = publicUrl;
+      }
+
+      if (el.sharePublicBtn) {
+        el.sharePublicBtn.onclick = async (e) => {
+          e.preventDefault();
+
+          try {
+            if (navigator.share) {
+              try {
+                await navigator.share({
+                  title: "Tela Pública - TennisPro",
+                  text: "Acesse minha tela pública de partidas do TennisPro:",
+                  url: publicUrl
+                });
+                return;
+              } catch (shareError) {
+                if (shareError && shareError.name === "AbortError") return;
+              }
+            }
+
+            await copySilently(publicUrl);
+          } catch (error) {
+            console.error("Erro ao compartilhar:", error);
+            await copySilently(publicUrl);
+          }
+        };
       }
     }
 
@@ -236,7 +383,7 @@
       if (el.headerUserSubtitle) el.headerUserSubtitle.textContent = "Acesso rápido às áreas do sistema";
     }
 
-    // ─── Modal de alertas ─────────────────────────────────────────────────
+    // ─── Alertas ─────────────────────────────────────────────────────────
 
     function openAlertModal() {
       if (el.alertModalOverlay) {
@@ -268,7 +415,7 @@
       el.alertBadge.textContent = count > 9 ? "9+" : String(count);
     }
 
-    // ─── Helpers de data/hora ─────────────────────────────────────────────
+    // ─── Data/Hora ───────────────────────────────────────────────────────
 
     function normalizeTime(value) {
       if (!value) return "--:--";
@@ -330,7 +477,7 @@
       return "";
     }
 
-    // ─── Helpers de partida ───────────────────────────────────────────────
+    // ─── Partidas / alertas ───────────────────────────────────────────────
 
     const pickPlayer1 = (d) => d.player1 || d.nomeJogador1 || d.jogador1 || d.player || d.jogador || "Jogador";
     const pickPlayer2 = (d) => d.player2 || d.nomeJogador2 || d.jogador2 || d.adversario || d.nomeAdversario || "Adversário";
@@ -342,7 +489,7 @@
     function getMatchDateTimeLabel(data) {
       const rawDate = pickDate(data);
       const dateBR = formatDateBR(rawDate);
-      const time = normalizeTime(pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : ""));
+      const time = normalizeTime(pickTime(rawDate ? rawDate : null) || (rawDate ? String(rawDate).slice(11, 16) : ""));
       return dateBR ? `${dateBR} - ${time}` : "";
     }
 
@@ -355,7 +502,7 @@
       const p1 = pickPlayer1(data), p2 = pickPlayer2(data);
       const p3 = pickPlayer3(data), p4 = pickPlayer4(data);
       if (isDoublesMatch(data)) {
-        return `<div class="alert-game-teams"><div class="alert-team-line">${p1}/${p2} X</div><div class="alert-team-line">${p3}/${p4}</div></div>`;
+        return `<div class="alert-game-teams"><div class="alert-team-line">${p1}/${p2}</div><div class="alert-team-line">${p3}/${p4}</div></div>`;
       }
       return `<div class="alert-game-title">${p1} X ${p2}</div>`;
     }
@@ -445,11 +592,6 @@
 
       el.logoutBtnBottom?.addEventListener("click", doLogout);
 
-      el.sharePublicBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        sharePublicLink();
-      });
-
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeAlertModal();
       });
@@ -459,8 +601,6 @@
 
     async function init() {
       bindEvents();
-
-      // já deixa uma imagem padrão visível no carregamento
       setDefaultAvatar();
 
       const auth = getAuth();
@@ -473,11 +613,6 @@
         const localSession = hasLocalSession();
         const biometricSession = hasBiometricSession();
 
-        console.log("[menu] onAuthStateChanged user:", user ? user.uid : null,
-          "localSession:", localSession,
-          "biometricSession:", biometricSession
-        );
-
         if (user) {
           setWelcome(user);
 
@@ -487,7 +622,8 @@
 
           await Promise.allSettled([
             loadProfileAvatar(user),
-            loadTodayAlerts(user)
+            loadTodayAlerts(user),
+            setupPublicButtons(user)
           ]);
 
           return;
@@ -505,7 +641,8 @@
 
             await Promise.allSettled([
               loadProfileAvatar(fallbackUser),
-              loadTodayAlerts(fallbackUser)
+              loadTodayAlerts(fallbackUser),
+              setupPublicButtons(fallbackUser)
             ]);
 
             return;
