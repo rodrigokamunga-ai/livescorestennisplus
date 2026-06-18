@@ -1501,6 +1501,7 @@
             ownerId: state.currentUser?.uid || "",
             ownerEmail: state.currentUser?.email || "",
             ownerName: player1Name,
+          
             modality: selectedModality,
             categoryName: el.categoryName?.value.trim() || "",
             tournamentName: el.tournamentName?.value.trim() || "",
@@ -1510,21 +1511,37 @@
             matchDateTime: el.matchDateTime?.value || "",
             court: el.court?.value.trim() || "",
             tournamentStage: el.tournamentStage?.value.trim() || "",
+          
             player1: player1Name,
             player2: el.player2?.value.trim() || "",
             player3: isDoubles ? (el.player3?.value.trim() || "") : "",
             player4: isDoubles ? (el.player4?.value.trim() || "") : "",
+          
             probPlayer1: 50,
             probPlayer2: 50,
             winnerByWO: woWinner,
             status: woWinner ? "wo" : selectedStatus,
             score: finalScore,
+          
             durationSeconds: isEditing ? (previousData.durationSeconds || 0) : 0,
             startedAt: isEditing ? (previousData.startedAt || null) : null,
             finishedAt: isEditing ? (previousData.finishedAt || null) : null,
             accumulatedSeconds: isEditing ? (previousData.accumulatedSeconds || 0) : 0,
-            matchId: isEditing ? (previousData.matchId || `JOGO-${Date.now().toString().slice(-6)}`) : `JOGO-${Date.now().toString().slice(-6)}`,
-            publicLinkId: isEditing ? (previousData.publicLinkId || (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8))) : (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8)),
+          
+            matchId: isEditing
+              ? (previousData.matchId || `JOGO-${Date.now().toString().slice(-6)}`)
+              : `JOGO-${Date.now().toString().slice(-6)}`,
+          
+            publicLinkId: isEditing
+              ? (previousData.publicLinkId || (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8)))
+              : (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : String(Date.now()).slice(-8)),
+          
+            // campos públicos
+            shareEnabled: true,
+            shareToken: isEditing
+              ? (previousData.shareToken || (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : String(Date.now()).slice(-8)))
+              : (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : String(Date.now()).slice(-8)),
+          
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           };
 
