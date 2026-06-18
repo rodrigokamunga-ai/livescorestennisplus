@@ -252,39 +252,106 @@
         return "";
       },
 
+      cleanSetHistory(setHistory) {
+        const history = Array.isArray(setHistory) ? setHistory : [];
+
+        const normalizeText = (text) =>
+          String(text || "")
+            .replace(/\((\d+)-(\d+)\)/g, "$1-$2")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
+        const seen = new Set();
+        const cleaned = [];
+
+        for (const item of history) {
+          if (!item) continue;
+
+          const g1 = Number(item?.games1 || 0);
+          const g2 = Number(item?.games2 || 0);
+          const tb1 = Number(item?.tieBreakPoints1 || 0);
+          const tb2 = Number(item?.tieBreakPoints2 || 0);
+          const mode = String(item?.tieBreakMode || "").trim();
+          const finalLabel = String(item?.finalLabel || "").trim();
+
+          let text = "";
+
+          if (finalLabel) {
+            text = finalLabel;
+          } else if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
+            const winnerIs1 = tb1 > tb2;
+            text = `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
+          } else if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
+            const winnerIs1 = tb1 > tb2;
+            text = `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
+          } else if (g1 > 0 || g2 > 0) {
+            text = `${g1}x${g2}`;
+          }
+
+          text = String(text || "").trim();
+          if (!text || text === "--") continue;
+
+          const norm = normalizeText(text);
+          if (seen.has(norm)) continue;
+
+          seen.add(norm);
+          cleaned.push(item);
+        }
+
+        return cleaned;
+      },
+
       getScoreLabel(match) {
         const score = U.normalizeScore(match.score || {});
         const status = U.normalizeText(match.status);
 
         if (status === "wo") return "WO";
 
-        const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+        const history = U.cleanSetHistory(score.setHistory);
 
-        if (history.length) {
-          return history
-            .map((setObj) => {
-              const g1 = Number(setObj?.games1 || 0);
-              const g2 = Number(setObj?.games2 || 0);
-              const tb1 = Number(setObj?.tieBreakPoints1 || 0);
-              const tb2 = Number(setObj?.tieBreakPoints2 || 0);
-              const isTB =
-                setObj?.tieBreakMode === "tb7" || setObj?.tieBreakMode === "super10";
+        const getSetText = (setObj) => {
+          if (!setObj) return "";
 
-              if (isTB && setObj?.tieBreakMode === "tb7") {
-                const setWinnerIsP1 = tb1 > tb2;
-                return `${setWinnerIsP1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
-              }
+          const g1 = Number(setObj?.games1 || 0);
+          const g2 = Number(setObj?.games2 || 0);
+          const tb1 = Number(setObj?.tieBreakPoints1 || 0);
+          const tb2 = Number(setObj?.tieBreakPoints2 || 0);
+          const mode = String(setObj?.tieBreakMode || "").trim();
+          const finalLabel = String(setObj?.finalLabel || "").trim();
 
-              if (isTB && setObj?.tieBreakMode === "super10") {
-                return `${tb1}-${tb2}`;
-              }
+          if (finalLabel) return finalLabel;
 
-              return `${g1}x${g2}`;
-            })
-            .join(" ");
+          if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
+            const winnerIs1 = tb1 > tb2;
+            return `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
+          }
+
+          if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
+            const winnerIs1 = tb1 > tb2;
+            return `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
+          }
+
+          if (g1 > 0 || g2 > 0) {
+            return `${g1}x${g2}`;
+          }
+
+          return "";
+        };
+
+        const parts = history
+          .map(getSetText)
+          .filter((t) => t && t !== "--");
+
+        if (parts.length) {
+          return parts.join(" • ");
         }
 
-        return `${score.sets1}x${score.sets2}`;
+        if (score.sets1 > 0 || score.sets2 > 0) {
+          return `${score.sets1}x${score.sets2}`;
+        }
+
+        return "--";
       },
 
       isMatchForLoggedUser(match, currentUser) {
@@ -446,11 +513,6 @@
         const stage = U.normalizeText(m.tournamentStage || "");
         if (!TOURNAMENT_STAGES.has(stage)) return;
 
-        // Conta o torneio considerando:
-        // - fase do torneio válida
-        // - ano
-        // - nome do torneio
-        // - formato do jogo (Simples / Duplas / Duplas Mistas)
         const tournamentName = U.normalizeText(String(m.tournamentName || "").trim());
         const year = U.toDate(m.matchDateTime)?.getFullYear() || "";
         const gameFormat = U.normalizeText(U.getGameFormat(m));
