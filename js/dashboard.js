@@ -829,12 +829,15 @@
 
     function toggleFilters() {
       state.filtersCollapsed = !state.filtersCollapsed;
-
+    
       if (el.filtersWrap) {
         el.filtersWrap.style.display = state.filtersCollapsed ? "none" : "grid";
       }
-
+    
+      const icon = el.toggleFiltersBtn?.querySelector(".career-bottom-icon");
       const label = el.toggleFiltersBtn?.querySelector(".career-bottom-label");
+    
+      if (icon) icon.textContent = state.filtersCollapsed ? "🔎" : "📋";
       if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
     }
 
@@ -907,11 +910,13 @@
       applyResponsiveMode();
 
       state.filtersCollapsed = true;
-      if (el.filtersWrap) el.filtersWrap.style.display = "none";
+if (el.filtersWrap) el.filtersWrap.style.display = "none";
 
-      const label = el.toggleFiltersBtn?.querySelector(".career-bottom-label");
-      if (label) label.textContent = "Filtros";
+const icon = el.toggleFiltersBtn?.querySelector(".career-bottom-icon");
+const label = el.toggleFiltersBtn?.querySelector(".career-bottom-label");
 
+if (icon) icon.textContent = "🔎";
+if (label) label.textContent = "Filtros";
       if (typeof __db === "undefined" && typeof firebase === "undefined") {
         setMessage("Firebase não carregado corretamente.");
         return;
