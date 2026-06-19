@@ -39,7 +39,8 @@
 
           <label class="btn-upload" for="photoFile">📷 Escolher foto</label>
 
-          <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none" />
+          <!-- removido capture para permitir galeria e câmera -->
+          <input type="file" id="photoFile" accept="image/*" style="display:none" />
 
           <span id="photoFileName">Nenhum arquivo selecionado</span>
 
@@ -53,6 +54,11 @@
 
         <!-- Informações pessoais -->
         <div class="profile-section-title">Informações pessoais</div>
+
+        <div class="form-group">
+          <label for="playerId">ID do Jogador</label>
+          <input type="text" id="playerId" readonly />
+        </div>
 
         <label>Nome do jogador
           <input type="text" id="displayName" readonly />
