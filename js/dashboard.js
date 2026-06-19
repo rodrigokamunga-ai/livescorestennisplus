@@ -839,6 +839,16 @@
     
       if (icon) icon.textContent = state.filtersCollapsed ? "🔎" : "📋";
       if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
+    
+      // Ao abrir os filtros, leva a tela para o topo total
+      if (!state.filtersCollapsed) {
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        }, 50);
+      }
     }
 
     // ─── Eventos ──────────────────────────────────────────────────────────
