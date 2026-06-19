@@ -31,24 +31,27 @@
       </div>
 
       <!-- Foto de perfil -->
-      <div class="profile-avatar-wrap">
-        <img id="avatarPreview" class="profile-avatar-img" src="img/perfil-padrao.png" alt="Foto de perfil" />
+<div class="profile-avatar-wrap">
+  <img id="avatarPreview" class="profile-avatar-img" src="img/perfil-padrao.png" alt="Foto de perfil" />
 
-        <div class="profile-avatar-info">
-          <span>Foto de perfil (máx. 2MB)</span>
+  <div class="profile-avatar-info">
+    <span>Foto de perfil (máx. 2MB)</span>
 
-          <label class="btn-upload" for="photoFile">📷 Escolher foto</label>
+    <div class="photo-actions">
+      <label class="btn-upload" for="photoFileGallery">🖼️ Escolher da galeria</label>
+      <label class="btn-upload" for="photoFileCamera">📷 Tirar foto</label>
+    </div>
 
-          <!-- removido capture para permitir galeria e câmera -->
-          <input type="file" id="photoFile" accept="image/*" style="display:none" />
+    <input type="file" id="photoFileGallery" accept="image/*" style="display:none" />
+    <input type="file" id="photoFileCamera" accept="image/*" capture="environment" style="display:none" />
 
-          <span id="photoFileName">Nenhum arquivo selecionado</span>
+    <span id="photoFileName">Nenhum arquivo selecionado</span>
 
-          <button type="button" id="removePhotoBtn" class="btn" style="margin-top:8px;">
-            🗑️ Excluir foto
-          </button>
-        </div>
-      </div>
+    <button type="button" id="removePhotoBtn" class="btn" style="margin-top:8px;">
+      🗑️ Excluir foto
+    </button>
+  </div>
+</div>
 
       <form id="profileForm" class="profile-form">
 
