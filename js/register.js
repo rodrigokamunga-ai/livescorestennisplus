@@ -18,6 +18,20 @@ const BIOMETRIC_KEY        = "lsts_biometric_uid";
 const BIOMETRIC_CRED_KEY   = "lsts_biometric_credId";
 const GOOGLE_PENDING_KEY   = "lsts_google_register_pending";
 
+// ─── Firebase helpers ─────────────────────────────────────────────────────────
+
+function getDb() {
+  if (typeof __db !== "undefined" && __db) return __db;
+  if (typeof firebase !== "undefined" && firebase.firestore) return firebase.firestore();
+  return null;
+}
+
+function getAuth() {
+  if (typeof __auth !== "undefined" && __auth) return __auth;
+  if (typeof firebase !== "undefined" && firebase.auth) return firebase.auth();
+  return null;
+}
+
 // ─── Mensagem ─────────────────────────────────────────────────────────────────
 
 function setMsg(text, type = "info") {
@@ -88,8 +102,8 @@ function updateStrengthUI(password) {
   const level    = Math.min(4, Math.floor(strength * 4 / 5));
   const colors   = ["transparent", "#e74c3c", "#f39c12", "#2ecc71", "#27ae60"];
 
-  strengthBar.className        = `password-strength-bar strength-${level}`;
-  strengthBar.style.width      = `${level * 25}%`;
+  strengthBar.className   = `password-strength-bar strength-${level}`;
+  strengthBar.style.width  = `${level * 25}%`;
   strengthBar.style.background = colors[level];
 
   if (!password) {
@@ -118,28 +132,77 @@ document.querySelectorAll(".toggle-pw").forEach(btn => {
   btn.addEventListener("click", () => {
     const input = document.getElementById(btn.dataset.target);
     if (!input) return;
-    const hidden    = input.type === "password";
-    input.type      = hidden ? "text" : "password";
+
+    const hidden = input.type === "password";
+    input.type = hidden ? "text" : "password";
     btn.textContent = hidden ? "🙈" : "👁️";
   });
 });
 
+// ─── Player ID personalizado ──────────────────────────────────────────────────
+
+function normalizePlayerName(name) {
+  return (name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+}
+
+function generatePlayerIdFallback(displayName, uid) {
+  const base = normalizePlayerName(displayName) || "player";
+  const shortUid = (uid || "anon").replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toLowerCase();
+  return `${base}_${shortUid}_id`;
+}
+
+async function generateUniquePlayerId(displayName, uid) {
+  const safeUid = (uid || "").trim();
+  const safeDisplayName = (displayName || "").trim();
+
+  const fallbackId = generatePlayerIdFallback(safeDisplayName, safeUid);
+
+  console.log("[register] generateUniquePlayerId()");
+  console.log("displayName:", safeDisplayName);
+  console.log("uid:", safeUid);
+  console.log("playerId gerado:", fallbackId);
+
+  return fallbackId;
+}
+
 // ─── Salvar perfil no Firestore ───────────────────────────────────────────────
 
 async function saveUserProfile(user, displayName, email) {
-  if (!window.__db || !user?.uid) return;
+  const db = getDb();
+  if (!db || !user?.uid) {
+    console.error("[register] Firestore ou user.uid não disponível.");
+    return null;
+  }
 
-  const docRef = __db.collection("users").doc(user.uid);
-  await docRef.set({
+  const safeDisplayName = (displayName || user.displayName || "").trim();
+  const safeEmail = (email || user.email || "").trim();
+
+  const playerId = await generateUniquePlayerId(safeDisplayName, user.uid);
+
+  const data = {
     uid:         user.uid,
     ownerId:     user.uid,
-    displayName: displayName || user.displayName || "",
-    email:       email       || user.email       || "",
+    playerId:    playerId,
+    displayName: safeDisplayName,
+    email:       safeEmail,
     role:        "user",
     blocked:     false,
     createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
     updatedAt:   firebase.firestore.FieldValue.serverTimestamp(),
-  }, { merge: true });
+  };
+
+  console.log("[register] salvando no Firestore users/{uid} ->", user.uid);
+  console.log("[register] dados:", data);
+
+  await db.collection("users").doc(user.uid).set(data, { merge: true });
+
+  console.log("[register] usuário salvo com sucesso.");
+  return playerId;
 }
 
 /* // ─── Biometria ──────────────────────────────────────────────────────────────── function offerBiometricRegistration(uid) { if (!window.PublicKeyCredential) return; if (!biometricRegisterBtn) return; biometricRegisterBtn.style.display = "flex"; biometricRegisterBtn.onclick = () => registerBiometric(uid); } async function registerBiometric(uid) { if (!window.PublicKeyCredential) { setMsg("Seu dispositivo não suporta biometria.", "error"); return; } try { setMsg("Aguardando biometria...", "info"); const challenge = new Uint8Array(32); crypto.getRandomValues(challenge); const credential = await navigator.credentials.create({ publicKey: { challenge, rp: { name: "Live Scores Tennis", id: location.hostname || "localhost" }, user: { id: new TextEncoder().encode(uid), name: emailInput?.value || uid, displayName: displayNameInput?.value || uid }, pubKeyCredParams: [ { type: "public-key", alg: -7 }, { type: "public-key", alg: -257 } ], authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }, timeout: 60000, attestation: "none" } }); if (credential) { localStorage.setItem(BIOMETRIC_KEY, uid); localStorage.setItem( BIOMETRIC_CRED_KEY, btoa(String.fromCharCode(...new Uint8Array(credential.rawId))) ); setMsg("✅ Biometria registrada! Você pode usá-la no login.", "success"); if (biometricRegisterBtn) biometricRegisterBtn.style.display = "none"; setTimeout(goLogin, 1500); } } catch (err) { console.warn("Biometria cancelada ou não disponível:", err); if (err.name === "NotAllowedError") { setMsg("Biometria cancelada pelo usuário.", "error"); } else { setMsg("Não foi possível registrar a biometria.", "error"); } } } */
@@ -148,59 +211,63 @@ async function saveUserProfile(user, displayName, email) {
 
 async function finishGoogleRegister(user) {
   const displayName = user.displayName || "";
-  const email       = user.email       || "";
+  const email = user.email || "";
 
-  await saveUserProfile(user, displayName, email);
+  console.log("[register] finishGoogleRegister()", { displayName, email, uid: user.uid });
+
+  const playerId = await saveUserProfile(user, displayName, email);
 
   localStorage.setItem(SESSION_KEY, "1");
   localStorage.removeItem(GOOGLE_PENDING_KEY);
 
-  setMsg("✅ Conta Google vinculada com sucesso!", "success");
-
-  /* offerBiometricRegistration(user.uid); if (!window.PublicKeyCredential) { setTimeout(goLogin, 1500); return; } // Se biometria disponível, aguarda clique no botão setTimeout(() => { if (!biometricRegisterBtn || biometricRegisterBtn.style.display === "none") { goLogin(); } }, 8000); // redireciona em 8s se não registrar biometria */
+  setMsg(`✅ Conta Google vinculada com sucesso! Seu ID: @${playerId}`, "success");
 
   setTimeout(goLogin, 1500);
 }
 
-// ─── ✅ Trata retorno do signInWithRedirect (Google) ──────────────────────────
+// ─── Trata retorno do signInWithRedirect (Google) ────────────────────────────
 
 async function handleGoogleRedirectResult() {
   try {
-    const result = await __auth.getRedirectResult();
+    const auth = getAuth();
+    if (!auth) return;
+
+    const result = await auth.getRedirectResult();
     if (!result || !result.user) return;
 
     setMsg("Finalizando cadastro com Google...", "info");
     await finishGoogleRegister(result.user);
 
   } catch (err) {
-    // auth/no-auth-event é esperado quando não há redirect pendente
     if (err.code && err.code !== "auth/no-auth-event") {
-      console.error("Erro no redirect Google:", err);
+      console.error("[register] Erro no redirect Google:", err);
       setMsg(getFirebaseErrorMsg(err.code), "error");
     }
   }
 }
 
-// Executa ao carregar a página para capturar retorno do redirect
 handleGoogleRedirectResult();
 
-// ─── Cadastro com Google ──────────────────────────────────────────────────────
+// ─── Cadastro com Google ─────────────────────────────────────────────────────
 
 googleRegisterBtn?.addEventListener("click", async () => {
   setMsg("Abrindo Google...", "info");
+
+  const auth = getAuth();
+  if (!auth) {
+    setMsg("Firebase Auth não disponível.", "error");
+    return;
+  }
 
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
 
   try {
-    // 1️⃣ Tenta popup primeiro (funciona em http/https)
     let result;
 
     try {
-      result = await __auth.signInWithPopup(provider);
+      result = await auth.signInWithPopup(provider);
     } catch (popupErr) {
-
-      // 2️⃣ Fallback: usa redirect se popup não for suportado ou bloqueado
       if (
         popupErr.code === "auth/operation-not-supported-in-this-environment" ||
         popupErr.code === "auth/popup-blocked" ||
@@ -208,39 +275,37 @@ googleRegisterBtn?.addEventListener("click", async () => {
       ) {
         setMsg("Redirecionando para o Google...", "info");
         localStorage.setItem(GOOGLE_PENDING_KEY, "1");
-        await __auth.signInWithRedirect(provider);
-        return; // página recarrega após o redirect
+        await auth.signInWithRedirect(provider);
+        return;
       }
 
       throw popupErr;
     }
 
-    // Popup funcionou — finaliza direto
     await finishGoogleRegister(result.user);
 
   } catch (err) {
-    console.error("Erro no cadastro com Google:", err);
+    console.error("[register] Erro no cadastro com Google:", err);
     setMsg(getFirebaseErrorMsg(err.code), "error");
   }
 });
 
-// ─── Cadastro com e-mail e senha ──────────────────────────────────────────────
+// ─── Cadastro com e-mail e senha ─────────────────────────────────────────────
 
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
   setMsg("Criando cadastro...", "info");
 
   const displayName     = displayNameInput?.value.trim() || "";
-  const email           = emailInput?.value.trim()       || "";
-  const password        = passwordInput?.value           || "";
-  const confirmPassword = confirmPasswordInput?.value    || "";
+  const email           = emailInput?.value.trim() || "";
+  const password        = passwordInput?.value || "";
+  const confirmPassword = confirmPasswordInput?.value || "";
 
-  if (!displayName)                 return setMsg("Informe o nome.", "error");
-  if (!email)                       return setMsg("Informe o e-mail.", "error");
-  if (password.length < 8)          return setMsg("A senha deve ter no mínimo 8 caracteres.", "error");
+  if (!displayName) return setMsg("Informe o nome.", "error");
+  if (!email) return setMsg("Informe o e-mail.", "error");
+  if (password.length < 8) return setMsg("A senha deve ter no mínimo 8 caracteres.", "error");
   if (password !== confirmPassword) return setMsg("As senhas não conferem.", "error");
 
-  // Valida força (mínimo 4 de 5 critérios)
   if (getPasswordStrength(password) < 4) {
     return setMsg(
       `Senha fraca. Adicione: ${getMissingRules(password).join(", ")}.`,
@@ -249,35 +314,46 @@ form?.addEventListener("submit", async (e) => {
   }
 
   try {
-    // 1️⃣ Cria conta no Firebase Auth
-    const credential = await __auth.createUserWithEmailAndPassword(email, password);
-    const user       = credential.user;
+    const auth = getAuth();
+    if (!auth) {
+      setMsg("Firebase Auth não disponível.", "error");
+      return;
+    }
+
+    const credential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = credential.user;
 
     if (!user) return setMsg("Não foi possível criar a conta.", "error");
 
-    // 2️⃣ Atualiza displayName
     await user.updateProfile({ displayName });
 
-    // 3️⃣ Salva no Firestore
-    await saveUserProfile(user, displayName, email);
+    console.log("[register] usuário Auth criado:", {
+      uid: user.uid,
+      displayName: user.displayName,
+      email: user.email
+    });
+
+    const playerId = await saveUserProfile(user, displayName, email);
 
     localStorage.setItem(SESSION_KEY, "1");
-    setMsg("✅ Cadastro criado com sucesso!", "success");
 
-    /* // 4️⃣ Oferece biometria offerBiometricRegistration(user.uid); if (!window.PublicKeyCredential) { setTimeout(goLogin, 1200); } */
+    console.log("[register] cadastro concluído com playerId:", playerId);
+    setMsg(`✅ Cadastro criado com sucesso! Seu ID: @${playerId}`, "success");
 
     setTimeout(goLogin, 1200);
 
   } catch (err) {
-    console.error("Erro no cadastro:", err);
+    console.error("[register] Erro no cadastro:", err);
     setMsg(getFirebaseErrorMsg(err.code || ""), "error");
 
-    // Remove conta órfã se Firestore falhou
-    if (err.code !== "auth/email-already-in-use" && __auth.currentUser) {
-      try {
-        await __auth.currentUser.delete();
-      } catch (deleteErr) {
-        console.warn("Não foi possível remover usuário órfão:", deleteErr);
+    if (err.code !== "auth/email-already-in-use") {
+      const auth = getAuth();
+      if (auth?.currentUser) {
+        try {
+          await auth.currentUser.delete();
+        } catch (deleteErr) {
+          console.warn("[register] Não foi possível remover usuário órfão:", deleteErr);
+        }
       }
     }
   }
