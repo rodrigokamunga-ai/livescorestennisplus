@@ -25,7 +25,7 @@
       allMatches: [],
       filteredMatches: [],
       currentPage: 1,
-      filtersVisible: true,
+      filtersVisible: false,
       currentUser: null,
       currentProfileName: "",
       unsubscribe: null,
@@ -1261,17 +1261,21 @@
 
     function toggleFiltersBar() {
       state.filtersVisible = !state.filtersVisible;
-      if (el.filtersBar) el.filtersBar.style.display = state.filtersVisible ? "" : "none";
-
+    
+      if (el.filtersBar) {
+        el.filtersBar.style.display = state.filtersVisible ? "" : "none";
+      }
+    
       if (el.toggleMatchesBtnBottom) {
         const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon");
         const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
-        if (icon) icon.textContent = state.filtersVisible ? "🔎" : "📋";
-        if (label) label.textContent = state.filtersVisible ? "Filtros" : "Lista";
+    
+        if (icon) icon.textContent = state.filtersVisible ? "📋" : "🔎";
+        if (label) label.textContent = state.filtersVisible ? "Lista" : "Filtros";
       }
-
+    
       if (el.toggleMatchesBtn) {
-        el.toggleMatchesBtn.textContent = state.filtersVisible ? "Ocultar filtros" : "Exibir filtros";
+        el.toggleMatchesBtn.textContent = state.filtersVisible ? "Lista" : "Filtros";
       }
     }
 
@@ -1380,8 +1384,8 @@
       const d = docSnap.data();
       const statusText = String(d.status || "scheduled").trim().toLowerCase();
       const label = U.getStatusLabel(statusText);
-
-      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td><span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span></td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir partida">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr>`;
+    
+      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}"> ${U.escapeHtml(d.tournamentName || "-")} </td> <td> <span class="status-tag status-${statusText}"> ${U.escapeHtml(label)} </span> </td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon">▶</span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon">👁️</span> <span class="admin-action-label">Detalhar</span> </button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon">✏️</span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon">🗑️</span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr> `;
     }
 
     function mobileCardHTML(docSnap) {
@@ -1389,8 +1393,14 @@
       const statusText = String(d.status || "scheduled").trim().toLowerCase();
       const label = U.getStatusLabel(statusText);
       const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
-
-      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Fase:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Abrir link">▶</button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar">👁️</button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar">✏️</button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir">🗑️</button> </div> </div> </td> </tr>`;
+    
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}"> ${U.escapeHtml(label)} </span> <span class="mobile-match-date"> ${U.escapeHtml(date)} </span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> 
+      
+      <div class="mobile-match-meta">
+  <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div>
+  <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div>
+  <div><strong>Fase:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div>
+</div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon">▶</span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon">👁️</span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon">✏️</span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon">🗑️</span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr> `;
     }
 
     function renderCurrentPage() {
@@ -1708,14 +1718,19 @@
       bindEvents();
       attachResponsiveListeners();
 
-      state.filtersVisible = true;
-      if (el.filtersBar) el.filtersBar.style.display = "";
-      if (el.toggleMatchesBtnBottom) {
-        const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon");
-        const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
-        if (icon) icon.textContent = "🔎";
-        if (label) label.textContent = "Filtros";
-      }
+      state.filtersVisible = false;
+if (el.filtersBar) el.filtersBar.style.display = "none";
+
+if (el.toggleMatchesBtnBottom) {
+  const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon");
+  const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
+  if (icon) icon.textContent = "🔎";
+  if (label) label.textContent = "Filtros";
+}
+
+if (el.toggleMatchesBtn) {
+  el.toggleMatchesBtn.textContent = "Filtros";
+}
 
       if (!hasAdminSession() && !hasBiometricSession()) {
         goLogin();
