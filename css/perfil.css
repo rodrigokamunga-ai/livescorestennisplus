@@ -175,6 +175,20 @@ body.profile-page {
   color: rgba(232, 238, 252, 0.6);
 }
 
+/* NOVO BLOCO: botões da foto em coluna */
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.photo-actions .btn-upload {
+  width: 100%;
+  justify-content: center;
+}
+
 .btn-upload {
   display: inline-flex;
   align-items: center;
