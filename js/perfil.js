@@ -49,7 +49,11 @@
       birthDate: document.getElementById("birthDate"),
       height: document.getElementById("height"),
       weight: document.getElementById("weight"),
-      photoFile: document.getElementById("photoFile"),
+
+      // Duas opções de foto
+      photoFileGallery: document.getElementById("photoFileGallery"),
+      photoFileCamera: document.getElementById("photoFileCamera"),
+
       avatarPreview: document.getElementById("avatarPreview"),
       photoFileName: document.getElementById("photoFileName"),
       removePhotoBtn: document.getElementById("removePhotoBtn"),
@@ -220,7 +224,8 @@
       removePhotoRequested = true;
       savedPhotoBase64 = "";
 
-      if (el.photoFile) el.photoFile.value = "";
+      if (el.photoFileGallery) el.photoFileGallery.value = "";
+      if (el.photoFileCamera) el.photoFileCamera.value = "";
       if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
       setDefaultAvatar();
 
@@ -365,7 +370,7 @@
 
       try {
         let photoBase64 = savedPhotoBase64;
-        const file = el.photoFile?.files?.[0];
+        const file = el.photoFileGallery?.files?.[0] || el.photoFileCamera?.files?.[0];
 
         if (removePhotoRequested) {
           photoBase64 = "";
@@ -587,13 +592,45 @@
       document.querySelectorAll('input[name="forehand"], input[name="backhand"]')
         .forEach((r) => r.checked = false);
 
-      if (el.photoFile) el.photoFile.value = "";
+      if (el.photoFileGallery) el.photoFileGallery.value = "";
+      if (el.photoFileCamera) el.photoFileCamera.value = "";
       if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
 
       savedPhotoBase64 = "";
       removePhotoRequested = false;
       setDefaultAvatar();
       setMsg("Formulário limpo.", "info");
+    }
+
+    function handlePhotoChange(input) {
+      const file = input.files?.[0];
+
+      if (!file) {
+        if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
+        setDefaultAvatar();
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+        setMsg("Selecione uma imagem válida.", "error");
+        input.value = "";
+        if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
+        setDefaultAvatar();
+        return;
+      }
+
+      if (el.photoFileName) el.photoFileName.textContent = file.name;
+      removePhotoRequested = false;
+
+      fileToBase64(file)
+        .then((resizedBase64) => {
+          if (el.avatarPreview) el.avatarPreview.src = resizedBase64;
+        })
+        .catch((err) => {
+          console.error("Erro ao processar imagem:", err);
+          setMsg("Erro ao processar a imagem.", "error");
+          setDefaultAvatar();
+        });
     }
 
     function bindEvents() {
@@ -605,34 +642,12 @@
         toggleLocationFields(this.value);
       });
 
-      el.photoFile?.addEventListener("change", async function () {
-        const file = this.files?.[0];
+      el.photoFileGallery?.addEventListener("change", function () {
+        handlePhotoChange(this);
+      });
 
-        if (!file) {
-          if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
-          setDefaultAvatar();
-          return;
-        }
-
-        if (!file.type.startsWith("image/")) {
-          setMsg("Selecione uma imagem válida.", "error");
-          this.value = "";
-          if (el.photoFileName) el.photoFileName.textContent = "Nenhum arquivo selecionado";
-          setDefaultAvatar();
-          return;
-        }
-
-        if (el.photoFileName) el.photoFileName.textContent = file.name;
-        removePhotoRequested = false;
-
-        try {
-          const resizedBase64 = await fileToBase64(file);
-          if (el.avatarPreview) el.avatarPreview.src = resizedBase64;
-        } catch (err) {
-          console.error("Erro ao processar imagem:", err);
-          setMsg("Erro ao processar a imagem.", "error");
-          setDefaultAvatar();
-        }
+      el.photoFileCamera?.addEventListener("change", function () {
+        handlePhotoChange(this);
       });
 
       el.generatePasswordBtn?.addEventListener("click", generatePassword);
@@ -713,9 +728,14 @@
     function init() {
       if (el.stateLabel) el.stateLabel.style.display = "none";
 
-      if (el.photoFile) {
-        el.photoFile.setAttribute("accept", "image/*");
-        el.photoFile.removeAttribute("capture");
+      if (el.photoFileGallery) {
+        el.photoFileGallery.setAttribute("accept", "image/*");
+        el.photoFileGallery.removeAttribute("capture");
+      }
+
+      if (el.photoFileCamera) {
+        el.photoFileCamera.setAttribute("accept", "image/*");
+        el.photoFileCamera.setAttribute("capture", "environment");
       }
 
       if (el.avatarPreview) el.avatarPreview.src = DEFAULT_AVATAR;
