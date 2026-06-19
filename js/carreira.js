@@ -19,7 +19,7 @@
       currentProfileName: "",
       currentProfileNameNew: "",
       unsubscribe: null,
-      filtersCollapsed: false,
+      filtersCollapsed: true,
       currentPage: 1
     };
 
@@ -686,23 +686,55 @@
     function updateToggleButtonUI() {
       const btn = el.toggleFiltersBtn;
       if (!btn) return;
+
       const icon = btn.querySelector(".career-bottom-icon");
       const label = btn.querySelector(".career-bottom-label");
+
       if (icon) icon.textContent = state.filtersCollapsed ? "🔎" : "📋";
       if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
     }
 
     function setFiltersCollapsed(collapsed) {
       state.filtersCollapsed = !!collapsed;
+    
       const filtersWrap = document.getElementById("careerFiltersSection");
-      filtersWrap?.classList.toggle("is-collapsed", state.filtersCollapsed);
+      if (filtersWrap) {
+        filtersWrap.style.display = state.filtersCollapsed ? "none" : "";
+    
+        if (!state.filtersCollapsed) {
+          setTimeout(() => {
+            const yOffset = -100; // ajuste conforme seu cabeçalho
+            const y = filtersWrap.getBoundingClientRect().top + window.scrollY + yOffset;
+    
+            window.scrollTo({
+              top: y,
+              behavior: "smooth"
+            });
+          }, 50);
+        }
+      }
+    
       updateToggleButtonUI();
     }
 
     function bindToggleFilters() {
-      el.toggleFiltersBtn?.addEventListener("click", () => {
+      el.toggleFiltersBtn?.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    
+        const scrollPosition = window.scrollY;
+    
         setFiltersCollapsed(!state.filtersCollapsed);
+    
+        // mantém a posição da tela após abrir/fechar filtros
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: scrollPosition,
+            behavior: "auto"
+          });
+        });
       });
+    
       updateToggleButtonUI();
     }
 
@@ -843,6 +875,10 @@
       }
 
       bindEvents();
+
+      // já entra com os filtros fechados
+      state.filtersCollapsed = true;
+      setFiltersCollapsed(true);
 
       __auth.onAuthStateChanged(async (user) => {
         const hasLocal = localStorage.getItem(ADMIN_KEY) === "1";
