@@ -326,14 +326,44 @@ body.admin-page .action-bottom-row {
   display: contents;
 }
 
-body.admin-page .action-cell .icon-btn {
-  min-width: 42px;
-  min-height: 42px;
-  border-radius: 12px;
-  padding: 0 10px;
+/* aqui entra o texto dos botões */
+body.admin-page .admin-action-btn {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 3px;
+  min-width: 68px;
+  min-height: 48px;
+  border-radius: 12px;
+  padding: 6px 8px;
+  line-height: 1;
+}
+
+body.admin-page .admin-action-icon {
+  font-size: 1rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+body.admin-page .admin-action-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.admin-page .action-cell .icon-btn {
+  min-width: 68px;
+  min-height: 48px;
+  border-radius: 12px;
+  padding: 6px 8px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   justify-self: center;
 }
 
@@ -1075,11 +1105,16 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   body.admin-page .mobile-match-actions .icon-btn {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 48px;
-    height: 48px;
+    min-height: 56px;
+    height: 56px;
     border-radius: 12px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
-    padding: 0;
+    padding: 6px 4px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
   }
 
   body.admin-page .mobile-match-actions .icon-btn.danger {
@@ -1157,7 +1192,6 @@ body.admin-page #scoreTieBreakSet3Wrapper {
     font-size: 0.66rem;
   }
 
-  /* Mantém os campos do placar lado a lado no mobile */
   body.admin-page .score-grid-2 {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
@@ -1250,7 +1284,6 @@ body.admin-page #scoreTieBreakSet3Wrapper {
     align-items: flex-start;
   }
 
-  /* 2 colunas no celular para os detalhes */
   body.admin-page .detail-info-grid,
   body.admin-page .detail-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1282,7 +1315,6 @@ body.admin-page #scoreTieBreakSet3Wrapper {
     font-size: 0.95rem;
   }
 
-  /* Reforço extra dos campos do placar */
   body.admin-page .score-set {
     padding: 10px;
   }
@@ -1294,6 +1326,11 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   body.admin-page .score-grid-2 {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+  }
+
+  /* texto menor no mobile */
+  body.admin-page .admin-action-label {
+    font-size: 0.62rem;
   }
 }
 
