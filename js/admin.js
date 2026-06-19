@@ -1264,6 +1264,18 @@
     
       if (el.filtersBar) {
         el.filtersBar.style.display = state.filtersVisible ? "" : "none";
+    
+        if (state.filtersVisible) {
+          setTimeout(() => {
+            const yOffset = -90; // ajuste conforme seu header fixo
+            const y = el.filtersBar.getBoundingClientRect().top + window.scrollY + yOffset;
+    
+            window.scrollTo({
+              top: y,
+              behavior: "smooth"
+            });
+          }, 50);
+        }
       }
     
       if (el.toggleMatchesBtnBottom) {
@@ -1430,6 +1442,7 @@
       updateScoreFieldsVisibility();
       lockMatchFormatIfFinished();
     }
+    
 
     function bindEvents() {
       if (!hasAdminSession() && !hasBiometricSession()) return goLogin();
