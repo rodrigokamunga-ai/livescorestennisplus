@@ -220,7 +220,6 @@
       if (cachedToken) return cachedToken;
 
       try {
-        // 1) tenta pegar de profiles/{uid}
         const profileRef = db.collection("profiles").doc(user.uid);
         const profileSnap = await profileRef.get();
         const profileData = profileSnap.exists ? (profileSnap.data() || {}) : {};
@@ -231,7 +230,6 @@
           return token;
         }
 
-        // 2) tenta pegar de alguma partida pública do usuário
         const matchesSnap = await db.collection(COLLECTION_NAME)
           .where("ownerId", "==", user.uid)
           .where("shareEnabled", "==", true)
@@ -245,16 +243,13 @@
           token = String(data.shareToken || "").trim();
         }
 
-        // 3) se ainda não existir, cria um novo
         if (!token) token = makeToken();
 
-        // grava em profiles/{uid} para persistir
         await profileRef.set({
           shareToken: token,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
-        // opcional: grava também nas partidas públicas do usuário sem token
         const allPublicSnap = await db.collection(COLLECTION_NAME)
           .where("ownerId", "==", user.uid)
           .where("shareEnabled", "==", true)
@@ -486,6 +481,15 @@
     const pickDate = (d) => d.matchDateTime || d.dataPartida || d.data || d.date || d.matchDate || d.dataJogo || null;
     const pickTime = (d) => d.horaPartida || d.hora || d.time || d.matchTime || d.horario || null;
 
+    const pickTournamentName = (d) =>
+      d.tournamentName ||
+      d.nomeTorneio ||
+      d.tournament ||
+      d.tournamentTitle ||
+      d.nomeDoTorneio ||
+      d.nameTournament ||
+      "";
+
     function getMatchDateTimeLabel(data) {
       const rawDate = pickDate(data);
       const dateBR = formatDateBR(rawDate);
@@ -517,13 +521,45 @@
 
     function renderAlerts(matches) {
       if (!el.alertModalBody) return;
+
       if (!matches?.length) {
-        el.alertModalBody.innerHTML = `<div class="alert-empty"><strong>Nenhum jogo para hoje.</strong><br>Não há partidas programadas para o dia de hoje.</div>`;
+        el.alertModalBody.innerHTML = ` <div class="alert-empty"> <strong>Nenhum jogo para hoje.</strong><br> Não há partidas programadas para o dia de hoje. </div>`;
         return;
       }
 
       const html = matches
-        .map((item) => ` <div class="alert-game-item"> <div class="alert-game-top"> <div class="alert-game-info"> <div class="alert-game-kicker">Jogo do dia</div> ${item.playersHTML || ""} </div> </div> <div class="alert-game-meta"> <div class="alert-game-date">${item.dateTimeLabel || "--"}</div> <div class="alert-game-extra"> <span class="alert-meta-pill">${item.categoryName || "-"}</span> <span class="alert-meta-pill">${item.tournamentStage || "-"}</span> </div> </div> </div> `)
+        .map((item) => {
+          const format = String(item.gameFormat || "").trim().toLowerCase();
+          const isTreinoOrRanking = format === "treino" || format === "ranking";
+
+          // Treino / Ranking -> mostrar apenas nome do torneio e data/hora
+          if (isTreinoOrRanking) {
+            const infoParts = [];
+
+            if (item.tournamentName) {
+              infoParts.push(`<span class="alert-meta-pill">${item.tournamentName}</span>`);
+            }
+
+            if (item.dateTimeLabel) {
+              infoParts.push(`<span class="alert-meta-pill">${item.dateTimeLabel}</span>`);
+            }
+
+            return ` <div class="alert-game-item"> <div class="alert-game-top"> <div class="alert-game-info"> <div class="alert-game-kicker">Jogo do dia</div> ${item.playersHTML || ""} </div> </div> <div class="alert-game-meta"> ${infoParts.length ? `<div class="alert-game-extra">${infoParts.join("")}</div>` : ""} </div> </div> `;
+          }
+
+          // Outros formatos -> mantém torneio + fase, sem "-"
+          const infoParts = [];
+
+          if (item.tournamentName) {
+            infoParts.push(`<span class="alert-meta-pill">${item.tournamentName}</span>`);
+          }
+
+          if (item.tournamentStage) {
+            infoParts.push(`<span class="alert-meta-pill">${item.tournamentStage}</span>`);
+          }
+
+          return ` <div class="alert-game-item"> <div class="alert-game-top"> <div class="alert-game-info"> <div class="alert-game-kicker">Jogo do dia</div> ${item.playersHTML || ""} </div> </div> <div class="alert-game-meta"> ${item.dateTimeLabel ? `<div class="alert-game-date">${item.dateTimeLabel}</div>` : ""} ${infoParts.length ? `<div class="alert-game-extra">${infoParts.join("")}</div>` : ""} </div> </div> `;
+        })
         .join("");
 
       el.alertModalBody.innerHTML = `<div class="alert-game-list">${html}</div>`;
@@ -531,33 +567,33 @@
 
     async function loadTodayAlerts(user) {
       if (!el.alertBadge || !el.alertModalBody || !user?.uid) return;
-    
+
       try {
         const db = getDb();
         if (!db) {
           renderAlerts([]);
           return;
         }
-    
+
         const now = new Date();
         const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    
+
         const matches = [];
-    
+
         const snapshot = await db.collection(COLLECTION_NAME)
           .where("ownerId", "==", user.uid)
           .get();
-    
+
         snapshot.forEach((doc) => {
           const data = doc.data() || {};
-    
+
           const rawDate = pickDate(data);
           if (normalizeDateOnly(rawDate) !== today) return;
-    
+
           const normalizedTime = normalizeTime(
             pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : "")
           );
-    
+
           matches.push({
             id: doc.id,
             jogador1: pickPlayer1(data),
@@ -566,12 +602,14 @@
             jogador4: pickPlayer4(data),
             horaPartida: normalizedTime,
             dateTimeLabel: getMatchDateTimeLabel(data),
+            tournamentName: pickTournamentName(data),
             categoryName: data.categoryName || "",
             tournamentStage: data.tournamentStage || "",
+            gameFormat: data.gameFormat || "",
             playersHTML: formatPlayersLine(data)
           });
         });
-    
+
         matches.sort((a, b) => a.horaPartida.localeCompare(b.horaPartida));
         currentAlertsSignature = getAlertsSignature(matches);
         renderAlerts(matches);
@@ -582,6 +620,7 @@
         renderAlerts([]);
       }
     }
+
     // ─── Eventos ──────────────────────────────────────────────────────────
 
     function bindEvents() {
