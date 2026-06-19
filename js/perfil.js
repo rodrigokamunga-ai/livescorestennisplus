@@ -39,6 +39,7 @@
       form: document.getElementById("profileForm"),
       displayName: document.getElementById("displayName"),
       email: document.getElementById("email"),
+      playerId: document.getElementById("playerId"),
       phone: document.getElementById("phone"),
       country: document.getElementById("country"),
       stateLabel: document.getElementById("stateLabel"),
@@ -150,9 +151,7 @@
     function toggleLocationFields(country, uf = "") {
       const isBR = country === "BR";
       if (el.stateLabel) el.stateLabel.style.display = isBR ? "" : "none";
-      if (isBR) {
-        populateStates(uf);
-      }
+      if (isBR) populateStates(uf);
     }
 
     function isStrongPassword(password) {
@@ -228,8 +227,23 @@
       setMsg("Foto removida. Clique em salvar para confirmar a alteração.", "info");
     }
 
+    function normalizePlayerName(name) {
+      return (name || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "")
+        .trim();
+    }
+
+    function buildFallbackPlayerId(userData, user) {
+      const base = normalizePlayerName(userData?.displayName || user?.displayName || "") || "player";
+      const shortUid = (user?.uid || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toLowerCase();
+      return shortUid ? `${base}_${shortUid}_id` : `${base}_id`;
+    }
+
     function fillForm(data) {
-      if (el.displayName) el.displayName.value = data.displayName || "";
+      if (el.displayName && data.displayName) el.displayName.value = data.displayName;
       if (el.phone) el.phone.value = data.phone || "";
       if (el.gender) el.gender.value = data.gender || "";
       if (el.birthDate) el.birthDate.value = data.birthDate || "";
@@ -258,11 +272,51 @@
       try {
         if (el.email) el.email.value = user.email || "";
         if (el.displayName) el.displayName.value = user.displayName || "";
+        if (el.playerId) el.playerId.value = "";
+
         previousDisplayName = user.displayName || "";
 
-        const doc = await getDb().collection("profiles").doc(user.uid).get();
-        if (doc.exists) {
-          fillForm(doc.data());
+        const db = getDb();
+
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        let userData = {};
+
+        if (userDoc.exists) {
+          userData = userDoc.data() || {};
+          console.log("[profile] userData carregado:", userData);
+
+          if (el.playerId) {
+            el.playerId.value = userData.playerId || buildFallbackPlayerId(userData, user);
+          }
+
+          if (el.displayName && !el.displayName.value && userData.displayName) {
+            el.displayName.value = userData.displayName;
+          }
+
+          if (el.email && !el.email.value && userData.email) {
+            el.email.value = userData.email;
+          }
+        } else {
+          console.warn("[profile] Documento users/{uid} não encontrado:", user.uid);
+          if (el.playerId) {
+            el.playerId.value = buildFallbackPlayerId({}, user);
+          }
+        }
+
+        const profileDoc = await db.collection("profiles").doc(user.uid).get();
+        if (profileDoc.exists) {
+          const profileData = profileDoc.data() || {};
+          fillForm(profileData);
+
+          if (el.displayName && profileData.displayName) {
+            el.displayName.value = profileData.displayName;
+          }
+
+          if (el.playerId && profileData.playerId) {
+            el.playerId.value = profileData.playerId;
+          } else if (el.playerId && !el.playerId.value) {
+            el.playerId.value = userData.playerId || buildFallbackPlayerId(userData, user);
+          }
         } else {
           savedPhotoBase64 = "";
           removePhotoRequested = false;
@@ -623,8 +677,11 @@
         currentUser = user;
         const fullUser = await buildBiometricFallbackUser(user);
         currentUser = fullUser || user;
+
         if (el.email) el.email.value = currentUser.email || "";
         if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        if (el.playerId) el.playerId.value = "";
+
         previousDisplayName = currentUser.displayName || "";
         await loadProfile(currentUser);
         return;
@@ -639,8 +696,11 @@
         }
 
         currentUser = fallbackUser;
+
         if (el.email) el.email.value = currentUser.email || "";
         if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        if (el.playerId) el.playerId.value = "";
+
         previousDisplayName = currentUser.displayName || "";
         await loadProfile(currentUser);
         return;
@@ -655,7 +715,7 @@
 
       if (el.photoFile) {
         el.photoFile.setAttribute("accept", "image/*");
-        el.photoFile.setAttribute("capture", "environment");
+        el.photoFile.removeAttribute("capture");
       }
 
       if (el.avatarPreview) el.avatarPreview.src = DEFAULT_AVATAR;
