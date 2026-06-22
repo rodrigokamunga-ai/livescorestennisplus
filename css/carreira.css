@@ -887,3 +887,17 @@ body.career-page .muted {
   color: #14b8a6;
   opacity: 0.35;
 }
+
+@media (max-width: 480px) {
+  .career-page .career-summary-card.total.matches span {
+    max-width: 78px;
+    white-space: normal;
+    line-height: 1.05;
+  }
+
+  .career-page .career-summary-card.runnerup span {
+    max-width: 92px;
+    white-space: normal;
+    line-height: 1.05;
+  }
+}
