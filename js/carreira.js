@@ -373,10 +373,9 @@
 
       matchTournamentFilter(match, tournamentText) {
         if (!tournamentText) return true;
-        return U.normalizeText(U.getTournamentName(match)).includes(
-          U.normalizeText(tournamentText)
-        );
+        return U.normalizeText(U.getTournamentName(match)) === U.normalizeText(tournamentText);
       },
+
 
       isDoubles(match) {
         const gf = U.normalizeText(U.getGameFormat(match));
