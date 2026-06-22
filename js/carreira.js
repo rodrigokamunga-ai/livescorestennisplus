@@ -20,7 +20,9 @@
       currentProfileNameNew: "",
       unsubscribe: null,
       filtersCollapsed: true,
-      currentPage: 1
+      currentPage: 1,
+      activeCardFilter: null,
+      showMatches: false
     };
 
     const el = {
@@ -29,8 +31,6 @@
       gameFormatFilter: document.getElementById("gameFormatFilter"),
       tournamentFilter: document.getElementById("tournamentFilter"),
       stageFilter: document.getElementById("stageFilter"),
-      resultFilter: document.getElementById("resultFilter"),
-      tournamentSituationFilter: document.getElementById("tournamentSituationFilter"),
       yearFilter: document.getElementById("yearFilter"),
       applyFilterBtn: document.getElementById("applyFilterBtn"),
       clearFilterBtn: document.getElementById("clearFilterBtn"),
@@ -41,6 +41,10 @@
       totalTournaments: document.getElementById("totalTournaments"),
       totalChampion: document.getElementById("totalChampion"),
       totalRunnerup: document.getElementById("totalRunnerup"),
+      totalRanking: document.getElementById("totalRanking"),
+      totalTraining: document.getElementById("totalTraining"),
+      totalSimple: document.getElementById("totalSimple"),
+      totalDoubles: document.getElementById("totalDoubles"),
       historyList: document.getElementById("historyList"),
       summaryMessage: document.getElementById("summaryMessage"),
       pageTitle: document.getElementById("pageTitle"),
@@ -224,7 +228,6 @@
 
         const ownerId = String(match.ownerId || "").trim();
         const isOwner = state.currentUser && ownerId === state.currentUser.uid;
-
         if (!isOwner) return "unknown";
 
         const ownerName = U.normalizeText(U.getOwnerNameInMatch(match));
@@ -280,8 +283,7 @@
           if (finalLabel) {
             text = finalLabel;
           } else if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
-            const winnerIs1 = tb1 > tb2;
-            text = `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
+            text = `${tb1}-${tb2}`;
           } else if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
             const winnerIs1 = tb1 > tb2;
             text = `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
@@ -323,8 +325,7 @@
           if (finalLabel) return finalLabel;
 
           if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
-            const winnerIs1 = tb1 > tb2;
-            return `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
+            return `${tb1}-${tb2}`;
           }
 
           if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
@@ -339,9 +340,7 @@
           return "";
         };
 
-        const parts = history
-          .map(getSetText)
-          .filter((t) => t && t !== "--");
+        const parts = history.map(getSetText).filter((t) => t && t !== "--");
 
         if (parts.length) {
           return parts.join(" • ");
@@ -417,34 +416,63 @@
       }
     };
 
+    const TOURNAMENT_STAGES = new Set([
+      "primeira rodada",
+      "segunda rodada",
+      "terceira rodada",
+      "oitavas de final",
+      "quartas de final",
+      "semifinais",
+      "final",
+      "grupos"
+    ]);
+
     function getAvailableYears(matches) {
       const years = new Set();
-
       matches.forEach((m) => {
         const d = U.toDate(m.matchDateTime);
         if (d) years.add(String(d.getFullYear()));
       });
-
       return Array.from(years).sort((a, b) => Number(b) - Number(a));
     }
 
     function populateYearFilter(matches) {
       if (!el.yearFilter) return;
-
       const currentValue = el.yearFilter.value;
       const years = getAvailableYears(matches);
-
       el.yearFilter.innerHTML = `<option value="">Todos os anos</option>`;
-
       years.forEach((year) => {
         const option = document.createElement("option");
         option.value = year;
         option.textContent = year;
         el.yearFilter.appendChild(option);
       });
+      if (years.includes(currentValue)) el.yearFilter.value = currentValue;
+    }
 
-      if (years.includes(currentValue)) {
-        el.yearFilter.value = currentValue;
+    function populateTournamentFilter(matches) {
+      if (!el.tournamentFilter) return;
+
+      const currentValue = el.tournamentFilter.value;
+      const tournaments = Array.from(
+        new Set(
+          matches
+            .map((m) => U.getTournamentName(m))
+            .filter((name) => name && name !== "-")
+        )
+      ).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
+
+      el.tournamentFilter.innerHTML = `<option value="">Todos os torneios</option>`;
+
+      tournaments.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        el.tournamentFilter.appendChild(option);
+      });
+
+      if (tournaments.includes(currentValue)) {
+        el.tournamentFilter.value = currentValue;
       }
     }
 
@@ -461,8 +489,6 @@
       if (el.gameFormatFilter) el.gameFormatFilter.value = "";
       if (el.tournamentFilter) el.tournamentFilter.value = "";
       if (el.stageFilter) el.stageFilter.value = "";
-      if (el.resultFilter) el.resultFilter.value = "";
-      if (el.tournamentSituationFilter) el.tournamentSituationFilter.value = "";
       if (el.yearFilter) el.yearFilter.value = "";
     }
 
@@ -472,8 +498,6 @@
         gameFormat: el.gameFormatFilter?.value?.trim() || "",
         tournament: el.tournamentFilter?.value?.trim() || "",
         stage: el.stageFilter?.value?.trim() || "",
-        result: el.resultFilter?.value?.trim() || "",
-        tournamentSituation: el.tournamentSituationFilter?.value?.trim() || "",
         year: el.yearFilter?.value?.trim() || ""
       };
     }
@@ -481,28 +505,29 @@
     function computeStats(matches) {
       let wins = 0,
         losses = 0,
-        wo = 0;
+        wo = 0,
+        ranking = 0,
+        training = 0,
+        simple = 0,
+        doubles = 0;
 
       matches.forEach((m) => {
         if (U.normalizeText(m.status) === "wo") wo++;
         const outcome = U.getLoggedUserOutcome(m);
         if (outcome === "win") wins++;
         if (outcome === "loss") losses++;
+
+        const stage = U.normalizeText(m.tournamentStage || "");
+        if (stage === "ranking") ranking++;
+        if (stage === "treino") training++;
+
+        const gf = U.normalizeText(U.getGameFormat(m));
+        if (gf === "simples") simple++;
+        if (gf === "duplas" || gf === "duplas mistas") doubles++;
       });
 
-      return { wins, losses, wo };
+      return { wins, losses, wo, ranking, training, simple, doubles };
     }
-
-    const TOURNAMENT_STAGES = new Set([
-      "primeira rodada",
-      "segunda rodada",
-      "terceira rodada",
-      "oitavas de final",
-      "quartas de final",
-      "semifinais",
-      "final",
-      "grupos"
-    ]);
 
     function computeTournamentStats(matches) {
       const tournaments = new Set();
@@ -516,7 +541,6 @@
         const tournamentName = U.normalizeText(String(m.tournamentName || "").trim());
         const year = U.toDate(m.matchDateTime)?.getFullYear() || "";
         const gameFormat = U.normalizeText(U.getGameFormat(m));
-
         const tournamentKey = `${tournamentName || "sem-nome"}::${year}::${gameFormat || "sem-formato"}`;
         tournaments.add(tournamentKey);
 
@@ -525,11 +549,7 @@
         if (situation === "runnerup") runnerup++;
       });
 
-      return {
-        tournaments: tournaments.size,
-        champion,
-        runnerup
-      };
+      return { tournaments: tournaments.size, champion, runnerup };
     }
 
     function renderSummary(matches) {
@@ -542,19 +562,16 @@
       const lossPct = totalPlayed > 0 ? Math.round((stats.losses / totalPlayed) * 100) : 0;
 
       if (el.totalMatches) el.totalMatches.textContent = String(total);
-
-      if (el.totalWins) {
-        el.totalWins.textContent = `${stats.wins} - ${winPct}%`;
-      }
-
-      if (el.totalLosses) {
-        el.totalLosses.textContent = `${stats.losses} - ${lossPct}%`;
-      }
-
+      if (el.totalWins) el.totalWins.textContent = `${stats.wins} - ${winPct}%`;
+      if (el.totalLosses) el.totalLosses.textContent = `${stats.losses} - ${lossPct}%`;
       if (el.totalWo) el.totalWo.textContent = String(stats.wo);
       if (el.totalTournaments) el.totalTournaments.textContent = String(tStats.tournaments);
       if (el.totalChampion) el.totalChampion.textContent = String(tStats.champion);
       if (el.totalRunnerup) el.totalRunnerup.textContent = String(tStats.runnerup);
+      if (el.totalRanking) el.totalRanking.textContent = String(stats.ranking);
+      if (el.totalTraining) el.totalTraining.textContent = String(stats.training);
+      if (el.totalSimple) el.totalSimple.textContent = String(stats.simple);
+      if (el.totalDoubles) el.totalDoubles.textContent = String(stats.doubles);
 
       const player = state.currentProfileName || "Usuário";
       if (el.pageTitle) el.pageTitle.textContent = `Carreira - ${player}`;
@@ -576,16 +593,122 @@
       return `${U.escapeHtml(team1)} x ${U.escapeHtml(team2)}`;
     }
 
+    function getStageIconSvg(stageRaw = "") {
+      const stage = U.normalizeText(stageRaw);
+
+      if (stage === "ranking") {
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="2" y="14" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/> <rect x="10" y="9" width="4" height="12" rx="1" stroke="currentColor" stroke-width="1.8"/> <rect x="18" y="4" width="4" height="17" rx="1" stroke="currentColor" stroke-width="1.8"/> <path d="M4 10l4-4 4 4 4-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
+      }
+
+      if (stage === "treino") {
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/> <path d="M12 3c2.4 2.4 3 5.4 3 9s-.6 6.6-3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M12 3c-2.4 2.4-3 5.4-3 9s.6 6.6 3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M3 12h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+      }
+
+      if (stage === "final") {
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M5 3h14v8a7 7 0 0 1-14 0V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> <path d="M5 6H2a1 1 0 0 0-1 1v2a4 4 0 0 0 4 4M19 6h3a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+      }
+
+      if (stage === "semifinais") {
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> </svg> `;
+      }
+
+      if (stage === "quartas de final") {
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+      }
+
+      if (stage === "oitavas de final") {
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+      }
+
+      return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/> <path d="M3 9h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <circle cx="8.5" cy="14" r="1.2" fill="currentColor"/> <circle cx="12" cy="14" r="1.2" fill="currentColor"/> <circle cx="15.5" cy="14" r="1.2" fill="currentColor"/> </svg> `;
+    }
+
+    function getOutcomeIconSvg(outcome, situation) {
+      if (situation === "champion") {
+        return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> </svg> `;
+      }
+
+      if (situation === "runnerup") {
+        return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/> <path d="M9 12.5L7.5 21l4.5-2 4.5 2L15 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
+      }
+
+      if (outcome === "win") {
+        return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M7.5 12.5l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
+      }
+
+      return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/> </svg> `;
+    }
+
     function renderPagedHistory(matches) {
       if (!el.historyList) return;
-
+    
       const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
       if (state.currentPage > totalPages) state.currentPage = totalPages;
       if (state.currentPage < 1) state.currentPage = 1;
-
+    
       const start = (state.currentPage - 1) * PAGE_SIZE;
       const pageItems = matches.slice(start, start + PAGE_SIZE);
-
+    
+      const getStageIconSvg = (stageRaw = "") => {
+        const stage = U.normalizeText(stageRaw);
+    
+        if (stage === "ranking") {
+          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="2" y="14" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/> <rect x="10" y="9" width="4" height="12" rx="1" stroke="currentColor" stroke-width="1.8"/> <rect x="18" y="4" width="4" height="17" rx="1" stroke="currentColor" stroke-width="1.8"/> <path d="M4 10l4-4 4 4 4-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
+        }
+    
+        if (stage === "treino") {
+          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/> <path d="M12 3c2.4 2.4 3 5.4 3 9s-.6 6.6-3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M12 3c-2.4 2.4-3 5.4-3 9s.6 6.6 3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M3 12h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+        }
+    
+        if (stage === "final") {
+          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M5 3h14v8a7 7 0 0 1-14 0V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> <path d="M5 6H2a1 1 0 0 0-1 1v2a4 4 0 0 0 4 4M19 6h3a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+        }
+    
+        if (stage === "semifinais") {
+          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> </svg> `;
+        }
+    
+        if (stage === "quartas de final") {
+          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+        }
+    
+        if (stage === "oitavas de final") {
+          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+        }
+    
+        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/> <path d="M3 9h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <circle cx="8.5" cy="14" r="1.2" fill="currentColor"/> <circle cx="12" cy="14" r="1.2" fill="currentColor"/> <circle cx="15.5" cy="14" r="1.2" fill="currentColor"/> </svg> `;
+      };
+    
+      const getOutcomeIconSvg = (outcome, situation) => {
+        if (situation === "champion") {
+          return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> </svg> `;
+        }
+    
+        if (situation === "runnerup") {
+          return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/> <path d="M9 12.5L7.5 21l4.5-2 4.5 2L15 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
+        }
+    
+        if (outcome === "win") {
+          return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M7.5 12.5l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
+        }
+    
+        return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/> </svg> `;
+      };
+    
+      const getFormatIconSvg = (gameFormatRaw = "") => {
+        const format = U.normalizeText(gameFormatRaw);
+    
+        if (format === "simples") {
+          return ` <svg class="career-match-icon format" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/> <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+        }
+    
+        if (format === "duplas" || format === "duplas mistas") {
+          return ` <svg class="career-match-icon format" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/> <circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/> <path d="M3.8 20c0-2.5 2.1-4.5 4.7-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M20.2 20c0-2.5-2.1-4.5-4.7-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
+        }
+    
+        return "";
+      };
+    
       if (!pageItems.length) {
         el.historyList.innerHTML = `<div class="empty-card">Nenhuma partida encontrada para os filtros selecionados.</div>`;
       } else {
@@ -604,47 +727,106 @@
             const score = U.escapeHtml(U.getScoreLabel(m));
             const duration = U.escapeHtml(U.getMatchDuration(m));
             const situation = U.getTournamentSituation(m);
-
             const outcome = U.getLoggedUserOutcome(m);
             const isWinner = outcome === "win";
-
+            const isTreino = U.normalizeText(m.tournamentStage || "") === "treino";
+    
             const cardClass = isWinner
               ? "career-card career-card-win"
               : "career-card career-card-loss";
-
+    
             const situationLabel =
               situation === "champion"
                 ? "🏆 Campeão"
                 : situation === "runnerup"
                 ? "🥈 Vice-Campeão"
                 : "";
-
+    
             const resultLabel = situationLabel || (isWinner ? "VITÓRIA" : "DERROTA");
-
             const teamDisplay = formatTeamName(m);
-
-            return ` <article class="${cardClass}"> <div class="career-card-top-status"> <div class="career-card-result">${resultLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${U.escapeHtml(date)}</strong></div> <div class="career-item"><span>Modalidade</span><strong>${modality}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> <div class="career-item"><span>Categoria</span><strong>${category}</strong></div> <div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div> <div class="career-item"><span>Fase</span><strong>${stage}</strong></div> <div class="career-item"><span>Tipo de piso</span><strong>${surfaceType}</strong></div> <div class="career-item"><span>Quadra</span><strong>${court}</strong></div> <div class="career-item"><span>Placar</span><strong>${score}</strong></div> <div class="career-item"><span>Duração</span><strong>${duration}</strong></div> </div> </article> `;
+    
+            const stageIcon = getStageIconSvg(m.tournamentStage || "");
+            const outcomeIcon = getOutcomeIconSvg(outcome, situation);
+            const formatIcon = getFormatIconSvg(m.gameFormat || "");
+    
+            return ` <article class="${cardClass}"> <div class="career-card-top-icons"> <span class="career-card-icon-slot outcome-slot">${outcomeIcon}</span> <span class="career-card-icon-slot stage-slot">${stageIcon}</span> ${formatIcon ? `<span class="career-card-icon-slot format-slot">${formatIcon}</span>` : ""} </div> <div class="career-card-top-status"> <div class="career-card-result">${resultLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${U.escapeHtml(date)}</strong></div> <div class="career-item"><span>Modalidade</span><strong>${modality}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> ${!isTreino ? `<div class="career-item"><span>Categoria</span><strong>${category}</strong></div>` : ""} ${!isTreino ? `<div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div>` : ""} <div class="career-item"><span>Fase</span><strong>${stage}</strong></div> <div class="career-item"><span>Tipo de piso</span><strong>${surfaceType}</strong></div> <div class="career-item"><span>Quadra</span><strong>${court}</strong></div> <div class="career-item"><span>Placar</span><strong>${score}</strong></div> <div class="career-item"><span>Duração</span><strong>${duration}</strong></div> </div> </article> `;
           })
           .join("");
       }
-
+    
       if (el.pageInfo) el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
       if (el.prevPageBtn) el.prevPageBtn.disabled = state.currentPage <= 1;
       if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
     }
 
+    function updateCardFilterUI() {
+      document.querySelectorAll(".career-summary-card[data-filter]").forEach((card) => {
+        const isActive = card.dataset.filter === state.activeCardFilter;
+        card.classList.toggle("career-card-filter-active", isActive);
+        card.classList.toggle(
+          "career-card-filter-inactive",
+          state.activeCardFilter !== null && !isActive
+        );
+      });
+    }
+
+    function applyCardFilter(filterType) {
+      state.activeCardFilter = state.activeCardFilter === filterType ? null : filterType;
+      state.showMatches = true;
+
+      updateCardFilterUI();
+
+      state.currentPage = 1;
+      applyFiltersAndRender();
+
+      setTimeout(() => {
+        const list = document.getElementById("historyList");
+        if (list) {
+          const y = list.getBoundingClientRect().top + window.scrollY - 20;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 80);
+    }
+
+    function bindCardFilters() {
+      document.querySelectorAll(".career-summary-card[data-filter]").forEach((card) => {
+        card.addEventListener("click", () => applyCardFilter(card.dataset.filter));
+      });
+    }
+
     function applyFiltersAndRender() {
-      const {
-        player,
-        gameFormat,
-        tournament,
-        stage,
-        result,
-        tournamentSituation,
-        year
-      } = getFilters();
+      const { player, gameFormat, tournament, stage, year } = getFilters();
 
       let filtered = state.allMatches.filter((m) => U.isMatchForLoggedUser(m, state.currentUser));
+
+      if (state.activeCardFilter === "wins") {
+        filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "win");
+      } else if (state.activeCardFilter === "losses") {
+        filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "loss");
+      } else if (state.activeCardFilter === "champion") {
+        filtered = filtered.filter((m) => U.getTournamentSituation(m) === "champion");
+      } else if (state.activeCardFilter === "runnerup") {
+        filtered = filtered.filter((m) => U.getTournamentSituation(m) === "runnerup");
+      } else if (state.activeCardFilter === "tournaments") {
+        filtered = filtered.filter((m) =>
+          TOURNAMENT_STAGES.has(U.normalizeText(m.tournamentStage || ""))
+        );
+      } else if (state.activeCardFilter === "ranking") {
+        filtered = filtered.filter((m) =>
+          U.normalizeText(m.tournamentStage || "") === "ranking"
+        );
+      } else if (state.activeCardFilter === "training") {
+        filtered = filtered.filter((m) =>
+          U.normalizeText(m.tournamentStage || "") === "treino"
+        );
+      } else if (state.activeCardFilter === "simple") {
+        filtered = filtered.filter((m) => U.normalizeText(U.getGameFormat(m)) === "simples");
+      } else if (state.activeCardFilter === "doubles") {
+        filtered = filtered.filter((m) => {
+          const gf = U.normalizeText(U.getGameFormat(m));
+          return gf === "duplas" || gf === "duplas mistas";
+        });
+      }
 
       if (player) filtered = filtered.filter((m) => U.matchOpponentFilter(m, player));
       if (gameFormat) filtered = filtered.filter((m) => U.matchGameFormatFilter(m, gameFormat));
@@ -652,16 +834,6 @@
 
       if (stage) {
         filtered = filtered.filter((m) => String(m.tournamentStage || "").trim() === stage);
-      }
-
-      if (result === "wins") filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "win");
-      if (result === "losses") filtered = filtered.filter((m) => U.getLoggedUserOutcome(m) === "loss");
-
-      if (tournamentSituation === "champion") {
-        filtered = filtered.filter((m) => U.getTournamentSituation(m) === "champion");
-      }
-      if (tournamentSituation === "runnerup") {
-        filtered = filtered.filter((m) => U.getTournamentSituation(m) === "runnerup");
       }
 
       if (year) {
@@ -686,34 +858,25 @@
     function updateToggleButtonUI() {
       const btn = el.toggleFiltersBtn;
       if (!btn) return;
-
       const icon = btn.querySelector(".career-bottom-icon");
       const label = btn.querySelector(".career-bottom-label");
-
       if (icon) icon.textContent = state.filtersCollapsed ? "🔎" : "📋";
       if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
     }
 
     function setFiltersCollapsed(collapsed) {
       state.filtersCollapsed = !!collapsed;
-    
       const filtersWrap = document.getElementById("careerFiltersSection");
       if (filtersWrap) {
         filtersWrap.style.display = state.filtersCollapsed ? "none" : "";
-    
         if (!state.filtersCollapsed) {
           setTimeout(() => {
-            const yOffset = -100; // ajuste conforme seu cabeçalho
+            const yOffset = -100;
             const y = filtersWrap.getBoundingClientRect().top + window.scrollY + yOffset;
-    
-            window.scrollTo({
-              top: y,
-              behavior: "smooth"
-            });
+            window.scrollTo({ top: y, behavior: "smooth" });
           }, 50);
         }
       }
-    
       updateToggleButtonUI();
     }
 
@@ -721,12 +884,11 @@
       el.toggleFiltersBtn?.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-    
+
         const scrollPosition = window.scrollY;
-    
+
         setFiltersCollapsed(!state.filtersCollapsed);
-    
-        // mantém a posição da tela após abrir/fechar filtros
+
         requestAnimationFrame(() => {
           window.scrollTo({
             top: scrollPosition,
@@ -734,23 +896,59 @@
           });
         });
       });
-    
+
       updateToggleButtonUI();
     }
 
+    function setSummaryMessageOrDefault() {
+      if (el.summaryMessage) {
+        el.summaryMessage.textContent = "Selecione um filtro para exibir as partidas finalizadas.";
+      }
+    }
+
     function bindEvents() {
-      el.applyFilterBtn?.addEventListener("click", applyFiltersAndRender);
+      el.applyFilterBtn?.addEventListener("click", () => {
+        state.showMatches = true;
+        applyFiltersAndRender();
+
+        setTimeout(() => {
+          const list = document.getElementById("historyList");
+          if (list) {
+            const y = list.getBoundingClientRect().top + window.scrollY - 20;
+            window.scrollTo({ top: y, behavior: "smooth" });
+          }
+        }, 80);
+      });
 
       el.clearFilterBtn?.addEventListener("click", () => {
+        state.activeCardFilter = null;
+        state.showMatches = false;
+        updateCardFilterUI();
         setDefaultFields(state.currentProfileName);
         state.currentPage = 1;
         applyFiltersAndRender();
+
+        setTimeout(() => {
+          const summary = document.querySelector(".career-summary");
+          if (summary) {
+            const y = summary.getBoundingClientRect().top + window.scrollY - 16;
+            window.scrollTo({ top: y, behavior: "smooth" });
+          }
+        }, 80);
       });
 
       el.prevPageBtn?.addEventListener("click", () => {
         if (state.currentPage > 1) {
           state.currentPage--;
           renderPagedHistory(state.filteredMatches);
+
+          setTimeout(() => {
+            const firstCard = document.querySelector("#historyList .career-card");
+            if (firstCard) {
+              const y = firstCard.getBoundingClientRect().top + window.scrollY - 20;
+              window.scrollTo({ top: y, behavior: "smooth" });
+            }
+          }, 50);
         }
       });
 
@@ -759,14 +957,22 @@
         if (state.currentPage < totalPages) {
           state.currentPage++;
           renderPagedHistory(state.filteredMatches);
+
+          setTimeout(() => {
+            const firstCard = document.querySelector("#historyList .career-card");
+            if (firstCard) {
+              const y = firstCard.getBoundingClientRect().top + window.scrollY - 20;
+              window.scrollTo({ top: y, behavior: "smooth" });
+            }
+          }, 50);
         }
       });
 
       bindToggleFilters();
+      bindCardFilters();
     }
 
     const logoutBtnBottom = document.getElementById("logoutBtnBottom");
-
     logoutBtnBottom?.addEventListener("click", async () => {
       try {
         localStorage.removeItem(ADMIN_KEY);
@@ -859,7 +1065,15 @@
               });
 
             populateYearFilter(state.allMatches);
-            applyFiltersAndRender();
+            populateTournamentFilter(state.allMatches);
+
+            if (state.showMatches) {
+              applyFiltersAndRender();
+            } else {
+              renderSummary(state.allMatches);
+              renderPagedHistory([]);
+              setSummaryMessageOrDefault();
+            }
           },
           (err) => {
             console.error(err);
@@ -876,9 +1090,9 @@
 
       bindEvents();
 
-      // já entra com os filtros fechados
       state.filtersCollapsed = true;
       setFiltersCollapsed(true);
+      state.showMatches = false;
 
       __auth.onAuthStateChanged(async (user) => {
         const hasLocal = localStorage.getItem(ADMIN_KEY) === "1";
