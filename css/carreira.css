@@ -586,3 +586,304 @@ body.career-page .muted {
     font-size: 0.66rem;
   }
 }
+
+/* ========================= ÍCONES DOS CARDS DE RESUMO ========================= */
+
+.career-page .career-summary-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.career-page .career-card-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  opacity: 0.18;
+  color: #ffffff;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+/* Hover sutil no card para destacar o ícone */
+.career-page .career-summary-card:hover .career-card-icon {
+  opacity: 0.38;
+  transform: scale(1.08) rotate(-4deg);
+}
+
+/* Cor temática por tipo de card */
+.career-page .career-summary-card.matches .career-card-icon {
+  color: #e8eefc;
+}
+
+.career-page .career-summary-card.tournament .career-card-icon {
+  color: #a78bfa;
+  opacity: 0.28;
+}
+
+.career-page .career-summary-card.win .career-card-icon {
+  color: #60a5fa;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.loss .career-card-icon {
+  color: #f87171;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.champion .career-card-icon {
+  color: #d8ff63;
+  opacity: 0.32;
+}
+
+.career-page .career-summary-card.runnerup .career-card-icon {
+  color: #04a241;
+  opacity: 0.38;
+}
+
+/* Hover com cor mais viva */
+.career-page .career-summary-card.tournament:hover .career-card-icon { opacity: 0.55; }
+.career-page .career-summary-card.win:hover .career-card-icon        { opacity: 0.55; }
+.career-page .career-summary-card.loss:hover .career-card-icon       { opacity: 0.55; }
+.career-page .career-summary-card.champion:hover .career-card-icon   { opacity: 0.60; }
+.career-page .career-summary-card.runnerup:hover .career-card-icon   { opacity: 0.60; }
+
+/* Garante que texto não sobreponha o ícone */
+.career-page .career-summary-card span,
+.career-page .career-summary-card strong {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================= CARDS CLICÁVEIS ========================= */
+
+.career-page .career-summary-card[data-filter] {
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    border-color 0.18s ease;
+  user-select: none;
+}
+
+.career-page .career-summary-card[data-filter]:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+.career-page .career-summary-card[data-filter]:active {
+  transform: scale(0.97);
+}
+
+/* Card ativo (filtro aplicado) */
+.career-page .career-summary-card.career-card-filter-active {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 0 2px currentColor, 0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+.career-page .career-summary-card.win.career-card-filter-active {
+  box-shadow: 0 0 0 2px #60a5fa, 0 16px 36px rgba(96, 165, 250, 0.22);
+  border-color: #60a5fa;
+}
+
+.career-page .career-summary-card.loss.career-card-filter-active {
+  box-shadow: 0 0 0 2px #f87171, 0 16px 36px rgba(248, 113, 113, 0.22);
+  border-color: #f87171;
+}
+
+.career-page .career-summary-card.tournament.career-card-filter-active {
+  box-shadow: 0 0 0 2px #a78bfa, 0 16px 36px rgba(167, 139, 250, 0.22);
+  border-color: #a78bfa;
+}
+
+.career-page .career-summary-card.champion.career-card-filter-active {
+  box-shadow: 0 0 0 2px #d8ff63, 0 16px 36px rgba(216, 255, 99, 0.22);
+  border-color: #d8ff63;
+}
+
+.career-page .career-summary-card.runnerup.career-card-filter-active {
+  box-shadow: 0 0 0 2px #04a241, 0 16px 36px rgba(4, 162, 65, 0.22);
+  border-color: #04a241;
+}
+
+.career-page .career-summary-card.matches.career-card-filter-active {
+  box-shadow: 0 0 0 2px #e8eefc, 0 16px 36px rgba(232, 238, 252, 0.18);
+  border-color: rgba(232, 238, 252, 0.5);
+}
+
+/* Cards inativos ficam levemente apagados */
+.career-page .career-summary-card.career-card-filter-inactive {
+  opacity: 0.42;
+  transform: scale(0.97);
+}
+
+.career-page .career-summary-card.ranking {
+  border-color: #38bdf8;
+}
+
+.career-page .career-summary-card.training {
+  border-color: #fb923c;
+}
+
+.career-page .career-summary-card.ranking .career-card-icon {
+  color: #38bdf8;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.training .career-card-icon {
+  color: #fb923c;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.ranking:hover .career-card-icon  { opacity: 0.55; }
+.career-page .career-summary-card.training:hover .career-card-icon { opacity: 0.55; }
+
+.career-page .career-summary-card.ranking.career-card-filter-active {
+  box-shadow: 0 0 0 2px #38bdf8, 0 16px 36px rgba(56, 189, 248, 0.22);
+  border-color: #38bdf8;
+}
+
+.career-page .career-summary-card.training.career-card-filter-active {
+  box-shadow: 0 0 0 2px #fb923c, 0 16px 36px rgba(251, 146, 60, 0.22);
+  border-color: #fb923c;
+}
+
+/* ========================= SELECT TORNEIO COM SCROLL ========================= */
+
+#tournamentFilter,
+#yearFilter {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* Estilo nativo aprimorado para o select */
+.career-page .career-filters select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+/* ========================= ÍCONES NOS CARDS DAS PARTIDAS ========================= */
+
+.career-page .career-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.career-page .career-card-top-icons {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  z-index: 2;
+  pointer-events: none;
+  flex-wrap: nowrap;
+}
+
+.career-page .career-card-icon-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.career-page .career-match-icon {
+  width: 28px;
+  height: 28px;
+  opacity: 0.9;
+}
+
+/* ícone do resultado */
+.career-page .career-match-icon.outcome {
+  color: #ffffff;
+  opacity: 0.28;
+}
+
+.career-page .career-card-win .career-match-icon.outcome {
+  color: #60a5fa;
+  opacity: 0.38;
+}
+
+.career-page .career-card-loss .career-match-icon.outcome {
+  color: #f87171;
+  opacity: 0.38;
+}
+
+/* ícone da fase */
+.career-page .career-match-icon.stage {
+  color: #d8ff63;
+  opacity: 0.25;
+}
+
+.career-page .career-card-win .career-match-icon.stage,
+.career-page .career-card-loss .career-match-icon.stage {
+  opacity: 0.22;
+}
+
+/* ajuste no topo do card para não colidir com os ícones */
+
+.career-page .career-card-top-status {
+  padding-right: 110px;
+  position: relative;
+  z-index: 1;
+}
+
+.career-page .career-card-head {
+  padding-right: 110px;
+}
+
+.career-page .career-summary-card.simple {
+  border-color: #f59e0b;
+}
+
+.career-page .career-summary-card.doubles {
+  border-color: #14b8a6;
+}
+
+.career-page .career-summary-card.simple .career-card-icon {
+  color: #f59e0b;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.doubles .career-card-icon {
+  color: #14b8a6;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.simple:hover .career-card-icon,
+.career-page .career-summary-card.doubles:hover .career-card-icon {
+  opacity: 0.55;
+}
+
+.career-page .career-summary-card.simple.career-card-filter-active {
+  box-shadow: 0 0 0 2px #f59e0b, 0 16px 36px rgba(245, 158, 11, 0.22);
+  border-color: #f59e0b;
+}
+
+.career-page .career-summary-card.doubles.career-card-filter-active {
+  box-shadow: 0 0 0 2px #14b8a6, 0 16px 36px rgba(20, 184, 166, 0.22);
+  border-color: #14b8a6;
+}
+
+.career-page .career-match-icon.format {
+  color: #ffffff;
+  opacity: 0.22;
+}
+
+.career-page .career-card-win .career-match-icon.format {
+  color: #f59e0b;
+  opacity: 0.35;
+}
+
+.career-page .career-card-loss .career-match-icon.format {
+  color: #14b8a6;
+  opacity: 0.35;
+}
