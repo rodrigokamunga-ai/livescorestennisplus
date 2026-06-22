@@ -637,12 +637,9 @@
     (Number(el.set1Player2?.value || 0) > Number(el.set1Player1?.value || 0) &&
      Number(el.set2Player1?.value || 0) > Number(el.set2Player2?.value || 0));
 
-  const needsSuper =
-    cfg.oneSetAdSuper
-      ? true
-      : (cfg.twoSetsNoAdSuper || cfg.twoSetsAdSuper)
-        ? splitSets
-        : (s1 === "super10" || s2 === "super10" || s3 === "super10");
+     const needsSuper =
+     (s1 === "super10" || s2 === "super10" || s3 === "super10") ||
+     ((cfg.twoSetsNoAdSuper || cfg.twoSetsAdSuper) && splitSets);
 
   if (needsTB1) {
     const v1 = Number(el.tbSet1Player1?.value || 0);
@@ -908,7 +905,7 @@
       }
       if (el.matchFormat) {
         el.matchFormat.value = data?.matchFormat || "";
-        el.matchFormat.disabled = String(data?.status || "").trim().toLowerCase() === "finished";
+        el.matchFormat.disabled = false;
       }
       if (el.matchDateTime) el.matchDateTime.value = data?.matchDateTime || "";
       if (el.court) el.court.value = data?.court || "";
@@ -950,8 +947,12 @@
       if (el.tbSet3Player1) el.tbSet3Player1.value = history[2]?.tieBreakPoints1 ?? "";
       if (el.tbSet3Player2) el.tbSet3Player2.value = history[2]?.tieBreakPoints2 ?? "";
 
-      if (el.tbSuperPlayer1) el.tbSuperPlayer1.value = history.find(s => s?.tieBreakMode === "super10")?.tieBreakPoints1 ?? "";
-      if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = history.find(s => s?.tieBreakMode === "super10")?.tieBreakPoints2 ?? "";
+      const superSet =
+  history.find((s) => s?.tieBreakMode === "super10") ||
+  history.find((s) => s?.tieBreakMode === "tb7" && ((Number(s?.tieBreakPoints1 || 0) > 0) || (Number(s?.tieBreakPoints2 || 0) > 0)));
+
+if (el.tbSuperPlayer1) el.tbSuperPlayer1.value = superSet?.tieBreakPoints1 ?? "";
+if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? "";
 
       if (el.formTitle) el.formTitle.textContent = id ? "Editando partida" : "Nova partida";
 
@@ -1254,9 +1255,7 @@
 
     function lockMatchFormatIfFinished() {
       if (!el.matchFormat) return;
-      const isEditing = Boolean(el.docId?.value);
-      const isFinished = String(el.status?.value || "").trim().toLowerCase() === "finished";
-      el.matchFormat.disabled = isEditing && isFinished;
+      el.matchFormat.disabled = false;
     }
 
     function toggleFiltersBar() {
