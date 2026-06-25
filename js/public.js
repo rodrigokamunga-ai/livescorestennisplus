@@ -7,11 +7,13 @@
     const params = new URLSearchParams(window.location.search);
     const ownerId = params.get("ownerId") || "";
     const shareToken = params.get("shareToken") || "";
+    const matchId = params.get("id") || "";
 
     const state = {
       cachedMatches: [],
       timer: null,
-      unsubscribe: null
+      unsubscribe: null,
+      unsubscribeSingle: null
     };
 
     const FILTER_KEY = "lsts_live_status_filter";
@@ -229,9 +231,27 @@
       getMatchSummary(match) {
         const score = U.normalizeScore(match.score || {});
         const summary = match.summary || match.matchSummary || {};
+        const stats = match.stats || {};
+        const p1Stats = stats.player1 || {};
+        const p2Stats = stats.player2 || {};
+
+        const total1 = Number(
+          summary.totalPoints1 ??
+          score.totalPoints1 ??
+          p1Stats.totalPointsWon ??
+          0
+        );
+
+        const total2 = Number(
+          summary.totalPoints2 ??
+          score.totalPoints2 ??
+          p2Stats.totalPointsWon ??
+          0
+        );
+
         return {
-          totalPoints1: Number(summary.totalPoints1 ?? score.totalPoints1 ?? 0),
-          totalPoints2: Number(summary.totalPoints2 ?? score.totalPoints2 ?? 0),
+          totalPoints1: total1,
+          totalPoints2: total2,
           breakPointsWon1: Number(summary.breakPointsWon1 ?? score.breakPointsWon1 ?? 0),
           breakPointsChances1: Number(summary.breakPointsChances1 ?? score.breakPointsChances1 ?? 0),
           breakPointsWon2: Number(summary.breakPointsWon2 ?? score.breakPointsWon2 ?? 0),
@@ -288,12 +308,16 @@
             String(matchStatus || "").toLowerCase() === "finished" ||
             String(matchStatus || "").toLowerCase() === "wo";
 
+          const buildTB = (gamesWinner, tbPoints) => {
+            return `<span class="set-score">${gamesWinner}<span class="set-tb">${tbPoints}</span></span>`;
+          };
+
           if (setObj.tieBreakMode === "tb7") {
             if (tb1 > 0 || tb2 > 0) {
               const p1Won = tb1 > tb2;
               return {
-                p1: `${p1Won ? 7 : 6}<sup>${tb1}</sup>`,
-                p2: `${p1Won ? 6 : 7}<sup>${tb2}</sup>`
+                p1: buildTB(p1Won ? 7 : 6, tb1),
+                p2: buildTB(p1Won ? 6 : 7, tb2)
               };
             }
           }
@@ -306,8 +330,8 @@
             if (tb1 > 0 || tb2 > 0) {
               const p1Won = tb1 > tb2;
               return {
-                p1: `${p1Won ? 7 : 6}<sup>${tb1}</sup>`,
-                p2: `${p1Won ? 6 : 7}<sup>${tb2}</sup>`
+                p1: buildTB(p1Won ? 7 : 6, tb1),
+                p2: buildTB(p1Won ? 6 : 7, tb2)
               };
             }
 
@@ -375,7 +399,7 @@
       if (document.getElementById("publicAppInlineStyles")) return;
       const style = document.createElement("style");
       style.id = "publicAppInlineStyles";
-      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } /* Duplas: quebra após a barra no nome */ .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } /* Resumo da partida */ .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } /* Mais respiro entre nome e colunas */ .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board[data-status="live"] .player-name, .match-board[data-status="suspended"] .player-name, .match-board[data-status="finished"] .player-name { padding-right: 6px !important; } } `;
+      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } /* Tie-break */ .match-board .set-col { display: inline-flex; align-items: flex-start; justify-content: center; white-space: nowrap; gap: 1px; } .match-board .set-score { display: inline-flex; align-items: flex-start; justify-content: center; white-space: nowrap; line-height: 1; } .match-board .set-tb { font-size: 0.58em !important; line-height: 1 !important; position: relative; top: -0.45em; margin-left: 1px; display: inline-block; } .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .stats-block { margin-top: 14px; } .stats-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin-top:10px; } .stat-card { background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 18px; padding: 14px 16px 16px; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(0,0,0,0.15); } .stat-title { text-align:center; color:#a9c6e6; font-size:0.88rem; line-height:1.15; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; } .stat-values { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 10px; } .stat-values span { font-size:1.1rem; font-weight:800; color:#b9ff5f; min-width:44px; text-align:center; } .values-multi span { min-width:64px; } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board[data-status="live"] .player-name, .match-board[data-status="suspended"] .player-name, .match-board[data-status="finished"] .player-name { padding-right: 6px !important; } .match-board .set-tb { font-size: 0.55em !important; top: -0.5em !important; margin-left: 1px !important; } .stats-grid { grid-template-columns: 1fr; } .stat-card { min-height: 80px; } } `;
       document.head.appendChild(style);
     }
 
@@ -422,7 +446,7 @@
         ? String(match.player2 || "Jogador 2").trim()
         : String(match.player4 || "Jogador 4").trim();
 
-      return ` <span class="name-line">${U.escapeHtml(p1)}/</span> <span class="name-line">${U.escapeHtml(p2)}</span> `;
+      return `<span class="name-line">${U.escapeHtml(p1)}/</span> <span class="name-line">${U.escapeHtml(p2)}</span>`;
     }
 
     function getTeam1Name(match) {
@@ -478,21 +502,112 @@
           : String(match.player2 || "Jogador 2").trim()
       );
 
-      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%">${p1 > 12 ? `${p1}%` : ""}</div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%">${p2 > 12 ? `${p2}%` : ""}</div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div>`;
+      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%">${p1 > 12 ? `${p1}%` : ""}</div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%">${p2 > 12 ? `${p2}%` : ""}</div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div> `;
     }
 
     function renderMatchSummary(match) {
       const team1 = isDoublesFormat(match)
         ? getTeam1Name(match).replace(/\n/g, " ").trim()
         : String(match.player1 || "Jogador 1").trim();
+
       const team2 = isDoublesFormat(match)
         ? getTeam2Name(match).replace(/\n/g, " ").trim()
         : String(match.player2 || "Jogador 2").trim();
+
       const s = U.getMatchSummary(match);
       const bp1 = U.formatBreakPoints(s.breakPointsWon1, s.breakPointsChances1);
       const bp2 = U.formatBreakPoints(s.breakPointsWon2, s.breakPointsChances2);
 
-      return ` <div class="match-summary"> <div class="match-summary-title">Resumo da partida</div> <div class="match-summary-grid"> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team1)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints1}</strong></span> <span class="summary-value">Break points: <strong>${bp1}</strong></span> </div> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team2)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints2}</strong></span> <span class="summary-value">Break points: <strong>${bp2}</strong></span> </div> </div> </div>`;
+      return ` <div class="match-summary"> <div class="match-summary-title">Resumo da partida</div> <div class="match-summary-grid"> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team1)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints1}</strong></span> <span class="summary-value">Break points: <strong>${bp1}</strong></span> </div> <div class="match-summary-item"> <span class="summary-label">${U.escapeHtml(team2)}</span> <span class="summary-value">Pontos totais: <strong>${s.totalPoints2}</strong></span> <span class="summary-value">Break points: <strong>${bp2}</strong></span> </div> </div> </div> `;
+    }
+
+    function renderStatistics(match) {
+      const score = U.normalizeScore(match.score || {});
+      const stats = match.stats || {};
+      const p1 = stats.player1 || {};
+      const p2 = stats.player2 || {};
+
+      const fmtPair = (a, b) => {
+        const v1 = Number(a ?? 0);
+        const v2 = Number(b ?? 0);
+        const total = v1 + v2;
+        const w1 = total > 0 ? (v1 / total) * 100 : 50;
+        const w2 = total > 0 ? (v2 / total) * 100 : 50;
+
+        return ` <div class="stat-values stat-values-pair"> <span>${U.escapeHtml(String(v1))}</span> <span>${U.escapeHtml(String(v2))}</span> </div> <div class="stat-compare-bar"> <div class="stat-compare-p1" style="width:${w1}%"></div> <div class="stat-compare-p2" style="width:${w2}%"></div> </div> <div class="stat-compare-labels"> <span>${w1.toFixed(0)}%</span> <span>${w2.toFixed(0)}%</span> </div> `;
+      };
+
+      const fmtTextPair = (a, b) => {
+        const v1 = String(a ?? "0");
+        const v2 = String(b ?? "0");
+
+        const n1 = Number(String(v1).split("/")[0]) || 0;
+        const n2 = Number(String(v2).split("/")[0]) || 0;
+        const total = n1 + n2;
+        const w1 = total > 0 ? (n1 / total) * 100 : 50;
+        const w2 = total > 0 ? (n2 / total) * 100 : 50;
+
+        return ` <div class="stat-values stat-values-textpair"> <span>${U.escapeHtml(v1)}</span> <span>${U.escapeHtml(v2)}</span> </div> <div class="stat-compare-bar"> <div class="stat-compare-p1" style="width:${w1}%"></div> <div class="stat-compare-p2" style="width:${w2}%"></div> </div> <div class="stat-compare-labels"> <span>${w1.toFixed(0)}%</span> <span>${w2.toFixed(0)}%</span> </div> `;
+      };
+
+      const pct = (won, attempts) => {
+        const a = Number(attempts || 0);
+        const w = Number(won || 0);
+        if (a <= 0) return "0.0%";
+        return `${((w / a) * 100).toFixed(1)}%`;
+      };
+
+      const service1Text1 = `${Number(p1.serve1Won || 0)}/${Number(p1.serve1Attempts || 0)}`;
+      const service1Text2 = `${Number(p2.serve1Won || 0)}/${Number(p2.serve1Attempts || 0)}`;
+
+      const service2Text1 = `${Number(p1.serve2Won || 0)}/${Number(p1.serve2Attempts || 0)}`;
+      const service2Text2 = `${Number(p2.serve2Won || 0)}/${Number(p2.serve2Attempts || 0)}`;
+
+      const service1Pct1 = pct(p1.serve1Won, p1.serve1Attempts);
+      const service1Pct2 = pct(p2.serve1Won, p2.serve1Attempts);
+
+      const service2Pct1 = pct(p1.serve2Won, p1.serve2Attempts);
+      const service2Pct2 = pct(p2.serve2Won, p2.serve2Attempts);
+
+      const netWon1 = Number(
+        p1.netWon ??
+        (Number(p1.dropshotWinner || 0) + Number(p1.smashWinner || 0) + Number(p1.voleioWinner || 0))
+      );
+      const netLost1 = Number(
+        p1.netLost ??
+        (Number(p1.dropshotError || 0) + Number(p1.smashError || 0) + Number(p1.voleioError || 0))
+      );
+
+      const netWon2 = Number(
+        p2.netWon ??
+        (Number(p2.dropshotWinner || 0) + Number(p2.smashWinner || 0) + Number(p2.voleioWinner || 0))
+      );
+      const netLost2 = Number(
+        p2.netLost ??
+        (Number(p2.dropshotError || 0) + Number(p2.smashError || 0) + Number(p2.voleioError || 0))
+      );
+
+      const unforcedText1 = `${Number(p1.enfFH || 0)}/${Number(p1.enfBH || 0)}`;
+      const unforcedText2 = `${Number(p2.enfFH || 0)}/${Number(p2.enfBH || 0)}`;
+
+      const winnersText1 = `${Number(p1.forehandWinner || 0)}/${Number(p1.backhandWinner || 0)}`;
+      const winnersText2 = `${Number(p2.forehandWinner || 0)}/${Number(p2.backhandWinner || 0)}`;
+
+      const dropshotText1 = `${Number(p1.dropshotWinner || 0)}/${Number(p1.dropshotError || 0)}`;
+      const dropshotText2 = `${Number(p2.dropshotWinner || 0)}/${Number(p2.dropshotError || 0)}`;
+
+      const bpWon1 = Number(score.breakPointsWon1 || p1.breakPointsWon || 0);
+      const bpCh1 = Number(score.breakPointsChances1 || p1.breakPointsChances || 0);
+      const bpWon2 = Number(score.breakPointsWon2 || p2.breakPointsWon || 0);
+      const bpCh2 = Number(score.breakPointsChances2 || p2.breakPointsChances || 0);
+
+      const breakText1 = `${bpWon1}/${bpCh1}`;
+      const breakText2 = `${bpWon2}/${bpCh2}`;
+
+      const performanceText1 = Number(p1.serveSuccessPct || 0).toFixed(1);
+      const performanceText2 = Number(p2.serveSuccessPct || 0).toFixed(1);
+
+      return ` <div class="match-summary stats-block"> <div class="match-summary-title">Estatísticas</div> <div class="stats-grid"> <div class="stat-card"> <div class="stat-title">Aces</div> ${fmtPair(p1.ace || 0, p2.ace || 0)} </div> <div class="stat-card"> <div class="stat-title">Duplas faltas</div> ${fmtPair(p1.doubleFault || 0, p2.doubleFault || 0)} </div> <div class="stat-card"> <div class="stat-title">Pontos vencidos<br>1º serviço</div> ${fmtTextPair(service1Text1, service1Text2)} <div class="stat-pct-row"> <span>${service1Pct1}</span> <span>${service1Pct2}</span> </div> </div> <div class="stat-card"> <div class="stat-title">Pontos vencidos<br>2º serviço</div> ${fmtTextPair(service2Text1, service2Text2)} <div class="stat-pct-row"> <span>${service2Pct1}</span> <span>${service2Pct2}</span> </div> </div> <div class="stat-card"> <div class="stat-title">Pontos na rede<br>(vencidos/perdidos)</div> ${fmtTextPair(`${netWon1}/${netLost1}`, `${netWon2}/${netLost2}`)} </div> <div class="stat-card"> <div class="stat-title">Winners<br>(forehand/backhand)</div> ${fmtTextPair(winnersText1, winnersText2)} </div> <div class="stat-card"> <div class="stat-title">Erros não forçados<br>(forehand/backhand)</div> ${fmtTextPair(unforcedText1, unforcedText2)} </div> <div class="stat-card"> <div class="stat-title">Erros forçados</div> ${fmtPair(p1.forcedError || 0, p2.forcedError || 0)} </div> <div class="stat-card"> <div class="stat-title">Pontos de devolução<br>(vencidos/perdidos)</div> ${fmtTextPair( `${Number(p1.returnPoint || 0)}/${Number(p1.returnError || 0)}`, `${Number(p2.returnPoint || 0)}/${Number(p2.returnError || 0)}` )} </div> <div class="stat-card"> <div class="stat-title">Pontos da linha de base<br>(vencidos/perdidos)</div> ${fmtTextPair( `${Number(p1.baselinePoint || 0)}/${Number(p1.baselineError || 0)}`, `${Number(p2.baselinePoint || 0)}/${Number(p2.baselineError || 0)}` )} </div> <div class="stat-card"> <div class="stat-title">Dropshot<br>(winners/erros)</div> ${fmtTextPair(dropshotText1, dropshotText2)} </div> <div class="stat-card"> <div class="stat-title">Break points<br>(vencidos/chances)</div> ${fmtTextPair(breakText1, breakText2)} </div> <div class="stat-card"> <div class="stat-title">Total de pontos vencidos</div> ${fmtPair(p1.totalPointsWon || 0, p2.totalPointsWon || 0)} </div> <div class="stat-card"> <div class="stat-title">Performance</div> ${fmtPair(performanceText1, performanceText2)} </div> </div> </div> `;
     }
 
     function getLiveFeedMessage(match) {
@@ -574,7 +689,7 @@
         : setColumns.hasTwoSets ? "two-set-head"
           : "one-set-head";
 
-      return ` <div class="match-table-head compact-head ${cls}"> <div class="team-label team-col">JOGADOR</div> <div class="set-col">1º SET</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="set-col">2º SET</div>` : ""} ${setColumns.hasThreeSets ? `<div class="set-col">3º SET</div>` : ""} <div class="points-col">PONTOS</div> </div>`;
+      return ` <div class="match-table-head compact-head ${cls}"> <div class="team-label team-col">JOGADOR</div> <div class="set-col">1º SET</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="set-col">2º SET</div>` : ""} ${setColumns.hasThreeSets ? `<div class="set-col">3º SET</div>` : ""} <div class="points-col">PONTOS</div> </div> `;
     }
 
     function buildPlayerRow(teamNameHtml, setColumns, pts, playerPos, score, isWinner, isWO, isFinished = false, winnerPos = null) {
@@ -586,7 +701,7 @@
       const serveBall = getServeBall(score, playerPos, isFinished, winnerPos);
       const setP = playerPos === 1 ? "p1" : "p2";
 
-      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}"> ${serveBall} <span class="team-name-compact-content ${isDoublesFormat(score) ? "doubles-name" : ""}">${teamNameHtml}</span> </div> <div class="score green set-col">${setColumns.set1[setP]}</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set2?.[setP] ?? "--"}</div>` : ""} ${setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set3?.[setP] ?? "--"}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div>`;
+      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}"> ${serveBall} <span class="team-name-compact-content ${isDoublesFormat(score) ? "doubles-name" : ""}"> ${teamNameHtml} </span> </div> <div class="score green set-col">${setColumns.set1[setP]}</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set2?.[setP] ?? "--"}</div>` : ""} ${setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set3?.[setP] ?? "--"}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div> `;
     }
 
     function renderFinalizedCard(match) {
@@ -612,7 +727,7 @@
       if (stage) footerParts.push(`<span class="footer-item">Fase: <strong>${stage}</strong></span>`);
       if (duration) footerParts.push(`<span class="footer-item">Duração: <strong>${duration}</strong></span>`);
 
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article>`;
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article> `;
     }
 
     function renderLiveCard(match) {
@@ -657,7 +772,7 @@
       if (court) row2Parts.push(`<span>Quadra: <strong>${court}</strong></span>`);
       if (matchDate) row2Parts.push(`<span>Data: <strong>${matchDate}</strong></span>`);
 
-      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} <div class="match-footer compact-footer match-footer-live"> ${row1Parts.length ? `<div class="match-footer-live-row">${row1Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} ${row2Parts.length ? `<div class="match-footer-live-row">${row2Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} </div> </article>`;
+      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} ${!isSuspended ? renderStatistics(match) : ""} <div class="match-footer compact-footer match-footer-live"> ${row1Parts.length ? `<div class="match-footer-live-row">${row1Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} ${row2Parts.length ? `<div class="match-footer-live-row">${row2Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} </div> </article> `;
     }
 
     function createScheduledCard(match) {
@@ -668,7 +783,7 @@
       const status = U.normalizeStatus(match.status);
       const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
 
-      return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name team-name-compact">${team1Html}</span> <span class="vs-separator">X</span> <span class="player-name team-name-compact">${team2Html}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span>` : ""} </div> </article>`;
+      return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name team-name-compact">${team1Html}</span> <span class="vs-separator">X</span> <span class="player-name team-name-compact">${team2Html}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span>` : ""} </div> </article> `;
     }
 
     function createCard(match) {
@@ -783,6 +898,35 @@
         );
     }
 
+    function listenSingleMatch() {
+      if (!matchId) return;
+
+      state.unsubscribeSingle?.();
+      state.unsubscribeSingle = null;
+
+      state.unsubscribeSingle = db.collection("matches")
+        .doc(matchId)
+        .onSnapshot(
+          (snap) => {
+            if (!snap.exists) return;
+
+            const match = { id: snap.id, ...snap.data() };
+
+            const idx = state.cachedMatches.findIndex((m) => m.id === match.id);
+            if (idx >= 0) {
+              state.cachedMatches[idx] = match;
+            } else {
+              state.cachedMatches.push(match);
+            }
+
+            renderLists(state.cachedMatches);
+          },
+          (err) => {
+            console.error("Erro ao escutar partida individual:", err);
+          }
+        );
+    }
+
     function refreshLiveDurations() {
       if (state.cachedMatches.length) renderLists(state.cachedMatches);
     }
@@ -800,6 +944,7 @@
       injectInlineStyles();
       initFilter();
       listenPublicMatches();
+      listenSingleMatch();
       state.timer = setInterval(refreshLiveDurations, 1000);
     }
 
@@ -808,4 +953,3 @@
 
   document.addEventListener("DOMContentLoaded", () => PublicApp.init());
 })();
-
