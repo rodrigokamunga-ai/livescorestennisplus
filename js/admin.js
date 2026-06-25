@@ -221,7 +221,7 @@
       },
       isDoublesFormatValue(gameFormat) {
         const value = String(gameFormat || "").trim();
-        return value === "Duplas" || value === "Duplas Mistas";
+        return value === "Duplas";
       },
       getTeam1NameFromData(d) {
         const gameFormat = String(d?.gameFormat || "Simples").trim();
@@ -1246,13 +1246,81 @@ if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? ""
 
     function detailsHTML(d) {
       try {
-        return `<div class="details-layout">${renderGeneralBlock(d)}${renderScoreBlock(d)}${renderSummaryBlock(d)}</div>`;
+        return `<div class="details-layout"> ${renderGeneralBlock(d)} ${renderScoreBlock(d)} ${renderSummaryBlock(d)} ${renderFinalStatsBlock(d)} </div>`;
       } catch (err) {
         console.error("Erro ao montar detalhes:", err, d);
         return `<div class="details-layout"><p>Erro ao carregar os detalhes da partida.</p></div>`;
       }
     }
 
+    function renderFinalStatsBlock(d) {
+      const stats = d?.stats || {};
+      const p1 = stats.player1 || {};
+      const p2 = stats.player2 || {};
+      const score = U.normalizeScore(d?.score || {});
+    
+      const team1HTML = U.escapeHtml(U.getTeam1NameFromData(d));
+      const team2HTML = U.escapeHtml(U.getTeam2NameFromData(d));
+    
+      const pct = (won, attempts) => {
+        const a = Number(attempts || 0);
+        const w = Number(won || 0);
+        if (a <= 0) return "0.0%";
+        return `${((w / a) * 100).toFixed(1)}%`;
+      };
+    
+      const service1Text1 = `${Number(p1.serve1Won || 0)}/${Number(p1.serve1Attempts || 0)}`;
+      const service1Text2 = `${Number(p2.serve1Won || 0)}/${Number(p2.serve1Attempts || 0)}`;
+    
+      const service2Text1 = `${Number(p1.serve2Won || 0)}/${Number(p1.serve2Attempts || 0)}`;
+      const service2Text2 = `${Number(p2.serve2Won || 0)}/${Number(p2.serve2Attempts || 0)}`;
+    
+      const netWon1 = Number(
+        p1.netWon ??
+        (Number(p1.dropshotWinner || 0) + Number(p1.smashWinner || 0) + Number(p1.voleioWinner || 0))
+      );
+      const netLost1 = Number(
+        p1.netLost ??
+        (Number(p1.dropshotError || 0) + Number(p1.smashError || 0) + Number(p1.voleioError || 0))
+      );
+    
+      const netWon2 = Number(
+        p2.netWon ??
+        (Number(p2.dropshotWinner || 0) + Number(p2.smashWinner || 0) + Number(p2.voleioWinner || 0))
+      );
+      const netLost2 = Number(
+        p2.netLost ??
+        (Number(p2.dropshotError || 0) + Number(p2.smashError || 0) + Number(p2.voleioError || 0))
+      );
+    
+      const unforcedText1 = `${Number(p1.enfFH || 0)}/${Number(p1.enfBH || 0)}`;
+      const unforcedText2 = `${Number(p2.enfFH || 0)}/${Number(p2.enfBH || 0)}`;
+    
+      const winnersText1 = `${Number(p1.forehandWinner || 0)}/${Number(p1.backhandWinner || 0)}`;
+      const winnersText2 = `${Number(p2.forehandWinner || 0)}/${Number(p2.backhandWinner || 0)}`;
+    
+      const dropshotText1 = `${Number(p1.dropshotWinner || 0)}/${Number(p1.dropshotError || 0)}`;
+      const dropshotText2 = `${Number(p2.dropshotWinner || 0)}/${Number(p2.dropshotError || 0)}`;
+    
+      const returnText1 = `${Number(p1.returnPoint || 0)}/${Number(p1.returnError || 0)}`;
+      const returnText2 = `${Number(p2.returnPoint || 0)}/${Number(p2.returnError || 0)}`;
+    
+      const baselineText1 = `${Number(p1.baselinePoint || 0)}/${Number(p1.baselineError || 0)}`;
+      const baselineText2 = `${Number(p2.baselinePoint || 0)}/${Number(p2.baselineError || 0)}`;
+    
+      const breakText1 = `${Number(score.breakPointsWon1 || p1.breakPointsWon || 0)}/${Number(score.breakPointsChances1 || p1.breakPointsChances || 0)}`;
+      const breakText2 = `${Number(score.breakPointsWon2 || p2.breakPointsWon || 0)}/${Number(score.breakPointsChances2 || p2.breakPointsChances || 0)}`;
+    
+      const totalPoints1 = Number(score.totalPoints1 || p1.totalPointsWon || 0);
+      const totalPoints2 = Number(score.totalPoints2 || p2.totalPointsWon || 0);
+    
+      const performanceText1 = Number(p1.serveSuccessPct || 0).toFixed(1) + "%";
+      const performanceText2 = Number(p2.serveSuccessPct || 0).toFixed(1) + "%";
+    
+      const playerBlock = (name, totalPoints, service1Text, service2Text, s1Pct, s2Pct, dropshotWinner, dropshotError, performanceText, netWon, netLost, winnersText, unforcedText, forcedError, returnText, baselineText, breakText) => ` <div class="detail-summary-card detail-summary-card-vertical"> <div class="detail-player-title">${name}</div> <div class="detail-summary-line"><span>Pontos totais</span><strong>${totalPoints}</strong></div> <div class="detail-summary-line"><span>Pontos vencidos no 1º serviço</span><strong>${service1Text}</strong></div> <div class="detail-summary-line"><span>Pontos vencidos no 2º serviço</span><strong>${service2Text}</strong></div> <div class="detail-summary-line"><span>Taxa do 1º serviço</span><strong>${s1Pct}</strong></div> <div class="detail-summary-line"><span>Taxa do 2º serviço</span><strong>${s2Pct}</strong></div> <div class="detail-summary-line"><span>Dropshot winner</span><strong>${dropshotWinner}</strong></div> <div class="detail-summary-line"><span>Dropshot erro</span><strong>${dropshotError}</strong></div> <div class="detail-summary-line"><span>Performance</span><strong>${performanceText}</strong></div> <div class="detail-summary-line"><span>Pontos na rede</span><strong>${netWon}/${netLost}</strong></div> <div class="detail-summary-line"><span>Winners (FH/BH)</span><strong>${winnersText}</strong></div> <div class="detail-summary-line"><span>Erros não forçados (FH/BH)</span><strong>${unforcedText}</strong></div> <div class="detail-summary-line"><span>Erros forçados</span><strong>${forcedError}</strong></div> <div class="detail-summary-line"><span>Pontos de devolução</span><strong>${returnText}</strong></div> <div class="detail-summary-line"><span>Pontos da linha de base</span><strong>${baselineText}</strong></div> <div class="detail-summary-line"><span>Break points</span><strong>${breakText}</strong></div> </div> `;
+    
+      return ` <section class="detail-section detail-section-final-stats"> <div class="detail-section-header"> <h4>Estatísticas da partida finalizada</h4> <span class="detail-section-subtitle">Desempenho consolidado dos jogadores</span> </div> <div class="detail-summary-stack"> ${playerBlock( team1HTML, totalPoints1, service1Text1, service2Text1, pct(p1.serve1Won, p1.serve1Attempts), pct(p1.serve2Won, p1.serve2Attempts), Number(p1.dropshotWinner || 0), Number(p1.dropshotError || 0), performanceText1, netWon1, netLost1, winnersText1, unforcedText1, Number(p1.forcedError || 0), returnText1, baselineText1, breakText1 )} ${playerBlock( team2HTML, totalPoints2, service1Text2, service2Text2, pct(p2.serve1Won, p2.serve1Attempts), pct(p2.serve2Won, p2.serve2Attempts), Number(p2.dropshotWinner || 0), Number(p2.dropshotError || 0), performanceText2, netWon2, netLost2, winnersText2, unforcedText2, Number(p2.forcedError || 0), returnText2, baselineText2, breakText2 )} </div> </section> `;
+    }
     function lockMatchFormatIfFinished() {
       if (!el.matchFormat) return;
       el.matchFormat.disabled = false;
@@ -1537,11 +1605,11 @@ if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? ""
         const selectedSurface = String(el.surfaceType?.value || "").trim();
         const selectedStatus = String(el.status?.value || "").trim();
 
-        if (!["Simples", "Duplas", "Duplas Mistas"].includes(selectedGameFormat)) return setMsg("Selecione um formato de jogo válido.");
+        if (!["Simples", "Duplas"].includes(selectedGameFormat)) return setMsg("Selecione um formato de jogo válido.");
         if (!ALLOWED_FORMATS_TENNIS.includes(selectedFormat)) return setMsg("Formato inválido para a modalidade selecionada.");
         if (!ALLOWED_SURFACES.includes(selectedSurface)) return setMsg("Selecione um tipo de piso válido.");
 
-        const isDoubles = selectedGameFormat === "Duplas" || selectedGameFormat === "Duplas Mistas";
+        const isDoubles = selectedGameFormat === "Duplas";
         const woWinner = String(el.winnerByWO?.value || "").trim();
         const player1Name = state.currentProfileName || state.currentUser?.displayName || "";
 
