@@ -1,3 +1,5 @@
+/* ========================================================= HEADER MOBILE / FILTROS ========================================================= */
+
 .mobile-filters-header {
   display: flex;
   align-items: center;
@@ -30,7 +32,7 @@
   flex: 1;
 }
 
-/* ───────────────────────────────────────────────────────────── Jogos do dia Nome dos jogadores maior ───────────────────────────────────────────────────────────── */
+/* ========================================================= JOGOS DO DIA / AGENDADOS ========================================================= */
 
 .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
   font-size: 1.22rem !important;
@@ -51,7 +53,12 @@
   font-weight: 800;
 }
 
-/* ───────────────────────────────────────────────────────────── Jogos em andamento e suspensos Não altera os jogos finalizados ───────────────────────────────────────────────────────────── */
+/* ========================================================= JOGOS EM ANDAMENTO / SUSPENSOS ========================================================= */
+
+.match-board[data-status="live"],
+.match-board[data-status="suspended"] {
+  align-items: stretch;
+}
 
 .match-board[data-status="live"] .team-name-compact,
 .match-board[data-status="suspended"] .team-name-compact {
@@ -70,17 +77,12 @@
   font-weight: 900;
 }
 
-.match-board[data-status="live"],
-.match-board[data-status="suspended"] {
-  align-items: stretch;
-}
-
 .match-board[data-status="live"] .match-player-row,
 .match-board[data-status="suspended"] .match-player-row {
   min-height: 44px;
 }
 
-/* CORREÇÃO: nome completo sem corte */
+/* Nome completo sem corte */
 .match-board[data-status="live"] .player-name,
 .match-board[data-status="suspended"] .player-name,
 .match-board[data-status="finished"] .player-name {
@@ -94,7 +96,7 @@
   line-height: 1.15 !important;
 }
 
-/* ───────────────────────────────────────────────────────────── Jogos finalizados - bloco um pouco maior - cabeçalho e colunas alinhados - JOGADOR à esquerda - nome dos jogadores 1 tamanho menor ───────────────────────────────────────────────────────────── */
+/* ========================================================= JOGOS FINALIZADOS ========================================================= */
 
 .match-board[data-status="finished"] {
   transform: scale(1.03);
@@ -105,7 +107,8 @@
   align-items: center;
 }
 
-.match-board[data-status="finished"] .match-table-head > div {
+.match-board[data-status="finished"] .match-table-head > div,
+.match-board[data-status="finished"] .match-player-row > div {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,21 +127,12 @@
   align-items: center;
 }
 
-.match-board[data-status="finished"] .match-player-row > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
 .match-board[data-status="finished"] .player-name {
   justify-content: flex-start !important;
   text-align: left !important;
   font-size: 0.98rem;
   line-height: 1.2;
   font-weight: 700;
-
-  /* Duplas: permite quebrar em várias linhas */
   white-space: normal !important;
   overflow: visible !important;
   text-overflow: unset !important;
@@ -150,302 +144,6 @@
   font-size: 1.05rem;
   font-weight: 900;
 }
-
-/* ───────────────────────────────────────────────────────────── Mobile ───────────────────────────────────────────────────────────── */
-
-/* ========================================================= CORREÇÃO FINAL — JOGOS FINALIZADOS COM 3 SETS Mantém a coluna "Pontos" na última posição no mobile ========================================================= */
-
-@media (max-width: 768px) {
-  /* Só finalizados */
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
-    display: grid !important;
-    grid-template-columns:
-      minmax(0, 3.55fr)
-      minmax(34px, 0.40fr)
-      minmax(34px, 0.40fr)
-      minmax(34px, 0.40fr)
-      minmax(42px, 0.50fr) !important;
-    column-gap: 10px !important;
-    align-items: center !important;
-  }
-
-  /* Cabeçalho e linhas: centraliza as colunas numéricas */
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
-    min-width: 0 !important;
-    text-align: center !important;
-    overflow: hidden !important;
-  }
-
-  /* Primeira coluna: nome do jogador */
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child {
-    text-align: left !important;
-    justify-content: flex-start !important;
-    padding-right: 6px !important;
-  }
-
-  /* Colunas de sets e pontos: mantém número centralizado */
-  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
-    min-width: 0 !important;
-    text-align: center !important;
-    justify-content: center !important;
-    white-space: nowrap !important;
-  }
-
-  /* Se o HTML estiver colocando a coluna pontos como último bloco, isso força ela a ficar no lugar certo visualmente */
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div:last-child,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div:last-child {
-    text-align: center !important;
-    justify-self: center !important;
-  }
-
-  /* Nome do jogador no finalizado: mostra completo */
-  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    line-height: 1.15 !important;
-    height: auto !important;
-    min-height: 0 !important;
-  }
-
-  /* Número finalizado: um pouco menor para caber bem */
-  body.public-page #finishedList .public-card[data-status="finished"] .score,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
-    font-size: 17px !important;
-    line-height: 1 !important;
-    min-width: 22px !important;
-  }
-}
-
-/* ========================================================= AJUSTES PONTUAIS — sem quebrar nomes e colunas ========================================================= */
-
-@media (max-width: 768px) {
-  /* Tie-break: número menor e mais alto */
-  .match-board .set-col sup {
-    font-size: 0.68em !important;
-    line-height: 0 !important;
-    position: relative !important;
-    top: -0.38em !important;
-  }
-
-  /* Jogos finalizados: números um pouco maiores */
-  .match-board[data-status="finished"] .score {
-    font-size: 19px !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-  }
-
-  /* Textos do rodapé finalizado: Torneio / Fase / Duração */
-  .match-board[data-status="finished"] .match-footer-finalized,
-  .match-board[data-status="finished"] .match-footer-finalized .footer-item,
-  .match-board[data-status="finished"] .match-footer-finalized strong {
-    font-size: 11px !important;
-    line-height: 1.15 !important;
-  }
-
-  /* Em andamento/suspenso: textos do rodapé */
-  .match-board[data-status="live"] .match-footer-live,
-  .match-board[data-status="suspended"] .match-footer-live,
-  .match-board[data-status="live"] .match-footer-live strong,
-  .match-board[data-status="suspended"] .match-footer-live strong {
-    font-size: 10px !important;
-    line-height: 1.15 !important;
-  }
-}
-
-/* ========================================================= EM ANDAMENTO — alinhar Fase, Duração, Quadra e Data ao centro ========================================================= */
-
-.match-board[data-status="live"] .match-footer-live,
-.match-board[data-status="suspended"] .match-footer-live {
-  align-items: center !important;
-}
-
-.match-board[data-status="live"] .match-footer-live-row,
-.match-board[data-status="suspended"] .match-footer-live-row {
-  justify-content: center !important;
-  text-align: center !important;
-  width: 100%;
-}
-
-.match-board[data-status="live"] .match-footer-live-row span,
-.match-board[data-status="suspended"] .match-footer-live-row span {
-  justify-content: center !important;
-  text-align: center !important;
-}
-
-.match-board[data-status="live"] .match-footer-live-row strong,
-.match-board[data-status="suspended"] .match-footer-live-row strong {
-  text-align: center !important;
-}
-
-@media (max-width: 768px) {
-  .match-board[data-status="live"] .match-footer-live,
-  .match-board[data-status="suspended"] .match-footer-live {
-    align-items: center !important;
-  }
-
-  .match-board[data-status="live"] .match-footer-live-row,
-  .match-board[data-status="suspended"] .match-footer-live-row {
-    justify-content: center !important;
-    text-align: center !important;
-  }
-}
-
-/* Espaçamento maior nas colunas */
-
-@media (max-width: 768px) {
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row {
-    display: grid !important;
-    grid-template-columns:
-      minmax(0, 3.55fr)
-      minmax(34px, 0.40fr)
-      minmax(34px, 0.40fr)
-      minmax(34px, 0.40fr)
-      minmax(42px, 0.50fr) !important;
-    column-gap: 10px !important;
-    align-items: center !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div {
-    min-width: 0 !important;
-    text-align: center !important;
-    overflow: hidden !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child {
-    text-align: left !important;
-    justify-content: flex-start !important;
-    padding-right: 6px !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-page #liveList .public-card[data-status="live"] .points-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .points-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .points-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col {
-    min-width: 0 !important;
-    text-align: center !important;
-    justify-content: center !important;
-    white-space: nowrap !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name {
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    line-height: 1.15 !important;
-    height: auto !important;
-    min-height: 0 !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
-  body.public-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score {
-    font-size: 17px !important;
-    line-height: 1 !important;
-    min-width: 22px !important;
-  }
-}
-
-/* ========================================================= RESUMO / DUPLAS / NOMES SEM CORTE ========================================================= */
-
-/* Garante quebra de nomes em qualquer cartão de resumo/detalhe */
-.detail-player-title,
-.detail-score-card .detail-player-title,
-.detail-info-item strong,
-.career-card-title,
-.player-name,
-.team-name-compact {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.15 !important;
-}
-
-/* Se for dupla, tenta manter a leitura em duas linhas */
-.player-name.team-name-compact,
-.team-name-compact {
-  white-space: normal !important;
-  line-height: 1.15 !important;
-}
-
-/* Espaço maior entre as colunas do placar */
-.match-table-head,
-.match-player-row {
-  column-gap: 12px;
-}
-
-.match-table-head > div,
-.match-player-row > div {
-  min-width: 0;
-}
-
-/* Pequeno respiro extra para colunas numéricas */
-.set-col,
-.points-col,
-.score {
-  padding-left: 2px;
-  padding-right: 2px;
-}
-
-/* Ajuda o resumo da partida a não cortar nomes */
-.detail-section-score .detail-player-title,
-.detail-section-score .detail-player-title span {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-}
-
-/* ========================================================= FINALIZADA alinhada à direita em todos os cards ========================================================= */
 
 .match-board .match-board-top {
   display: flex;
@@ -466,4 +164,400 @@
 .match-board[data-status="wo"] .match-status {
   margin-left: auto !important;
   text-align: right !important;
+}
+
+/* ========================================================= RESUMO DA PARTIDA ========================================================= */
+
+.match-summary {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.match-summary-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.match-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.match-summary-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.summary-label {
+  display: block;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #ffffff;
+  margin-bottom: 6px;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.summary-value {
+  display: block;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.86);
+  margin-top: 3px;
+  text-align: center;
+}
+
+.summary-value strong {
+  font-weight: 900;
+  color: #ffffff;
+}
+
+/* ========================================================= ESTATÍSTICAS Texto branco + barra comparativa verde/azul ========================================================= */
+
+.stats-block {
+  margin-top: 14px;
+}
+
+.stats-block .stat-card {
+  background: rgba(25, 34, 54, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 14px 16px 16px;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.stats-block .stat-title {
+  text-align: center;
+  color: #ffffff !important;
+  font-size: 0.88rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+  display: block;
+  font-weight: 800;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.stats-block .stat-values {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
+}
+
+.stats-block .stat-values span {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff !important;
+  min-width: 44px;
+  text-align: center;
+}
+
+.stats-block .stat-pct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px 0;
+  margin-top: -2px;
+}
+
+.stats-block .stat-pct-row span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Barra comparativa */
+.stats-block .stat-compare-bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  margin-top: 8px;
+}
+
+.stats-block .stat-compare-p1 {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.stats-block .stat-compare-p2 {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.stats-block .stat-compare-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ffffff !important;
+}
+
+.stats-block .stat-compare-labels span {
+  color: #ffffff !important;
+}
+
+/* ========================================================= COLUNAS / ESPAÇAMENTO GERAL ========================================================= */
+
+.match-table-head,
+.match-player-row {
+  column-gap: 12px;
+}
+
+.match-table-head > div,
+.match-player-row > div {
+  min-width: 0;
+}
+
+.set-col,
+.points-col,
+.score {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* ========================================================= TIE-BREAK ========================================================= */
+
+.match-board .set-col sup {
+  font-size: 0.68em !important;
+  line-height: 0 !important;
+  position: relative !important;
+  top: -0.38em !important;
+}
+
+/* ========================================================= FOOTER LIVE / SUSPENSO ========================================================= */
+
+.match-board[data-status="live"] .match-footer-live,
+.match-board[data-status="suspended"] .match-footer-live {
+  align-items: center !important;
+}
+
+.match-board[data-status="live"] .match-footer-live-row,
+.match-board[data-status="suspended"] .match-footer-live-row {
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100%;
+}
+
+.match-board[data-status="live"] .match-footer-live-row span,
+.match-board[data-status="suspended"] .match-footer-live-row span,
+.match-board[data-status="live"] .match-footer-live-row strong,
+.match-board[data-status="suspended"] .match-footer-live-row strong {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* ========================================================= RESPONSIVO ========================================================= */
+
+@media (max-width: 768px) {
+  .match-summary-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+    font-size: 1.05rem !important;
+  }
+
+  .match-board[data-status="finished"] .score {
+    font-size: 19px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+  }
+
+  .match-board[data-status="finished"] .match-footer-finalized,
+  .match-board[data-status="finished"] .match-footer-finalized .footer-item,
+  .match-board[data-status="finished"] .match-footer-finalized strong {
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+  }
+
+  .match-board[data-status="live"] .match-footer-live,
+  .match-board[data-status="suspended"] .match-footer-live,
+  .match-board[data-status="live"] .match-footer-live strong,
+  .match-board[data-status="suspended"] .match-footer-live strong {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  .stats-block .stat-card,
+  .match-summary-item {
+    padding: 10px;
+  }
+
+  .stats-block .stat-title {
+    font-size: 0.75rem;
+  }
+
+  .stats-block .stat-values span {
+    font-size: 1rem;
+  }
+
+  .stats-block .stat-pct-row span {
+    font-size: 0.78rem;
+  }
+
+  .stats-block .stat-compare-bar {
+    height: 7px;
+  }
+
+  .stats-block .stat-compare-labels {
+    font-size: 0.72rem;
+  }
+
+  /* Melhor ajuste para cards live/suspended no mobile */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    display: grid !important;
+    grid-template-columns:
+      minmax(0, 3.55fr)
+      minmax(34px, 0.40fr)
+      minmax(34px, 0.40fr)
+      minmax(34px, 0.40fr)
+      minmax(42px, 0.50fr) !important;
+    column-gap: 10px !important;
+    align-items: center !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
+    min-width: 0 !important;
+    text-align: center !important;
+    overflow: hidden !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    padding-right: 6px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-page #liveList .public-card[data-status="live"] .points-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .points-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .points-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+    min-width: 0 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.15 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 17px !important;
+    line-height: 1 !important;
+    min-width: 22px !important;
+  }
+
+  .match-board[data-status="live"] .match-footer-live,
+  .match-board[data-status="suspended"] .match-footer-live {
+    align-items: center !important;
+  }
+
+  .match-board[data-status="live"] .match-footer-live-row,
+  .match-board[data-status="suspended"] .match-footer-live-row {
+    justify-content: center !important;
+    text-align: center !important;
+  }
 }
