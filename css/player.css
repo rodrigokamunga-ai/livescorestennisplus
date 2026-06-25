@@ -88,7 +88,7 @@ body.player-page .timer-line strong {
   text-align: left;
 }
 
-/* ========================= TOGGLE GAMES / PONTOS ========================= */
+/* ========================= TOGGLE GAMES / PONTOS / ESTATÍSTICAS ========================= */
 .input-mode-toggle {
   display: flex;
   gap: 8px;
@@ -231,6 +231,12 @@ body.player-page .timer-line strong {
   transform: scale(.95);
 }
 
+.point-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .point-value {
   font-size: clamp(38px, 10vw, 56px);
   font-weight: 900;
@@ -285,6 +291,12 @@ body.player-page .timer-line strong {
 
 .games-mini-btn:active {
   transform: scale(.95);
+}
+
+.games-mini-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 .games-mini-val {
@@ -420,6 +432,296 @@ body.player-page .score-card {
   display: none;
 }
 
+/* ========================= ÁREA DE ESTATÍSTICAS / CONTROLADOR ========================= */
+body.player-page .stats-control-panel {
+  width: 100%;
+  margin-top: 2px;
+}
+
+body.player-page .stats-controller-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+body.player-page .stats-controller-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 22px;
+  padding: 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+}
+
+body.player-page .stats-controller-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), transparent 35%),
+    radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 30%);
+  pointer-events: none;
+}
+
+body.player-page .stats-controller-card .section-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8fa4be;
+  margin: 0 0 10px;
+  display: block;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+}
+
+body.player-page .stats-controller-card .group {
+  border-radius: 18px;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+  position: relative;
+  overflow: hidden;
+  background: rgba(8, 14, 26, 0.35);
+}
+
+body.player-page .stats-controller-card .group-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8fa4be;
+  margin-bottom: 10px;
+  font-weight: 900;
+  position: relative;
+  z-index: 1;
+}
+
+body.player-page .stats-controller-card .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Botões da estatística */
+body.player-page .stats-controller-card .play-btn {
+  position: relative;
+  min-height: 122px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+    #0f1828;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 12px;
+  color: #eaf2ff;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: center;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease, border-color .16s ease, background .16s ease;
+}
+
+body.player-page .stats-controller-card .play-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255,255,255,0.12), transparent 34%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06), transparent 26%);
+  pointer-events: none;
+}
+
+body.player-page .stats-controller-card .play-btn::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+body.player-page .stats-controller-card .play-btn:hover {
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+  box-shadow:
+    0 16px 34px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+body.player-page .stats-controller-card .play-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+body.player-page .stats-controller-card .play-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18), 0 14px 30px rgba(0,0,0,0.28);
+}
+
+body.player-page .stats-controller-card .play-btn.tap {
+  animation: tapPulse 220ms ease;
+}
+
+@keyframes tapPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.985); }
+  100% { transform: scale(1); }
+}
+
+body.player-page .stats-controller-card .play-icon {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.98;
+}
+
+body.player-page .stats-controller-card .play-icon svg {
+  width: 40px;
+  height: 40px;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.06));
+}
+
+body.player-page .stats-controller-card .play-label {
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+body.player-page .stats-controller-card .play-sub {
+  font-size: 0.63rem;
+  color: rgba(234, 242, 255, 0.72);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: -2px;
+}
+
+/* Cores dos botões da estatística */
+body.player-page .play-serve {
+  color: #60a5fa;
+}
+
+body.player-page .play-ace {
+  color: #a3e635;
+}
+
+body.player-page .play-doublefault {
+  color: #fb7185;
+}
+
+body.player-page .play-winner {
+  color: #facc15;
+}
+
+body.player-page .play-error {
+  color: #fb7185;
+}
+
+body.player-page .play-net {
+  color: #38bdf8;
+}
+
+body.player-page .play-return {
+  color: #c084fc;
+}
+
+body.player-page .play-baseline {
+  color: #34d399;
+}
+
+/* Cartões do controlador */
+body.player-page .stats-controller-card .server-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  background: rgba(190,242,100,0.12);
+  border: 1px solid rgba(190,242,100,0.22);
+  color: #bef264;
+  display: inline-flex;
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+body.player-page .stats-controller-card .serve-status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  display: inline-flex;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+body.player-page .stats-controller-card .serve-status.serve-first {
+  background: rgba(34,197,94,0.16);
+  color: #22c55e;
+  border-color: rgba(34,197,94,0.28);
+}
+
+body.player-page .stats-controller-card .serve-status.serve-second {
+  background: rgba(245,158,11,0.16);
+  color: #f59e0b;
+  border-color: rgba(245,158,11,0.28);
+}
+
+/* ========================= FLASH NO BOTÃO CLICADO ========================= */
+body.player-page .stats-controller-card .play-btn.btn-flash-p1 {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(255,255,255,0.03)), #0f1828 !important;
+  border-color: rgba(34, 197, 94, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.35),
+    0 0 18px rgba(34, 197, 94, 0.28),
+    0 12px 28px rgba(0,0,0,0.22) !important;
+  transform: scale(0.985);
+}
+
+body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.28), rgba(255,255,255,0.03)), #0f1828 !important;
+  border-color: rgba(59, 130, 246, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.35),
+    0 0 18px rgba(59, 130, 246, 0.28),
+    0 12px 28px rgba(0,0,0,0.22) !important;
+  transform: scale(0.985);
+}
+
 /* ========================= RESPONSIVO ========================= */
 @media (max-width: 480px) {
   .score-unified {
@@ -445,26 +747,24 @@ body.player-page .score-card {
     padding: 9px 10px;
   }
 
-  .point-btn {
-    width: 46px;
-    height: 46px;
-    font-size: 24px;
-  }
-
-  .point-value {
-    font-size: 42px;
-    min-width: 52px;
-  }
-
+  .point-btn,
   .games-mini-btn {
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     font-size: 24px;
+    border-radius: 14px;
   }
 
+  .point-value,
   .games-mini-val {
     font-size: 42px;
-    min-width: 52px;
+    min-width: 54px;
+  }
+
+  .point-control,
+  .games-control {
+    padding: 10px 12px;
+    border-radius: 16px;
   }
 
   .score-box strong {
@@ -482,6 +782,42 @@ body.player-page .score-card {
 
   body.player-page {
     padding-bottom: calc(64px + env(safe-area-inset-bottom) + 8px);
+  }
+
+  body.player-page .stats-controller-grid {
+    gap: 10px;
+  }
+
+  body.player-page .stats-controller-card {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  body.player-page .stats-controller-card .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.player-page .stats-controller-card .play-btn {
+    min-height: 112px;
+    border-radius: 16px;
+  }
+
+  body.player-page .stats-controller-card .play-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  body.player-page .stats-controller-card .play-icon svg {
+    width: 38px;
+    height: 38px;
+  }
+
+  body.player-page .stats-controller-card .play-label {
+    font-size: 0.83rem;
+  }
+
+  body.player-page .stats-controller-card .play-sub {
+    font-size: 0.61rem;
   }
 }
 
@@ -548,4 +884,13 @@ body.player-page .player-bottom-btn-disabled {
   filter: grayscale(0.25);
   background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
   border-color: rgba(255,255,255,.06);
+}
+
+/* ========================= BLOQUEIO DOS BOTÕES DA ABA ESTATÍSTICAS ========================= */
+body.player-page #statsControlPanel button:disabled,
+body.player-page #statsControlPanel .play-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.15);
 }
