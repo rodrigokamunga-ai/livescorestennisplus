@@ -1348,7 +1348,7 @@ body.admin-page #scoreTieBreakSet3Wrapper {
 
 @media (max-width: 768px) {
   body.admin-page .detail-summary-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 10px;
   }
 
@@ -1400,5 +1400,29 @@ body.admin-page #scoreTieBreakSet3Wrapper {
 
   body.admin-page .detail-summary-line strong {
     font-size: 0.9rem;
+  }
+}
+
+/* ========================= ESTATÍSTICAS FINAIS EM COLUNA ÚNICA NO MOBILE ========================= */
+@media (max-width: 768px) {
+  body.admin-page .detail-summary-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  body.admin-page .detail-summary-card-vertical {
+    width: 100%;
+  }
+
+  /* mantém o resumo da partida em 2 colunas se você quiser */
+  body.admin-page .detail-section-final-stats .detail-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  body.admin-page .detail-section-final-stats .detail-summary-grid {
+    grid-template-columns: 1fr;
   }
 }
