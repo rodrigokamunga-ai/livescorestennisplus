@@ -58,6 +58,15 @@
           </select>
         </label>
 
+        <label>Formato do jogo
+          <select id="gameFormat" required>
+            <option value="">Informe o formato do jogo</option>
+            <option value="Simples">Simples</option>
+            <option value="Duplas">Duplas</option>
+            
+          </select>
+        </label>
+
         <label id="tournamentNameWrapper">Nome do torneio
           <input type="text" id="tournamentName" placeholder="Informe o nome do torneio" />
         </label>
@@ -75,14 +84,7 @@
           </select>
         </label>
 
-        <label>Formato do jogo
-          <select id="gameFormat" required>
-            <option value="">Informe o formato do jogo</option>
-            <option value="Simples">Simples</option>
-            <option value="Duplas">Duplas</option>
-            <option value="Duplas Mistas">Duplas Mistas</option>
-          </select>
-        </label>
+        
 
         <label>Formato da partida
           <select id="matchFormat" required>
@@ -142,7 +144,7 @@
           <select id="status">
             <option value="scheduled">Informe o status da partida</option>
             <option value="scheduled">Jogos do dia</option>
-            <option value="live">Em andamento</option>
+            
             <option value="finished">Finalizada</option>
             <option value="wo">Finalizada por WO</option>
           </select>
@@ -274,7 +276,6 @@
             <option value="">Todos os formatos</option>
             <option value="Simples">Simples</option>
             <option value="Duplas">Duplas</option>
-            <option value="Duplas Mistas">Duplas Mistas</option>
           </select>
 
           <input type="text" id="filterTournament" placeholder="Pesquisar por torneio" />
