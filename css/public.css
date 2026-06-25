@@ -227,7 +227,7 @@
   color: #ffffff;
 }
 
-/* ========================================================= ESTATÍSTICAS Texto branco + barra comparativa verde/azul ========================================================= */
+/* ========================================================= ESTATÍSTICAS ========================================================= */
 
 .stats-block {
   margin-top: 14px;
@@ -269,6 +269,7 @@
   word-break: break-word;
 }
 
+/* linha principal dos valores */
 .stats-block .stat-values {
   display: flex;
   justify-content: space-between;
@@ -285,6 +286,7 @@
   text-align: center;
 }
 
+/* linha das porcentagens */
 .stats-block .stat-pct-row {
   display: flex;
   justify-content: space-between;
@@ -339,6 +341,36 @@
   color: #ffffff !important;
 }
 
+/* ========================================================= SERVIÇOS EM UMA ÚNICA LINHA ========================================================= */
+
+.stats-block .stat-values-textpair {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+.stats-block .stat-values-textpair span {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff !important;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stats-block .stat-values-textpair span:first-child {
+  flex: 0 0 auto;
+}
+
+.stats-block .stat-values-textpair span:last-child {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
 /* ========================================================= COLUNAS / ESPAÇAMENTO GERAL ========================================================= */
 
 .match-table-head,
@@ -360,11 +392,40 @@
 
 /* ========================================================= TIE-BREAK ========================================================= */
 
-.match-board .set-col sup {
-  font-size: 0.68em !important;
-  line-height: 0 !important;
-  position: relative !important;
-  top: -0.38em !important;
+.match-board .set-col {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  gap: 1px;
+  overflow: visible !important;
+}
+
+.match-board .set-score {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1;
+  overflow: visible !important;
+}
+
+.match-board .set-main {
+  display: inline-block;
+  line-height: 1;
+}
+
+.match-board .set-tb {
+  font-size: 0.58em !important;
+  line-height: 1 !important;
+  position: relative;
+  top: -0.45em;
+  margin-left: 1px;
+  display: inline-block;
+  vertical-align: top;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  min-width: 0;
 }
 
 /* ========================================================= FOOTER LIVE / SUSPENSO ========================================================= */
@@ -387,6 +448,41 @@
 .match-board[data-status="suspended"] .match-footer-live-row strong {
   justify-content: center !important;
   text-align: center !important;
+}
+
+/* PARTIDAS FINALIZADAS COM DURAÇÃO EM LINHA ABAIXO */
+.match-board[data-status="finished"] .match-footer-finalized {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  width: 100% !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+}
+
+.match-footer-finalized-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
+}
+
+.match-footer-finalized .footer-item {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  align-items: center !important;
+}
+
+.match-footer-finalized .footer-sep {
+  display: inline-flex !important;
+  opacity: 0.45 !important;
+  flex: 0 0 auto !important;
 }
 
 /* ========================================================= RESPONSIVO ========================================================= */
@@ -447,7 +543,16 @@
     font-size: 0.72rem;
   }
 
-  /* Melhor ajuste para cards live/suspended no mobile */
+  .stats-block .stat-values-textpair {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .stats-block .stat-values-textpair span {
+    font-size: 0.95rem;
+  }
+
+  /* Melhor ajuste para cards live/suspended/finished no mobile */
   body.public-page #liveList .public-card[data-status="live"] .match-table-head,
   body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
   body.public-page #liveList .public-card[data-status="live"] .match-player-row,
@@ -462,12 +567,12 @@
   body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
     display: grid !important;
     grid-template-columns:
-      minmax(0, 3.55fr)
-      minmax(34px, 0.40fr)
-      minmax(34px, 0.40fr)
-      minmax(34px, 0.40fr)
-      minmax(42px, 0.50fr) !important;
-    column-gap: 10px !important;
+      minmax(0, 3.45fr)
+      minmax(38px, 0.45fr)
+      minmax(38px, 0.45fr)
+      minmax(44px, 0.55fr)
+      minmax(52px, 0.70fr) !important;
+    column-gap: 8px !important;
     align-items: center !important;
   }
 
@@ -484,8 +589,8 @@
   body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
   body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
     min-width: 0 !important;
+    overflow: visible !important;
     text-align: center !important;
-    overflow: hidden !important;
   }
 
   body.public-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
@@ -507,36 +612,55 @@
 
   body.public-page #liveList .public-card[data-status="live"] .set-col,
   body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-page #liveList .public-card[data-status="live"] .points-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .points-col,
   body.public-page #liveList .public-card[data-status="suspended"] .set-col,
   body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .points-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col,
   body.public-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
     min-width: 0 !important;
     text-align: center !important;
     justify-content: center !important;
     white-space: nowrap !important;
+    overflow: visible !important;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
-    white-space: normal !important;
+  body.public-page #liveList .public-card[data-status="live"] .set-score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-score,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-score,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-score {
+    display: inline-flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
     overflow: visible !important;
-    text-overflow: unset !important;
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    line-height: 1.15 !important;
-    height: auto !important;
-    min-height: 0 !important;
+    line-height: 1 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-main,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-main {
+    font-size: 1.02em;
+    line-height: 1;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-tb,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-tb {
+    font-size: 0.62em !important;
+    line-height: 1 !important;
+    top: -0.55em !important;
+    margin-left: 1px !important;
+    position: relative !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
   }
 
   body.public-page #liveList .public-card[data-status="live"] .score,
@@ -548,6 +672,7 @@
     font-size: 17px !important;
     line-height: 1 !important;
     min-width: 22px !important;
+    overflow: visible !important;
   }
 
   .match-board[data-status="live"] .match-footer-live,
@@ -559,5 +684,73 @@
   .match-board[data-status="suspended"] .match-footer-live-row {
     justify-content: center !important;
     text-align: center !important;
+  }
+
+  .match-footer-finalized-row {
+    font-size: 10px;
+    line-height: 1.15;
+    gap: 4px;
+  }
+
+  .match-board[data-status="finished"] .match-footer-finalized {
+    gap: 3px !important;
+  }
+}
+
+/* ========================================================= EXTRA: AJUSTE FINO PARA TIE-BREAK E FINALIZADOS ========================================================= */
+
+@media (max-width: 480px) {
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.35fr)
+      minmax(38px, 0.44fr)
+      minmax(38px, 0.44fr)
+      minmax(46px, 0.58fr)
+      minmax(56px, 0.78fr) !important;
+    column-gap: 6px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-main,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-main {
+    font-size: 0.98em;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-tb,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-tb {
+    font-size: 0.58em !important;
+    top: -0.52em !important;
+  }
+
+  .stats-block .stat-values-textpair span {
+    font-size: 0.92rem;
   }
 }
