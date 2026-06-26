@@ -168,7 +168,7 @@
     }
 
     function updateMatchControls(status) {
-      const isFinished = status === "finished" || status === "wo";
+      const isFinished = status === "finished" || status === "wo" || status === "ret";
 
       if (el.startBtn) {
         el.startBtn.disabled = isFinished;
@@ -202,7 +202,7 @@
     function applyUndoLockState(data) {
       if (!el.undoBtn) return;
 
-      const isFinished = data.status === "finished" || data.status === "wo";
+      const isFinished = data.status === "finished" || data.status === "wo" || data.status === "ret";
       const finishedAt = data.finishedAt?.toDate
         ? data.finishedAt.toDate()
         : (data.finishedAt ? new Date(data.finishedAt) : null);
@@ -402,11 +402,12 @@
       if (status === "suspended") return "SUSPENSA";
       if (status === "finished") return "FINALIZADA";
       if (status === "wo") return "FINALIZADA POR WO";
+      if (status === "ret") return "FINALIZADA POR RET";
       return "NÃO INICIADA";
     }
 
     function isMatchLocked(data) {
-      return data.status === "finished" || data.status === "wo";
+      return data.status === "finished" || data.status === "wo" || data.status === "ret";
     }
 
     function cloneDeep(obj) {
@@ -926,38 +927,50 @@
     async function decrementPoint(winnerPos) {
       if (!id) return;
       const ref = __db.collection("matches").doc(id);
-
+    
       try {
         const snap = await ref.get();
         if (!snap.exists) return setMsg("Partida não encontrada.", "error");
-
+    
         let data = snap.data();
         if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
         if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
-
+    
         if (data.status !== "live") {
           await ensureMatchStarted(ref, data);
           data = (await ref.get()).data();
         }
-
+    
         const lastAction = buildLastActionSnapshot(data);
-        const score = normalizeScore(data.score);
+const score = normalizeScore(data.score);
 
-        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-          if (winnerPos === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
-          if (winnerPos === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
-        } else {
-          if (winnerPos === 1) score.points1 = Math.max(0, score.points1 - 1);
-          if (winnerPos === 2) score.points2 = Math.max(0, score.points2 - 1);
-        }
+const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
+if (history.length > 0) {
+  history.pop();
+}
+score.lastPoints = history;
 
+if (winnerPos === 1) {
+  score.totalPoints1 = Math.max(0, Number(score.totalPoints1 || 0) - 1);
+} else {
+  score.totalPoints2 = Math.max(0, Number(score.totalPoints2 || 0) - 1);
+}
+
+if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+  if (winnerPos === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
+  if (winnerPos === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
+} else {
+  if (winnerPos === 1) score.points1 = Math.max(0, score.points1 - 1);
+  if (winnerPos === 2) score.points2 = Math.max(0, score.points2 - 1);
+}
+    
         await ref.update({
           lastAction,
           score: buildScorePayload(score),
           server: score.server,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
+    
       } catch (err) {
         console.error(err);
         setMsg(err.message || "Erro ao decrementar ponto.", "error");
@@ -1095,6 +1108,47 @@
       }
     }
 
+    function createRetirementModal(player1Name, player2Name) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = ` position:fixed; inset:0; background:rgba(0,0,0,0.72); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px; `;
+    
+        const box = document.createElement("div");
+        box.style.cssText = ` width:min(420px, 100%); background:#1f2937; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,0.45); font-family:inherit; `;
+    
+        box.innerHTML = ` <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;"> Deseja abandonar a partida? </div> <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;"> Selecione quem abandonou a partida. </div> <div style="display:flex;flex-direction:column;gap:10px;"> <button id="retPlayer1" style=" padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer; ">${player1Name}</button> <button id="retPlayer2" style=" padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer; ">${player2Name}</button> <button id="retCancel" style=" padding:12px 14px; border:none; border-radius:12px; background:rgba(255,255,255,0.10); color:#fff; font-weight:800; cursor:pointer; ">Cancelar</button> </div> `;
+    
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    
+        const cleanup = () => {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+    
+        box.querySelector("#retPlayer1").addEventListener("click", () => {
+          cleanup();
+          resolve("player1");
+        });
+    
+        box.querySelector("#retPlayer2").addEventListener("click", () => {
+          cleanup();
+          resolve("player2");
+        });
+    
+        box.querySelector("#retCancel").addEventListener("click", () => {
+          cleanup();
+          resolve(null);
+        });
+    
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) {
+            cleanup();
+            resolve(null);
+          }
+        });
+      });
+    }
+
     function bindButtons() {
       bindInputModeToggle();
 
@@ -1192,42 +1246,66 @@
       });
 
       el.finishBtn?.addEventListener("click", async () => {
-        if (!id || !confirm("Deseja finalizar a partida?")) return;
+        if (!id) return;
+      
         try {
           const ref = __db.collection("matches").doc(id);
           const snap = await ref.get();
           if (!snap.exists) return setMsg("Partida não encontrada.", "error");
-
+      
           const data = snap.data();
-
+      
           if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
-
+      
+          const team1Name = getTeam1Name(data);
+          const team2Name = getTeam2Name(data);
+      
+          const action = await createRetirementModal(team1Name, team2Name);
+          if (!action) {
+            const normalConfirm = confirm("Deseja encerrar a partida?");
+            if (!normalConfirm) return;
+          }
+      
+          const wasRetirement = action === "player1" || action === "player2";
+      
           const lastAction = buildLastActionSnapshot(data);
-
+      
           let durationSeconds = Number(data.accumulatedSeconds || 0);
-
+      
           if (data.status === "live") {
             const started = data.startedAt?.toDate
               ? data.startedAt.toDate()
               : (data.startedAt ? new Date(data.startedAt) : null);
+      
             if (started && !isNaN(started.getTime())) {
               durationSeconds += Math.floor((Date.now() - started.getTime()) / 1000);
             } else if (liveStartedAtMs) {
               durationSeconds += Math.floor((Date.now() - liveStartedAtMs) / 1000);
             }
           }
-
+      
           liveStartedAtMs = null;
           stopTimer();
-
+      
           const score = normalizeScore(data.score);
           const finishedAt = firebase.firestore.Timestamp.now();
-
+      
           score.setHistory = buildFinalSetHistory(score, data);
-
+      
+          let statusToSave = "finished";
+          let winnerByWO = data.winnerByWO || "";
+          let abandonedBy = "";
+          let winnerByRet = "";
+      
+          if (wasRetirement) {
+            statusToSave = "ret";
+            abandonedBy = action;
+            winnerByRet = action === "player1" ? "player2" : "player1";
+          }
+      
           await ref.update({
             lastAction,
-            status: data.winnerByWO ? "wo" : "finished",
+            status: statusToSave,
             finishedAt,
             durationSeconds: Math.max(1, durationSeconds),
             accumulatedSeconds: durationSeconds,
@@ -1235,17 +1313,25 @@
             server: score.server || data.server || "player1",
             startedAt: data.startedAt || null,
             suspendedAt: null,
+            winnerByWO,
+            abandonedBy,
+            winnerByRet,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-
+      
           if (el.durationEl) el.durationEl.textContent = durationText(durationSeconds * 1000);
-          setMsg("Partida finalizada com sucesso.", "success");
+      
+          if (wasRetirement) {
+            const winnerName = action === "player1" ? team2Name : team1Name;
+            setMsg(`Partida finalizada por abandono. Vencedor: ${winnerName}`, "success");
+          } else {
+            setMsg("Partida finalizada com sucesso.", "success");
+          }
         } catch (err) {
           console.error(err);
           setMsg(err.message, "error");
         }
       });
-
       el.resetScoreBtn?.addEventListener("click", async () => {
         if (!id || !confirm("Deseja zerar o placar e as estatísticas?")) return;
 
@@ -1326,11 +1412,15 @@
           };
 
           await ref.update({
-            lastAction,
-            score: defaultScore(),
-            stats: cleanStats,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+  lastAction,
+  score: defaultScore(),
+  stats: cleanStats,
+  startedAt: firebase.firestore.Timestamp.now(),
+  accumulatedSeconds: 0,
+  durationSeconds: 0,
+  suspendedAt: null,
+  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+});
 
           setMsg("Placar e estatísticas zerados com sucesso.", "success");
         } catch (err) {
