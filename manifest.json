@@ -2,7 +2,7 @@
   "name": "TennisPro",
   "short_name": "TennisPro",
   "description": "Aplicativo PWA para partidas, placares, histórico e gerenciamento de jogadores.",
-  "start_url": "./login.html",
+  "start_url": "./menu.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f1726",
