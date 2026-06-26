@@ -407,7 +407,8 @@ body.admin-page .status-finished {
   color: #86efac;
 }
 
-body.admin-page .status-wo {
+body.admin-page .status-wo,
+body.admin-page .status-ret {
   background: rgba(248, 113, 113, 0.10);
   border: 1px solid rgba(248, 113, 113, 0.18);
   color: #fca5a5;
@@ -1425,4 +1426,91 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   body.admin-page .detail-section-final-stats .detail-summary-grid {
     grid-template-columns: 1fr;
   }
+}
+
+body.admin-page .confronto-card {
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+body.admin-page .confronto-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body.admin-page .confronto-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #f4f8ff;
+  line-height: 1.25;
+}
+
+body.admin-page .confronto-title strong {
+  color: #d8ff63;
+  font-size: 1.05rem;
+}
+
+body.admin-page .confronto-total {
+  font-size: 0.82rem;
+  color: rgba(232, 238, 252, 0.7);
+}
+
+body.admin-page .confronto-match-row {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+body.admin-page .confronto-match-main,
+body.admin-page .confronto-match-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.admin-page .confronto-match-title {
+  font-weight: 800;
+  color: #fff;
+}
+
+body.admin-page .confronto-match-score {
+  font-weight: 900;
+  color: #d8ff63;
+}
+
+body.admin-page .confronto-header {
+  margin-bottom: 12px;
+}
+
+body.admin-page .confronto-header h3 {
+  margin: 0 0 4px;
+  font-weight: 900;
+}
+
+body.admin-page .confronto-header p {
+  margin: 0;
+  color: rgba(232, 238, 252, 0.72);
+}
+
+body.admin-page .confronto-controls {
+  margin-bottom: 12px;
+}
+
+body.admin-page .confronto-controls input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: rgba(12, 18, 30, 0.62);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.08);
 }
