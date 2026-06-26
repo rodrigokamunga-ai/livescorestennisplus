@@ -199,11 +199,20 @@
       getWinnerPosition(match) {
         const status = U.normalizeText(match.status);
         const woWinner = U.normalizeText(match.winnerByWO);
+        const retWinner = U.normalizeText(match.winnerByRet);
+
         if (status === "wo") {
           if (woWinner === "player1") return 1;
           if (woWinner === "player2") return 2;
           return null;
         }
+
+        if (status === "ret") {
+          if (retWinner === "player1") return 1;
+          if (retWinner === "player2") return 2;
+          return null;
+        }
+
         const score = U.normalizeScore(match.score || {});
         if (score.sets1 > score.sets2) return 1;
         if (score.sets2 > score.sets1) return 2;
@@ -223,6 +232,7 @@
       },
 
       getLoggedUserOutcome(match) {
+        const status = U.normalizeText(match.status);
         const winnerPos = U.getWinnerPosition(match);
         if (!winnerPos) return "unknown";
 
@@ -243,8 +253,17 @@
         return "unknown";
       },
 
+      getResultType(match) {
+        const status = U.normalizeText(match.status);
+        if (status === "wo") return "WO";
+        if (status === "ret") return "RET";
+        return "";
+      },
+
       isFinalMatch(match) {
-        return U.normalizeText(match.tournamentStage) === "final";
+        const stage = U.normalizeText(match.tournamentStage);
+        const status = U.normalizeText(match.status);
+        return stage === "final" || status === "finished" || status === "wo" || status === "ret";
       },
 
       getTournamentSituation(match) {
@@ -309,6 +328,7 @@
         const status = U.normalizeText(match.status);
 
         if (status === "wo") return "WO";
+        if (status === "ret") return "RET";
 
         const history = U.cleanSetHistory(score.setHistory);
 
@@ -375,7 +395,6 @@
         if (!tournamentText) return true;
         return U.normalizeText(U.getTournamentName(match)) === U.normalizeText(tournamentText);
       },
-
 
       isDoubles(match) {
         const gf = U.normalizeText(U.getGameFormat(match));
@@ -511,7 +530,9 @@
         doubles = 0;
 
       matches.forEach((m) => {
-        if (U.normalizeText(m.status) === "wo") wo++;
+        const status = U.normalizeText(m.status);
+        if (status === "wo" || status === "ret") wo++;
+
         const outcome = U.getLoggedUserOutcome(m);
         if (outcome === "win") wins++;
         if (outcome === "loss") losses++;
@@ -640,74 +661,28 @@
 
     function renderPagedHistory(matches) {
       if (!el.historyList) return;
-    
+
       const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
       if (state.currentPage > totalPages) state.currentPage = totalPages;
       if (state.currentPage < 1) state.currentPage = 1;
-    
+
       const start = (state.currentPage - 1) * PAGE_SIZE;
       const pageItems = matches.slice(start, start + PAGE_SIZE);
-    
-      const getStageIconSvg = (stageRaw = "") => {
-        const stage = U.normalizeText(stageRaw);
-    
-        if (stage === "ranking") {
-          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="2" y="14" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/> <rect x="10" y="9" width="4" height="12" rx="1" stroke="currentColor" stroke-width="1.8"/> <rect x="18" y="4" width="4" height="17" rx="1" stroke="currentColor" stroke-width="1.8"/> <path d="M4 10l4-4 4 4 4-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
-        }
-    
-        if (stage === "treino") {
-          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/> <path d="M12 3c2.4 2.4 3 5.4 3 9s-.6 6.6-3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M12 3c-2.4 2.4-3 5.4-3 9s.6 6.6 3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M3 12h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
-        }
-    
-        if (stage === "final") {
-          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M5 3h14v8a7 7 0 0 1-14 0V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> <path d="M5 6H2a1 1 0 0 0-1 1v2a4 4 0 0 0 4 4M19 6h3a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
-        }
-    
-        if (stage === "semifinais") {
-          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> </svg> `;
-        }
-    
-        if (stage === "quartas de final") {
-          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
-        }
-    
-        if (stage === "oitavas de final") {
-          return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
-        }
-    
-        return ` <svg class="career-match-icon stage" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/> <path d="M3 9h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <circle cx="8.5" cy="14" r="1.2" fill="currentColor"/> <circle cx="12" cy="14" r="1.2" fill="currentColor"/> <circle cx="15.5" cy="14" r="1.2" fill="currentColor"/> </svg> `;
-      };
-    
-      const getOutcomeIconSvg = (outcome, situation) => {
-        if (situation === "champion") {
-          return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/> </svg> `;
-        }
-    
-        if (situation === "runnerup") {
-          return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/> <path d="M9 12.5L7.5 21l4.5-2 4.5 2L15 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
-        }
-    
-        if (outcome === "win") {
-          return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M7.5 12.5l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg> `;
-        }
-    
-        return ` <svg class="career-match-icon outcome" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/> <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/> </svg> `;
-      };
-    
+
       const getFormatIconSvg = (gameFormatRaw = "") => {
         const format = U.normalizeText(gameFormatRaw);
-    
+
         if (format === "simples") {
           return ` <svg class="career-match-icon format" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/> <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
         }
-    
+
         if (format === "duplas" || format === "duplas mistas") {
           return ` <svg class="career-match-icon format" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/> <circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/> <path d="M3.8 20c0-2.5 2.1-4.5 4.7-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M20.2 20c0-2.5-2.1-4.5-4.7-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
         }
-    
+
         return "";
       };
-    
+
       if (!pageItems.length) {
         el.historyList.innerHTML = `<div class="empty-card">Nenhuma partida encontrada para os filtros selecionados.</div>`;
       } else {
@@ -729,30 +704,36 @@
             const outcome = U.getLoggedUserOutcome(m);
             const isWinner = outcome === "win";
             const isTreino = U.normalizeText(m.tournamentStage || "") === "treino";
-    
+            const resultType = U.getResultType(m);
+
             const cardClass = isWinner
               ? "career-card career-card-win"
               : "career-card career-card-loss";
-    
+
             const situationLabel =
               situation === "champion"
                 ? "🏆 Campeão"
                 : situation === "runnerup"
                 ? "🥈 Vice-Campeão"
                 : "";
-    
-            const resultLabel = situationLabel || (isWinner ? "VITÓRIA" : "DERROTA");
+
+            const outcomeLabel =
+              resultType === "WO"
+                ? (isWinner ? "VITÓRIA POR WO" : "DERROTA POR WO")
+                : resultType === "RET"
+                ? (isWinner ? "VITÓRIA POR ABANDONO" : "DERROTA POR ABANDONO")
+                : (situationLabel || (isWinner ? "VITÓRIA" : "DERROTA"));
+
             const teamDisplay = formatTeamName(m);
-    
             const stageIcon = getStageIconSvg(m.tournamentStage || "");
             const outcomeIcon = getOutcomeIconSvg(outcome, situation);
             const formatIcon = getFormatIconSvg(m.gameFormat || "");
-    
-            return ` <article class="${cardClass}"> <div class="career-card-top-icons"> <span class="career-card-icon-slot outcome-slot">${outcomeIcon}</span> <span class="career-card-icon-slot stage-slot">${stageIcon}</span> ${formatIcon ? `<span class="career-card-icon-slot format-slot">${formatIcon}</span>` : ""} </div> <div class="career-card-top-status"> <div class="career-card-result">${resultLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${U.escapeHtml(date)}</strong></div> <div class="career-item"><span>Modalidade</span><strong>${modality}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> ${!isTreino ? `<div class="career-item"><span>Categoria</span><strong>${category}</strong></div>` : ""} ${!isTreino ? `<div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div>` : ""} <div class="career-item"><span>Fase</span><strong>${stage}</strong></div> <div class="career-item"><span>Tipo de piso</span><strong>${surfaceType}</strong></div> <div class="career-item"><span>Quadra</span><strong>${court}</strong></div> <div class="career-item"><span>Placar</span><strong>${score}</strong></div> <div class="career-item"><span>Duração</span><strong>${duration}</strong></div> </div> </article> `;
+
+            return ` <article class="${cardClass}"> <div class="career-card-top-icons"> <span class="career-card-icon-slot outcome-slot">${outcomeIcon}</span> <span class="career-card-icon-slot stage-slot">${stageIcon}</span> ${formatIcon ? `<span class="career-card-icon-slot format-slot">${formatIcon}</span>` : ""} </div> <div class="career-card-top-status"> <div class="career-card-result">${outcomeLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${U.escapeHtml(date)}</strong></div> <div class="career-item"><span>Modalidade</span><strong>${modality}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> ${!isTreino ? `<div class="career-item"><span>Categoria</span><strong>${category}</strong></div>` : ""} ${!isTreino ? `<div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div>` : ""} <div class="career-item"><span>Fase</span><strong>${stage}</strong></div> <div class="career-item"><span>Tipo de piso</span><strong>${surfaceType}</strong></div> <div class="career-item"><span>Quadra</span><strong>${court}</strong></div> <div class="career-item"><span>Placar</span><strong>${score}</strong></div> <div class="career-item"><span>Duração</span><strong>${duration}</strong></div> </div> </article> `;
           })
           .join("");
       }
-    
+
       if (el.pageInfo) el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
       if (el.prevPageBtn) el.prevPageBtn.disabled = state.currentPage <= 1;
       if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
@@ -1060,7 +1041,7 @@
               .map((doc) => ({ id: doc.id, ...doc.data() }))
               .filter((m) => {
                 const status = U.normalizeText(m.status);
-                return status === "finished" || status === "wo";
+                return status === "finished" || status === "wo" || status === "ret";
               });
 
             populateYearFilter(state.allMatches);
