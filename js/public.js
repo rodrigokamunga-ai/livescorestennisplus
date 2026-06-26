@@ -57,7 +57,8 @@
           case "live": return "EM ANDAMENTO";
           case "suspended": return "SUSPENSA";
           case "finished": return "FINALIZADA";
-          case "wo": return "FINALIZADA POR WO";
+          case "wo": return "WO";
+          case "ret": return "RET";
           default: return "NÃO INICIADA";
         }
       },
@@ -67,7 +68,9 @@
           case "live": return "status-live";
           case "suspended": return "status-suspended";
           case "finished":
-          case "wo": return "status-finished";
+          case "wo":
+          case "ret":
+            return "status-finished";
           default: return "status-scheduled";
         }
       },
@@ -76,7 +79,7 @@
         const s = String(status || "scheduled").trim().toLowerCase();
         if (s === "live") return "live";
         if (s === "suspended") return "suspended";
-        if (s === "finished" || s === "wo") return "finished";
+        if (s === "finished" || s === "wo" || s === "ret") return "finished";
         return "scheduled";
       },
 
@@ -216,7 +219,7 @@
           return U.durationText(accumulated * 1000);
         }
 
-        if (match.status === "finished" || match.status === "wo") {
+        if (match.status === "finished" || match.status === "wo" || match.status === "ret") {
           if (match.durationSeconds && Number(match.durationSeconds) > 0) {
             return U.durationText(Number(match.durationSeconds) * 1000);
           }
@@ -276,10 +279,18 @@
       getWinnerPosition(match, score) {
         const status = String(match?.status || "").trim().toLowerCase();
         const woWinner = String(match?.winnerByWO || "").trim().toLowerCase();
+        const retWinner = String(match?.winnerByRet || "").trim().toLowerCase();
+
         if (status === "wo") {
           if (woWinner === "player1") return 1;
           if (woWinner === "player2") return 2;
         }
+
+        if (status === "ret") {
+          if (retWinner === "player1") return 1;
+          if (retWinner === "player2") return 2;
+        }
+
         if (Number(score.sets1 || 0) > Number(score.sets2 || 0)) return 1;
         if (Number(score.sets2 || 0) > Number(score.sets1 || 0)) return 2;
         return null;
@@ -316,7 +327,8 @@
 
           const isFinished =
             String(matchStatus || "").toLowerCase() === "finished" ||
-            String(matchStatus || "").toLowerCase() === "wo";
+            String(matchStatus || "").toLowerCase() === "wo" ||
+            String(matchStatus || "").toLowerCase() === "ret";
 
           const buildTB = (gamesWinner, tbPoints) => {
             return `<span class="set-score">${gamesWinner}<span class="set-tb">${tbPoints}</span></span>`;
@@ -368,7 +380,8 @@
             if (
               currentIsSuperTB &&
               String(match.status || "").toLowerCase() !== "finished" &&
-              String(match.status || "").toLowerCase() !== "wo"
+              String(match.status || "").toLowerCase() !== "wo" &&
+              String(match.status || "").toLowerCase() !== "ret"
             ) {
               return { p1: "6", p2: "6" };
             }
@@ -532,7 +545,7 @@
         balls.push(`<span class="last-point-ball ${cls}" title="Ponto do Jogador ${point.winnerPos}"></span>`);
       }
 
-      return ` <div class="last-points-block"> <div class="last-points-title">Últimos 10 pontos</div> <div class="last-points-balls">${balls.join("")}</div> </div> `;
+      return ` <div class="last-points-block"> <div class="last-points-title">Últimos 10 pontos Jogados</div> <div class="last-points-balls">${balls.join("")}</div> </div> `;
     }
 
     function renderMatchSummary(match) {
@@ -735,11 +748,15 @@
       const category = U.escapeHtml(U.normalizeText(match.categoryName, ""));
       const tournament = U.escapeHtml(U.normalizeText(match.tournamentName || match.tournament || "", ""));
       const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const status = U.normalizeStatus(match.status);
+      const rawStatus = String(match.status || "").trim().toLowerCase();
+      const status = U.normalizeStatus(rawStatus);
+      const statusText = rawStatus === "ret"
+        ? "RET"
+        : U.statusLabel(rawStatus);
       const setColumns = U.getSetColumns(match, score);
       const duration = U.buildDuration(match);
       const winnerPos = U.getWinnerPosition(match, score);
-      const isWO = String(match.status || "").toLowerCase() === "wo";
+      const isWO = rawStatus === "wo";
 
       const isThreeSetsFinished = setColumns.hasThreeSets;
       const ptDisp = isThreeSetsFinished
@@ -751,7 +768,7 @@
       if (stage) footerParts.push(`<span class="footer-item">Fase: <strong>${stage}</strong></span>`);
       if (duration) footerParts.push(`<span class="footer-item">Duração: <strong>${duration}</strong></span>`);
 
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article> `;
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${statusText}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article> `;
     }
 
     function renderLiveCard(match) {
@@ -811,7 +828,7 @@
     }
 
     function createCard(match) {
-      const rawStatus = match.status || "scheduled";
+      const rawStatus = String(match.status || "scheduled").trim().toLowerCase();
       const status = U.normalizeStatus(rawStatus);
       if (status === "finished") return renderFinalizedCard(match);
       if (status === "live" || rawStatus === "suspended") return renderLiveCard(match);
@@ -835,7 +852,7 @@
       matches.forEach((m) => {
         const rawStatus = String(m.status || "scheduled").trim().toLowerCase();
 
-        if (rawStatus === "finished" || rawStatus === "wo") finished.push(m);
+        if (rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret") finished.push(m);
         else if (rawStatus === "live" || rawStatus === "suspended") live.push(m);
         else scheduled.push(m);
       });
