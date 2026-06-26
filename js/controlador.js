@@ -363,10 +363,27 @@
       return false;
     }
 
+    function pushLastPoint(score, winnerPos) {
+      const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
+
+      history.push({
+        winnerPos,
+        at: firebase.firestore.Timestamp.now()
+      });
+
+      while (history.length > 10) {
+        history.shift();
+      }
+
+      score.lastPoints = history;
+      return score;
+    }
+
     function buildScorePayload(score) {
       return {
         ...score,
         setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
+        lastPoints: Array.isArray(score.lastPoints) ? score.lastPoints : [],
         tieBreakMode: score.tieBreakMode || null,
         lastTieBreakMode: score.lastTieBreakMode || null,
         lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
@@ -504,6 +521,9 @@
         }
 
         const newScore = normalizeScore(result.score || score);
+
+        // salva histórico dos últimos 10 pontos
+        pushLastPoint(newScore, winnerPos);
 
         if (result.gameWon) {
           newScore.server = newScore.server === "player1" ? "player2" : "player1";
