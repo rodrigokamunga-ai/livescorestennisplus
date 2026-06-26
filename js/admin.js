@@ -248,10 +248,17 @@
         return `${U.escapeHtml(team1)} <span class="vs-separator">X</span> ${U.escapeHtml(team2)}`;
       },
       getStatusLabel(status = "") {
-        const s = String(status || "").trim().toLowerCase();
-        const map = { scheduled: "Jogos do dia", live: "Em andamento", finished: "Finalizada", wo: "WO", suspended: "Suspensa" };
-        return map[s] || status || "Jogos do dia";
-      }
+  const s = String(status || "").trim().toLowerCase();
+  const map = {
+    scheduled: "Jogos do dia",
+    live: "Em andamento",
+    finished: "Finalizada",
+    wo: "WO",
+    ret: "RET",
+    suspended: "Suspensa"
+  };
+  return map[s] || status || "Jogos do dia";
+}
     };
 
     function setMsg(text) { if (el.msg) el.msg.textContent = text || ""; }
