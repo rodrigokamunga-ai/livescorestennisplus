@@ -260,14 +260,21 @@
         return "";
       },
 
+      isTournamentMatch(match) {
+        const stage = U.normalizeText(match.tournamentStage);
+        return TOURNAMENT_STAGES.has(stage);
+      },
+      
       isFinalMatch(match) {
         const stage = U.normalizeText(match.tournamentStage);
-        const status = U.normalizeText(match.status);
-        return stage === "final" || status === "finished" || status === "wo" || status === "ret";
+        return stage === "final";
       },
-
+      
       getTournamentSituation(match) {
+        // Só torneios podem ter Campeão / Vice-Campeão
+        if (!U.isTournamentMatch(match)) return "";
         if (!U.isFinalMatch(match)) return "";
+      
         const outcome = U.getLoggedUserOutcome(match);
         if (outcome === "win") return "champion";
         if (outcome === "loss") return "runnerup";
@@ -710,19 +717,24 @@
               ? "career-card career-card-win"
               : "career-card career-card-loss";
 
-            const situationLabel =
-              situation === "champion"
-                ? "🏆 Campeão"
-                : situation === "runnerup"
-                ? "🥈 Vice-Campeão"
-                : "";
-
-            const outcomeLabel =
-              resultType === "WO"
-                ? (isWinner ? "VITÓRIA POR WO" : "DERROTA POR WO")
-                : resultType === "RET"
-                ? (isWinner ? "VITÓRIA POR ABANDONO" : "DERROTA POR ABANDONO")
-                : (situationLabel || (isWinner ? "VITÓRIA" : "DERROTA"));
+              const stageNorm = U.normalizeText(m.tournamentStage || "");
+              const isTournament = TOURNAMENT_STAGES.has(stageNorm);
+              
+              const situationLabel =
+                isTournament && stageNorm === "final"
+                  ? situation === "champion"
+                    ? "🏆 Campeão"
+                    : situation === "runnerup"
+                    ? "🥈 Vice-Campeão"
+                    : ""
+                  : "";
+              
+              const outcomeLabel =
+                resultType === "WO"
+                  ? (isWinner ? "VITÓRIA POR WO" : "DERROTA POR WO")
+                  : resultType === "RET"
+                  ? (isWinner ? "VITÓRIA POR ABANDONO" : "DERROTA POR ABANDONO")
+                  : (situationLabel || (isWinner ? "VITÓRIA" : "DERROTA"));
 
             const teamDisplay = formatTeamName(m);
             const stageIcon = getStageIconSvg(m.tournamentStage || "");
