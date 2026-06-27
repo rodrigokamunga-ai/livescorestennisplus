@@ -554,9 +554,49 @@ body.player-page .stats-controller-card .play-btn::after {
   bottom: 0;
   height: 3px;
   border-radius: 999px;
-  background: currentColor;
+  background: #38bdf8; /* cor padrão da linha */
   opacity: 0.95;
   pointer-events: none;
+}
+
+body.player-page .stats-controller-card .play-btn.play-serve::after {
+  background: #eeff00; /* 1º serviço - amarelo/laranja */
+}
+
+body.player-page .stats-controller-card .play-btn.play-serve-first::after {
+  background: #eeff00; /* 1º serviço - amarelo */
+}
+
+body.player-page .stats-controller-card .play-btn.play-serve-second::after {
+  background: #fc9f00; /* 2º serviço - laranja */
+}
+
+body.player-page .stats-controller-card .play-btn.play-doublefault::after {
+  background: #ef4444; /* dupla falta - vermelho */
+}
+
+body.player-page .stats-controller-card .play-btn.play-ace::after {
+  background: #38bdf8; /* ace - azul */
+}
+
+body.player-page .stats-controller-card .play-btn.play-winner::after {
+  background: #38bdf8; /* winner - azul */
+}
+
+body.player-page .stats-controller-card .play-btn.play-error::after {
+  background: #ef4444; /* erro - vermelho */
+}
+
+body.player-page .stats-controller-card .play-btn.play-net::after {
+  background: #38bdf8; /* ponto normal - azul */
+}
+
+body.player-page .stats-controller-card .play-btn.play-return::after {
+  background: #38bdf8; /* ponto de devolução - azul */
+}
+
+body.player-page .stats-controller-card .play-btn.play-baseline::after {
+  background: #38bdf8; /* ponto da linha de base - azul */
 }
 
 body.player-page .stats-controller-card .play-btn:hover {
@@ -620,39 +660,6 @@ body.player-page .stats-controller-card .play-sub {
   font-weight: 700;
   line-height: 1.1;
   margin-top: -2px;
-}
-
-/* Cores dos botões da estatística */
-body.player-page .play-serve {
-  color: #60a5fa;
-}
-
-body.player-page .play-ace {
-  color: #a3e635;
-}
-
-body.player-page .play-doublefault {
-  color: #fb7185;
-}
-
-body.player-page .play-winner {
-  color: #facc15;
-}
-
-body.player-page .play-error {
-  color: #fb7185;
-}
-
-body.player-page .play-net {
-  color: #38bdf8;
-}
-
-body.player-page .play-return {
-  color: #c084fc;
-}
-
-body.player-page .play-baseline {
-  color: #34d399;
 }
 
 /* Cartões do controlador */
