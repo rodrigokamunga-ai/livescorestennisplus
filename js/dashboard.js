@@ -123,14 +123,21 @@
       getMatchWinner(match) {
         const status = U.normalizeText(match.status);
         const score  = match.score || {};
-
+      
         if (status === "wo") {
           const wo = U.normalizeText(match.winnerByWO);
           if (wo === "player1") return 1;
           if (wo === "player2") return 2;
           return null;
         }
-
+      
+        if (status === "ret") {
+          const retWinner = U.normalizeText(match.winnerByRet);
+          if (retWinner === "player1") return 1;
+          if (retWinner === "player2") return 2;
+          return null;
+        }
+      
         const sets1 = Number(score.sets1 || 0);
         const sets2 = Number(score.sets2 || 0);
         if (sets1 > sets2) return 1;
@@ -211,7 +218,7 @@
 
       getWinnerName(match, currentUserName) {
         const winner = U.getMatchWinner(match);
-
+      
         if (winner === 1) {
           return U.isDoubles(match)
             ? U.getCurrentTeamPlayers(match, currentUserName).join(" / ")
@@ -222,7 +229,7 @@
             ? U.getOpponentTeamPlayers(match, currentUserName).join(" / ")
             : String(match.player2 || "Jogador 2").trim();
         }
-
+      
         const wo = U.normalizeText(match.winnerByWO);
         if (wo === "player1") {
           return U.isDoubles(match)
@@ -234,7 +241,19 @@
             ? U.getOpponentTeamPlayers(match, currentUserName).join(" / ")
             : String(match.player2 || "Jogador 2").trim();
         }
-
+      
+        const retWinner = U.normalizeText(match.winnerByRet);
+        if (retWinner === "player1") {
+          return U.isDoubles(match)
+            ? U.getCurrentTeamPlayers(match, currentUserName).join(" / ")
+            : String(match.player1 || "Jogador 1").trim();
+        }
+        if (retWinner === "player2") {
+          return U.isDoubles(match)
+            ? U.getOpponentTeamPlayers(match, currentUserName).join(" / ")
+            : String(match.player2 || "Jogador 2").trim();
+        }
+      
         return "Empate";
       },
 
@@ -809,11 +828,11 @@
         .onSnapshot(
           (snapshot) => {
             state.allMatches = snapshot.docs
-              .map((doc) => ({ id: doc.id, ...doc.data() }))
-              .filter((m) => {
-                const status = U.normalizeText(m.status);
-                return status === "finished" || status === "wo";
-              });
+  .map((doc) => ({ id: doc.id, ...doc.data() }))
+  .filter((m) => {
+    const status = U.normalizeText(m.status);
+    return status === "finished" || status === "wo" || status === "ret";
+  });
 
             renderOptionsFromMatches();
             applyFilters();
