@@ -90,6 +90,19 @@
         </label>
       </div>
 
+      <!-- Toggle Stats 1 Jogador / 2 Jogadores -->
+      <div id="statsModeToggle" class="stats-mode-toggle" style="display:none;">
+        <label id="statsModeSingleLabel" class="active" for="statsModeSingle">
+          <input type="radio" name="statsMode" id="statsModeSingle" value="single" checked />
+          <span>Stats 1 Jogador</span>
+        </label>
+
+        <label id="statsModeDoubleLabel" for="statsModeDouble">
+          <input type="radio" name="statsMode" id="statsModeDouble" value="double" />
+          <span>Stats 2 Jogadores</span>
+        </label>
+      </div>
+
       <!-- Placar + Estatísticas no mesmo local -->
       <div class="score-unified" id="playerPanelBody">
 
@@ -175,10 +188,20 @@
 
             <!-- Jogador 1 -->
             <div class="stats-controller-card" id="stats1Card">
-              </br></br>
+              <br><br>
 
               <div class="serve-status" id="serve-status-p1">1º SERVIÇO</div>
               <span class="section-title" id="statsTitle1">Stats Jogador 1</span>
+
+              <!-- Seleção de saque do jogador 1 -->
+              <div class="group saque-selecao">
+                <div class="group-title">Saque</div>
+                <label class="manual-player-name-row" for="servePlayer1Stats">
+                  <input type="radio" name="server" value="player1" id="servePlayer1Stats" />
+                  <span class="serve-ball-indicator" title="Sacador"></span>
+                  <span class="player-col-name" id="player1NameStats">Jogador 1</span>
+                </label>
+              </div>
 
               <div class="group saque">
                 <div class="group-title">Saque</div>
@@ -306,9 +329,30 @@
               </div>
             </div>
 
-            <!-- Jogador 2 -->
+            <!-- Jogador 2 manual no modo Stats 1 Jogador -->
+            <div class="stats-controller-card stats-manual-card" id="stats2ManualCard" style="display:none;">
+              <div class="manual-title-wrap">
+                <span class="section-title">Jogador 2</span>
+              </div>
+
+              <label class="manual-player-name-row" for="servePlayer2Manual">
+                <input type="radio" name="server" value="player2" id="servePlayer2Manual" />
+                <span class="serve-ball-indicator" title="Sacador"></span>
+                <span class="player-col-name" id="player2NameManual">Jogador 2</span>
+              </label>
+
+              <div class="manual-point-box">
+                <div class="point-control manual-point-control" id="manualPointControl2">
+                  <button class="point-btn" data-delta="-1" data-target="player2">−</button>
+                  <strong class="point-value" id="points2Manual">0</strong>
+                  <button class="point-btn" data-delta="1" data-target="player2">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Jogador 2 completo no modo Stats 2 Jogadores -->
             <div class="stats-controller-card" id="stats2Card">
-              </br></br>
+              <br><br>
 
               <div class="serve-status" id="serve-status-p2">1º SERVIÇO</div>
               <span class="section-title" id="statsTitle2">Stats Jogador 2</span>
