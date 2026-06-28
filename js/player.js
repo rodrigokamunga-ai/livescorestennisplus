@@ -105,6 +105,87 @@
       });
     }
 
+    function getStatsActionHandlers() {
+      const addPointFn = window.addPoint || (typeof addPoint === "function" ? addPoint : null);
+      const marcarServicoFn = window.marcarServico || (typeof marcarServico === "function" ? marcarServico : null);
+      const marcarServicoFalhaFn = window.marcarServicoFalha || (typeof marcarServicoFalha === "function" ? marcarServicoFalha : null);
+    
+      return {
+        j1_servico_1: () => marcarServicoFn?.(1, 1),
+        j1_servico_2: () => marcarServicoFn?.(1, 2),
+        j1_df: () => marcarServicoFalhaFn?.(1, "df"),
+        j1_ace: () => addPointFn?.(1, "ace"),
+        j1_smash_win: () => addPointFn?.(1, "smash_win"),
+        j1_smash_err: () => addPointFn?.(1, "smash_err"),
+        j1_voleio_win: () => addPointFn?.(1, "voleio_win"),
+        j1_voleio_err: () => addPointFn?.(1, "voleio_err"),
+        j1_fw: () => addPointFn?.(1, "fw"),
+        j1_bw: () => addPointFn?.(1, "bw"),
+        j1_enf_fh: () => addPointFn?.(1, "enf_fh"),
+        j1_enf_bh: () => addPointFn?.(1, "enf_bh"),
+        j1_ef: () => addPointFn?.(1, "ef"),
+        j1_ponto_normal: () => addPointFn?.(1, "normal"),
+        j1_dropshot_win: () => addPointFn?.(1, "dropshot_win"),
+        j1_dropshot_err: () => addPointFn?.(1, "dropshot_err"),
+        j1_ponto_devolucao: () => addPointFn?.(1, "ponto_devolucao"),
+        j1_erro_devolucao: () => addPointFn?.(1, "erro_devolucao"),
+        j1_erro_linha_base: () => addPointFn?.(1, "erro_linha_base"),
+        j1_ponto_linha_base: () => addPointFn?.(1, "ponto_linha_base"),
+    
+        j2_servico_1: () => marcarServicoFn?.(2, 1),
+        j2_servico_2: () => marcarServicoFn?.(2, 2),
+        j2_df: () => marcarServicoFalhaFn?.(2, "df"),
+        j2_ace: () => addPointFn?.(2, "ace"),
+        j2_smash_win: () => addPointFn?.(2, "smash_win"),
+        j2_smash_err: () => addPointFn?.(2, "smash_err"),
+        j2_voleio_win: () => addPointFn?.(2, "voleio_win"),
+        j2_voleio_err: () => addPointFn?.(2, "voleio_err"),
+        j2_fw: () => addPointFn?.(2, "fw"),
+        j2_bw: () => addPointFn?.(2, "bw"),
+        j2_enf_fh: () => addPointFn?.(2, "enf_fh"),
+        j2_enf_bh: () => addPointFn?.(2, "enf_bh"),
+        j2_ef: () => addPointFn?.(2, "ef"),
+        j2_ponto_normal: () => addPointFn?.(2, "normal"),
+        j2_dropshot_win: () => addPointFn?.(2, "dropshot_win"),
+        j2_dropshot_err: () => addPointFn?.(2, "dropshot_err"),
+        j2_ponto_devolucao: () => addPointFn?.(2, "ponto_devolucao"),
+        j2_erro_devolucao: () => addPointFn?.(2, "erro_devolucao"),
+        j2_erro_linha_base: () => addPointFn?.(2, "erro_linha_base"),
+        j2_ponto_linha_base: () => addPointFn?.(2, "ponto_linha_base")
+      };
+    }
+
+    function bindStatsActions() {
+      const actionHandlers = getStatsActionHandlers();
+    
+      Object.entries(actionHandlers).forEach(([btnId, handler]) => {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+    
+        // Remove o onclick inline para evitar duplicidade
+        btn.removeAttribute("onclick");
+    
+        btn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          if (btn.disabled) return;
+    
+          try {
+            const result = handler?.();
+            if (result && typeof result.then === "function") {
+              await result;
+            }
+          } catch (err) {
+            console.error(`Erro ao executar ação do botão ${btnId}:`, err);
+          }
+        });
+      });
+      
+    }
+
+    bindStatsActions();
+
+
+
     function applyStatsView(mode) {
       statsViewMode = mode;
       const isSingle = mode === "single";
