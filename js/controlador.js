@@ -211,10 +211,27 @@
       }, 150);
     }
 
+    function syncServeInputs(server) {
+      const p1Active = server === "player1";
+      const p2Active = server === "player2";
+
+      const servePlayer1 = document.getElementById("servePlayer1");
+      const servePlayer2 = document.getElementById("servePlayer2");
+      const servePlayer1Stats = document.getElementById("servePlayer1Stats");
+      const servePlayer2Manual = document.getElementById("servePlayer2Manual");
+
+      if (servePlayer1) servePlayer1.checked = p1Active;
+      if (servePlayer1Stats) servePlayer1Stats.checked = p1Active;
+      if (servePlayer2) servePlayer2.checked = p2Active;
+      if (servePlayer2Manual) servePlayer2Manual.checked = p2Active;
+    }
+
     function updateServeUI(data) {
       const server = data?.score?.server || data?.server || "player1";
       const p1Active = server === "player1";
       const p2Active = server === "player2";
+
+      syncServeInputs(server);
 
       const stats = normalizeStats(data?.stats || buildDefaultStats());
       const p1ServeType = num(stats.player1.currentServeType || 1);
@@ -547,8 +564,7 @@
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        scrollToServingPlayer(newScore.server);
-
+        syncServeInputs(newScore.server);
         updateServeUI({ score: newScore, stats });
         updateStatsButtonsByServer({ score: newScore });
         setMsg(`Jogada registrada: ${acao}.`, "success");
@@ -588,6 +604,7 @@
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
+        syncServeInputs(freshData?.score?.server || freshData?.server || (jogador === 1 ? "player1" : "player2"));
         updateServeUI({ ...freshData, stats });
         setMsg(`SACANDO: ${tipo === 1 ? "1º SERVIÇO" : "2º SERVIÇO"} — Jogador ${jogador}`, "info");
       } catch (err) {
@@ -663,6 +680,20 @@
       document.getElementById("j2_erro_devolucao")?.addEventListener("click", () => addPoint(2, "erro_devolucao"));
       document.getElementById("j2_erro_linha_base")?.addEventListener("click", () => addPoint(2, "erro_linha_base"));
       document.getElementById("j2_ponto_linha_base")?.addEventListener("click", () => addPoint(2, "ponto_linha_base"));
+
+      // Radios de saque fora do Stats
+      document.getElementById("servePlayer1")?.addEventListener("change", () => {
+        syncServeInputs("player1");
+      });
+      document.getElementById("servePlayer2")?.addEventListener("change", () => {
+        syncServeInputs("player2");
+      });
+      document.getElementById("servePlayer1Stats")?.addEventListener("change", () => {
+        syncServeInputs("player1");
+      });
+      document.getElementById("servePlayer2Manual")?.addEventListener("change", () => {
+        syncServeInputs("player2");
+      });
     }
 
     function loadMatch() {
@@ -679,6 +710,7 @@
           }
 
           const data = snap.data();
+
           updateServeUI(data);
           updateStatsButtonsByServer(data);
 
@@ -696,6 +728,11 @@
       bindButtons();
       loadMatch();
     }
+
+    // Exposição global para os onclick do HTML
+    window.marcarServico = marcarServico;
+    window.marcarServicoFalha = marcarServicoFalha;
+    window.addPoint = addPoint;
 
     return { init };
   })();
