@@ -126,6 +126,43 @@ body.player-page .timer-line strong {
   border-color: rgba(216,255,99,.22);
 }
 
+/* ========================= NOVO TOGGLE STATS 1 / 2 JOGADORES ========================= */
+.stats-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.stats-mode-toggle label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(232,238,252,.65);
+  cursor: pointer;
+  transition: background .15s, color .15s, border .15s;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.stats-mode-toggle input[type="radio"] {
+  display: none;
+}
+
+.stats-mode-toggle label.active {
+  background: rgba(216,255,99,.16);
+  color: #d8ff63;
+  border-color: rgba(216,255,99,.22);
+}
+
 /* ========================= PLACAR UNIFICADO ========================= */
 .score-unified {
   display: flex;
@@ -554,49 +591,49 @@ body.player-page .stats-controller-card .play-btn::after {
   bottom: 0;
   height: 3px;
   border-radius: 999px;
-  background: #38bdf8; /* cor padrão da linha */
+  background: #38bdf8;
   opacity: 0.95;
   pointer-events: none;
 }
 
 body.player-page .stats-controller-card .play-btn.play-serve::after {
-  background: #eeff00; /* 1º serviço - amarelo/laranja */
+  background: #eeff00;
 }
 
 body.player-page .stats-controller-card .play-btn.play-serve-first::after {
-  background: #eeff00; /* 1º serviço - amarelo */
+  background: #eeff00;
 }
 
 body.player-page .stats-controller-card .play-btn.play-serve-second::after {
-  background: #fc9f00; /* 2º serviço - laranja */
+  background: #fc9f00;
 }
 
 body.player-page .stats-controller-card .play-btn.play-doublefault::after {
-  background: #ef4444; /* dupla falta - vermelho */
+  background: #ef4444;
 }
 
 body.player-page .stats-controller-card .play-btn.play-ace::after {
-  background: #38bdf8; /* ace - azul */
+  background: #38bdf8;
 }
 
 body.player-page .stats-controller-card .play-btn.play-winner::after {
-  background: #38bdf8; /* winner - azul */
+  background: #38bdf8;
 }
 
 body.player-page .stats-controller-card .play-btn.play-error::after {
-  background: #ef4444; /* erro - vermelho */
+  background: #ef4444;
 }
 
 body.player-page .stats-controller-card .play-btn.play-net::after {
-  background: #38bdf8; /* ponto normal - azul */
+  background: #38bdf8;
 }
 
 body.player-page .stats-controller-card .play-btn.play-return::after {
-  background: #38bdf8; /* ponto de devolução - azul */
+  background: #38bdf8;
 }
 
 body.player-page .stats-controller-card .play-btn.play-baseline::after {
-  background: #38bdf8; /* ponto da linha de base - azul */
+  background: #38bdf8;
 }
 
 body.player-page .stats-controller-card .play-btn:hover {
@@ -708,6 +745,65 @@ body.player-page .stats-controller-card .serve-status.serve-second {
   border-color: rgba(245,158,11,0.28);
 }
 
+/* ========================= BLOCO MANUAL DO JOGADOR 2 ========================= */
+.stats-manual-card {
+  min-height: 220px;
+}
+
+.manual-title-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.manual-player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  padding: 10px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  transition: background .15s, border-color .15s;
+}
+
+.manual-player-name-row input[type="radio"] {
+  display: none;
+}
+
+.manual-player-name-row:has(input[type="radio"]:checked) {
+  background: rgba(77,163,255,.14);
+  border-color: rgba(77,163,255,.45);
+}
+
+.manual-player-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
+  background: #d8ff63;
+  border-color: #d8ff63;
+  box-shadow: 0 0 8px rgba(216,255,99,.75);
+}
+
+.manual-point-box {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.manual-point-header {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8fa4be;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.manual-point-control {
+  width: 100%;
+}
+
 /* ========================= FLASH NO BOTÃO CLICADO ========================= */
 body.player-page .stats-controller-card .play-btn.btn-flash-p1 {
   background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(255,255,255,0.03)), #0f1828 !important;
@@ -727,6 +823,73 @@ body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
     0 0 18px rgba(59, 130, 246, 0.28),
     0 12px 28px rgba(0,0,0,0.22) !important;
   transform: scale(0.985);
+}
+
+/* ========================= BOTÃO COMPARTILHAR ========================= */
+body.player-page .share-match-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(216,255,99,0.12), rgba(255,255,255,0.03));
+  color: #eef4ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.14);
+}
+
+body.player-page .share-match-btn:hover {
+  border-color: rgba(216,255,99,0.22);
+  background: linear-gradient(180deg, rgba(216,255,99,0.16), rgba(255,255,255,0.04));
+}
+
+body.player-page .share-match-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ========================= TEXTOS AUXILIARES ========================= */
+body.player-page .shared-match-badge {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #d8ff63;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.player-page .shared-match-label {
+  margin-top: 2px;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #d8ff63;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* ========================= BOTÕES DESABILITADOS ========================= */
+body.player-page .player-bottom-btn.disabled-link,
+body.player-page .player-bottom-btn-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border-color: rgba(255,255,255,.06);
+}
+
+/* ========================= BLOQUEIO DOS BOTÕES DA ABA ESTATÍSTICAS ========================= */
+body.player-page #statsControlPanel button:disabled,
+body.player-page #statsControlPanel .play-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.15);
 }
 
 /* ========================= RESPONSIVO ========================= */
@@ -826,6 +989,15 @@ body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
   body.player-page .stats-controller-card .play-sub {
     font-size: 0.61rem;
   }
+
+  .stats-mode-toggle {
+    gap: 6px;
+  }
+
+  .stats-mode-toggle label {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -835,69 +1007,21 @@ body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
   }
 }
 
-/* ========================= BOTÃO COMPARTILHAR ========================= */
-body.player-page .share-match-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: linear-gradient(180deg, rgba(216,255,99,0.12), rgba(255,255,255,0.03));
-  color: #eef4ff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.14);
+/* ========================= FIX VISUAL SEM ALTERAR LAYOUT ========================= */
+body.player-page .player-col-name-row.is-serving .serve-ball-indicator,
+body.player-page .manual-player-name-row.is-serving .serve-ball-indicator {
+  background: #d8ff63 !important;
+  border-color: #d8ff63 !important;
+  box-shadow: 0 0 8px rgba(216,255,99,.75) !important;
 }
 
-body.player-page .share-match-btn:hover {
-  border-color: rgba(216,255,99,0.22);
-  background: linear-gradient(180deg, rgba(216,255,99,0.16), rgba(255,255,255,0.04));
+body.player-page .player-col-name-row.is-serving .player-col-name,
+body.player-page .manual-player-name-row.is-serving .player-col-name {
+  color: #ffffff !important;
 }
 
-body.player-page .share-match-icon {
-  font-size: 1rem;
-  line-height: 1;
-}
-
-/* ========================= TEXTOS AUXILIARES ========================= */
-body.player-page .shared-match-badge {
-  margin-top: 4px;
-  margin-bottom: 6px;
-  font-size: 0.78rem;
-  font-weight: 900;
-  color: #d8ff63;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-body.player-page .shared-match-label {
-  margin-top: 2px;
-  margin-bottom: 6px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #d8ff63;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-/* ========================= BOTÕES DESABILITADOS ========================= */
-body.player-page .player-bottom-btn.disabled-link,
-body.player-page .player-bottom-btn-disabled {
-  opacity: 0.45;
-  pointer-events: none;
-  cursor: not-allowed;
-  filter: grayscale(0.25);
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  border-color: rgba(255,255,255,.06);
-}
-
-/* ========================= BLOQUEIO DOS BOTÕES DA ABA ESTATÍSTICAS ========================= */
-body.player-page #statsControlPanel button:disabled,
-body.player-page #statsControlPanel .play-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: grayscale(0.15);
+/* ========================= TÍTULOS DAS SEÇÕES EM BRANCO ========================= */
+body.player-page .stats-controller-card .section-title,
+body.player-page .stats-controller-card .group-title {
+  color: #ffffff !important;
 }
