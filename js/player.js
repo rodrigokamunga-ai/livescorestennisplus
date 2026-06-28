@@ -7,6 +7,7 @@
     const shareTokenFromUrl = params.get("shareToken");
 
     let inputMode = "games";
+    let statsViewMode = "single"; // "single" | "double"
 
     const el = {
       matchTitle:        document.getElementById("matchTitle"),
@@ -20,6 +21,7 @@
       msg:               document.getElementById("playerMsg"),
       points1:           document.getElementById("points1"),
       points2:           document.getElementById("points2"),
+      points2Manual:     document.getElementById("points2Manual"),
       games1:            document.getElementById("games1"),
       games2:            document.getElementById("games2"),
       sets1:             document.getElementById("sets1"),
@@ -32,6 +34,8 @@
       games2Label:       document.getElementById("games2Label"),
       servePlayer1Label: document.getElementById("servePlayer1Label"),
       servePlayer2Label: document.getElementById("servePlayer2Label"),
+      player2NameManual: document.getElementById("player2NameManual"),
+      player1NameStats:  document.getElementById("player1NameStats"),
       startBtn:          document.getElementById("startBtn"),
       startBtnIcon:      document.getElementById("startBtnIcon"),
       startBtnLabel:     document.getElementById("startBtnLabel"),
@@ -42,6 +46,8 @@
       player2Name:       document.getElementById("player2Name"),
       servePlayer1:      document.getElementById("servePlayer1"),
       servePlayer2:      document.getElementById("servePlayer2"),
+      servePlayer1Stats: document.getElementById("servePlayer1Stats"),
+      servePlayer2Manual: document.getElementById("servePlayer2Manual"),
       gamesControl1:     document.getElementById("gamesControl1"),
       gamesControl2:     document.getElementById("gamesControl2"),
       pointControl1:     document.getElementById("pointControl1"),
@@ -54,6 +60,14 @@
       modeStatsLabel:    document.getElementById("modeStatsLabel"),
       scoreModesArea:    document.getElementById("scoreModesArea"),
       statsControlPanel: document.getElementById("statsControlPanel"),
+      statsModeToggle:   document.getElementById("statsModeToggle"),
+      statsModeSingle:   document.getElementById("statsModeSingle"),
+      statsModeDouble:   document.getElementById("statsModeDouble"),
+      statsModeSingleLabel: document.getElementById("statsModeSingleLabel"),
+      statsModeDoubleLabel: document.getElementById("statsModeDoubleLabel"),
+      stats2ManualCard:  document.getElementById("stats2ManualCard"),
+      stats2Card:        document.getElementById("stats2Card"),
+      stats1Card:        document.getElementById("stats1Card"),
       shareBtn:          document.getElementById("shareBtn"),
       shareBtnIcon:      document.getElementById("shareBtnIcon"),
       shareBtnLabel:     document.getElementById("shareBtnLabel")
@@ -61,59 +75,49 @@
 
     const serveOption1 = document.getElementById("serveOption1");
     const serveOption2 = document.getElementById("serveOption2");
+    const manualServeOption1 = document.querySelector("label[for='servePlayer1Stats']");
+    const manualServeOption2 = document.querySelector("label[for='servePlayer2Manual']");
 
     let lastServerShown = null;
-
-    function scrollToStatsServeArea(server) {
-      const target =
-        server === "player2"
-          ? document.getElementById("stats2Card")
-          : document.getElementById("stats1Card");
-
-      if (!target) return;
-
-      requestAnimationFrame(() => {
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "nearest"
-        });
-
-        window.scrollBy(0, -12);
-      });
-    }
-
+    let currentServer = "player1";
     let timer = null;
     let liveStartedAtMs = null;
     let msgTimer = null;
-
     let undoLockTimer = null;
     let undoLockedUntilMs = null;
 
     function flashStatsButton(btn, playerPos) {
       if (!btn) return;
-
       const flashClass = playerPos === 1 ? "btn-flash-p1" : "btn-flash-p2";
-
       btn.classList.remove("btn-flash-p1", "btn-flash-p2");
       void btn.offsetWidth;
       btn.classList.add(flashClass);
-
-      setTimeout(() => {
-        btn.classList.remove(flashClass);
-      }, 220);
+      setTimeout(() => btn.classList.remove(flashClass), 220);
     }
 
     function bindStatsButtonFlash() {
       document.querySelectorAll("#statsControlPanel .play-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const id = btn.id || "";
-
-          const playerPos = id.startsWith("j1_") ? 1 : 2;
-
+          const btnId = btn.id || "";
+          const playerPos = btnId.startsWith("j1_") ? 1 : 2;
           flashStatsButton(btn, playerPos);
         });
       });
+    }
+
+    function applyStatsView(mode) {
+      statsViewMode = mode;
+      const isSingle = mode === "single";
+      const isDouble = mode === "double";
+
+      if (el.statsModeSingleLabel) el.statsModeSingleLabel.classList.toggle("active", isSingle);
+      if (el.statsModeDoubleLabel) el.statsModeDoubleLabel.classList.toggle("active", isDouble);
+
+      if (el.stats1Card) el.stats1Card.style.display = "";
+      if (el.stats2Card) el.stats2Card.style.display = isDouble ? "" : "none";
+      if (el.stats2ManualCard) el.stats2ManualCard.style.display = isSingle ? "" : "none";
+
+      if (el.statsModeToggle) el.statsModeToggle.style.display = inputMode === "stats" ? "flex" : "none";
     }
 
     function applyInputMode(mode) {
@@ -129,22 +133,13 @@
 
       if (el.gamesControl1) el.gamesControl1.style.display = isGames ? "flex" : "none";
       if (el.gamesControl2) el.gamesControl2.style.display = isGames ? "flex" : "none";
-
       if (el.pointControl1) el.pointControl1.style.display = isPoints ? "flex" : "none";
       if (el.pointControl2) el.pointControl2.style.display = isPoints ? "flex" : "none";
+      if (el.scoreModesArea) el.scoreModesArea.style.display = isStats ? "none" : "";
+      if (el.statsControlPanel) el.statsControlPanel.style.display = isStats ? "" : "none";
+      if (el.statsModeToggle) el.statsModeToggle.style.display = isStats ? "flex" : "none";
 
-      if (el.scoreModesArea) {
-        el.scoreModesArea.style.display = isStats ? "none" : "";
-      }
-
-      if (el.statsControlPanel) {
-        el.statsControlPanel.style.display = isStats ? "" : "none";
-      }
-
-      if (isStats) {
-        const currentServer = el.servePlayer2?.checked ? "player2" : "player1";
-        setTimeout(() => scrollToStatsServeArea(currentServer), 100);
-      }
+      if (isStats) applyStatsView(statsViewMode || "single");
     }
 
     function bindInputModeToggle() {
@@ -155,16 +150,28 @@
       el.modeGamesLabel?.addEventListener("click", () => {
         if (!el.modeGames?.disabled) applyInputMode("games");
       });
-
       el.modePointsLabel?.addEventListener("click", () => {
         if (!el.modePoints?.disabled) applyInputMode("points");
       });
-
       el.modeStatsLabel?.addEventListener("click", () => {
         if (!el.modeStats?.disabled) applyInputMode("stats");
       });
 
       applyInputMode("games");
+    }
+
+    function bindStatsViewToggle() {
+      el.statsModeSingle?.addEventListener("change", () => applyStatsView("single"));
+      el.statsModeDouble?.addEventListener("change", () => applyStatsView("double"));
+
+      el.statsModeSingleLabel?.addEventListener("click", () => {
+        if (!el.statsModeSingle?.disabled) applyStatsView("single");
+      });
+      el.statsModeDoubleLabel?.addEventListener("click", () => {
+        if (!el.statsModeDouble?.disabled) applyStatsView("double");
+      });
+
+      applyStatsView("single");
     }
 
     function updateMatchControls(status) {
@@ -174,12 +181,10 @@
         el.startBtn.disabled = isFinished;
         el.startBtn.title = isFinished ? "Partida já finalizada" : "";
       }
-
       if (el.finishBtn) {
         el.finishBtn.disabled = isFinished || (status !== "live" && status !== "suspended");
         el.finishBtn.title = isFinished ? "Partida já finalizada" : "";
       }
-
       if (el.resetScoreBtn) {
         el.resetScoreBtn.disabled = isFinished;
         el.resetScoreBtn.title = isFinished ? "Partida já finalizada" : "";
@@ -248,7 +253,6 @@
 
     function setStatsButtonsDisabled(disabled) {
       const statsButtons = document.querySelectorAll("#statsControlPanel button");
-
       statsButtons.forEach((btn) => {
         btn.disabled = disabled;
         btn.style.opacity = disabled ? "0.35" : "";
@@ -272,31 +276,29 @@
       setStatsButtonsDisabled(isLocked || isSuspended);
 
       const toggleDisabled = isLocked || isSuspended;
-
       if (el.modeGames) el.modeGames.disabled = toggleDisabled || isTBActive;
       if (el.modePoints) el.modePoints.disabled = toggleDisabled;
       if (el.modeStats) el.modeStats.disabled = toggleDisabled;
 
       [el.modeGamesLabel, el.modePointsLabel, el.modeStatsLabel].forEach((lbl, i) => {
         if (!lbl) return;
-        const disabled =
-          toggleDisabled ||
-          (i === 0 && isTBActive);
-
+        const disabled = toggleDisabled || (i === 0 && isTBActive);
         lbl.style.opacity = disabled ? "0.35" : "";
         lbl.style.cursor = disabled ? "not-allowed" : "";
         lbl.style.pointerEvents = disabled ? "none" : "";
       });
 
-      if (el.servePlayer1) el.servePlayer1.disabled = isLocked || isSuspended;
-      if (el.servePlayer2) el.servePlayer2.disabled = isLocked || isSuspended;
+      const serveDisabled = isLocked || isSuspended;
+      if (el.servePlayer1) el.servePlayer1.disabled = serveDisabled;
+      if (el.servePlayer2) el.servePlayer2.disabled = serveDisabled;
+      if (el.servePlayer1Stats) el.servePlayer1Stats.disabled = serveDisabled;
+      if (el.servePlayer2Manual) el.servePlayer2Manual.disabled = serveDisabled;
 
-      [serveOption1, serveOption2].forEach((opt) => {
+      [serveOption1, serveOption2, manualServeOption1, manualServeOption2].forEach((opt) => {
         if (!opt) return;
-        const disabled = isLocked || isSuspended;
-        opt.style.opacity = disabled ? "0.4" : "";
-        opt.style.cursor = disabled ? "not-allowed" : "";
-        opt.style.pointerEvents = disabled ? "none" : "";
+        opt.style.opacity = serveDisabled ? "0.4" : "";
+        opt.style.cursor = serveDisabled ? "not-allowed" : "";
+        opt.style.pointerEvents = serveDisabled ? "none" : "";
       });
 
       if (isTBActive && !isLocked && !isSuspended) {
@@ -457,11 +459,6 @@
       };
     }
 
-    function formatSetLabel(index) {
-      const labels = ["1º set", "2º set", "3º set", "4º set", "5º set"];
-      return labels[index] || `${index + 1}º set`;
-    }
-
     function buildMatchScoreText(data) {
       const score = normalizeScore(data.score);
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
@@ -475,7 +472,6 @@
         const finalLabel = String(setItem?.finalLabel || "").trim();
 
         if (finalLabel) return finalLabel;
-
         if (mode === "super10") {
           if (tb1 > 0 || tb2 > 0) {
             const winnerIs1 = tb1 > tb2;
@@ -489,25 +485,19 @@
             const setScore = tb1 > tb2 ? "7x6" : "6x7";
             return `${setScore} (${tb1}-${tb2})`;
           }
-
           if (g1 === 7 && g2 === 6) return "7x6";
           if (g1 === 6 && g2 === 7) return "6x7";
           return "";
         }
 
-        if (g1 > 0 || g2 > 0) {
-          return `${g1}x${g2}`;
-        }
-
+        if (g1 > 0 || g2 > 0) return `${g1}x${g2}`;
         return "";
       };
 
       const parts = [];
-
       for (const setItem of history) {
         const text = formatSetText(setItem);
         if (!text) continue;
-
         if (parts.length && parts[parts.length - 1] === text) continue;
         parts.push(text);
       }
@@ -530,10 +520,7 @@
         } else {
           const g1 = Number(score.games1 || 0);
           const g2 = Number(score.games2 || 0);
-
-          if (g1 > 0 || g2 > 0) {
-            parts.push(`${g1}x${g2}`);
-          }
+          if (g1 > 0 || g2 > 0) parts.push(`${g1}x${g2}`);
         }
       }
 
@@ -572,21 +559,32 @@
       return (gf === "Duplas" || gf === "Duplas Mistas") ? `${p3}/${p4}` : (data?.player2 || "Jogador 2");
     }
 
+    function setServingClass(elm, active) {
+      if (!elm) return;
+      elm.classList.toggle("is-serving", !!active);
+    }
+
+    function syncServeUI(server) {
+      currentServer = server || "player1";
+      const isP1 = currentServer === "player1";
+      const isP2 = currentServer === "player2";
+
+      if (el.servePlayer1) el.servePlayer1.checked = isP1;
+      if (el.servePlayer1Stats) el.servePlayer1Stats.checked = isP1;
+      if (el.servePlayer2) el.servePlayer2.checked = isP2;
+      if (el.servePlayer2Manual) el.servePlayer2Manual.checked = isP2;
+
+      if (serveOption1) setServingClass(serveOption1, isP1);
+      if (serveOption2) setServingClass(serveOption2, isP2);
+      if (manualServeOption1) setServingClass(manualServeOption1, isP1);
+      if (manualServeOption2) setServingClass(manualServeOption2, isP2);
+
+      lastServerShown = currentServer;
+    }
+
     function updateServeUI(data) {
-      const server = data.score?.server || data.server || "player1";
-
-      if (el.servePlayer1) el.servePlayer1.checked = server === "player1";
-      if (el.servePlayer2) el.servePlayer2.checked = server === "player2";
-
-      serveOption1?.classList.toggle("is-serving", server === "player1");
-      serveOption2?.classList.toggle("is-serving", server === "player2");
-
-      if (inputMode === "stats" && lastServerShown !== server) {
-        lastServerShown = server;
-        scrollToStatsServeArea(server);
-      } else {
-        lastServerShown = server;
-      }
+      const server = data?.score?.server || data?.server || currentServer || "player1";
+      syncServeUI(server);
     }
 
     function renderInfoTop(data) {
@@ -595,13 +593,9 @@
 
       if (el.matchDateTimeTop) el.matchDateTimeTop.textContent = formatDateTime(data.matchDateTime);
       if (el.matchTitle) el.matchTitle.textContent = `${getTeam1Name(data)} x ${getTeam2Name(data)}`;
-
       if (el.matchMode) el.matchMode.textContent = modality || "-";
       if (el.matchFormat) el.matchFormat.textContent = fmt || "-";
-
-      if (el.matchSubTitle) {
-        el.matchSubTitle.textContent = "Acompanhe e atualize o placar em tempo real";
-      }
+      if (el.matchSubTitle) el.matchSubTitle.textContent = "Acompanhe e atualize o placar em tempo real";
 
       if (el.statusLabel) {
         const score = data.score || {};
@@ -610,9 +604,7 @@
         else el.statusLabel.textContent = mapStatus(data.status);
       }
 
-      if (el.matchScore) {
-        el.matchScore.textContent = buildMatchScoreText(data);
-      }
+      if (el.matchScore) el.matchScore.textContent = buildMatchScoreText(data);
     }
 
     function renderMatch(data) {
@@ -621,6 +613,8 @@
 
       if (el.player1Name) el.player1Name.textContent = getTeam1Name(data);
       if (el.player2Name) el.player2Name.textContent = getTeam2Name(data);
+      if (el.player2NameManual) el.player2NameManual.textContent = getTeam2Name(data);
+      if (el.player1NameStats) el.player1NameStats.textContent = getTeam1Name(data);
       if (el.servePlayer1Label) el.servePlayer1Label.textContent = getTeam1Name(data);
       if (el.servePlayer2Label) el.servePlayer2Label.textContent = getTeam2Name(data);
       if (el.games1Label) el.games1Label.textContent = `Games - ${getTeam1Name(data)}`;
@@ -632,9 +626,11 @@
       if (isTBActive) {
         if (el.points1) el.points1.textContent = String(score.tieBreakPoints1 ?? 0);
         if (el.points2) el.points2.textContent = String(score.tieBreakPoints2 ?? 0);
+        if (el.points2Manual) el.points2Manual.textContent = String(score.tieBreakPoints2 ?? 0);
       } else if (isTBFinished) {
         if (el.points1) el.points1.textContent = String(score.lastTieBreakPoints1 ?? 0);
         if (el.points2) el.points2.textContent = String(score.lastTieBreakPoints2 ?? 0);
+        if (el.points2Manual) el.points2Manual.textContent = String(score.lastTieBreakPoints2 ?? 0);
       } else {
         const ptText = typeof getPointDisplay === "function"
           ? getPointDisplay(score.points1, score.points2, fmt, score)
@@ -643,13 +639,16 @@
         if (ptText.includes("AD - J1")) {
           if (el.points1) el.points1.textContent = "AD";
           if (el.points2) el.points2.textContent = "40";
+          if (el.points2Manual) el.points2Manual.textContent = "40";
         } else if (ptText.includes("AD - J2")) {
           if (el.points1) el.points1.textContent = "40";
           if (el.points2) el.points2.textContent = "AD";
+          if (el.points2Manual) el.points2Manual.textContent = "AD";
         } else {
           const parts = String(ptText).split("x");
           if (el.points1) el.points1.textContent = parts[0] ?? "0";
           if (el.points2) el.points2.textContent = parts[1] ?? "0";
+          if (el.points2Manual) el.points2Manual.textContent = parts[1] ?? "0";
         }
       }
 
@@ -666,9 +665,10 @@
       updateMatchControls(data.status);
       applyUndoLockState(data);
       updateControlsState(data);
-
       renderInfoTop(data);
       updateServeUI(data);
+
+      if (inputMode === "stats") applyStatsView(statsViewMode || "single");
 
       if (data.status === "live") {
         const accumulated = Number(data.accumulatedSeconds || 0) * 1000;
@@ -714,16 +714,8 @@
 
     function pushLastPoint(score, winnerPos) {
       const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
-
-      history.push({
-        winnerPos,
-        at: firebase.firestore.Timestamp.now()
-      });
-
-      while (history.length > 10) {
-        history.shift();
-      }
-
+      history.push({ winnerPos, at: firebase.firestore.Timestamp.now() });
+      while (history.length > 10) history.shift();
       score.lastPoints = history;
       return score;
     }
@@ -769,7 +761,6 @@
 
       const isDecisiveNoAd = noAd && sp === 3 && rp === 3;
       const isBreakPoint = (rp === 3 && sp < 3) || isAdvantageForReceiver || isDecisiveNoAd;
-
       if (!isBreakPoint) return;
 
       if (rcvPos === 1) s.breakPointsChances1++;
@@ -781,7 +772,7 @@
       }
     }
 
-    function buildFinalSetHistory(score, data) {
+    function buildFinalSetHistory(score) {
       const s = normalizeScore(score);
       const history = Array.isArray(s.setHistory) ? [...s.setHistory] : [];
 
@@ -820,7 +811,6 @@
           tieBreakPoints2: tb2,
           finalLabel: `${winnerIs1 ? "7x6" : "6x7"} ${tb1}-${tb2}`
         });
-
         return cleanedHistory;
       }
 
@@ -836,7 +826,6 @@
           tieBreakPoints2: tb2,
           finalLabel: `7x6 (${tb1}-${tb2})`
         });
-
         return cleanedHistory;
       }
 
@@ -872,16 +861,13 @@
 
         const lastAction = buildLastActionSnapshot(data);
         const scoreBefore = normalizeScore(data.score);
-        const player = winnerPos;
-
         const result = typeof updateScoreWithPoint === "function"
-          ? updateScoreWithPoint(scoreBefore, player, data.matchFormat)
+          ? updateScoreWithPoint(scoreBefore, winnerPos, data.matchFormat)
           : { score: scoreBefore, gameWon: false, setWon: false, winner: 0, tieBreakStarted: false };
 
-        const score = result.score;
+        const score = result.score || scoreBefore;
 
         pushLastPoint(score, winnerPos);
-
         winnerPos === 1 ? score.totalPoints1++ : score.totalPoints2++;
         applyBreakPointStats(scoreBefore, score, data, winnerPos);
 
@@ -897,9 +883,7 @@
           ? getMatchWinner(score, data.matchFormat)
           : result.winner || 0;
 
-        if (finished) {
-          score.setHistory = buildFinalSetHistory(score, data);
-        }
+        if (finished) score.setHistory = buildFinalSetHistory(score);
 
         await ref.update({
           lastAction,
@@ -917,7 +901,6 @@
         else if (result.tieBreakStarted) setMsg(score.tieBreakMode === "super10" ? "🎾 Super Tie-break iniciado!" : "🎾 Tie-break iniciado!", "info");
         else if (result.setWon) setMsg("✅ Set encerrado!", "info");
         else setMsg(`Ponto do Jogador ${winnerPos} salvo.`, "success");
-
       } catch (err) {
         console.error(err);
         setMsg(err.message || "Erro ao salvar ponto.", "error");
@@ -927,50 +910,43 @@
     async function decrementPoint(winnerPos) {
       if (!id) return;
       const ref = __db.collection("matches").doc(id);
-    
+
       try {
         const snap = await ref.get();
         if (!snap.exists) return setMsg("Partida não encontrada.", "error");
-    
+
         let data = snap.data();
         if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
         if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
-    
+
         if (data.status !== "live") {
           await ensureMatchStarted(ref, data);
           data = (await ref.get()).data();
         }
-    
+
         const lastAction = buildLastActionSnapshot(data);
-const score = normalizeScore(data.score);
+        const score = normalizeScore(data.score);
+        const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
+        if (history.length > 0) history.pop();
+        score.lastPoints = history;
 
-const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
-if (history.length > 0) {
-  history.pop();
-}
-score.lastPoints = history;
+        if (winnerPos === 1) score.totalPoints1 = Math.max(0, Number(score.totalPoints1 || 0) - 1);
+        else score.totalPoints2 = Math.max(0, Number(score.totalPoints2 || 0) - 1);
 
-if (winnerPos === 1) {
-  score.totalPoints1 = Math.max(0, Number(score.totalPoints1 || 0) - 1);
-} else {
-  score.totalPoints2 = Math.max(0, Number(score.totalPoints2 || 0) - 1);
-}
+        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+          if (winnerPos === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
+          if (winnerPos === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
+        } else {
+          if (winnerPos === 1) score.points1 = Math.max(0, score.points1 - 1);
+          if (winnerPos === 2) score.points2 = Math.max(0, score.points2 - 1);
+        }
 
-if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-  if (winnerPos === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
-  if (winnerPos === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
-} else {
-  if (winnerPos === 1) score.points1 = Math.max(0, score.points1 - 1);
-  if (winnerPos === 2) score.points2 = Math.max(0, score.points2 - 1);
-}
-    
         await ref.update({
           lastAction,
           score: buildScorePayload(score),
           server: score.server,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-    
       } catch (err) {
         console.error(err);
         setMsg(err.message || "Erro ao decrementar ponto.", "error");
@@ -1016,9 +992,7 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
           ? getMatchWinner(score, data.matchFormat)
           : 0;
 
-        if (finished) {
-          score.setHistory = buildFinalSetHistory(score, data);
-        }
+        if (finished) score.setHistory = buildFinalSetHistory(score);
 
         await ref.update({
           lastAction,
@@ -1033,21 +1007,52 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
         if (setResult.tieBreakStarted) setMsg(score.tieBreakMode === "super10" ? "🎾 Super Tie-break!" : "🎾 Tie-break!", "info");
         else if (setResult.setWon) setMsg("✅ Set gravado.", "success");
         else setMsg("Games atualizados.", "success");
-
       } catch (err) {
         console.error(err);
         setMsg(err.message, "error");
       }
     }
 
+    async function getCurrentMatchData() {
+      if (!id) return null;
+      const snap = await __db.collection("matches").doc(id).get();
+      return snap.exists ? snap.data() : null;
+    }
+
+    async function setServe(server) {
+      if (!id) return;
+      try {
+        const ref = __db.collection("matches").doc(id);
+        const snap = await ref.get();
+        if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+        const data = snap.data();
+        if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+        if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
+
+        const lastAction = buildLastActionSnapshot(data);
+        const score = normalizeScore(data.score);
+        score.server = server;
+
+        await ref.update({
+          lastAction,
+          score: buildScorePayload(score),
+          server,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        syncServeUI(server);
+        setMsg(`Saque: Jogador ${server === "player1" ? 1 : 2}.`, "info");
+      } catch (err) {
+        console.error(err);
+        setMsg(err.message || "Erro ao alterar o saque.", "error");
+      }
+    }
+
     function getShareUrl() {
       const url = new URL(window.location.href);
       url.searchParams.set("id", id);
-
-      if (shareTokenFromUrl) {
-        url.searchParams.set("shareToken", shareTokenFromUrl);
-      }
-
+      if (shareTokenFromUrl) url.searchParams.set("shareToken", shareTokenFromUrl);
       return url.toString();
     }
 
@@ -1064,19 +1069,15 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
       ta.style.left = "-9999px";
       document.body.appendChild(ta);
       ta.select();
+
       let ok = false;
-      try {
-        ok = document.execCommand("copy");
-      } catch (_) {
-        ok = false;
-      }
+      try { ok = document.execCommand("copy"); } catch (_) { ok = false; }
       document.body.removeChild(ta);
       return ok;
     }
 
     async function handleShare() {
       if (!id) return;
-
       const shareUrl = getShareUrl();
       const title = document.title || "Live Scores Tennis";
 
@@ -1092,54 +1093,45 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
         }
 
         const copied = await copyToClipboard(shareUrl);
-        if (copied) {
-          setMsg("Link copiado para a área de transferência.", "success");
-        } else {
-          prompt("Copie o link compartilhável:", shareUrl);
-        }
+        if (copied) setMsg("Link copiado para a área de transferência.", "success");
+        else prompt("Copie o link compartilhável:", shareUrl);
       } catch (err) {
         console.error(err);
         const copied = await copyToClipboard(shareUrl);
-        if (copied) {
-          setMsg("Link copiado para a área de transferência.", "success");
-        } else {
-          prompt("Copie o link compartilhável:", shareUrl);
-        }
+        if (copied) setMsg("Link copiado para a área de transferência.", "success");
+        else prompt("Copie o link compartilhável:", shareUrl);
       }
     }
 
     function createRetirementModal(player1Name, player2Name) {
       return new Promise((resolve) => {
         const overlay = document.createElement("div");
-        overlay.style.cssText = ` position:fixed; inset:0; background:rgba(0,0,0,0.72); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px; `;
-    
+        overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.72); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px;";
+
         const box = document.createElement("div");
-        box.style.cssText = ` width:min(420px, 100%); background:#1f2937; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,0.45); font-family:inherit; `;
-    
-        box.innerHTML = ` <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;"> Deseja abandonar a partida? </div> <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;"> Selecione quem abandonou a partida. </div> <div style="display:flex;flex-direction:column;gap:10px;"> <button id="retPlayer1" style=" padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer; ">${player1Name}</button> <button id="retPlayer2" style=" padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer; ">${player2Name}</button> <button id="retCancel" style=" padding:12px 14px; border:none; border-radius:12px; background:rgba(255,255,255,0.10); color:#fff; font-weight:800; cursor:pointer; ">Cancelar</button> </div> `;
-    
+        box.style.cssText = "width:min(420px, 100%); background:#1f2937; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,0.45); font-family:inherit;";
+
+        box.innerHTML = `
+          <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;">Deseja abandonar a partida?</div>
+          <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;">Selecione quem abandonou a partida.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button id="retPlayer1" style="padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer;">${player1Name}</button>
+            <button id="retPlayer2" style="padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer;">${player2Name}</button>
+            <button id="retCancel" style="padding:12px 14px; border:none; border-radius:12px; background:rgba(255,255,255,0.10); color:#fff; font-weight:800; cursor:pointer;">Cancelar</button>
+          </div>
+        `;
+
         overlay.appendChild(box);
         document.body.appendChild(overlay);
-    
+
         const cleanup = () => {
           if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
         };
-    
-        box.querySelector("#retPlayer1").addEventListener("click", () => {
-          cleanup();
-          resolve("player1");
-        });
-    
-        box.querySelector("#retPlayer2").addEventListener("click", () => {
-          cleanup();
-          resolve("player2");
-        });
-    
-        box.querySelector("#retCancel").addEventListener("click", () => {
-          cleanup();
-          resolve(null);
-        });
-    
+
+        box.querySelector("#retPlayer1").addEventListener("click", () => { cleanup(); resolve("player1"); });
+        box.querySelector("#retPlayer2").addEventListener("click", () => { cleanup(); resolve("player2"); });
+        box.querySelector("#retCancel").addEventListener("click", () => { cleanup(); resolve(null); });
+
         overlay.addEventListener("click", (e) => {
           if (e.target === overlay) {
             cleanup();
@@ -1151,12 +1143,12 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
 
     function bindButtons() {
       bindInputModeToggle();
+      bindStatsViewToggle();
 
       el.shareBtn?.addEventListener("click", handleShare);
 
       el.startBtn?.addEventListener("click", async () => {
         if (!id) return;
-
         try {
           const ref = __db.collection("matches").doc(id);
           const snap = await ref.get();
@@ -1191,7 +1183,6 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
             if (!confirm("Deseja interromper (suspender) a partida?")) return;
 
             const lastAction = buildLastActionSnapshot(data);
-
             const started = data.startedAt?.toDate
               ? data.startedAt.toDate()
               : (data.startedAt ? new Date(data.startedAt) : null);
@@ -1238,7 +1229,6 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
             setMsg("Partida recomeçada.", "success");
             return;
           }
-
         } catch (err) {
           console.error(err);
           setMsg(err.message, "error");
@@ -1247,62 +1237,58 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
 
       el.finishBtn?.addEventListener("click", async () => {
         if (!id) return;
-      
+
         try {
           const ref = __db.collection("matches").doc(id);
           const snap = await ref.get();
           if (!snap.exists) return setMsg("Partida não encontrada.", "error");
-      
+
           const data = snap.data();
-      
           if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
-      
+
           const team1Name = getTeam1Name(data);
           const team2Name = getTeam2Name(data);
-      
+
           const action = await createRetirementModal(team1Name, team2Name);
           if (!action) {
             const normalConfirm = confirm("Deseja encerrar a partida?");
             if (!normalConfirm) return;
           }
-      
+
           const wasRetirement = action === "player1" || action === "player2";
-      
           const lastAction = buildLastActionSnapshot(data);
-      
+
           let durationSeconds = Number(data.accumulatedSeconds || 0);
-      
           if (data.status === "live") {
             const started = data.startedAt?.toDate
               ? data.startedAt.toDate()
               : (data.startedAt ? new Date(data.startedAt) : null);
-      
+
             if (started && !isNaN(started.getTime())) {
               durationSeconds += Math.floor((Date.now() - started.getTime()) / 1000);
             } else if (liveStartedAtMs) {
               durationSeconds += Math.floor((Date.now() - liveStartedAtMs) / 1000);
             }
           }
-      
+
           liveStartedAtMs = null;
           stopTimer();
-      
+
           const score = normalizeScore(data.score);
           const finishedAt = firebase.firestore.Timestamp.now();
-      
-          score.setHistory = buildFinalSetHistory(score, data);
-      
+          score.setHistory = buildFinalSetHistory(score);
+
           let statusToSave = "finished";
           let winnerByWO = data.winnerByWO || "";
           let abandonedBy = "";
           let winnerByRet = "";
-      
+
           if (wasRetirement) {
             statusToSave = "ret";
             abandonedBy = action;
             winnerByRet = action === "player1" ? "player2" : "player1";
           }
-      
+
           await ref.update({
             lastAction,
             status: statusToSave,
@@ -1318,9 +1304,8 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
             winnerByRet,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-      
+
           if (el.durationEl) el.durationEl.textContent = durationText(durationSeconds * 1000);
-      
           if (wasRetirement) {
             const winnerName = action === "player1" ? team2Name : team1Name;
             setMsg(`Partida finalizada por abandono. Vencedor: ${winnerName}`, "success");
@@ -1332,6 +1317,7 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
           setMsg(err.message, "error");
         }
       });
+
       el.resetScoreBtn?.addEventListener("click", async () => {
         if (!id || !confirm("Deseja zerar o placar e as estatísticas?")) return;
 
@@ -1344,83 +1330,52 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
           if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
 
           const lastAction = buildLastActionSnapshot(data);
-
           liveStartedAtMs = null;
           stopTimer();
 
           const cleanStats = {
             player1: {
               currentServeType: 1,
-              serve1Attempts: 0,
-              serve1Won: 0,
-              serve2Attempts: 0,
-              serve2Won: 0,
-              serveTotal: 0,
-              serveSuccessPct: 0,
-              doubleFault: 0,
-              ace: 0,
-              dropshotWinner: 0,
-              dropshotError: 0,
-              smashWinner: 0,
-              smashError: 0,
-              voleioWinner: 0,
-              voleioError: 0,
-              forehandWinner: 0,
-              forehandError: 0,
-              backhandWinner: 0,
-              backhandError: 0,
-              enfFH: 0,
-              enfBH: 0,
-              forcedError: 0,
-              normalPoint: 0,
-              returnPoint: 0,
-              returnError: 0,
-              baselineError: 0,
-              baselinePoint: 0,
+              serve1Attempts: 0, serve1Won: 0, serve2Attempts: 0, serve2Won: 0,
+              serveTotal: 0, serveSuccessPct: 0,
+              doubleFault: 0, ace: 0,
+              dropshotWinner: 0, dropshotError: 0,
+              smashWinner: 0, smashError: 0,
+              voleioWinner: 0, voleioError: 0,
+              forehandWinner: 0, forehandError: 0,
+              backhandWinner: 0, backhandError: 0,
+              enfFH: 0, enfBH: 0, forcedError: 0,
+              normalPoint: 0, returnPoint: 0, returnError: 0,
+              baselineError: 0, baselinePoint: 0,
               totalPointsWon: 0
             },
             player2: {
               currentServeType: 1,
-              serve1Attempts: 0,
-              serve1Won: 0,
-              serve2Attempts: 0,
-              serve2Won: 0,
-              serveTotal: 0,
-              serveSuccessPct: 0,
-              doubleFault: 0,
-              ace: 0,
-              dropshotWinner: 0,
-              dropshotError: 0,
-              smashWinner: 0,
-              smashError: 0,
-              voleioWinner: 0,
-              voleioError: 0,
-              forehandWinner: 0,
-              forehandError: 0,
-              backhandWinner: 0,
-              backhandError: 0,
-              enfFH: 0,
-              enfBH: 0,
-              forcedError: 0,
-              normalPoint: 0,
-              returnPoint: 0,
-              returnError: 0,
-              baselineError: 0,
-              baselinePoint: 0,
+              serve1Attempts: 0, serve1Won: 0, serve2Attempts: 0, serve2Won: 0,
+              serveTotal: 0, serveSuccessPct: 0,
+              doubleFault: 0, ace: 0,
+              dropshotWinner: 0, dropshotError: 0,
+              smashWinner: 0, smashError: 0,
+              voleioWinner: 0, voleioError: 0,
+              forehandWinner: 0, forehandError: 0,
+              backhandWinner: 0, backhandError: 0,
+              enfFH: 0, enfBH: 0, forcedError: 0,
+              normalPoint: 0, returnPoint: 0, returnError: 0,
+              baselineError: 0, baselinePoint: 0,
               totalPointsWon: 0
             }
           };
 
           await ref.update({
-  lastAction,
-  score: defaultScore(),
-  stats: cleanStats,
-  startedAt: firebase.firestore.Timestamp.now(),
-  accumulatedSeconds: 0,
-  durationSeconds: 0,
-  suspendedAt: null,
-  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-});
+            lastAction,
+            score: defaultScore(),
+            stats: cleanStats,
+            startedAt: firebase.firestore.Timestamp.now(),
+            accumulatedSeconds: 0,
+            durationSeconds: 0,
+            suspendedAt: null,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
 
           setMsg("Placar e estatísticas zerados com sucesso.", "success");
         } catch (err) {
@@ -1431,10 +1386,12 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
 
       el.undoBtn?.addEventListener("click", async () => {
         if (!id || !confirm("Deseja desfazer a última ação?")) return;
+
         try {
           const ref = __db.collection("matches").doc(id);
           const snap = await ref.get();
           if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
           const data = snap.data();
           if (!data.lastAction) return setMsg("Não há ação anterior para desfazer.", "error");
 
@@ -1497,33 +1454,20 @@ if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
       });
 
       const handleServeChange = async (server) => {
-        if (!id) return;
-        try {
-          const ref = __db.collection("matches").doc(id);
-          const snap = await ref.get();
-          if (!snap.exists) return setMsg("Partida não encontrada.", "error");
-          const data = snap.data();
-          if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
-          if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
-          const lastAction = buildLastActionSnapshot(data);
-          const score = normalizeScore(data.score);
-          score.server = server;
-          await ref.update({
-            lastAction,
-            score: buildScorePayload(score),
-            server,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          updateServeUI({ server });
-          setMsg(`Saque: Jogador ${server === "player1" ? 1 : 2}.`, "info");
-        } catch (err) {
-          console.error(err);
-          setMsg(err.message, "error");
-        }
+        await setServe(server);
       };
 
-      document.getElementById("servePlayer1")?.addEventListener("change", () => handleServeChange("player1"));
-      document.getElementById("servePlayer2")?.addEventListener("change", () => handleServeChange("player2"));
+      ["servePlayer1", "servePlayer1Stats"].forEach((idEl) => {
+        document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player1"));
+      });
+      ["servePlayer2", "servePlayer2Manual"].forEach((idEl) => {
+        document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player2"));
+      });
+
+      serveOption1?.addEventListener("click", () => setServe("player1"));
+      serveOption2?.addEventListener("click", () => setServe("player2"));
+      manualServeOption1?.addEventListener("click", () => setServe("player1"));
+      manualServeOption2?.addEventListener("click", () => setServe("player2"));
     }
 
     function loadMatch() {
