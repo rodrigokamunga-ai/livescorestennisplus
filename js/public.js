@@ -903,70 +903,90 @@
     function renderLists(matches) {
       applyFilterAndRender(matches);
     }
+        // INJETADO: Repassa os dados reativos em background para a aba da TV se ela estiver aberta na tela
+        if (window.tvAbaRef && !window.tvAbaRef.closed && Array.isArray(matches)) {
+          // Procura a partida ao vivo correspondente na sua lista reativa e envia
+          const paramsTv = new URLSearchParams(window.location.search);
+          const matchIdTv = paramsTv.get("id") || "";
+          const jogoAtivo = matches.find(m => m.id === matchIdTv || m.status === "live");
+          if (jogoAtivo) window.tvAbaRef.postMessage(jogoAtivo, "*");
+        }
+    
 
-    function listenPublicMatches() {
-      state.unsubscribe?.();
-      state.unsubscribe = null;
-
-      if (!ownerId) {
-        [el.scheduledList, el.liveList, el.finishedList].forEach(
-          (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o identificador do usuário."))
-        );
-        return;
-      }
-
-      if (!shareToken) {
-        [el.scheduledList, el.liveList, el.finishedList].forEach(
-          (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o token de compartilhamento."))
-        );
-        return;
-      }
-
-      state.unsubscribe = db.collection("matches")
-        .where("ownerId", "==", ownerId)
-        .where("shareEnabled", "==", true)
-        .onSnapshot(
-          (snapshot) => {
-            state.cachedMatches = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            renderLists(state.cachedMatches);
-          },
-          (err) => {
-            console.error("Erro ao carregar partidas públicas:", err);
+        function listenPublicMatches() {
+          state.unsubscribe?.();
+          state.unsubscribe = null;
+    
+          if (!ownerId) {
             [el.scheduledList, el.liveList, el.finishedList].forEach(
-              (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos públicos"))
+              (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o identificador do usuário."))
             );
+            return;
           }
-        );
-    }
-
-    function listenSingleMatch() {
-      if (!matchId) return;
-
-      state.unsubscribeSingle?.();
-      state.unsubscribeSingle = null;
-
-      state.unsubscribeSingle = db.collection("matches")
-        .doc(matchId)
-        .onSnapshot(
-          (snap) => {
-            if (!snap.exists) return;
-
-            const match = { id: snap.id, ...snap.data() };
-
-            const idx = state.cachedMatches.findIndex((m) => m.id === match.id);
-            if (idx >= 0) {
-              state.cachedMatches[idx] = match;
-            } else {
-              state.cachedMatches.push(match);
-            }
-
-            renderLists(state.cachedMatches);
-          },
-          (err) => {
-            console.error("Erro ao escutar partida individual:", err);
+    
+          if (!shareToken) {
+            [el.scheduledList, el.liveList, el.finishedList].forEach(
+              (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o token de compartilhamento."))
+            );
+            return;
           }
-        );
-    }
+    
+          state.unsubscribe = db.collection("matches")
+            .where("ownerId", "==", ownerId)
+            .where("shareEnabled", "==", true)
+            .onSnapshot(
+              (snapshot) => {
+                state.cachedMatches = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                renderLists(state.cachedMatches);
+              },
+              (err) => {
+                console.error("Erro ao carregar partidas públicas:", err);
+                [el.scheduledList, el.liveList, el.finishedList].forEach(
+                  (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos públicos"))
+                );
+              }
+            );
+        }
+    
+        function listenSingleMatch() {
+          if (!matchId) return;
+    
+          state.unsubscribeSingle?.();
+          state.unsubscribeSingle = null;
+    
+          state.unsubscribeSingle = db.collection("matches")
+            .doc(matchId)
+            .onSnapshot(
+              (snap) => {
+                if (!snap.exists) return;
+    
+                const match = { id: snap.id, ...snap.data() };
+    
+                // CORREÇÃO DEFINTIVA: Verifica rigorosamente se a partida já existe na lista.
+                // Se existir, atualiza o índice correto. Se não existir, ela insere o push.
+                const idx = state.cachedMatches.findIndex((m) => m.id === match.id);
+                if (idx >= 0) {
+                  state.cachedMatches[idx] = match;
+                } else {
+                  state.cachedMatches.push(match);
+                }
+    
+                // LIMPEZA ADICIONAL ANTI-DUPLICAÇÃO: Filtra o array para eliminar qualquer ID repetido residual
+                const idsVistos = new Set();
+                state.cachedMatches = state.cachedMatches.filter(m => {
+                  if (idsVistos.has(m.id)) return false;
+                  idsVistos.add(m.id);
+                  return true;
+                });
+    
+                renderLists(state.cachedMatches);
+              },
+              (err) => {
+                console.error("Erro ao escutar partida individual:", err);
+              }
+            );
+        }
+    
 
     function refreshLiveDurations() {
       if (state.cachedMatches.length) renderLists(state.cachedMatches);
@@ -994,3 +1014,4 @@
 
   document.addEventListener("DOMContentLoaded", () => PublicApp.init());
 })();
+
