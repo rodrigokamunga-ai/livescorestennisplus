@@ -2,60 +2,196 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape" />
   <title>Transmissão Placar TV | TennisPro</title>
+  
   <style>
+    /* CSS BLINDADO PARA MODO DEITADO (LANDSCAPE) */
     html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0f172a;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0f172a;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      /* Previne puxar para atualizar ou comportamentos elásticos */
+      overscroll-behavior: none; 
     }
-    #liveVideo { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
-    .tv-overlay-container { position: absolute; bottom: 24px; left: 24px; z-index: 2; width: auto; height: auto; box-sizing: border-box; }
-    .placar-tv-box { background: transparent; min-width: 320px; }
-    .status-badge-tv { text-align: right; color: #d8ff63; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; padding-right: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-    .tabela-tv-placar { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
-    .tabela-tv-placar th { color: #a9c6e6; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; padding: 0 10px 2px 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-    .th-jogador { text-align: left; } .th-set { text-align: center; width: 50px; } .th-pontos { text-align: center; width: 65px; }
-    .linha-jogador-tv td { background: rgba(30, 41, 59, 0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid rgba(255, 255, 255, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.08); height: 44px; vertical-align: middle; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-    .linha-jogador-tv td:first-child { border-left: 1px solid rgba(30, 41, 59, 0.88); border-top-left-radius: 10px; border-bottom-left-radius: 10px; padding-left: 14px; }
-    .linha-jogador-tv td:last-child { border-right: 1px solid rgba(30, 41, 59, 0.88); border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
-    .nome-tv-atleta { color: #ffffff; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-    .serve-ball-tv { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d8ff63; box-shadow: 0 0 8px #d8ff63, 0 0 2px #d8ff63; flex-shrink: 0; }
-    .set-tv-score { text-align: center; color: #d8ff63; font-size: 18px; font-weight: 800; }
-    .pontos-tv-score { text-align: center; color: #ffffff; font-size: 18px; font-weight: 800; background: rgba(255, 255, 255, 0.04); border-left: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Correção do Hardware de Vídeo para cobrir toda a tela horizontal */
+    #liveVideo {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      background-color: #000;
+    }
+
+    /* Container Dinâmico e Flutuante no Canto Inferior Esquerdo */
+    .tv-overlay-container {
+      position: absolute;
+      bottom: 5vh; /* Proporcional à altura do celular deitado */
+      left: 4vw;   /* Proporcional à largura do celular deitado */
+      z-index: 2;
+      width: auto;
+      height: auto;
+      box-sizing: border-box;
+      pointer-events: none; /* Garante que toques passem direto para o vídeo se necessário */
+    }
+
+    /* Bloco Encolhido do Placar Estilo TV */
+    .placar-tv-box {
+      background: transparent;
+      width: 360px; /* Largura compacta ideal para telas horizontais */
+      max-width: 85vw;
+    }
+
+    /* Badge superior do status do jogo */
+    .status-badge-tv {
+      text-align: right;
+      color: #d8ff63;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      padding-right: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    }
+
+    /* Tabela do Placar */
+    .tabela-tv-placar {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+    }
+
+    .tabela-tv-placar th {
+      color: #a9c6e6;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0 10px 2px 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    }
+    .th-jogador { text-align: left; }
+    .th-set { text-align: center; width: 50px; }
+    .th-pontos { text-align: center; width: 65px; }
+
+    /* Caixa dos Jogadores (Efeito Vidro Translúcido Reforçado) */
+    .linha-jogador-tv td {
+      background: rgba(15, 23, 42, 0.85); /* Fundo um pouco mais escuro para ler bem no sol */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      height: 42px;
+      vertical-align: middle;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    
+    .linha-jogador-tv td:first-child {
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+      padding-left: 12px;
+    }
+    .linha-jogador-tv td:last-child {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .nome-tv-atleta {
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .serve-ball-tv {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d8ff63;
+      box-shadow: 0 0 8px #d8ff63;
+      flex-shrink: 0;
+    }
+
+    .set-tv-score {
+      text-align: center;
+      color: #d8ff63;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .pontos-tv-score {
+      text-align: center;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Câmera de fundo -->
-  <video id="liveVideo" autoplay playsinline muted></video>
+  <!-- Câmera de fundo nativa com atributos obrigatórios de iOS/Android -->
+  <video id="liveVideo" autoplay playsinline muted loop></video>
 
-  <!-- Placar Horizontal -->
+  <!-- Painel do Placar da TV -->
   <main class="tv-overlay-container">
     <div class="placar-tv-box">
-      <div class="status-badge-tv" id="tvStatus">SINCED</div>
+      <div class="status-badge-tv" id="tvStatus">CONECTANDO...</div>
       <div id="tvGridPlacar"></div>
     </div>
   </main>
 
   <script>
-    // 1. INICIALIZAÇÃO DA CÂMERA DO SMARTPHONE
-    async function ligarCameraTraseira() {
+    // 1. INICIALIZAÇÃO DA CÂMERA TRASEIRA OTIMIZADA PARA MOBILE (CHROME/SAFARI)
+    async function ligarCameraTraseiraMobile() {
+      const video = document.getElementById('liveVideo');
+      if (!video) return;
+
+      // Configurações flexíveis para evitar que o celular recuse a abertura
+      const constraints = {
+        video: { 
+          facingMode: "environment" // Força o uso da câmera de trás
+        },
+        audio: false
+      };
+
       try {
-        const constraints = {
-          video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
-          audio: false
-        };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        const video = document.getElementById('liveVideo');
-        if (video) video.srcObject = stream;
+        video.srcObject = stream;
+        
+        // Correção específica para Safari: força o play caso o navegador tente pausar
+        video.onloadedmetadata = () => {
+          video.play().catch(e => console.log("Erro ao dar play automático:", e));
+        };
       } catch (error) {
-        console.warn("Câmera indisponível.", error);
+        console.warn("Aviso de hardware ou permissão negada:", error);
+        document.getElementById("tvStatus").innerText = "PERMISSÃO DA CÂMERA NEGADA";
       }
     }
-    document.addEventListener('DOMContentLoaded', ligarCameraTraseira);
+    
+    // Liga a câmera assim que a página estiver pronta
+    document.addEventListener('DOMContentLoaded', ligarCameraTraseiraMobile);
 
-    // 2. CRIA O RÁDIO RECEPTOR DINÂMICO
+    // 2. RECEPTOR VIA MENSAGERIA DE RÁDIO LOCAL (MANTIDA DO SEU PROJETO)
     const canalTv = new BroadcastChannel("tennis_tv_channel");
 
     function processarDadosPlacar(data) {
@@ -64,16 +200,11 @@
       const score = data.score || {};
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
 
-      // A) IDENTIFICA O FORMATO DO JOGO PELO TEXTO DA PARTIDA
       const fmt = String(data.matchFormat || "").toLowerCase();
-      const hasTwoSets = fmt.includes("2 sets");
-      const hasThreeSets = fmt.includes("3 sets");
-      
       let qtdCols = 1;
-      if (hasTwoSets || hasThreeSets) qtdCols = 2;
-      if (hasThreeSets) qtdCols = 3;
+      if (fmt.includes("2 sets") || fmt.includes("3 sets")) qtdCols = 2;
+      if (fmt.includes("3 sets")) qtdCols = 3;
 
-      // B) PROCESSAMENTO DE NOMES (SIMPLES OU DUPLAS)
       const isDuplas = String(data.gameFormat || "").includes("Duplas");
       let name1 = String(data.player1 || "Jogador 1");
       let name2 = String(data.player2 || "Jogador 2");
@@ -82,7 +213,6 @@
         name2 = `${data.player3 || "Jogador 3"}/${data.player4 || "Jogador 4"}`;
       }
 
-      // C) RESOLVE A PONTUAÇÃO CONVERSÍVEL (00, 15, 30, 40, AD, TIE-BREAK)
       const isTieBreakAtivo = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
       let viewPts1 = "00";
       let viewPts2 = "00";
@@ -108,44 +238,23 @@
         }
       }
 
-      // D) MAPEIA OS VALORES DE CADA CARD DE SET COM HISTÓRICO DINÂMICO
       const setsHtmlHead = [];
       const setsHtmlRow1 = [];
       const setsHtmlRow2 = [];
 
       for (let i = 0; i < qtdCols; i++) {
         setsHtmlHead.push(`<th class="th-set">${i + 1}º SET</th>`);
-        
-        let g1 = "0";
-        let g2 = "0";
-
-        if (history[i]) {
-          g1 = String(history[i].games1 ?? 0);
-          g2 = String(history[i].games2 ?? 0);
-          if (history[i].tieBreakMode && (history[i].tieBreakPoints1 > 0 || history[i].tieBreakPoints2 > 0)) {
-            const tb1 = history[i].tieBreakPoints1 || 0;
-            const tb2 = history[i].tieBreakPoints2 || 0;
-            if (tb1 > tb2) g1 += `<sub>${tb1}</sub>`;
-            else g2 += `<sub>${tb2}</sub>`;
-          }
-        } else if (history.length === i) {
-          g1 = String(score.games1 ?? 0);
-          g2 = String(score.games2 ?? 0);
-        } else {
-          g1 = "--";
-          g2 = "--";
-        }
-
+        let g1 = history[i] ? String(history[i].games1 ?? 0) : (history.length === i ? String(score.games1 ?? 0) : "--");
+        let g2 = history[i] ? String(history[i].games2 ?? 0) : (history.length === i ? String(score.games2 ?? 0) : "--");
         setsHtmlRow1.push(`<td class="set-tv-score">${g1}</td>`);
         setsHtmlRow2.push(`<td class="set-tv-score">${g2}</td>`);
       }
 
-      // E) RECONSTRÓI A TABELA INTEIRA COM AS COLUNAS SOLICITADAS
       const server = score.server || data.server || "player1";
       const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : '';
       const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : '';
 
-      const markupCompleto = `
+      document.getElementById("tvGridPlacar").innerHTML = `
         <table class="tabela-tv-placar">
           <thead>
             <tr>
@@ -156,44 +265,27 @@
           </thead>
           <tbody>
             <tr class="linha-jogador-tv">
-              <td>
-                <div class="nome-tv-atleta">
-                  ${ball1}
-                  <span>${name1.toUpperCase()}</span>
-                </div>
-              </td>
+              <td><div class="nome-tv-atleta">${ball1}<span>${name1.toUpperCase()}</span></div></td>
               ${setsHtmlRow1.join("")}
               <td class="pontos-tv-score">${viewPts1}</td>
             </tr>
             <tr class="linha-jogador-tv">
-              <td>
-                <div class="nome-tv-atleta">
-                  ${ball2}
-                  <span>${name2.toUpperCase()}</span>
-                </div>
-              </td>
+              <td><div class="nome-tv-atleta">${ball2}<span>${name2.toUpperCase()}</span></div></td>
               ${setsHtmlRow2.join("")}
               <td class="pontos-tv-score">${viewPts2}</td>
             </tr>
           </tbody>
         </table>
       `;
-
-      document.getElementById("tvGridPlacar").innerHTML = markupCompleto;
     }
 
-    // REMOVIDO FILTRO DE ID CEGO: Escuta e renderiza diretamente o sinal enviado pelo painel ativo
     canalTv.onmessage = (event) => {
-      const payload = event.data;
-      if (payload && payload.score) {
-        processarDadosPlacar(payload);
+      if (event.data && event.data.score) {
+        processarDadosPlacar(event.data);
       }
     };
 
-    // Solicita os dados iniciais ao abrir a janela
-    setTimeout(() => { 
-      canalTv.postMessage("PEDIR_PLACAR_ATUAL"); 
-    }, 300);
+    setTimeout(() => { canalTv.postMessage("PEDIR_PLACAR_ATUAL"); }, 300);
   </script>
 </body>
 </html>
