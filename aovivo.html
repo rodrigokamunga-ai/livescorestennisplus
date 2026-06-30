@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Transmissão Placar TV | TennisPro</title>
   
   <style>
@@ -61,13 +61,11 @@
 </head>
 <body>
 
-  <!-- Tela Interativa Inicial (Livre e destravada instantaneamente) -->
   <div id="telaInicial">
     <button class="btn-iniciar-tv" onclick="iniciarFluxoTransmissaoNativa()">Iniciar Transmissão</button>
   </div>
 
-  <!-- Hardware de Vídeo -->
-  <video id="liveVideo" autoplay playsinline muted loop></video>
+  <video id="liveVideo" autoplay playsinline webkit-playsinline muted></video>
 
   <main class="tv-overlay-container">
     <div class="placar-tv-box">
@@ -75,34 +73,153 @@
       <div id="tvGridPlacar"></div>
     </div>
   </main>
+
   <script>
-    // CRIA O RECEPTOR DE RÁDIO LOCAL COMUNICADOR ENTRE ABAS
     const canalTv = new BroadcastChannel("tennis_tv_channel");
     let relogioBuscaDadosTv = null;
 
-    // 1. DISPARADOR DE TOQUE: LIGA A CÂMERA E ATIVA A BUSCA CONTÍNUA
     async function iniciarFluxoTransmissaoNativa() {
       document.getElementById("telaInicial").style.display = "none";
       
-      // Ativa o hardware da câmera traseira deitado de forma limpa
+      // FIX PARA ANDROID: Configurações de hardware flexíveis e fallback de câmera
       try {
-        const constraints = { video: { facingMode: "environment" }, audio: false };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const constraints = { 
+          video: { 
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }, 
+          audio: false 
+        };
+        
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (e) {
+          // Se falhar pedindo a traseira estrita, tenta qualquer câmera disponível para não quebrar o app
+          console.log("Tentando fallback de câmera genérica...");
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        }
+
         const video = document.getElementById('liveVideo');
         if (video) {
           video.srcObject = stream;
-          video.play().catch(e => console.log("Erro autoplay:", e));
+          // Garante o disparo do play mesmo se o celular entrar em modo de economia de energia
+          setTimeout(() => {
+            video.play().catch(err => console.log("Erro autoplay:", err));
+          }, 100);
         }
       } catch (error) {
         console.warn("Camera indisponivel:", error);
         document.getElementById("tvStatus").innerText = "CÂMERA INDISPONÍVEL";
       }
 
-      // CHAVE DA SINCRONIA: Fica chamando o painel de controle a cada 1 segundo 
-      // até que ele acorde e envie os nomes e pontos da partida criada
-      relogioBuscaDadosTv = setInterval(() => {
-        canalTv.postMessage("PEDIR_PLACAR_ATUAL");
-      }, 1000);
+      // Inicia a busca contínua pelos dados do painel de controle
+      if (!relogioBuscaDadosTv) {
+        relogioBuscaDadosTv = setInterval(() => {
+          canalTv.postMessage("PEDIR_PLACAR_ATUAL");
+        }, 1000);
+      }
+    }
+
+    canalTv.onmessage = (event) => {
+      const payload = event.data;
+      if (payload && payload.score) {
+        // Deixamos o intervalo ativo caso precise restabelecer sinal, limpando apenas se necessário
+        renderizarPlacarHorizontalTv(payload);
+      }
+    };
+
+    function renderizarPlacarHorizontalTv(data) {
+      if (!data || !data.score) return;
+      
+      const score = data.score || {};
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+
+      const fmt = String(data.matchFormat || "").toLowerCase();
+      const hasTwoSets = fmt.includes("2 sets");
+      const hasThreeSets = fmt.includes("3 sets");
+      
+      let qtdCols = 1;
+      if (hasTwoSets || hasThreeSets) qtdCols = 2;
+      if (hasThreeSets) qtdCols = 3;
+
+      const isDuplas = String(data.gameFormat || "").includes("Duplas");
+      let name1 = String(data.player1 || "Jogador 1");
+      let name2 = String(data.player2 || "Jogador 2");
+      if (isDuplas) {
+        name1 = `${data.player1 || "Jogador 1"}/${data.player2 || "Jogador 2"}`;
+        name2 = `${data.player3 || "Jogador 3"}/${data.player4 || "Jogador 4"}`;
+      }
+
+      const isTieBreakAtivo = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
+      let viewPts1 = "00";
+      let viewPts2 = "00";
+
+      if (isTieBreakAtivo) {
+        viewPts1 = String(score.tieBreakPoints1 ?? 0);
+        viewPts2 = String(score.tieBreakPoints2 ?? 0);
+        document.getElementById("tvStatus").innerText = score.tieBreakMode === "super10" ? "SUPER TIE-BREAK" : "TIE-BREAK";
+      } else {
+        if (data.status === "live") document.getElementById("tvStatus").innerText = "EM ANDAMENTO";
+        else if (data.status === "suspended") document.getElementById("tvStatus").innerText = "SUSPENSA";
+        else if (data.status === "finished") document.getElementById("tvStatus").innerText = "FINALIZADA";
+        else document.getElementById("tvStatus").innerText = "NÃO INICIADA";
+
+        const deparaTenis = { "0": "00", "1": "15", "2": "30", "3": "40" };
+        if (score.advantage === "player1") {
+          viewPts1 = "AD"; viewPts2 = "40";
+        } else if (score.advantage === "player2") {
+          viewPts1 = "40"; viewPts2 = "AD";
+        } else {
+          viewPts1 = deparaTenis[String(score.points1 ?? 0)] || "00";
+          viewPts2 = deparaTenis[String(score.points2 ?? 0)] || "00";
+        }
+      }
+
+      const setsHtmlHead = [];
+      const setsHtmlRow1 = [];
+      const setsHtmlRow2 = [];
+
+      for (let i = 0; i < qtdCols; i++) {
+        setsHtmlHead.push(`<th class="th-set">${i + 1}º SET</th>`);
+        let g1 = history[i] ? String(history[i].games1 ?? 0) : (history.length === i ? String(score.games1 ?? 0) : "--");
+        let g2 = history[i] ? String(history[i].games2 ?? 0) : (history.length === i ? String(score.games2 ?? 0) : "--");
+        setsHtmlRow1.push(`<td class="set-tv-score">${g1}</td>`);
+        setsHtmlRow2.push(`<td class="set-tv-score">${g2}</td>`);
+      }
+
+      const server = score.server || data.server || "player1";
+      const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : '';
+      const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : '';
+
+      document.getElementById("tvGridPlacar").innerHTML = `
+        <table class="tabela-tv-placar">
+          <thead>
+            <tr>
+              <th class="th-jogador">Jogador</th>
+              ${setsHtmlHead.join("")}
+              <th class="th-pontos">Pontos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="linha-jogador-tv">
+              <td><div class="nome-tv-atleta">${ball1}<span>${name1.toUpperCase()}</span></div></td>
+              ${setsHtmlRow1.join("")}
+              <td class="pontos-tv-score">${viewPts1}</td>
+            </tr>
+            <tr class="linha-jogador-tv">
+              <td><div class="nome-tv-atleta">${ball2}<span>${name2.toUpperCase()}</span></div></td>
+              ${setsHtmlRow2.join("")}
+              <td class="pontos-tv-score">${viewPts2}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>
     }
 
     // 2. ESCUTA ATIVA DO RÁDIO LOCAL (IGNORA CONFLITOS DE CACHE E DISCO)
