@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, orientation=landscape" />
   <title>Transmissão Placar TV | TennisPro</title>
   
   <style>
@@ -12,7 +12,7 @@
       overscroll-behavior: none; 
     }
 
-    /* Tela de Boas-Vindas obrigatoria para Chrome e Safari Mobile */
+    /* Tela de Inicialização obrigatória para liberar a câmera traseira por toque no celular */
     #telaInicial {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: #0f172a; z-index: 99; display: flex; flex-direction: column;
@@ -24,10 +24,12 @@
       box-shadow: 0 10px 25px rgba(216,255,99,0.3); text-transform: uppercase;
     }
 
+    /* Vídeo em tela cheia deitado */
     #liveVideo {
       width: 100vw; height: 100vh; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; background: #000;
     }
 
+    /* Placar compacto fixado no Canto Inferior Esquerdo */
     .tv-overlay-container {
       position: absolute; bottom: 5vh; left: 4vw; z-index: 2; width: auto; height: auto; box-sizing: border-box;
     }
@@ -48,8 +50,8 @@
       border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       height: 42px; vertical-align: middle; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-    .linha-jogador-tv td:first-child { border-left: 1px solid rgba(255, 255, 255, 0.1); border-top-left-radius: 8px; border-bottom-left-radius: 8px; padding-left: 12px; }
-    .linha-jogador-tv td:last-child { border-right: 1px solid rgba(255, 255, 255, 0.1); border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    .linha-jogador-tv td:first-child { border-left: 1px solid rgba(15, 23, 42, 0.85); border-top-left-radius: 8px; border-bottom-left-radius: 8px; padding-left: 12px; }
+    .linha-jogador-tv td:last-child { border-right: 1px solid rgba(15, 23, 42, 0.85); border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 
     .nome-tv-atleta { color: #ffffff; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
     .serve-ball-tv { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d8ff63; box-shadow: 0 0 8px #d8ff63; flex-shrink: 0; }
@@ -59,51 +61,71 @@
 </head>
 <body>
 
-  <!-- Tela Interativa Inicial -->
+  <!-- Tela Interativa Inicial (Livre e destravada instantaneamente) -->
   <div id="telaInicial">
-    <button class="btn-iniciar-tv" onclick="desbloquearMidiaERadio()">Iniciar Transmissão</button>
+    <button class="btn-iniciar-tv" onclick="iniciarFluxoTransmissaoNativa()">Iniciar Transmissão</button>
   </div>
 
   <!-- Hardware de Vídeo -->
   <video id="liveVideo" autoplay playsinline muted loop></video>
 
-  <!-- Elemento de sobreposição do placar -->
   <main class="tv-overlay-container">
     <div class="placar-tv-box">
-      <div class="status-badge-tv" id="tvStatus">AGUARDANDO CONTROLE...</div>
+      <div class="status-badge-tv" id="tvStatus">AGUARDANDO SINAL...</div>
       <div id="tvGridPlacar"></div>
     </div>
   </main>
   <script>
-    // INSTANCIA O CANAL DE RÁDIO LOCAL IMUNE A TRAVAS DE REGRAS DO FIREBASE
+    // CRIA O RECEPTOR DE RÁDIO LOCAL COMUNICADOR ENTRE ABAS
     const canalTv = new BroadcastChannel("tennis_tv_channel");
+    let relogioBuscaDadosTv = null;
 
-    // 1. DISPARADOR VIA TOQUE (LIBERA A CÂMERA E ATIVA O RÁDIO SEM BLOQUEIOS)
-    async function desbloquearMidiaERadio() {
+    // 1. DISPARADOR DE TOQUE: LIGA A CÂMERA E ATIVA A BUSCA CONTÍNUA
+    async function iniciarFluxoTransmissaoNativa() {
       document.getElementById("telaInicial").style.display = "none";
       
-      // Ativa o hardware da câmera traseira do smartphone
+      // Ativa o hardware da câmera traseira deitado de forma limpa
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        const constraints = { video: { facingMode: "environment" }, audio: false };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         const video = document.getElementById('liveVideo');
-        if (video) video.srcObject = stream;
+        if (video) {
+          video.srcObject = stream;
+          video.play().catch(e => console.log("Erro autoplay:", e));
+        }
       } catch (error) {
-        console.warn("Aviso de hardware ou permissão negada:", error);
-        document.getElementById("tvStatus").innerText = "ERRO DE CÂMERA";
+        console.warn("Camera indisponivel:", error);
+        document.getElementById("tvStatus").innerText = "CÂMERA INDISPONÍVEL";
       }
 
-      // Pede ativamente o placar atual para o controlador principal (player.js)
-      canalTv.postMessage("PEDIR_PLACAR_ATUAL");
+      // CHAVE DA SINCRONIA: Fica chamando o painel de controle a cada 1 segundo 
+      // até que ele acorde e envie os nomes e pontos da partida criada
+      relogioBuscaDadosTv = setInterval(() => {
+        canalTv.postMessage("PEDIR_PLACAR_ATUAL");
+      }, 1000);
     }
 
-    // 2. MOTOR DE RECEBIMENTO E FORMATAÇÃO HORIZONTAL COMPACTA
-    function processarDadosPlacar(data) {
+    // 2. ESCUTA ATIVA DO RÁDIO LOCAL (IGNORA CONFLITOS DE CACHE E DISCO)
+    canalTv.onmessage = (event) => {
+      const payload = event.data;
+      if (payload && payload.score) {
+        // Se recebeu o placar real com sucesso, desliga o relógio de busca para economizar bateria
+        if (relogioBuscaDadosTv) {
+          clearInterval(relogioBuscaDadosTv);
+          relogioBuscaDadosTv = null;
+        }
+        renderizarPlacarHorizontalTv(payload);
+      }
+    };
+
+    // 3. RENDERIZADOR COMPACTO HORIZONTAL ESTILO TV DE ESPORTES
+    function renderizarPlacarHorizontalTv(data) {
       if (!data || !data.score) return;
       
       const score = data.score || {};
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
 
-      // Identifica o formato de sets configurado no jogo cadastrado
+      // Identifica o formato de sets configurado para desenhar as colunas certas
       const fmt = String(data.matchFormat || "").toLowerCase();
       const hasTwoSets = fmt.includes("2 sets");
       const hasThreeSets = fmt.includes("3 sets");
@@ -112,7 +134,7 @@
       if (hasTwoSets || hasThreeSets) qtdCols = 2;
       if (hasThreeSets) qtdCols = 3;
 
-      // Sincronização de nomes (Simples ou Duplas)
+      // Tratamento dinâmico de nomes para Simples ou Duplas
       const isDuplas = String(data.gameFormat || "").includes("Duplas");
       let name1 = String(data.player1 || "Jogador 1");
       let name2 = String(data.player2 || "Jogador 2");
@@ -121,7 +143,7 @@
         name2 = `${data.player3 || "Jogador 3"}/${data.player4 || "Jogador 4"}`;
       }
 
-      // Tradução da escala de pontos do tênis (00, 15, 30, 40, AD, Tie-break)
+      // Pontuação adaptável do tênis (00, 15, 30, 40, AD, Tie-break)
       const isTieBreakAtivo = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
       let viewPts1 = "00";
       let viewPts2 = "00";
@@ -147,7 +169,6 @@
         }
       }
 
-      // Desenha as colunas de sets dinamicamente baseadas no jogo ativo
       const setsHtmlHead = [];
       const setsHtmlRow1 = [];
       const setsHtmlRow2 = [];
@@ -160,7 +181,6 @@
         setsHtmlRow2.push(`<td class="set-tv-score">${g2}</td>`);
       }
 
-      // Indicador visual de saque (bolinha verde)
       const server = score.server || data.server || "player1";
       const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : '';
       const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : '';
@@ -189,14 +209,6 @@
         </table>
       `;
     }
-
-    // Escuta as transmissões de rádio locais enviadas pelo player.js
-    canalTv.onmessage = (event) => {
-      const payload = event.data;
-      if (payload && payload.score) {
-        processarDadosPlacar(payload);
-      }
-    };
   </script>
 </body>
 </html>
