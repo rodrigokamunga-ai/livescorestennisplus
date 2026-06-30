@@ -652,12 +652,20 @@
     // =========================================================================
     // FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO E TRANSMISSÃO TV
     // =========================================================================
-    function renderMatch(data) {
-      // Transmite as atualizacoes via radio local para a TV de forma segura
-      new BroadcastChannel("tennis_tv_channel").postMessage(data);
-
-      const score = normalizeScore(data.score);
-      const fmt = data.matchFormat || "";
+    
+      function renderMatch(data) {
+        // CORREÇÃO CIRÚRGICA: Utiliza a variável global 'id' do script para garantir 
+        // que o canal gravado em disco bata exatamente com o link aberto na TV
+        if (data && typeof id !== "undefined" && id) {
+          localStorage.setItem(`tennis_pro_match_data_${id}`, JSON.stringify(data));
+        }
+      
+        // Transmite as atualizacoes via radio local para a TV de forma segura
+        new BroadcastChannel("tennis_tv_channel").postMessage(data);
+      
+        const score = normalizeScore(data.score);
+        const fmt = data.matchFormat || "";
+      
 
       if (el.player1Name) el.player1Name.textContent = getTeam1Name(data);
       if (el.player2Name) el.player2Name.textContent = getTeam2Name(data);
