@@ -1,157 +1,272 @@
 // =========================================================================
-// MOTOR DE CARREGAMENTO SEGURO CONTRA CONFLITO DE FILAS (TENNISPRO TV)
+// TENNISPRO TV - PAINEL AO VIVO
+// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR
 // =========================================================================
+
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM totalmente carregado. Aguardando injeção do Firebase...");
-  
-    // Inicia um loop de verificação em background até a Google injetar a palavra 'firebase'
-    const checarFirebasePronto = setInterval(() => {
-      if (typeof firebase !== "undefined") {
-        clearInterval(checarFirebasePronto);
-        inicializarPlacarTelevisao();
+  console.log("DOM totalmente carregado. Aguardando Firebase...");
+
+  const checarFirebasePronto = setInterval(() => {
+    if (typeof firebase !== "undefined") {
+      clearInterval(checarFirebasePronto);
+      inicializarPlacarTelevisao();
+    }
+  }, 50);
+
+  function inicializarPlacarTelevisao() {
+    console.log("Firebase detectado! Inicializando painel ao vivo...");
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBngwZh3oErADZoTFG6AOqj6QLzwv1R6qY",
+      authDomain: "live-scores-tennis-plus.firebaseapp.com",
+      projectId: "live-scores-tennis-plus",
+      storageBucket: "live-scores-tennis-plus.firebasestorage.app",
+      messagingSenderId: "949079557619",
+      appId: "1:949079557619:web:d1715339815c28d971be86",
+      measurementId: "G-NDT9YVW4C6"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    window.__auth = firebase.auth();
+    window.__db = firebase.firestore();
+    window.firebaseAppReady = true;
+
+    const params = new URLSearchParams(window.location.search);
+    const matchId = (params.get("id") || "").trim();
+
+    const videoElement = document.getElementById("liveVideo");
+    const btnAbrirCamera = document.getElementById("btnAbrirCamera");
+    const cameraStatus = document.getElementById("cameraStatus");
+    const tvGridPlacar = document.getElementById("tvGridPlacar");
+    const tvStatus = document.getElementById("tvStatus");
+    const tvInfoBox = document.getElementById("tvInfoBox");
+
+    let localTimer = null;
+    let cameraStream = null;
+    let relayInterval = null;
+    let latestPayload = null;
+
+    // BroadcastChannel opcional
+    const canalTv = ("BroadcastChannel" in window) ? new BroadcastChannel("tennis_tv_channel") : null;
+
+    function setCameraStatus(msg = "") {
+      if (cameraStatus) cameraStatus.textContent = msg;
+    }
+
+    function setTvInfo(msg = "") {
+      if (tvInfoBox) tvInfoBox.textContent = msg;
+    }
+
+    function stopCamera() {
+      if (cameraStream && typeof cameraStream.getTracks === "function") {
+        cameraStream.getTracks().forEach((track) => track.stop());
       }
-    }, 50); // Testa a cada 50 milissegundos de forma silenciosa
-  
-    function inicializarPlacarTelevisao() {
-      console.log("Firebase detectado! Inicializando credenciais da quadra...");
-  
-      const firebaseConfig = {
-        apiKey: "AIzaSyBngwZh3oErADZoTFG6AOqj6QLzwv1R6qY",
-        authDomain: "://firebaseapp.com",
-        projectId: "live-scores-tennis-plus",
-        storageBucket: "live-scores-tennis-plus.firebasestorage.app",
-        messagingSenderId: "949079557619",
-        appId: "1:949079557619:web:d1715339815c28d971be86",
-        measurementId: "G-NDT9YVW4C6"
-      };
-  
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+      cameraStream = null;
+
+      if (videoElement) {
+        videoElement.srcObject = null;
       }
-  
-      // Vincula obrigatoriamente no objeto global do navegador
-      window.__auth = firebase.auth();
-      window.__db = firebase.firestore();
-      window.firebaseAppReady = true;
-  
-      const videoElement = document.getElementById('liveVideo');
-      const params = new URLSearchParams(window.location.search);
-      const matchId = params.get("id");
-  
-      let localTimer = null;
-      let liveStartedAtMs = null;
-  
-      // 1. INICIALIZA A CÂMERA TRASEIRA NO PLANO DE FUNDO
-      async function ligarCameraTraseira() {
+    }
+
+    function stopRelay() {
+      if (relayInterval) {
+        clearInterval(relayInterval);
+        relayInterval = null;
+      }
+    }
+
+    async function ligarCameraTraseira() {
+      try {
+        setCameraStatus("");
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("getUserMedia não suportado neste navegador.");
+        }
+
+        if (!videoElement) {
+          throw new Error("Elemento <video id='liveVideo'> não encontrado.");
+        }
+
+        stopCamera();
+
+        const preferredConstraints = {
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        };
+
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment", width: 1920, height: 1080 },
+          cameraStream = await navigator.mediaDevices.getUserMedia(preferredConstraints);
+        } catch (e1) {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
             audio: false
           });
-          if (videoElement) videoElement.srcObject = stream;
-        } catch (error) {
-          console.error("Erro ao acessar hardware da câmera traseira:", error);
         }
-      }
-      ligarCameraTraseira();
-  
-      // 2. FUNÇÕES DE TRATAMENTO DE REGRAS DE NEGÓCIO CLONADAS DO PUBLIC.JS
-      function getGameFormat(match) {
-        return String(match?.gameFormat || "Simples").trim();
-      }
-  
-      function isDoublesFormat(match) {
-        return getGameFormat(match) === "Duplas" || getGameFormat(match) === "Duplas Mistas";
-      }
-  
-      function renderPlayerNameTV(match, which) {
-        const doubles = isDoublesFormat(match);
-        if (!doubles) {
-          return which === 1
-            ? String(match.player1 || "Jogador 1").trim()
-            : String(match.player2 || "Jogador 2").trim();
+
+        videoElement.srcObject = cameraStream;
+        videoElement.muted = true;
+        videoElement.playsInline = true;
+        videoElement.setAttribute("autoplay", "");
+        videoElement.setAttribute("muted", "");
+        videoElement.setAttribute("playsinline", "");
+
+        try {
+          await videoElement.play();
+        } catch (playErr) {
+          console.log("Erro autoplay:", playErr);
         }
-        const p1 = which === 1 ? String(match.player1 || "Jogador 1").trim() : String(match.player3 || "Jogador 3").trim();
-        const p2 = which === 1 ? String(match.player2 || "Jogador 2").trim() : String(match.player4 || "Jogador 4").trim();
-        return `${p1}/${p2}`;
+
+        setCameraStatus("");
+        console.log("Câmera iniciada com sucesso.");
+      } catch (error) {
+        console.warn("Camera indisponivel:", error);
+
+        let msg = "CÂMERA INDISPONÍVEL";
+        if (error.name === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
+        else if (error.name === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
+        else if (error.name === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
+        else if (error.name === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
+        else if (error.name === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
+        else if (error.message) msg = error.message.toUpperCase();
+
+        if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
+        setCameraStatus(msg);
       }
-  
-      function durationText(ms) {
-        const s = Math.floor(ms / 1000);
-        const h = String(Math.floor(s / 3600)).padStart(2, "0");
-        const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-        const sec = String(s % 60).padStart(2, "0");
-        return `${h}:${m}:${sec}`;
+    }
+
+    async function iniciarFluxoTransmissaoNativa() {
+      const telaInicial = document.getElementById("telaInicial");
+      if (telaInicial) telaInicial.style.display = "none";
+
+      await ligarCameraTraseira();
+
+      // Se tiver uma partida aberta, já tenta requisitar
+      pedirPlacarAtual();
+    }
+
+    // expõe para uso externo, se necessário
+    window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
+
+    if (btnAbrirCamera) {
+      btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
+    }
+
+    window.addEventListener("beforeunload", () => {
+      stopCamera();
+      stopRelay();
+      if (canalTv) canalTv.close();
+    });
+
+    function getGameFormat(match) {
+      return String(match?.gameFormat || "Simples").trim();
+    }
+
+    function isDoublesFormat(match) {
+      const gf = getGameFormat(match);
+      return gf === "Duplas" || gf === "Duplas Mistas";
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderPlayerNameTV(match, which) {
+      const doubles = isDoublesFormat(match);
+
+      if (!doubles) {
+        return which === 1
+          ? String(match.player1 || "Jogador 1").trim()
+          : String(match.player2 || "Jogador 2").trim();
       }
-  
-      function mapStatus(status) {
-        switch (status) {
-          case "live": return "EM ANDAMENTO";
-          case "suspended": return "SUSPENSA";
-          case "finished": return "FINALIZADA";
-          case "wo": return "WO";
-          case "ret": return "RET";
-          default: return "NÃO INICIADA";
-        }
+
+      const p1 = which === 1
+        ? String(match.player1 || "Jogador 1").trim()
+        : String(match.player3 || "Jogador 3").trim();
+      const p2 = which === 1
+        ? String(match.player2 || "Jogador 2").trim()
+        : String(match.player4 || "Jogador 4").trim();
+
+      return `${p1}/${p2}`;
+    }
+
+    function durationText(ms) {
+      if (!ms || ms < 0) return "00:00:00";
+      const s = Math.floor(ms / 1000);
+      const h = String(Math.floor(s / 3600)).padStart(2, "0");
+      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+      const sec = String(s % 60).padStart(2, "0");
+      return `${h}:${m}:${sec}`;
+    }
+
+    function mapStatus(status) {
+      switch (String(status || "").toLowerCase()) {
+        case "live": return "EM ANDAMENTO";
+        case "suspended": return "SUSPENSA";
+        case "finished": return "FINALIZADA";
+        case "wo": return "WO";
+        case "ret": return "RET";
+        default: return "NÃO INICIADA";
       }
-  
-      function normalizeScoreLocal(score = {}) {
-        return {
-          points1: Number(score.points1 || 0),
-          points2: Number(score.points2 || 0),
-          games1: Number(score.games1 || 0),
-          games2: Number(score.games2 || 0),
-          sets1: Number(score.sets1 || 0),
-          sets2: Number(score.sets2 || 0),
-          tieBreakMode: score.tieBreakMode === "tb7" || score.tieBreakMode === "super10" ? score.tieBreakMode : null,
-          tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
-          tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
-          lastTieBreakMode: score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10" ? score.lastTieBreakMode : null,
-          lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-          lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
-          setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
-          server: score.server || "player1",
-          advantage: score.advantage || null
-        };
+    }
+
+    function normalizeScoreLocal(score = {}) {
+      return {
+        points1: Number(score.points1 || 0),
+        points2: Number(score.points2 || 0),
+        games1: Number(score.games1 || 0),
+        games2: Number(score.games2 || 0),
+        sets1: Number(score.sets1 || 0),
+        sets2: Number(score.sets2 || 0),
+        tieBreakMode: score.tieBreakMode === "tb7" || score.tieBreakMode === "super10" ? score.tieBreakMode : null,
+        tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
+        tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
+        lastTieBreakMode: score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10" ? score.lastTieBreakMode : null,
+        lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
+        lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+        setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
+        server: score.server || "player1",
+        advantage: score.advantage || null
+      };
+    }
+
+    function tennisPointLabelLocal(points) {
+      switch (Number(points || 0)) {
+        case 0: return "00";
+        case 1: return "15";
+        case 2: return "30";
+        case 3: return "40";
+        default: return "40";
       }
-  
-      function tennisPointLabelLocal(points) {
-        switch (Number(points || 0)) {
-          case 0: return "00";
-          case 1: return "15";
-          case 2: return "30";
-          case 3: return "40";
-          default: return "40";
-        }
+    }
+
+    function getPointDisplayTV(score, matchFormat, isFinished = false) {
+      if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+        return { p1: String(score.tieBreakPoints1 ?? 0), p2: String(score.tieBreakPoints2 ?? 0) };
       }
-  
-      function getPointDisplayTV(score, matchFormat, isFinished = false) {
-        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-          return { p1: String(score.tieBreakPoints1 ?? 0), p2: String(score.tieBreakPoints2 ?? 0) };
-        }
-        if (isFinished && (score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")) {
-          return { p1: String(score.lastTieBreakPoints1 ?? 0), p2: String(score.lastTieBreakPoints2 ?? 0) };
-        }
-        const fmt = String(matchFormat || "").toLowerCase();
-        const noAd = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
-        const hasAd = fmt.includes("com vantagem") || fmt.includes("3 sets");
-        const p1 = score.points1;
-        const p2 = score.points2;
-  
-        if (hasAd && !noAd) {
-          if (score.advantage === "player1") return { p1: "AD", p2: "40" };
-          if (score.advantage === "player2") return { p1: "40", p2: "AD" };
-          if (p1 >= 3 && p2 >= 3) {
-            if (p1 === p2) return { p1: "40", p2: "40" };
-            if (p1 > p2) return { p1: "AD", p2: "40" };
-            if (p2 > p1) return { p1: "40", p2: "AD" };
-          }
-          return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
-        }
-        if (noAd) {
-          if (p1 === 3 && p2 === 3) return { p1: "40", p2: "40" };
-          return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
-        }
+
+      if (isFinished && (score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")) {
+        return { p1: String(score.lastTieBreakPoints1 ?? 0), p2: String(score.lastTieBreakPoints2 ?? 0) };
+      }
+
+      const fmt = String(matchFormat || "").toLowerCase();
+      const noAd = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
+      const hasAd = fmt.includes("com vantagem") || fmt.includes("3 sets");
+      const p1 = score.points1;
+      const p2 = score.points2;
+
+      if (hasAd && !noAd) {
         if (score.advantage === "player1") return { p1: "AD", p2: "40" };
         if (score.advantage === "player2") return { p1: "40", p2: "AD" };
         if (p1 >= 3 && p2 >= 3) {
@@ -161,196 +276,266 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
       }
-  
-      function toDateLocal(value) {
-        if (!value) return null;
-        if (value.toDate && typeof value.toDate === "function") return value.toDate();
-        return new Date(value);
+
+      if (noAd) {
+        if (p1 === 3 && p2 === 3) return { p1: "40", p2: "40" };
+        return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
       }
-  
-      function buildDurationLocal(match) {
-        const accumulated = Number(match.accumulatedSeconds || 0);
-        if (match.status === "suspended") return durationText(accumulated * 1000);
-        if (match.status === "live") {
-          const started = toDateLocal(match.startedAt);
-          if (started && !isNaN(started.getTime())) {
-            const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
-            return durationText((accumulated + elapsed) * 1000);
-          }
-          return durationText(accumulated * 1000);
-        }
-        if (match.durationSeconds && Number(match.durationSeconds) > 0) return durationText(Number(match.durationSeconds) * 1000);
-        return "00:00:00";
+
+      if (score.advantage === "player1") return { p1: "AD", p2: "40" };
+      if (score.advantage === "player2") return { p1: "40", p2: "AD" };
+
+      if (p1 >= 3 && p2 >= 3) {
+        if (p1 === p2) return { p1: "40", p2: "40" };
+        if (p1 > p2) return { p1: "AD", p2: "40" };
+        if (p2 > p1) return { p1: "40", p2: "AD" };
       }
-  
-      function getSetColumnsLocal(match, score) {
-        const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-        function formatSet(setObj) {
-          if (!setObj) return { p1: "0", p2: "0" };
-          const g1 = Number(setObj.games1 ?? 0);
-          const g2 = Number(setObj.games2 ?? 0);
-          const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
-          const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
-          if (setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10") {
-            if (tb1 > 0 || tb2 > 0) return { p1: String(tb1 > tb2 ? 7 : 6), p2: String(tb1 > tb2 ? 6 : 7), tb1: tb1 > tb2 ? tb1 : 0, tb2: tb2 > tb1 ? tb2 : 0 };
-          }
-          return { p1: String(g1), p2: String(g2), tb1: 0, tb2: 0 };
-        }
-        const setsTratados = [];
-        for (let i = 0; i < 3; i++) {
-          if (history[i]) setsTratados.push(formatSet(history[i]));
-          else if (history.length === i) setsTratados.push({ p1: String(score.games1 ?? 0), p2: String(score.games2 ?? 0), tb1: 0, tb2: 0 });
-        }
-        return setsTratados;
+
+      return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
+    }
+
+    function toDateLocal(value) {
+      if (!value) return null;
+      if (value.toDate && typeof value.toDate === "function") return value.toDate();
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function buildDurationLocal(match) {
+      const accumulated = Number(match.accumulatedSeconds || 0);
+
+      if (match.status === "suspended") {
+        return durationText(accumulated * 1000);
       }
-    // 3. CANAL DE ESCUTA REATIVO EM TEMPO REAL NO FIRESTORE
-    const idTratado = String(matchId || "").trim();
 
-    if (idTratado && idTratado !== "null" && window.__db) {
-      console.log("Escuta síncrona iniciada para a partida ID:", idTratado);
+      if (match.status === "live") {
+        const started = toDateLocal(match.startedAt);
+        if (started && !isNaN(started.getTime())) {
+          const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
+          return durationText((accumulated + elapsed) * 1000);
+        }
+        return durationText(accumulated * 1000);
+      }
 
-      window.__db.collection("matches").doc(idTratado).onSnapshot((doc) => {
-        try {
-          if (!doc.exists) {
-            console.warn("Aviso: Documento não existe no Firestore para o ID:", idTratado);
-            return;
+      if (match.durationSeconds && Number(match.durationSeconds) > 0) {
+        return durationText(Number(match.durationSeconds) * 1000);
+      }
+
+      return "00:00:00";
+    }
+
+    function getSetColumnsLocal(match, score) {
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+
+      function formatSet(setObj) {
+        if (!setObj) return { p1: "0", p2: "0", tb1: 0, tb2: 0 };
+        const g1 = Number(setObj.games1 ?? 0);
+        const g2 = Number(setObj.games2 ?? 0);
+        const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
+        const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
+
+        if (setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10") {
+          if (tb1 > 0 || tb2 > 0) {
+            return {
+              p1: String(tb1 > tb2 ? 7 : 6),
+              p2: String(tb1 > tb2 ? 6 : 7),
+              tb1: tb1 > tb2 ? tb1 : 0,
+              tb2: tb2 > tb1 ? tb2 : 0
+            };
           }
+        }
 
-          const data = doc.data();
-          const score = normalizeScoreLocal(data.score || {});
-          const fmt = data.matchFormat || "";
+        return { p1: String(g1), p2: String(g2), tb1: 0, tb2: 0 };
+      }
 
-          // SINCRO DOS NOMES: Aplica a formatação do seu renderPlayerName
-          const elName1 = document.getElementById("tvName1");
-          const elName2 = document.getElementById("tvName2");
-          if (elName1) elName1.innerText = renderPlayerNameTV(data, 1).toUpperCase();
-          if (elName2) elName2.innerText = renderPlayerNameTV(data, 2).toUpperCase();
-
-          // Sincroniza os games do set atual
-          const elGame1 = document.getElementById("tvGame1");
-          const elGame2 = document.getElementById("tvGame2");
-          if (elGame1) elGame1.innerText = score.games1 ?? "0";
-          if (elGame2) elGame2.innerText = score.games2 ?? "0";
-
-          // Altera o rótulo do cabeçalho da transmissão (Status)
-          const labelStatus = document.getElementById("tvStatus");
-          const isTBActive = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
-          const isTBFinished = data.status === "finished" && !score.tieBreakMode && !!score.lastTieBreakMode;
-
-          if (labelStatus) {
-            if (score.tieBreakMode === "super10" && data.status === "live") labelStatus.innerText = "SUPER TIE-BREAK";
-            else if (score.tieBreakMode === "tb7" && data.status === "live") labelStatus.innerText = "TIE-BREAK";
-            else labelStatus.innerText = mapStatus(data.status);
-          }
-
-          // RESOLVE O PLACAR DE PONTOS TRADUZIDOS DA FUNÇÃO GETPOINTDISPLAYTV
-          const ptDisp = getPointDisplayTV(score, data.matchFormat, data.status === "finished");
-          
-          const elPoints1 = document.getElementById("tvPoints1");
-          const elPoints2 = document.getElementById("tvPoints2");
-          if (elPoints1) elPoints1.innerText = ptDisp.p1;
-          if (elPoints2) elPoints2.innerText = ptDisp.p2;
-
-          // Controle de tempo reativo da Transmissão (buildDurationLocal)
-          const durationEl = document.getElementById("tvDuration");
-          if (durationEl) {
-            clearInterval(localTimer);
-            localTimer = null;
-
-            if (data.status === "live") {
-              const updateClock = () => {
-                if (durationEl) durationEl.textContent = buildDurationLocal(data);
-              };
-              updateClock();
-              localTimer = setInterval(updateClock, 1000);
-            } else {
-              durationEl.textContent = buildDurationLocal(data);
-            }
-          }
-
-          // Sincronização do Indicador de Saque (//)
-          const sacadorAtual = score.server || data.server || "player1";
-          const elServe1 = document.getElementById("tvServe1");
-          const elServe2 = document.getElementById("tvServe2");
-          if (elServe1) elServe1.innerText = sacadorAtual === "player1" ? "//" : "";
-          if (elServe2) elServe2.innerText = sacadorAtual === "player2" ? "//" : "";
-
-          // PROCESSAMENTO DOS SETS ANTERIORES BASEADOS NO SEU ARRANJO DE HISTÓRICO
-          for (let i = 0; i < 3; i++) {
-            const box1 = document.getElementById(`tvSet1_${i}`);
-            const box2 = document.getElementById(`tvSet2_${i}`);
-            if (box1) box1.style.display = "none";
-            if (box2) box2.style.display = "none";
-          }
-
-          const historicoSets = getSetColumnsLocal(data, score);
-
-          historicoSets.forEach((setObj, index) => {
-            if (index < 3) {
-              const elBox1 = document.getElementById(`tvSet1_${index}`);
-              const elBox2 = document.getElementById(`tvSet2_${index}`);
-
-              if (elBox1 && elBox2) {
-                const nSet1 = elBox1.querySelector(".nSet");
-                const nSet2 = elBox2.querySelector(".nSet");
-                const nTB1 = elBox1.querySelector(".nTB");
-                const nTB2 = elBox2.querySelector(".nTB");
-
-                if (nSet1) nSet1.innerText = setObj.p1;
-                if (nSet2) nSet2.innerText = setObj.p2;
-
-                if (nTB1) nTB1.innerText = setObj.tb1 > 0 ? String(setObj.tb1) : "";
-                if (nTB2) nTB2.innerText = setObj.tb2 > 0 ? String(setObj.tb2) : "";
-
-                elBox1.style.display = "table-cell";
-                elBox2.style.display = "table-cell";
-              }
-            }
+      const setsTratados = [];
+      for (let i = 0; i < 3; i++) {
+        if (history[i]) {
+          setsTratados.push(formatSet(history[i]));
+        } else if (history.length === i) {
+          setsTratados.push({
+            p1: String(score.games1 ?? 0),
+            p2: String(score.games2 ?? 0),
+            tb1: 0,
+            tb2: 0
           });
-
-          // 4. LOGICA DE ALERTA DE BREAK POINT / PONTO DECISIVO (NO-AD)
-          const badgeAlerta = document.getElementById("badgeAlerta");
-          if (badgeAlerta) {
-            const fmtTexto = String(data.matchFormat || "").toLowerCase();
-            const isNoAd = fmtTexto.includes("sem vantagem") || fmtTexto.includes("no ad") || fmtTexto.includes("no-ad");
-            const hasAd = fmtTexto.includes("com vantagem") || fmtTexto.includes("3 sets");
-            
-            const sp = sacadorAtual === "player1" ? score.points1 : score.points2;
-            const rp = sacadorAtual === "player1" ? score.points2 : score.points1;
-
-            let exibeAlerta = false;
-            let textoAlerta = "BREAK POINT";
-
-            if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-              exibeAlerta = false;
-            } else if (isNoAd && score.points1 === 3 && score.points2 === 3) {
-              exibeAlerta = true;
-              textoAlerta = "PONTO DECISIVO";
-            } else if (hasAd && !isNoAd && ((sacadorAtual === "player1" && score.advantage === "player2") || (sacadorAtual === "player2" && score.advantage === "player1"))) {
-              exibeAlerta = true;
-            } else if (rp === 3 && sp < 3) {
-              exibeAlerta = true;
-            }
-
-            if (exibeAlerta) {
-              badgeAlerta.innerText = score.tieBreakMode ? "MINI-BREAK" : textoAlerta;
-              badgeAlerta.style.display = "block";
-            } else {
-              badgeAlerta.style.display = "none";
-          }
         }
-      } catch (innerError) {
-        console.error("Erro interno ao renderizar os dados do snapshot:", innerError);
       }
 
-    }, (error) => {
-      console.error("Erro crítico na escuta real do Firestore Ao Vivo:", error);
+      return setsTratados;
+    }
+
+    function renderPlacar(data) {
+      if (!data || !data.score || !tvGridPlacar) return;
+
+      const score = normalizeScoreLocal(data.score || {});
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+
+      const fmt = String(data.matchFormat || "").toLowerCase();
+      const hasTwoSets = fmt.includes("2 sets");
+      const hasThreeSets = fmt.includes("3 sets");
+
+      let qtdCols = 1;
+      if (hasTwoSets || hasThreeSets) qtdCols = 2;
+      if (hasThreeSets) qtdCols = 3;
+
+      const isDuplas = String(data.gameFormat || "").includes("Duplas");
+      let name1 = String(data.player1 || "Jogador 1");
+      let name2 = String(data.player2 || "Jogador 2");
+
+      if (isDuplas) {
+        name1 = `${data.player1 || "Jogador 1"}/${data.player2 || "Jogador 2"}`;
+        name2 = `${data.player3 || "Jogador 3"}/${data.player4 || "Jogador 4"}`;
+      }
+
+      const isTieBreakAtivo = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
+      let viewPts1 = "00";
+      let viewPts2 = "00";
+
+      if (isTieBreakAtivo) {
+        viewPts1 = String(score.tieBreakPoints1 ?? 0);
+        viewPts2 = String(score.tieBreakPoints2 ?? 0);
+        if (tvStatus) {
+          tvStatus.innerText = score.tieBreakMode === "super10" ? "SUPER TIE-BREAK" : "TIE-BREAK";
+        }
+      } else {
+        if (tvStatus) {
+          if (data.status === "live") tvStatus.innerText = "EM ANDAMENTO";
+          else if (data.status === "suspended") tvStatus.innerText = "SUSPENSA";
+          else if (data.status === "finished") tvStatus.innerText = "FINALIZADA";
+          else tvStatus.innerText = "NÃO INICIADA";
+        }
+
+        const deparaTenis = { "0": "00", "1": "15", "2": "30", "3": "40" };
+
+        if (score.advantage === "player1") {
+          viewPts1 = "AD";
+          viewPts2 = "40";
+        } else if (score.advantage === "player2") {
+          viewPts1 = "40";
+          viewPts2 = "AD";
+        } else {
+          viewPts1 = deparaTenis[String(score.points1 ?? 0)] || "00";
+          viewPts2 = deparaTenis[String(score.points2 ?? 0)] || "00";
+        }
+      }
+
+      const setsHtmlHead = [];
+      const setsHtmlRow1 = [];
+      const setsHtmlRow2 = [];
+
+      for (let i = 0; i < qtdCols; i++) {
+        setsHtmlHead.push(`<th class="th-set">${i + 1}º SET</th>`);
+
+        const g1 = history[i]
+          ? String(history[i].games1 ?? 0)
+          : (history.length === i ? String(score.games1 ?? 0) : "--");
+
+        const g2 = history[i]
+          ? String(history[i].games2 ?? 0)
+          : (history.length === i ? String(score.games2 ?? 0) : "--");
+
+        setsHtmlRow1.push(`<td class="set-tv-score">${g1}</td>`);
+        setsHtmlRow2.push(`<td class="set-tv-score">${g2}</td>`);
+      }
+
+      const server = score.server || data.server || "player1";
+      const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : '';
+      const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : '';
+
+      tvGridPlacar.innerHTML = ` <table class="tabela-tv-placar"> <thead> <tr> <th class="th-jogador">Jogador</th> ${setsHtmlHead.join("")} <th class="th-pontos">Pontos</th> </tr> </thead> <tbody> <tr class="linha-jogador-tv"> <td> <div class="nome-tv-atleta">${ball1}<span>${escapeHtml(name1.toUpperCase())}</span></div> </td> ${setsHtmlRow1.join("")} <td class="pontos-tv-score">${viewPts1}</td> </tr> <tr class="linha-jogador-tv"> <td> <div class="nome-tv-atleta">${ball2}<span>${escapeHtml(name2.toUpperCase())}</span></div> </td> ${setsHtmlRow2.join("")} <td class="pontos-tv-score">${viewPts2}</td> </tr> </tbody> </table> `;
+
+      setTvInfo(
+        data.court
+          ? `Quadra: ${data.court}`
+          : (data.tournamentStage ? `Fase: ${data.tournamentStage}` : "")
+      );
+    }
+
+    function processPayload(payload) {
+      if (!payload) return;
+
+      // aceitamos payload direto da partida
+      if (payload.score) {
+        latestPayload = payload;
+        stopRelay();
+        renderPlacar(payload);
+        return;
+      }
+
+      // também aceitamos mensagens do tipo {type:'matchUpdate', match:{...}}
+      if (payload.type === "matchUpdate" && payload.match && payload.match.score) {
+        latestPayload = payload.match;
+        stopRelay();
+        renderPlacar(payload.match);
+        return;
+      }
+    }
+
+    function pedirPlacarAtual() {
+      // pede pela BroadcastChannel
+      if (canalTv) {
+        canalTv.postMessage("PEDIR_PLACAR_ATUAL");
+      }
+
+      // e também avisa a janela/opener, se houver
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: "PEDIR_PLACAR_ATUAL" }, "*");
+      }
+
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: "PEDIR_PLACAR_ATUAL" }, "*");
+      }
+    }
+
+    // Ouvindo BroadcastChannel
+    if (canalTv) {
+      canalTv.onmessage = (event) => {
+        processPayload(event.data);
+      };
+    }
+
+    // Ouvindo postMessage da aba pública / janela pai
+    window.addEventListener("message", (event) => {
+      processPayload(event.data);
     });
-  } else {
-    const labelStatus = document.getElementById("tvStatus");
-    if (labelStatus) labelStatus.innerText = "SEM ID DE PARTIDA";
-    console.error("Erro fatal: Parâmetro 'id' ou instância global 'window.__db' não foram encontrados.");
+
+    // Firestore: se houver id na URL, também tenta buscar diretamente
+    if (matchId && matchId !== "null" && window.__db) {
+      console.log("Escuta Firestore iniciada para a partida ID:", matchId);
+
+      window.__db.collection("matches").doc(matchId).onSnapshot(
+        (doc) => {
+          try {
+            if (!doc.exists) {
+              console.warn("Documento não existe no Firestore para o ID:", matchId);
+              return;
+            }
+
+            const data = { id: doc.id, ...doc.data() };
+            latestPayload = data;
+            renderPlacar(data);
+          } catch (innerError) {
+            console.error("Erro interno ao renderizar snapshot:", innerError);
+          }
+        },
+        (error) => {
+          console.error("Erro crítico na escuta real do Firestore Ao Vivo:", error);
+        }
+      );
+    } else {
+      if (tvStatus) tvStatus.innerText = "SEM ID DE PARTIDA";
+      console.warn("Sem parâmetro id. A TV vai aguardar mensagens da aba pública.");
+    }
+
+    // Loop de solicitação de dados enquanto não chega nada
+    relayInterval = setInterval(() => {
+      if (!latestPayload) {
+        pedirPlacarAtual();
+      }
+    }, 1000);
+
+    // tenta iniciar a câmera automaticamente só se o usuário já interagiu;
+    // caso contrário, o botão resolverá isso.
   }
-} // FIM DA FUNÇÃO INICIALIZARPLACARTELEVISAO
-}); // FIM DO DOMCONTENTLOADED
-  
+});
