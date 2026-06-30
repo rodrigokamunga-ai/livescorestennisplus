@@ -1,6 +1,6 @@
 // =========================================================================
 // TENNISPRO TV - PAINEL AO VIVO
-// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR
+// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR + DEBUG NA TELA
 // =========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -49,15 +49,55 @@ document.addEventListener("DOMContentLoaded", () => {
     let relayInterval = null;
     let latestPayload = null;
 
-    // BroadcastChannel opcional
-    const canalTv = ("BroadcastChannel" in window) ? new BroadcastChannel("tennis_tv_channel") : null;
+    const canalTv = ("BroadcastChannel" in window)
+      ? new BroadcastChannel("tennis_tv_channel")
+      : null;
+
+    // ---------------------------------------------------------------------
+    // DEBUG NA TELA
+    // ---------------------------------------------------------------------
+    function appendDebug(msg, isError = false) {
+      const time = new Date().toLocaleTimeString("pt-BR");
+      const text = `[${time}] ${msg}`;
+
+      console.log(text);
+
+      if (cameraStatus) {
+        cameraStatus.innerHTML = ` <div style="font-size:13px; line-height:1.4; color:${isError ? '#ffb4b4' : '#fff'}; white-space:pre-wrap;"> ${escapeHtml(text)} </div> `;
+      }
+    }
+
+    function showDebugLines(lines = []) {
+      if (!cameraStatus) return;
+
+      cameraStatus.innerHTML = lines.map((line, idx) => {
+        const color = line.type === "error"
+          ? "#ffb4b4"
+          : line.type === "warn"
+            ? "#ffd37a"
+            : "#ffffff";
+
+        return `<div style="font-size:13px; line-height:1.45; color:${color}; white-space:pre-wrap; margin-bottom:${idx < lines.length - 1 ? '4px' : '0'};"> ${escapeHtml(line.text)} </div>`;
+      }).join("");
+    }
 
     function setCameraStatus(msg = "") {
-      if (cameraStatus) cameraStatus.textContent = msg;
+      if (cameraStatus) {
+        cameraStatus.textContent = msg;
+      }
     }
 
     function setTvInfo(msg = "") {
       if (tvInfoBox) tvInfoBox.textContent = msg;
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function stopCamera() {
@@ -80,7 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function ligarCameraTraseira() {
       try {
-        setCameraStatus("");
+        showDebugLines([
+          { type: "info", text: "Tentando iniciar câmera..." },
+          { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
+          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` }
+        ]);
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("getUserMedia não suportado neste navegador.");
@@ -92,41 +136,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
         stopCamera();
 
-        const preferredConstraints = {
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: false
-        };
+        let stream = null;
+        let firstError = null;
 
         try {
-          cameraStream = await navigator.mediaDevices.getUserMedia(preferredConstraints);
-        } catch (e1) {
-          cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: true,
+          appendDebug("Tentando câmera traseira com facingMode environment...");
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
             audio: false
           });
+        } catch (e1) {
+          firstError = e1;
+          appendDebug(`Falhou o primeiro teste: ${e1.name || "Erro"} - ${e1.message || e1}`, true);
+
+          try {
+            appendDebug("Tentando fallback com video: true...");
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false
+            });
+          } catch (e2) {
+            appendDebug(`Falhou o fallback: ${e2.name || "Erro"} - ${e2.message || e2}`, true);
+            throw e2;
+          }
         }
 
-        videoElement.srcObject = cameraStream;
-        videoElement.muted = true;
-        videoElement.playsInline = true;
-        videoElement.setAttribute("autoplay", "");
-        videoElement.setAttribute("muted", "");
-        videoElement.setAttribute("playsinline", "");
+        cameraStream = stream;
 
-        try {
-          await videoElement.play();
-        } catch (playErr) {
-          console.log("Erro autoplay:", playErr);
+        const tracks = stream.getTracks ? stream.getTracks() : [];
+        appendDebug(`Câmera iniciada. Tracks: ${tracks.length}`);
+
+        if (videoElement) {
+          videoElement.srcObject = stream;
+          videoElement.muted = true;
+          videoElement.playsInline = true;
+          videoElement.setAttribute("autoplay", "");
+          videoElement.setAttribute("muted", "");
+          videoElement.setAttribute("playsinline", "");
+
+          try {
+            await videoElement.play();
+            appendDebug("play() executado com sucesso.");
+          } catch (playErr) {
+            appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
+          }
         }
 
         setCameraStatus("");
-        console.log("Câmera iniciada com sucesso.");
+        appendDebug("Câmera iniciada com sucesso.");
       } catch (error) {
-        console.warn("Camera indisponivel:", error);
+        console.error("Erro ao acessar a câmera traseira:", error);
 
         let msg = "CÂMERA INDISPONÍVEL";
         if (error.name === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
@@ -137,7 +200,13 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (error.message) msg = error.message.toUpperCase();
 
         if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
-        setCameraStatus(msg);
+
+        showDebugLines([
+          { type: "error", text: "Falha ao iniciar a câmera." },
+          { type: "error", text: `Erro: ${error.name || "Sem nome"} - ${error.message || error}` },
+          { type: "warn", text: `Mensagem exibida: ${msg}` },
+          { type: "info", text: "Dica: teste no Chrome, permita a câmera e confirme que a página não está em iframe sem allow=camera." }
+        ]);
       }
     }
 
@@ -145,13 +214,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const telaInicial = document.getElementById("telaInicial");
       if (telaInicial) telaInicial.style.display = "none";
 
+      appendDebug("Botão pressionado. Iniciando fluxo...");
       await ligarCameraTraseira();
 
-      // Se tiver uma partida aberta, já tenta requisitar
       pedirPlacarAtual();
     }
 
-    // expõe para uso externo, se necessário
     window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
 
     if (btnAbrirCamera) {
@@ -164,6 +232,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (canalTv) canalTv.close();
     });
 
+    // ---------------------------------------------------------------------
+    // REGRAS E UTILITÁRIOS DO PLACAR
+    // ---------------------------------------------------------------------
     function getGameFormat(match) {
       return String(match?.gameFormat || "Simples").trim();
     }
@@ -171,15 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function isDoublesFormat(match) {
       const gf = getGameFormat(match);
       return gf === "Duplas" || gf === "Duplas Mistas";
-    }
-
-    function escapeHtml(str = "") {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
     }
 
     function renderPlayerNameTV(match, which) {
@@ -365,6 +427,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return setsTratados;
     }
 
+    // ---------------------------------------------------------------------
+    // PLACAR
+    // ---------------------------------------------------------------------
     function renderPlacar(data) {
       if (!data || !data.score || !tvGridPlacar) return;
 
@@ -455,7 +520,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function processPayload(payload) {
       if (!payload) return;
 
-      // aceitamos payload direto da partida
       if (payload.score) {
         latestPayload = payload;
         stopRelay();
@@ -463,7 +527,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // também aceitamos mensagens do tipo {type:'matchUpdate', match:{...}}
       if (payload.type === "matchUpdate" && payload.match && payload.match.score) {
         latestPayload = payload.match;
         stopRelay();
@@ -473,12 +536,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function pedirPlacarAtual() {
-      // pede pela BroadcastChannel
       if (canalTv) {
         canalTv.postMessage("PEDIR_PLACAR_ATUAL");
       }
 
-      // e também avisa a janela/opener, se houver
       if (window.opener && !window.opener.closed) {
         window.opener.postMessage({ type: "PEDIR_PLACAR_ATUAL" }, "*");
       }
@@ -488,27 +549,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Ouvindo BroadcastChannel
     if (canalTv) {
       canalTv.onmessage = (event) => {
         processPayload(event.data);
       };
     }
 
-    // Ouvindo postMessage da aba pública / janela pai
     window.addEventListener("message", (event) => {
       processPayload(event.data);
     });
 
-    // Firestore: se houver id na URL, também tenta buscar diretamente
     if (matchId && matchId !== "null" && window.__db) {
-      console.log("Escuta Firestore iniciada para a partida ID:", matchId);
+      appendDebug(`Escuta Firestore iniciada para ID: ${matchId}`);
 
       window.__db.collection("matches").doc(matchId).onSnapshot(
         (doc) => {
           try {
             if (!doc.exists) {
-              console.warn("Documento não existe no Firestore para o ID:", matchId);
+              appendDebug(`Documento não existe no Firestore para o ID: ${matchId}`, true);
               return;
             }
 
@@ -516,26 +574,22 @@ document.addEventListener("DOMContentLoaded", () => {
             latestPayload = data;
             renderPlacar(data);
           } catch (innerError) {
-            console.error("Erro interno ao renderizar snapshot:", innerError);
+            appendDebug(`Erro interno ao renderizar snapshot: ${innerError.message || innerError}`, true);
           }
         },
         (error) => {
-          console.error("Erro crítico na escuta real do Firestore Ao Vivo:", error);
+          appendDebug(`Erro crítico no Firestore: ${error.name || "Erro"} - ${error.message || error}`, true);
         }
       );
     } else {
       if (tvStatus) tvStatus.innerText = "SEM ID DE PARTIDA";
-      console.warn("Sem parâmetro id. A TV vai aguardar mensagens da aba pública.");
+      appendDebug("Sem parâmetro id. A TV vai aguardar mensagens da aba pública.");
     }
 
-    // Loop de solicitação de dados enquanto não chega nada
     relayInterval = setInterval(() => {
       if (!latestPayload) {
         pedirPlacarAtual();
       }
     }, 1000);
-
-    // tenta iniciar a câmera automaticamente só se o usuário já interagiu;
-    // caso contrário, o botão resolverá isso.
   }
 });
