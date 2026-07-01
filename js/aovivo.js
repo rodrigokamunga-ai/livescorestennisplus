@@ -39,7 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const videoElement = document.getElementById("liveVideo");
     const btnAbrirCamera = document.getElementById("btnAbrirCamera");
+    const btnTentarNovamente = document.getElementById("btnTentarNovamente");
     const cameraStatus = document.getElementById("cameraStatus");
+    const cameraDebug = document.getElementById("cameraDebug");
+    const cameraHint = document.getElementById("cameraHint");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
@@ -65,32 +68,50 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/'/g, "&#039;");
     }
 
+    function clearDebug() {
+      if (cameraStatus) cameraStatus.innerHTML = "";
+      if (cameraDebug) cameraDebug.innerHTML = "";
+    }
+
     function appendDebug(msg, isError = false) {
       const time = new Date().toLocaleTimeString("pt-BR");
       const text = `[${time}] ${msg}`;
       console.log(text);
 
+      const lineHtml = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap; margin-top:4px;"> ${escapeHtml(text)} </div> `;
+
       if (cameraStatus) {
-        cameraStatus.innerHTML = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap;"> ${escapeHtml(text)} </div> `;
+        cameraStatus.innerHTML = (cameraStatus.innerHTML || "") + lineHtml;
+      }
+
+      if (cameraDebug) {
+        cameraDebug.innerHTML = (cameraDebug.innerHTML || "") + lineHtml;
       }
     }
 
     function showDebugLines(lines = []) {
-      if (!cameraStatus) return;
-
-      cameraStatus.innerHTML = lines.map((line, idx) => {
-        const color = line.type === "error"
-          ? "#ffb4b4"
-          : line.type === "warn"
-            ? "#ffd37a"
-            : "#ffffff";
-
-        return `<div style="font-size:13px; line-height:1.45; color:${color}; white-space:pre-wrap; margin-bottom:${idx < lines.length - 1 ? "4px" : "0"};"> ${escapeHtml(line.text)} </div>`;
-      }).join("");
+      clearDebug();
+      lines.forEach((line) => appendDebug(line.text, line.type === "error"));
     }
 
     function setTvInfo(msg = "") {
       if (tvInfoBox) tvInfoBox.textContent = msg;
+    }
+
+    function setCameraHint(msg = "") {
+      if (cameraHint) cameraHint.textContent = msg;
+    }
+
+    function showPermissionHelp() {
+      setCameraHint(
+        "Permissão da câmera negada no Android. Toque no cadeado na barra do navegador > Permissões > Câmera > Permitir e tente novamente."
+      );
+      if (btnTentarNovamente) btnTentarNovamente.style.display = "inline-block";
+    }
+
+    function hidePermissionHelp() {
+      setCameraHint("");
+      if (btnTentarNovamente) btnTentarNovamente.style.display = "none";
     }
 
     // ---------------------------------------------------------------------
@@ -114,6 +135,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    async function tentarBloquearPaisagem() {
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape");
+          appendDebug("Orientação travada em paisagem com sucesso.");
+        }
+      } catch (e) {
+        appendDebug(`Não foi possível travar paisagem: ${e.message || e}`, true);
+      }
+    }
+
     async function ligarCameraTraseira() {
       try {
         showDebugLines([
@@ -124,19 +156,19 @@ document.addEventListener("DOMContentLoaded", () => {
           { type: "info", text: `protocol: ${window.location.protocol}` },
           { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
         ]);
-    
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("getUserMedia não suportado neste navegador.");
         }
-    
+
         if (!videoElement) {
           throw new Error("Elemento <video id='liveVideo'> não encontrado.");
         }
-    
+
         stopCamera();
-    
+
         let stream = null;
-    
+
         // 1) PRIMEIRA TENTATIVA: câmera traseira explícita
         try {
           appendDebug("Tentando câmera traseira com facingMode exact environment...");
@@ -151,28 +183,27 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e1) {
           appendDebug(`Falhou exact environment -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
         }
-    
+
         // 2) SEGUNDA TENTATIVA: listar dispositivos e procurar traseira
         if (!stream) {
           try {
             appendDebug("Tentando listar dispositivos de vídeo...");
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter((d) => d.kind === "videoinput");
-    
+
             appendDebug(`Câmeras encontradas: ${videoDevices.length}`);
-    
+
             if (!videoDevices.length) {
               throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
             }
-    
-            // prioriza labels típicos de traseira
+
             const backCamera =
               videoDevices.find((d) =>
                 /back|rear|environment|traseira|câmera traseira/i.test(d.label || "")
               ) || videoDevices[videoDevices.length - 1];
-    
+
             appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
-    
+
             stream = await navigator.mediaDevices.getUserMedia({
               video: {
                 deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
@@ -185,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
           }
         }
-    
+
         // 3) TERCEIRA TENTATIVA: environment ideal
         if (!stream) {
           try {
@@ -202,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Falhou ideal environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
           }
         }
-    
+
         // 4) ÚLTIMO FALLBACK: qualquer câmera
         if (!stream) {
           try {
@@ -216,12 +247,12 @@ document.addEventListener("DOMContentLoaded", () => {
             throw e4;
           }
         }
-    
+
         cameraStream = stream;
-    
+
         const tracks = stream.getTracks ? stream.getTracks() : [];
         appendDebug(`Câmera iniciada. Tracks: ${tracks.length}`);
-    
+
         if (videoElement) {
           videoElement.srcObject = stream;
           videoElement.muted = true;
@@ -229,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
           videoElement.setAttribute("autoplay", "");
           videoElement.setAttribute("muted", "");
           videoElement.setAttribute("playsinline", "");
-    
+
           try {
             await videoElement.play();
             appendDebug("play() executado com sucesso.");
@@ -237,15 +268,15 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
           }
         }
-    
+
         appendDebug("Câmera iniciada com sucesso.");
         return true;
       } catch (error) {
         console.error("Erro ao acessar a câmera:", error);
-    
+
         const nomeErro = error?.name || "Sem nome";
         const mensagemErro = error?.message || String(error);
-    
+
         let msg = "CÂMERA INDISPONÍVEL";
         if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
         else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
@@ -253,9 +284,9 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
         else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
         else if (mensagemErro) msg = mensagemErro.toUpperCase();
-    
+
         if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
-    
+
         showDebugLines([
           { type: "error", text: "Falha ao iniciar a câmera." },
           { type: "error", text: `Nome do erro: ${nomeErro}` },
@@ -276,13 +307,19 @@ document.addEventListener("DOMContentLoaded", () => {
               )
           }
         ]);
-    
+
+        if (nomeErro === "NotAllowedError") {
+          showPermissionHelp();
+        }
+
         return false;
       }
     }
 
     async function iniciarFluxoTransmissaoNativa() {
       appendDebug("Botão pressionado. Iniciando fluxo...");
+
+      await tentarBloquearPaisagem();
 
       const sucesso = await ligarCameraTraseira();
 
@@ -292,13 +329,24 @@ document.addEventListener("DOMContentLoaded", () => {
         pedirPlacarAtual();
       } else {
         appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
+        appendDebug("Verifique as linhas acima para ver o erro real.", false);
       }
     }
 
+    function tentarNovamente() {
+      appendDebug("Usuário tocou em 'Tentar novamente'.");
+      iniciarFluxoTransmissaoNativa();
+    }
+
     window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
+    window.tentarNovamenteCamera = tentarNovamente;
 
     if (btnAbrirCamera) {
       btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
+    }
+
+    if (btnTentarNovamente) {
+      btnTentarNovamente.addEventListener("click", tentarNovamente);
     }
 
     window.addEventListener("beforeunload", () => {
