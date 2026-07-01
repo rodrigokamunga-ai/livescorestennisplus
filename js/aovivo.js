@@ -1,6 +1,6 @@
 // =========================================================================
 // TENNISPRO TV - PAINEL AO VIVO
-// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR + DEBUG NA TELA
+// CÂMERA + FIRESTORE + PLACAR + DEBUG NA TELA
 // =========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -53,9 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ? new BroadcastChannel("tennis_tv_channel")
       : null;
 
-    // ---------------------------------------------------------------------
-    // DEBUG NA TELA
-    // ---------------------------------------------------------------------
     function escapeHtml(str = "") {
       return String(str)
         .replace(/&/g, "&amp;")
@@ -93,9 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (tvInfoBox) tvInfoBox.textContent = msg;
     }
 
-    // ---------------------------------------------------------------------
-    // CÂMERA
-    // ---------------------------------------------------------------------
     function stopCamera() {
       if (cameraStream && typeof cameraStream.getTracks === "function") {
         cameraStream.getTracks().forEach((track) => track.stop());
@@ -119,7 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
         showDebugLines([
           { type: "info", text: "Tentando iniciar câmera..." },
           { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
-          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` }
+          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` },
+          { type: "info", text: `userAgent: ${navigator.userAgent}` },
+          { type: "info", text: `protocol: ${window.location.protocol}` },
+          { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
         ]);
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -134,27 +131,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let stream = null;
 
+        // 1) TESTE PRINCIPAL: video: true
         try {
-          appendDebug("Tentando câmera traseira com facingMode environment...");
+          appendDebug("Tentando câmera com video: true...");
           stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            },
+            video: true,
             audio: false
           });
         } catch (e1) {
-          appendDebug(`Falhou o primeiro teste: ${e1.name || "Erro"} - ${e1.message || e1}`, true);
+          appendDebug(`Falhou video:true -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
 
+          // 2) FALLBACK: câmera traseira
           try {
-            appendDebug("Tentando fallback com video: true...");
+            appendDebug("Tentando fallback com facingMode environment...");
             stream = await navigator.mediaDevices.getUserMedia({
-              video: true,
+              video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
               audio: false
             });
           } catch (e2) {
-            appendDebug(`Falhou o fallback: ${e2.name || "Erro"} - ${e2.message || e2}`, true);
+            appendDebug(`Falhou environment -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
             throw e2;
           }
         }
@@ -183,23 +182,40 @@ document.addEventListener("DOMContentLoaded", () => {
         appendDebug("Câmera iniciada com sucesso.");
         return true;
       } catch (error) {
-        console.error("Erro ao acessar a câmera traseira:", error);
+        console.error("Erro ao acessar a câmera:", error);
+
+        const nomeErro = error?.name || "Sem nome";
+        const mensagemErro = error?.message || String(error);
 
         let msg = "CÂMERA INDISPONÍVEL";
-        if (error.name === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
-        else if (error.name === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
-        else if (error.name === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
-        else if (error.name === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
-        else if (error.name === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
-        else if (error.message) msg = error.message.toUpperCase();
+        if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
+        else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
+        else if (nomeErro === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
+        else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
+        else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
+        else if (mensagemErro) msg = mensagemErro.toUpperCase();
 
         if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
 
         showDebugLines([
           { type: "error", text: "Falha ao iniciar a câmera." },
-          { type: "error", text: `Erro: ${error.name || "Sem nome"} - ${error.message || error}` },
+          { type: "error", text: `Nome do erro: ${nomeErro}` },
+          { type: "error", text: `Mensagem do erro: ${mensagemErro}` },
           { type: "warn", text: `Mensagem exibida: ${msg}` },
-          { type: "info", text: "Teste no Chrome mobile e confirme a permissão de câmera." }
+          {
+            type: "info",
+            text:
+              "Objeto completo: " +
+              JSON.stringify(
+                {
+                  name: error?.name || null,
+                  message: error?.message || null,
+                  stack: error?.stack || null
+                },
+                null,
+                2
+              )
+          }
         ]);
 
         return false;
@@ -232,9 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (canalTv) canalTv.close();
     });
 
-    // ---------------------------------------------------------------------
-    // UTILITÁRIOS DE PLACAR
-    // ---------------------------------------------------------------------
     function getGameFormat(match) {
       return String(match?.gameFormat || "Simples").trim();
     }
@@ -427,9 +440,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return setsTratados;
     }
 
-    // ---------------------------------------------------------------------
-    // RENDER DO PLACAR
-    // ---------------------------------------------------------------------
     function renderPlacar(data) {
       if (!data || !data.score || !tvGridPlacar) return;
 
@@ -517,9 +527,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    // ---------------------------------------------------------------------
-    // RECEPTOR DE DADOS
-    // ---------------------------------------------------------------------
     function processPayload(payload) {
       if (!payload) return;
 
@@ -562,9 +569,6 @@ document.addEventListener("DOMContentLoaded", () => {
       processPayload(event.data);
     });
 
-    // ---------------------------------------------------------------------
-    // FIRESTORE DIRETO, SE HOUVER ID NA URL
-    // ---------------------------------------------------------------------
     if (matchId && matchId !== "null" && window.__db) {
       appendDebug(`Escuta Firestore iniciada para ID: ${matchId}`);
 
@@ -592,7 +596,6 @@ document.addEventListener("DOMContentLoaded", () => {
       appendDebug("Sem parâmetro id. A TV vai aguardar mensagens da aba pública.");
     }
 
-    // Enquanto não chega payload, pede atualização
     relayInterval = setInterval(() => {
       if (!latestPayload) {
         pedirPlacarAtual();
