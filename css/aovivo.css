@@ -12,6 +12,7 @@ body.aovivo-page {
   position: relative;
 }
 
+/* Vídeo de fundo */
 #liveVideo {
   width: 100vw;
   height: 100vh;
@@ -22,6 +23,7 @@ body.aovivo-page {
   background: #000;
 }
 
+/* Tela inicial */
 #telaInicial {
   position: fixed;
   inset: 0;
@@ -51,6 +53,7 @@ body.aovivo-page {
   letter-spacing: 0.03em;
 }
 
+/* Overlay do placar */
 .tv-overlay-container {
   position: absolute;
   z-index: 2;
@@ -65,10 +68,9 @@ body.aovivo-page {
   background: transparent;
   width: min(42vw, 420px);
   max-width: 92vw;
-  transform-origin: bottom left;
-  transform: scale(0.82);
 }
 
+/* Status superior */
 .status-badge-tv {
   text-align: right;
   color: #d8ff63;
@@ -90,10 +92,22 @@ body.aovivo-page {
   text-shadow: 0 2px 4px rgba(0,0,0,0.85);
 }
 
+/* Garante visibilidade do placar no iOS */
+#tvGridPlacar {
+  display: block;
+  width: 100%;
+  position: relative;
+  z-index: 3;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Tabela do placar */
 .tabela-tv-placar {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 4px;
+  table-layout: fixed;
 }
 
 .tabela-tv-placar th {
@@ -121,9 +135,7 @@ body.aovivo-page {
 }
 
 .linha-jogador-tv td {
-  background: rgba(15, 23, 42, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.92);
   height: 34px;
   vertical-align: middle;
   box-shadow: 0 3px 12px rgba(0,0,0,0.45);
@@ -155,6 +167,7 @@ body.aovivo-page {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 160px;
+  min-width: 0;
 }
 
 .serve-ball-tv {
@@ -183,6 +196,7 @@ body.aovivo-page {
   border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Paisagem */
 @media (orientation: landscape) {
   .tv-overlay-container {
     left: 3vw;
@@ -191,7 +205,6 @@ body.aovivo-page {
 
   .placar-tv-box {
     width: min(38vw, 390px);
-    transform: scale(0.80);
   }
 
   .nome-tv-atleta {
@@ -199,6 +212,7 @@ body.aovivo-page {
   }
 }
 
+/* Retrato */
 @media (orientation: portrait) {
   .tv-overlay-container {
     left: 2.5vw;
@@ -208,7 +222,6 @@ body.aovivo-page {
   .placar-tv-box {
     width: 92vw;
     max-width: 92vw;
-    transform: scale(0.72);
   }
 
   .nome-tv-atleta {
@@ -227,5 +240,16 @@ body.aovivo-page {
 
   .linha-jogador-tv td {
     height: 31px;
+  }
+}
+
+/* Telas pequenas */
+@media (max-width: 768px) {
+  .status-badge-tv {
+    font-size: 10px;
+  }
+
+  .placar-tv-box {
+    max-width: 94vw;
   }
 }
