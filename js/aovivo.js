@@ -148,6 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function ligarCameraTraseira() {
       try {
+        hidePermissionHelp();
+
         showDebugLines([
           { type: "info", text: "Tentando iniciar câmera..." },
           { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
