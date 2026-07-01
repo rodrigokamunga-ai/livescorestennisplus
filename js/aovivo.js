@@ -137,18 +137,22 @@ document.addEventListener("DOMContentLoaded", () => {
     
         let stream = null;
     
-        // 1) Tenta pegar qualquer câmera
+        // 1) PRIMEIRA TENTATIVA: câmera traseira explícita
         try {
-          appendDebug("Tentando câmera com video: true...");
+          appendDebug("Tentando câmera traseira com facingMode exact environment...");
           stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
+            video: {
+              facingMode: { exact: "environment" },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
             audio: false
           });
         } catch (e1) {
-          appendDebug(`Falhou video:true -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
+          appendDebug(`Falhou exact environment -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
         }
     
-        // 2) Se falhar, tenta selecionar explicitamente a câmera traseira por deviceId
+        // 2) SEGUNDA TENTATIVA: listar dispositivos e procurar traseira
         if (!stream) {
           try {
             appendDebug("Tentando listar dispositivos de vídeo...");
@@ -161,9 +165,10 @@ document.addEventListener("DOMContentLoaded", () => {
               throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
             }
     
+            // prioriza labels típicos de traseira
             const backCamera =
               videoDevices.find((d) =>
-                /back|rear|environment|traseira/i.test(d.label || "")
+                /back|rear|environment|traseira|câmera traseira/i.test(d.label || "")
               ) || videoDevices[videoDevices.length - 1];
     
             appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
@@ -181,10 +186,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
     
-        // 3) Último fallback: tenta environment
+        // 3) TERCEIRA TENTATIVA: environment ideal
         if (!stream) {
           try {
-            appendDebug("Tentando fallback com facingMode environment...");
+            appendDebug("Tentando fallback com facingMode ideal environment...");
             stream = await navigator.mediaDevices.getUserMedia({
               video: {
                 facingMode: { ideal: "environment" },
@@ -194,8 +199,21 @@ document.addEventListener("DOMContentLoaded", () => {
               audio: false
             });
           } catch (e3) {
-            appendDebug(`Falhou environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
-            throw e3;
+            appendDebug(`Falhou ideal environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
+          }
+        }
+    
+        // 4) ÚLTIMO FALLBACK: qualquer câmera
+        if (!stream) {
+          try {
+            appendDebug("Último fallback: video:true...");
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false
+            });
+          } catch (e4) {
+            appendDebug(`Falhou video:true -> ${e4.name || "Erro"} - ${e4.message || e4}`, true);
+            throw e4;
           }
         }
     
