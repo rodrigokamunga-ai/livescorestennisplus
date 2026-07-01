@@ -1,7 +1,6 @@
 // =========================================================================
 // TENNISPRO TV - PAINEL AO VIVO
-// CÂMERA + FIRESTORE + PLACAR + DEBUG NA TELA
-// COM BOTÃO "TENTAR NOVAMENTE" E AJUDA DE PERMISSÃO
+// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR + DEBUG NA TELA
 // =========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -40,10 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const videoElement = document.getElementById("liveVideo");
     const btnAbrirCamera = document.getElementById("btnAbrirCamera");
-    const btnTentarNovamente = document.getElementById("btnTentarNovamente");
     const cameraStatus = document.getElementById("cameraStatus");
-    const cameraDebug = document.getElementById("cameraDebug");
-    const cameraHint = document.getElementById("cameraHint");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
@@ -69,50 +65,32 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/'/g, "&#039;");
     }
 
-    function clearDebug() {
-      if (cameraStatus) cameraStatus.innerHTML = "";
-      if (cameraDebug) cameraDebug.innerHTML = "";
-    }
-
     function appendDebug(msg, isError = false) {
       const time = new Date().toLocaleTimeString("pt-BR");
       const text = `[${time}] ${msg}`;
       console.log(text);
 
-      const lineHtml = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap; margin-top:4px;"> ${escapeHtml(text)} </div> `;
-
       if (cameraStatus) {
-        cameraStatus.innerHTML = (cameraStatus.innerHTML || "") + lineHtml;
-      }
-
-      if (cameraDebug) {
-        cameraDebug.innerHTML = (cameraDebug.innerHTML || "") + lineHtml;
+        cameraStatus.innerHTML = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap;"> ${escapeHtml(text)} </div> `;
       }
     }
 
     function showDebugLines(lines = []) {
-      clearDebug();
-      lines.forEach((line) => appendDebug(line.text, line.type === "error"));
+      if (!cameraStatus) return;
+
+      cameraStatus.innerHTML = lines.map((line, idx) => {
+        const color = line.type === "error"
+          ? "#ffb4b4"
+          : line.type === "warn"
+            ? "#ffd37a"
+            : "#ffffff";
+
+        return `<div style="font-size:13px; line-height:1.45; color:${color}; white-space:pre-wrap; margin-bottom:${idx < lines.length - 1 ? "4px" : "0"};"> ${escapeHtml(line.text)} </div>`;
+      }).join("");
     }
 
     function setTvInfo(msg = "") {
       if (tvInfoBox) tvInfoBox.textContent = msg;
-    }
-
-    function setCameraHint(msg = "") {
-      if (cameraHint) cameraHint.textContent = msg;
-    }
-
-    function showPermissionHelp() {
-      setCameraHint(
-        "Permissão da câmera negada no Android. Toque no cadeado na barra do navegador > Permissões > Câmera > Permitir e tente novamente."
-      );
-      if (btnTentarNovamente) btnTentarNovamente.style.display = "inline-block";
-    }
-
-    function hidePermissionHelp() {
-      setCameraHint("");
-      if (btnTentarNovamente) btnTentarNovamente.style.display = "none";
     }
 
     // ---------------------------------------------------------------------
@@ -138,8 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function ligarCameraTraseira() {
       try {
-        hidePermissionHelp();
-
         showDebugLines([
           { type: "info", text: "Tentando iniciar câmera..." },
           { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
@@ -148,19 +124,19 @@ document.addEventListener("DOMContentLoaded", () => {
           { type: "info", text: `protocol: ${window.location.protocol}` },
           { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
         ]);
-
+    
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("getUserMedia não suportado neste navegador.");
         }
-
+    
         if (!videoElement) {
           throw new Error("Elemento <video id='liveVideo'> não encontrado.");
         }
-
+    
         stopCamera();
-
+    
         let stream = null;
-
+    
         // 1) Tenta pegar qualquer câmera
         try {
           appendDebug("Tentando câmera com video: true...");
@@ -171,27 +147,27 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e1) {
           appendDebug(`Falhou video:true -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
         }
-
+    
         // 2) Se falhar, tenta selecionar explicitamente a câmera traseira por deviceId
         if (!stream) {
           try {
             appendDebug("Tentando listar dispositivos de vídeo...");
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter((d) => d.kind === "videoinput");
-
+    
             appendDebug(`Câmeras encontradas: ${videoDevices.length}`);
-
+    
             if (!videoDevices.length) {
               throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
             }
-
+    
             const backCamera =
               videoDevices.find((d) =>
                 /back|rear|environment|traseira/i.test(d.label || "")
               ) || videoDevices[videoDevices.length - 1];
-
+    
             appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
-
+    
             stream = await navigator.mediaDevices.getUserMedia({
               video: {
                 deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
@@ -204,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
           }
         }
-
+    
         // 3) Último fallback: tenta environment
         if (!stream) {
           try {
@@ -222,12 +198,12 @@ document.addEventListener("DOMContentLoaded", () => {
             throw e3;
           }
         }
-
+    
         cameraStream = stream;
-
+    
         const tracks = stream.getTracks ? stream.getTracks() : [];
         appendDebug(`Câmera iniciada. Tracks: ${tracks.length}`);
-
+    
         if (videoElement) {
           videoElement.srcObject = stream;
           videoElement.muted = true;
@@ -235,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
           videoElement.setAttribute("autoplay", "");
           videoElement.setAttribute("muted", "");
           videoElement.setAttribute("playsinline", "");
-
+    
           try {
             await videoElement.play();
             appendDebug("play() executado com sucesso.");
@@ -243,15 +219,15 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
           }
         }
-
+    
         appendDebug("Câmera iniciada com sucesso.");
         return true;
       } catch (error) {
         console.error("Erro ao acessar a câmera:", error);
-
+    
         const nomeErro = error?.name || "Sem nome";
         const mensagemErro = error?.message || String(error);
-
+    
         let msg = "CÂMERA INDISPONÍVEL";
         if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
         else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
@@ -259,9 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
         else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
         else if (mensagemErro) msg = mensagemErro.toUpperCase();
-
+    
         if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
-
+    
         showDebugLines([
           { type: "error", text: "Falha ao iniciar a câmera." },
           { type: "error", text: `Nome do erro: ${nomeErro}` },
@@ -282,11 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
               )
           }
         ]);
-
-        if (nomeErro === "NotAllowedError") {
-          showPermissionHelp();
-        }
-
+    
         return false;
       }
     }
@@ -302,24 +274,13 @@ document.addEventListener("DOMContentLoaded", () => {
         pedirPlacarAtual();
       } else {
         appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
-        appendDebug("Verifique as linhas acima para ver o erro real.", false);
       }
     }
 
-    function tentarNovamente() {
-      appendDebug("Usuário tocou em 'Tentar novamente'.");
-      iniciarFluxoTransmissaoNativa();
-    }
-
     window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
-    window.tentarNovamenteCamera = tentarNovamente;
 
     if (btnAbrirCamera) {
       btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
-    }
-
-    if (btnTentarNovamente) {
-      btnTentarNovamente.addEventListener("click", tentarNovamente);
     }
 
     window.addEventListener("beforeunload", () => {
@@ -657,37 +618,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("message", (event) => {
       processPayload(event.data);
     });
-
-    function detectarModoApp() {
-  const el = document.getElementById("modoAppInfo");
-  if (!el) return;
-
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-  const isFullscreen = window.matchMedia("(display-mode: fullscreen)").matches;
-  const isMinimalUi = window.matchMedia("(display-mode: minimal-ui)").matches;
-  const isBrowser = window.matchMedia("(display-mode: browser)").matches;
-
-  let modo = "Chrome normal";
-
-  if (isFullscreen) {
-    modo = "standalone / fullscreen";
-  } else if (isStandalone) {
-    modo = "PWA / standalone";
-  } else if (isMinimalUi) {
-    modo = "PWA / minimal-ui";
-  } else if (isBrowser) {
-    modo = "Chrome normal";
-  }
-
-  el.textContent =
-    `Modo detectado: ${modo}\n` +
-    `standalone: ${isStandalone}\n` +
-    `fullscreen: ${isFullscreen}\n` +
-    `minimal-ui: ${isMinimalUi}\n` +
-    `browser: ${isBrowser}`;
-}
-
-document.addEventListener("DOMContentLoaded", detectarModoApp);
 
     // ---------------------------------------------------------------------
     // FIRESTORE DIRETO, SE HOUVER ID NA URL
