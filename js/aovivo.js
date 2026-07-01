@@ -1,8 +1,8 @@
 // =========================================================================
 // TENNISPRO TV - PAINEL AO VIVO
 // CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR
-// SEM LOGS VISUAIS
-// TENTA FULLSCREEN APÓS TOQUE DO USUÁRIO
+// SEM FULLSCREEN
+// SEM BLOQUEIO DE ORIENTAÇÃO
 // =========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -37,6 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const videoElement = document.getElementById("liveVideo");
     const btnAbrirCamera = document.getElementById("btnAbrirCamera");
+    const btnTentarNovamente = document.getElementById("btnTentarNovamente");
+    const cameraStatus = document.getElementById("cameraStatus");
+    const cameraDebug = document.getElementById("cameraDebug");
+    const cameraHint = document.getElementById("cameraHint");
+    const modoAppInfo = document.getElementById("modoAppInfo");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
@@ -49,6 +54,89 @@ document.addEventListener("DOMContentLoaded", () => {
       ? new BroadcastChannel("tennis_tv_channel")
       : null;
 
+    // ---------------------------------------------------------------------
+    // DEBUG / MENSAGENS
+    // ---------------------------------------------------------------------
+    function escapeHtml(str = "") {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function clearDebug() {
+      if (cameraStatus) cameraStatus.innerHTML = "";
+      if (cameraDebug) cameraDebug.innerHTML = "";
+    }
+
+    function appendDebug(msg, isError = false) {
+      const time = new Date().toLocaleTimeString("pt-BR");
+      const text = `[${time}] ${msg}`;
+      console.log(text);
+
+      const lineHtml = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap; margin-top:4px;"> ${escapeHtml(text)} </div> `;
+
+      if (cameraStatus) {
+        cameraStatus.innerHTML = (cameraStatus.innerHTML || "") + lineHtml;
+      }
+
+      if (cameraDebug) {
+        cameraDebug.innerHTML = (cameraDebug.innerHTML || "") + lineHtml;
+      }
+    }
+
+    function showDebugLines(lines = []) {
+      clearDebug();
+      lines.forEach((line) => appendDebug(line.text, line.type === "error"));
+    }
+
+    function setTvInfo(msg = "") {
+      if (tvInfoBox) tvInfoBox.textContent = msg;
+    }
+
+    function setCameraHint(msg = "") {
+      if (cameraHint) cameraHint.textContent = msg;
+    }
+
+    function showPermissionHelp() {
+      setCameraHint(
+        "Permissão da câmera negada no Android. Toque no cadeado na barra do navegador > Permissões > Câmera > Permitir e tente novamente."
+      );
+      if (btnTentarNovamente) btnTentarNovamente.style.display = "inline-block";
+    }
+
+    function hidePermissionHelp() {
+      setCameraHint("");
+      if (btnTentarNovamente) btnTentarNovamente.style.display = "none";
+    }
+
+    function mostrarModoApp() {
+      if (!modoAppInfo) return;
+
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+      const isFullscreen = window.matchMedia("(display-mode: fullscreen)").matches;
+      const isMinimalUi = window.matchMedia("(display-mode: minimal-ui)").matches;
+      const isBrowser = window.matchMedia("(display-mode: browser)").matches;
+
+      let modo = "Chrome normal";
+      if (isStandalone) modo = "PWA / standalone";
+      else if (isFullscreen) modo = "fullscreen";
+      else if (isMinimalUi) modo = "minimal-ui";
+      else if (isBrowser) modo = "Chrome normal";
+
+      modoAppInfo.textContent =
+        `Modo detectado: ${modo}\n` +
+        `standalone: ${isStandalone}\n` +
+        `fullscreen: ${isFullscreen}\n` +
+        `minimal-ui: ${isMinimalUi}\n` +
+        `browser: ${isBrowser}`;
+    }
+
+    // ---------------------------------------------------------------------
+    // CÂMERA
+    // ---------------------------------------------------------------------
     function stopCamera() {
       if (cameraStream && typeof cameraStream.getTracks === "function") {
         cameraStream.getTracks().forEach((track) => track.stop());
@@ -67,6 +155,201 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    async function ligarCameraTraseira() {
+      try {
+        hidePermissionHelp();
+
+        showDebugLines([
+          { type: "info", text: "Tentando iniciar câmera..." },
+          { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
+          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` },
+          { type: "info", text: `userAgent: ${navigator.userAgent}` },
+          { type: "info", text: `protocol: ${window.location.protocol}` },
+          { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
+        ]);
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("getUserMedia não suportado neste navegador.");
+        }
+
+        if (!videoElement) {
+          throw new Error("Elemento <video id='liveVideo'> não encontrado.");
+        }
+
+        stopCamera();
+
+        let stream = null;
+
+        // 1) câmera traseira explícita
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { exact: "environment" },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+        } catch (e1) {
+          appendDebug(`Falhou exact environment -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
+        }
+
+        // 2) lista dispositivos e tenta achar a traseira
+        if (!stream) {
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter((d) => d.kind === "videoinput");
+
+            if (!videoDevices.length) {
+              throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
+            }
+
+            const backCamera =
+              videoDevices.find((d) =>
+                /back|rear|environment|traseira|câmera traseira/i.test(d.label || "")
+              ) || videoDevices[videoDevices.length - 1];
+
+            appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
+
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
+              audio: false
+            });
+          } catch (e2) {
+            appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
+          }
+        }
+
+        // 3) fallback environment
+        if (!stream) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
+              audio: false
+            });
+          } catch (e3) {
+            appendDebug(`Falhou ideal environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
+          }
+        }
+
+        // 4) último fallback qualquer câmera
+        if (!stream) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false
+            });
+          } catch (e4) {
+            appendDebug(`Falhou video:true -> ${e4.name || "Erro"} - ${e4.message || e4}`, true);
+            throw e4;
+          }
+        }
+
+        cameraStream = stream;
+
+        if (videoElement) {
+          videoElement.srcObject = stream;
+          videoElement.muted = true;
+          videoElement.playsInline = true;
+          videoElement.setAttribute("autoplay", "");
+          videoElement.setAttribute("muted", "");
+          videoElement.setAttribute("playsinline", "");
+
+          try {
+            await videoElement.play();
+          } catch (playErr) {
+            appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
+          }
+        }
+
+        return true;
+      } catch (error) {
+        const nomeErro = error?.name || "Sem nome";
+        const mensagemErro = error?.message || String(error);
+
+        let msg = "CÂMERA INDISPONÍVEL";
+        if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
+        else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
+        else if (nomeErro === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
+        else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
+        else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
+        else if (mensagemErro) msg = mensagemErro.toUpperCase();
+
+        if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
+
+        showDebugLines([
+          { type: "error", text: "Falha ao iniciar a câmera." },
+          { type: "error", text: `Nome do erro: ${nomeErro}` },
+          { type: "error", text: `Mensagem do erro: ${mensagemErro}` },
+          { type: "warn", text: `Mensagem exibida: ${msg}` },
+          {
+            type: "info",
+            text:
+              "Objeto completo: " +
+              JSON.stringify(
+                {
+                  name: error?.name || null,
+                  message: error?.message || null,
+                  stack: error?.stack || null
+                },
+                null,
+                2
+              )
+          }
+        ]);
+
+        if (nomeErro === "NotAllowedError") {
+          showPermissionHelp();
+        }
+
+        return false;
+      }
+    }
+
+    async function iniciarFluxoTransmissaoNativa() {
+      const sucesso = await ligarCameraTraseira();
+
+      if (sucesso) {
+        const telaInicial = document.getElementById("telaInicial");
+        if (telaInicial) telaInicial.style.display = "none";
+        pedirPlacarAtual();
+      } else {
+        appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
+      }
+    }
+
+    function tentarNovamente() {
+      iniciarFluxoTransmissaoNativa();
+    }
+
+    window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
+    window.tentarNovamenteCamera = tentarNovamente;
+
+    if (btnAbrirCamera) {
+      btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
+    }
+
+    if (btnTentarNovamente) {
+      btnTentarNovamente.addEventListener("click", tentarNovamente);
+    }
+
+    window.addEventListener("beforeunload", () => {
+      stopCamera();
+      stopRelay();
+      if (canalTv) canalTv.close();
+    });
+
+    // ---------------------------------------------------------------------
+    // UTILITÁRIOS DE PLACAR
+    // ---------------------------------------------------------------------
     function getGameFormat(match) {
       return String(match?.gameFormat || "Simples").trim();
     }
@@ -259,6 +542,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return setsTratados;
     }
 
+    // ---------------------------------------------------------------------
+    // RENDER DO PLACAR
+    // ---------------------------------------------------------------------
     function renderPlacar(data) {
       if (!data || !data.score || !tvGridPlacar) return;
 
@@ -344,6 +630,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // ---------------------------------------------------------------------
+    // RECEPTOR DE DADOS
+    // ---------------------------------------------------------------------
     function processPayload(payload) {
       if (!payload) return;
 
@@ -386,50 +675,65 @@ document.addEventListener("DOMContentLoaded", () => {
       processPayload(event.data);
     });
 
-    async function entrarFullscreen() {
-      try {
-        const target = document.documentElement;
-        if (target.requestFullscreen) {
-          await target.requestFullscreen({ navigationUI: "hide" });
-        }
-      } catch (_) {
-        // silencioso
-      }
-    }
-
+    // ---------------------------------------------------------------------
+    // CÂMERA
+    // ---------------------------------------------------------------------
     async function ligarCameraTraseira() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return false;
-      }
-
-      if (!videoElement) {
-        return false;
-      }
-
-      stopCamera();
-
-      let stream = null;
-
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { exact: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          },
-          audio: false
-        });
-      } catch (_) {}
+        hidePermissionHelp();
 
-      if (!stream) {
+        showDebugLines([
+          { type: "info", text: "Tentando iniciar câmera..." },
+          { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
+          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` },
+          { type: "info", text: `userAgent: ${navigator.userAgent}` },
+          { type: "info", text: `protocol: ${window.location.protocol}` },
+          { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
+        ]);
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("getUserMedia não suportado neste navegador.");
+        }
+
+        if (!videoElement) {
+          throw new Error("Elemento <video id='liveVideo'> não encontrado.");
+        }
+
+        stopCamera();
+
+        let stream = null;
+
+        // 1) câmera traseira explícita
         try {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const videoDevices = devices.filter((d) => d.kind === "videoinput");
-          const backCamera =
-            videoDevices.find((d) => /back|rear|environment|traseira/i.test(d.label || "")) ||
-            videoDevices[videoDevices.length - 1];
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { exact: "environment" },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+        } catch (e1) {
+          appendDebug(`Falhou exact environment -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
+        }
 
-          if (backCamera) {
+        // 2) lista dispositivos e tenta achar a traseira
+        if (!stream) {
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter((d) => d.kind === "videoinput");
+
+            if (!videoDevices.length) {
+              throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
+            }
+
+            const backCamera =
+              videoDevices.find((d) =>
+                /back|rear|environment|traseira|câmera traseira/i.test(d.label || "")
+              ) || videoDevices[videoDevices.length - 1];
+
+            appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
+
             stream = await navigator.mediaDevices.getUserMedia({
               video: {
                 deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
@@ -438,63 +742,120 @@ document.addEventListener("DOMContentLoaded", () => {
               },
               audio: false
             });
+          } catch (e2) {
+            appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
           }
-        } catch (_) {}
-      }
+        }
 
-      if (!stream) {
-        try {
+        // 3) fallback environment
+        if (!stream) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
+              audio: false
+            });
+          } catch (e3) {
+            appendDebug(`Falhou ideal environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
+          }
+        }
+
+        // 4) último fallback qualquer câmera
+        if (!stream) {
           stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            },
+            video: true,
             audio: false
           });
-        } catch (_) {}
+        }
+
+        cameraStream = stream;
+
+        if (videoElement) {
+          videoElement.srcObject = stream;
+          videoElement.muted = true;
+          videoElement.playsInline = true;
+          videoElement.setAttribute("autoplay", "");
+          videoElement.setAttribute("muted", "");
+          videoElement.setAttribute("playsinline", "");
+          try {
+            await videoElement.play();
+          } catch (playErr) {
+            appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
+          }
+        }
+
+        return true;
+      } catch (error) {
+        const nomeErro = error?.name || "Sem nome";
+        const mensagemErro = error?.message || String(error);
+
+        let msg = "CÂMERA INDISPONÍVEL";
+        if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
+        else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
+        else if (nomeErro === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
+        else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
+        else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
+        else if (mensagemErro) msg = mensagemErro.toUpperCase();
+
+        if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
+
+        showDebugLines([
+          { type: "error", text: "Falha ao iniciar a câmera." },
+          { type: "error", text: `Nome do erro: ${nomeErro}` },
+          { type: "error", text: `Mensagem do erro: ${mensagemErro}` },
+          { type: "warn", text: `Mensagem exibida: ${msg}` },
+          {
+            type: "info",
+            text:
+              "Objeto completo: " +
+              JSON.stringify(
+                {
+                  name: error?.name || null,
+                  message: error?.message || null,
+                  stack: error?.stack || null
+                },
+                null,
+                2
+              )
+          }
+        ]);
+
+        if (nomeErro === "NotAllowedError") {
+          showPermissionHelp();
+        }
+
+        return false;
       }
-
-      if (!stream) {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        });
-      }
-
-      cameraStream = stream;
-
-      if (videoElement) {
-        videoElement.srcObject = stream;
-        videoElement.muted = true;
-        videoElement.playsInline = true;
-        videoElement.setAttribute("autoplay", "");
-        videoElement.setAttribute("muted", "");
-        videoElement.setAttribute("playsinline", "");
-        try {
-          await videoElement.play();
-        } catch (_) {}
-      }
-
-      return true;
     }
 
     async function iniciarFluxoTransmissaoNativa() {
-      await entrarFullscreen();
-
       const sucesso = await ligarCameraTraseira();
 
       if (sucesso) {
         const telaInicial = document.getElementById("telaInicial");
         if (telaInicial) telaInicial.style.display = "none";
         pedirPlacarAtual();
+      } else {
+        appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
       }
     }
 
+    function tentarNovamente() {
+      iniciarFluxoTransmissaoNativa();
+    }
+
     window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
+    window.tentarNovamenteCamera = tentarNovamente;
 
     if (btnAbrirCamera) {
       btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
+    }
+
+    if (btnTentarNovamente) {
+      btnTentarNovamente.addEventListener("click", tentarNovamente);
     }
 
     window.addEventListener("beforeunload", () => {
@@ -524,5 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pedirPlacarAtual();
       }
     }, 1000);
+
+    mostrarModoApp();
   }
 });
