@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const videoElement = document.getElementById("liveVideo");
     const btnAbrirCamera = document.getElementById("btnAbrirCamera");
     const cameraStatus = document.getElementById("cameraStatus");
+    const cameraDebug = document.getElementById("cameraDebug");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
@@ -70,23 +71,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const text = `[${time}] ${msg}`;
       console.log(text);
 
+      const lineHtml = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap; margin-top:4px;"> ${escapeHtml(text)} </div> `;
+
       if (cameraStatus) {
-        cameraStatus.innerHTML = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap;"> ${escapeHtml(text)} </div> `;
+        cameraStatus.innerHTML = (cameraStatus.innerHTML || "") + lineHtml;
+      }
+
+      if (cameraDebug) {
+        cameraDebug.innerHTML = (cameraDebug.innerHTML || "") + lineHtml;
       }
     }
 
     function showDebugLines(lines = []) {
-      if (!cameraStatus) return;
+      if (cameraStatus) {
+        cameraStatus.innerHTML = "";
+      }
 
-      cameraStatus.innerHTML = lines.map((line, idx) => {
-        const color = line.type === "error"
-          ? "#ffb4b4"
-          : line.type === "warn"
-            ? "#ffd37a"
-            : "#ffffff";
+      if (cameraDebug) {
+        cameraDebug.innerHTML = "";
+      }
 
-        return `<div style="font-size:13px; line-height:1.45; color:${color}; white-space:pre-wrap; margin-bottom:${idx < lines.length - 1 ? "4px" : "0"};"> ${escapeHtml(line.text)} </div>`;
-      }).join("");
+      lines.forEach((line) => {
+        appendDebug(line.text, line.type === "error");
+      });
     }
 
     function setTvInfo(msg = "") {
@@ -124,19 +131,19 @@ document.addEventListener("DOMContentLoaded", () => {
           { type: "info", text: `protocol: ${window.location.protocol}` },
           { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
         ]);
-    
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error("getUserMedia não suportado neste navegador.");
         }
-    
+
         if (!videoElement) {
           throw new Error("Elemento <video id='liveVideo'> não encontrado.");
         }
-    
+
         stopCamera();
-    
+
         let stream = null;
-    
+
         // 1) Tenta pegar qualquer câmera
         try {
           appendDebug("Tentando câmera com video: true...");
@@ -147,27 +154,27 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e1) {
           appendDebug(`Falhou video:true -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
         }
-    
+
         // 2) Se falhar, tenta selecionar explicitamente a câmera traseira por deviceId
         if (!stream) {
           try {
             appendDebug("Tentando listar dispositivos de vídeo...");
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter((d) => d.kind === "videoinput");
-    
+
             appendDebug(`Câmeras encontradas: ${videoDevices.length}`);
-    
+
             if (!videoDevices.length) {
               throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
             }
-    
+
             const backCamera =
               videoDevices.find((d) =>
                 /back|rear|environment|traseira/i.test(d.label || "")
               ) || videoDevices[videoDevices.length - 1];
-    
+
             appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
-    
+
             stream = await navigator.mediaDevices.getUserMedia({
               video: {
                 deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
@@ -180,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
           }
         }
-    
+
         // 3) Último fallback: tenta environment
         if (!stream) {
           try {
@@ -198,12 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
             throw e3;
           }
         }
-    
+
         cameraStream = stream;
-    
+
         const tracks = stream.getTracks ? stream.getTracks() : [];
         appendDebug(`Câmera iniciada. Tracks: ${tracks.length}`);
-    
+
         if (videoElement) {
           videoElement.srcObject = stream;
           videoElement.muted = true;
@@ -211,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
           videoElement.setAttribute("autoplay", "");
           videoElement.setAttribute("muted", "");
           videoElement.setAttribute("playsinline", "");
-    
+
           try {
             await videoElement.play();
             appendDebug("play() executado com sucesso.");
@@ -219,15 +226,15 @@ document.addEventListener("DOMContentLoaded", () => {
             appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
           }
         }
-    
+
         appendDebug("Câmera iniciada com sucesso.");
         return true;
       } catch (error) {
         console.error("Erro ao acessar a câmera:", error);
-    
+
         const nomeErro = error?.name || "Sem nome";
         const mensagemErro = error?.message || String(error);
-    
+
         let msg = "CÂMERA INDISPONÍVEL";
         if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
         else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
@@ -235,9 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
         else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
         else if (mensagemErro) msg = mensagemErro.toUpperCase();
-    
+
         if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
-    
+
         showDebugLines([
           { type: "error", text: "Falha ao iniciar a câmera." },
           { type: "error", text: `Nome do erro: ${nomeErro}` },
@@ -258,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
               )
           }
         ]);
-    
+
         return false;
       }
     }
@@ -274,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pedirPlacarAtual();
       } else {
         appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
+        appendDebug("Verifique as linhas acima para ver o erro real.", false);
       }
     }
 
