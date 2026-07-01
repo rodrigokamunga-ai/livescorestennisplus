@@ -1,6 +1,7 @@
 // =========================================================================
 // TENNISPRO TV - PAINEL AO VIVO
 // CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR + DEBUG NA TELA
+// SEM LOCK DE ORIENTAÇÃO
 // =========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
 
-    let localTimer = null;
     let cameraStream = null;
     let relayInterval = null;
     let latestPayload = null;
@@ -155,17 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (relayInterval) {
         clearInterval(relayInterval);
         relayInterval = null;
-      }
-    }
-
-    async function tentarBloquearPaisagem() {
-      try {
-        if (screen.orientation && screen.orientation.lock) {
-          await screen.orientation.lock("landscape");
-          appendDebug("Orientação travada em paisagem com sucesso.");
-        }
-      } catch (e) {
-        appendDebug(`Não foi possível travar paisagem: ${e.message || e}`, true);
       }
     }
 
@@ -343,8 +332,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function iniciarFluxoTransmissaoNativa() {
       appendDebug("Botão pressionado. Iniciando fluxo...");
-
-      await tentarBloquearPaisagem();
 
       const sucesso = await ligarCameraTraseira();
 
@@ -653,8 +640,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const server = score.server || data.server || "player1";
-      const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : '';
-      const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : '';
+      const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : "";
+      const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : "";
 
       tvGridPlacar.innerHTML = ` <table class="tabela-tv-placar"> <thead> <tr> <th class="th-jogador">Jogador</th> ${setsHtmlHead.join("")} <th class="th-pontos">Pontos</th> </tr> </thead> <tbody> <tr class="linha-jogador-tv"> <td> <div class="nome-tv-atleta">${ball1}<span>${escapeHtml(name1.toUpperCase())}</span></div> </td> ${setsHtmlRow1.join("")} <td class="pontos-tv-score">${viewPts1}</td> </tr> <tr class="linha-jogador-tv"> <td> <div class="nome-tv-atleta">${ball2}<span>${escapeHtml(name2.toUpperCase())}</span></div> </td> ${setsHtmlRow2.join("")} <td class="pontos-tv-score">${viewPts2}</td> </tr> </tbody> </table> `;
 
