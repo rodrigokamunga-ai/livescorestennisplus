@@ -1,6 +1,7 @@
 // =========================================================================
 // TENNISPRO TV - PAINEL AO VIVO
-// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR + DEBUG NA TELA
+// CÂMERA + FIRESTORE + PLACAR + DEBUG NA TELA
+// COM BOTÃO "TENTAR NOVAMENTE" E AJUDA DE PERMISSÃO
 // =========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -39,8 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const videoElement = document.getElementById("liveVideo");
     const btnAbrirCamera = document.getElementById("btnAbrirCamera");
+    const btnTentarNovamente = document.getElementById("btnTentarNovamente");
     const cameraStatus = document.getElementById("cameraStatus");
     const cameraDebug = document.getElementById("cameraDebug");
+    const cameraHint = document.getElementById("cameraHint");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
@@ -66,6 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/'/g, "&#039;");
     }
 
+    function clearDebug() {
+      if (cameraStatus) cameraStatus.innerHTML = "";
+      if (cameraDebug) cameraDebug.innerHTML = "";
+    }
+
     function appendDebug(msg, isError = false) {
       const time = new Date().toLocaleTimeString("pt-BR");
       const text = `[${time}] ${msg}`;
@@ -83,21 +91,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showDebugLines(lines = []) {
-      if (cameraStatus) {
-        cameraStatus.innerHTML = "";
-      }
-
-      if (cameraDebug) {
-        cameraDebug.innerHTML = "";
-      }
-
-      lines.forEach((line) => {
-        appendDebug(line.text, line.type === "error");
-      });
+      clearDebug();
+      lines.forEach((line) => appendDebug(line.text, line.type === "error"));
     }
 
     function setTvInfo(msg = "") {
       if (tvInfoBox) tvInfoBox.textContent = msg;
+    }
+
+    function setCameraHint(msg = "") {
+      if (cameraHint) cameraHint.textContent = msg;
+    }
+
+    function showPermissionHelp() {
+      setCameraHint(
+        "Permissão da câmera negada no Android. Toque no cadeado na barra do navegador > Permissões > Câmera > Permitir e tente novamente."
+      );
+      if (btnTentarNovamente) btnTentarNovamente.style.display = "inline-block";
+    }
+
+    function hidePermissionHelp() {
+      setCameraHint("");
+      if (btnTentarNovamente) btnTentarNovamente.style.display = "none";
     }
 
     // ---------------------------------------------------------------------
@@ -123,6 +138,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function ligarCameraTraseira() {
       try {
+        hidePermissionHelp();
+
         showDebugLines([
           { type: "info", text: "Tentando iniciar câmera..." },
           { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
@@ -266,6 +283,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         ]);
 
+        if (nomeErro === "NotAllowedError") {
+          showPermissionHelp();
+        }
+
         return false;
       }
     }
@@ -285,10 +306,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    function tentarNovamente() {
+      appendDebug("Usuário tocou em 'Tentar novamente'.");
+      iniciarFluxoTransmissaoNativa();
+    }
+
     window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
+    window.tentarNovamenteCamera = tentarNovamente;
 
     if (btnAbrirCamera) {
       btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
+    }
+
+    if (btnTentarNovamente) {
+      btnTentarNovamente.addEventListener("click", tentarNovamente);
     }
 
     window.addEventListener("beforeunload", () => {
