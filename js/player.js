@@ -9,17 +9,6 @@
     let inputMode = "games";
     let statsViewMode = "single"; // "single" | "double"
 
-    // Instancia o canal de rádio local para manter o cache e responder à TV
-    let cacheMatchDataLocal = null;
-    const canalTvLocal = new BroadcastChannel("tennis_tv_channel");
-
-    // Escuta se a TV abriu e acabou de pedir o placar atualizado
-    canalTvLocal.onmessage = (event) => {
-      if (event.data === "PEDIR_PLACAR_ATUAL" && cacheMatchDataLocal) {
-        canalTvLocal.postMessage(cacheMatchDataLocal);
-      }
-    };
-
     const el = {
       matchTitle:        document.getElementById("matchTitle"),
       matchSubTitle:     document.getElementById("matchSubTitle"),
@@ -115,6 +104,7 @@
         });
       });
     }
+
     function getStatsActionHandlers() {
       const addPointFn = window.addPoint || (typeof addPoint === "function" ? addPoint : null);
       const marcarServicoFn = window.marcarServico || (typeof marcarServico === "function" ? marcarServico : null);
@@ -172,6 +162,7 @@
         const btn = document.getElementById(btnId);
         if (!btn) return;
     
+        // Remove o onclick inline para evitar duplicidade
         btn.removeAttribute("onclick");
     
         btn.addEventListener("click", async (e) => {
@@ -184,11 +175,16 @@
               await result;
             }
           } catch (err) {
-            console.error(`Erro ao executar acao do botao ${btnId}:`, err);
+            console.error(`Erro ao executar ação do botão ${btnId}:`, err);
           }
         });
       });
+      
     }
+
+    bindStatsActions();
+
+
 
     function applyStatsView(mode) {
       statsViewMode = mode;
@@ -205,7 +201,27 @@
       if (el.statsModeToggle) el.statsModeToggle.style.display = inputMode === "stats" ? "flex" : "none";
     }
 
-    
+    function applyInputMode(mode) {
+      inputMode = mode;
+
+      const isGames = mode === "games";
+      const isPoints = mode === "points";
+      const isStats = mode === "stats";
+
+      if (el.modeGamesLabel) el.modeGamesLabel.classList.toggle("active", isGames);
+      if (el.modePointsLabel) el.modePointsLabel.classList.toggle("active", isPoints);
+      if (el.modeStatsLabel) el.modeStatsLabel.classList.toggle("active", isStats);
+
+      if (el.gamesControl1) el.gamesControl1.style.display = isGames ? "flex" : "none";
+      if (el.gamesControl2) el.gamesControl2.style.display = isGames ? "flex" : "none";
+      if (el.pointControl1) el.pointControl1.style.display = isPoints ? "flex" : "none";
+      if (el.pointControl2) el.pointControl2.style.display = isPoints ? "flex" : "none";
+      if (el.scoreModesArea) el.scoreModesArea.style.display = isStats ? "none" : "";
+      if (el.statsControlPanel) el.statsControlPanel.style.display = isStats ? "" : "none";
+      if (el.statsModeToggle) el.statsModeToggle.style.display = isStats ? "flex" : "none";
+
+      if (isStats) applyStatsView(statsViewMode || "single");
+    }
 
     function bindInputModeToggle() {
       el.modeGames?.addEventListener("change", () => applyInputMode("games"));
@@ -221,6 +237,8 @@
       el.modeStatsLabel?.addEventListener("click", () => {
         if (!el.modeStats?.disabled) applyInputMode("stats");
       });
+
+      applyInputMode("games");
     }
 
     function bindStatsViewToggle() {
@@ -233,6 +251,8 @@
       el.statsModeDoubleLabel?.addEventListener("click", () => {
         if (!el.statsModeDouble?.disabled) applyStatsView("double");
       });
+
+      applyStatsView("single");
     }
 
     function updateMatchControls(status) {
@@ -240,15 +260,15 @@
 
       if (el.startBtn) {
         el.startBtn.disabled = isFinished;
-        el.startBtn.title = isFinished ? "Partida ja finalizada" : "";
+        el.startBtn.title = isFinished ? "Partida já finalizada" : "";
       }
       if (el.finishBtn) {
         el.finishBtn.disabled = isFinished || (status !== "live" && status !== "suspended");
-        el.finishBtn.title = isFinished ? "Partida ja finalizada" : "";
+        el.finishBtn.title = isFinished ? "Partida já finalizada" : "";
       }
       if (el.resetScoreBtn) {
         el.resetScoreBtn.disabled = isFinished;
-        el.resetScoreBtn.title = isFinished ? "Partida ja finalizada" : "";
+        el.resetScoreBtn.title = isFinished ? "Partida já finalizada" : "";
       }
 
       [el.startBtn, el.finishBtn, el.resetScoreBtn].forEach((btn) => {
@@ -264,6 +284,7 @@
         undoLockTimer = null;
       }
     }
+
     function applyUndoLockState(data) {
       if (!el.undoBtn) return;
 
@@ -281,7 +302,7 @@
 
         if (remainingMs <= 0) {
           el.undoBtn.disabled = true;
-          el.undoBtn.title = "Desfazer bloqueado apos 5 minutos da finalizacao";
+          el.undoBtn.title = "Desfazer bloqueado após 5 minutos da finalização";
           el.undoBtn.style.opacity = "0.35";
           el.undoBtn.style.cursor = "not-allowed";
           return;
@@ -289,14 +310,14 @@
 
         undoLockedUntilMs = Date.now() + remainingMs;
         el.undoBtn.disabled = false;
-        el.undoBtn.title = "Desfazer disponivel por ate 5 minutos apos a finalizacao";
+        el.undoBtn.title = "Desfazer disponível por até 5 minutos após a finalização";
         el.undoBtn.style.opacity = "";
         el.undoBtn.style.cursor = "";
 
         undoLockTimer = setTimeout(() => {
           if (el.undoBtn) {
             el.undoBtn.disabled = true;
-            el.undoBtn.title = "Desfazer bloqueado apos 5 minutos da finalizacao";
+            el.undoBtn.title = "Desfazer bloqueado após 5 minutos da finalização";
             el.undoBtn.style.opacity = "0.35";
             el.undoBtn.style.cursor = "not-allowed";
           }
@@ -306,7 +327,7 @@
       }
 
       el.undoBtn.disabled = !data.lastAction;
-      el.undoBtn.title = data.lastAction ? "" : "Nao ha acao anterior para desfazer";
+      el.undoBtn.title = data.lastAction ? "" : "Não há ação anterior para desfazer";
       el.undoBtn.style.opacity = el.undoBtn.disabled ? "0.35" : "";
       el.undoBtn.style.cursor = el.undoBtn.disabled ? "not-allowed" : "";
     }
@@ -381,7 +402,7 @@
       } else if (status === "suspended") {
         el.startBtn.disabled = false;
         if (el.startBtnIcon) el.startBtnIcon.textContent = "▶️";
-        if (el.startBtnLabel) el.startBtnLabel.textContent = "Recomecar";
+        if (el.startBtnLabel) el.startBtnLabel.textContent = "Recomeçar";
         el.startBtn.classList.remove("pause-action");
         el.startBtn.classList.add("primary-action");
       } else if (status === "finished" || status === "wo") {
@@ -398,6 +419,48 @@
         el.startBtn.classList.add("primary-action");
       }
     }
+
+    function setMsg(text, type = "") {
+      if (!el.msg) return;
+      el.msg.textContent = text || "";
+      el.msg.className = type ? `msg ${type}` : "msg";
+      if (msgTimer) {
+        clearTimeout(msgTimer);
+        msgTimer = null;
+      }
+      if (text) {
+        msgTimer = setTimeout(() => {
+          if (el.msg) el.msg.textContent = "";
+        }, 2500);
+      }
+    }
+
+    function stopTimer() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function durationText(ms) {
+      const s = Math.floor(ms / 1000);
+      const h = String(Math.floor(s / 3600)).padStart(2, "0");
+      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+      const sec = String(s % 60).padStart(2, "0");
+      return `${h}:${m}:${sec}`;
+    }
+
+    function startTimer(baseMs) {
+      stopTimer();
+      if (!baseMs || Number.isNaN(baseMs)) return;
+      liveStartedAtMs = baseMs;
+      const update = () => {
+        if (el.durationEl) el.durationEl.textContent = durationText(Date.now() - liveStartedAtMs);
+      };
+      update();
+      timer = setInterval(update, 1000);
+    }
+
     function getFinishedDurationText(data) {
       if (data?.durationSeconds && Number(data.durationSeconds) > 0) {
         return durationText(Number(data.durationSeconds) * 1000);
@@ -423,10 +486,9 @@
       if (status === "finished") return "FINALIZADA";
       if (status === "wo") return "FINALIZADA POR WO";
       if (status === "ret") return "FINALIZADA POR RET";
-      return "NAO INICIADA";
+      return "NÃO INICIADA";
     }
 
-    // Estruturas de Dados de Segurança do Placar
     function isMatchLocked(data) {
       return data.status === "finished" || data.status === "wo" || data.status === "ret";
     }
@@ -528,9 +590,13 @@
         if (isTBActive) {
           const tb1 = Number(score.tieBreakPoints1 || 0);
           const tb2 = Number(score.tieBreakPoints2 || 0);
+
           if (tb1 > 0 || tb2 > 0) {
-            if (score.tieBreakMode === "super10") parts.push(`${tb1}-${tb2}`);
-            else parts.push(tb1 > tb2 ? `7x6 (${tb1}-${tb2})` : `6x7 (${tb1}-${tb2})`);
+            if (score.tieBreakMode === "super10") {
+              parts.push(`${tb1}-${tb2}`);
+            } else {
+              parts.push(tb1 > tb2 ? `7x6 (${tb1}-${tb2})` : `6x7 (${tb1}-${tb2})`);
+            }
           }
         } else {
           const g1 = Number(score.games1 || 0);
@@ -538,7 +604,8 @@
           if (g1 > 0 || g2 > 0) parts.push(`${g1}x${g2}`);
         }
       }
-      return parts.length ? parts.join(" - ") : "0x0";
+
+      return parts.length ? parts.join(" • ") : "0x0";
     }
 
     function buildLastActionSnapshot(data) {
@@ -554,6 +621,7 @@
         accumulatedSeconds: data.accumulatedSeconds || 0
       };
     }
+
     function getGameFormat(data) {
       return String(data?.gameFormat || "Simples").trim();
     }
@@ -612,153 +680,15 @@
 
       if (el.statusLabel) {
         const score = data.score || {};
-        if (score.tieBreakMode === "super10" && data.status === "live") el.statusLabel.textContent = "EM ANDAMENTO - SUPER TIE-BREAK";
-        else if (score.tieBreakMode === "tb7" && data.status === "live") el.statusLabel.textContent = "EM ANDAMENTO - TIE-BREAK";
+        if (score.tieBreakMode === "super10" && data.status === "live") el.statusLabel.textContent = "EM ANDAMENTO • SUPER TIE-BREAK";
+        else if (score.tieBreakMode === "tb7" && data.status === "live") el.statusLabel.textContent = "EM ANDAMENTO • TIE-BREAK";
         else el.statusLabel.textContent = mapStatus(data.status);
       }
 
       if (el.matchScore) el.matchScore.textContent = buildMatchScoreText(data);
     }
 
-        // =========================================================================
-    // MOTOR DO CRONÔMETRO (MOVIDO PARA O TOPO DO ESCOPO DE RENDERIZAÇÃO)
-    // =========================================================================
-    function stopTimer() {
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
-      }
-    }
-
-    function durationText(ms) {
-      const s = Math.floor(ms / 1000);
-      const h = String(Math.floor(s / 3600)).padStart(2, "0");
-      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-      const sec = String(s % 60).padStart(2, "0");
-      return `${h}:${m}:${sec}`;
-    }
-
-    function startTimer(baseMs) {
-      stopTimer();
-      if (!baseMs || Number.isNaN(baseMs)) return;
-      liveStartedAtMs = baseMs;
-      const update = () => {
-        if (el.durationEl) el.durationEl.textContent = durationText(Date.now() - liveStartedAtMs);
-      };
-      update();
-      timer = setInterval(update, 1000);
-    }
-
-    // =========================================================================
-    // FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO E TRANSMISSÃO TV
-    // =========================================================================
-    
-      function renderMatch(data) {
-        // CORREÇÃO CIRÚRGICA: Utiliza a variável global 'id' do script para garantir 
-        // que o canal gravado em disco bata exatamente com o link aberto na TV
-        if (data && typeof id !== "undefined" && id) {
-          localStorage.setItem(`tennis_pro_match_data_${id}`, JSON.stringify(data));
-        }
-      
-        // Transmite as atualizacoes via radio local para a TV de forma segura
-        new BroadcastChannel("tennis_tv_channel").postMessage(data);
-      
-        const score = normalizeScore(data.score);
-        const fmt = data.matchFormat || "";
-      
-
-      if (el.player1Name) el.player1Name.textContent = getTeam1Name(data);
-      if (el.player2Name) el.player2Name.textContent = getTeam2Name(data);
-      if (el.player2NameManual) el.player2NameManual.textContent = getTeam2Name(data);
-      if (el.player1NameStats) el.player1NameStats.textContent = getTeam1Name(data);
-      if (el.servePlayer1Label) el.servePlayer1Label.textContent = getTeam1Name(data);
-      if (el.servePlayer2Label) el.servePlayer2Label.textContent = getTeam2Name(data);
-      if (el.games1Label) el.games1Label.textContent = `Games - ${getTeam1Name(data)}`;
-      if (el.games2Label) el.games2Label.textContent = `Games - ${getTeam2Name(data)}`;
-
-      const isTBActive = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
-      const isTBFinished = data.status === "finished" && !score.tieBreakMode && !!score.lastTieBreakMode;
-
-      if (isTBActive) {
-        if (el.points1) el.points1.textContent = String(score.tieBreakPoints1 ?? 0);
-        if (el.points2) el.points2.textContent = String(score.tieBreakPoints2 ?? 0);
-        if (el.points2Manual) el.points2Manual.textContent = String(score.tieBreakPoints2 ?? 0);
-      } else if (isTBFinished) {
-        if (el.points1) el.points1.textContent = String(score.lastTieBreakPoints1 ?? 0);
-        if (el.points2) el.points2.textContent = String(score.lastTieBreakPoints2 ?? 0);
-        if (el.points2Manual) el.points2Manual.textContent = String(score.lastTieBreakPoints2 ?? 0);
-      } else {
-        const ptText = typeof window.getPointDisplay === "function"
-          ? window.getPointDisplay(score.points1, score.points2, fmt, score)
-          : `${score.points1}x${score.points2}`;
-
-        if (ptText.includes("AD - J1")) {
-          if (el.points1) el.points1.textContent = "AD";
-          if (el.points2) el.points2.textContent = "40";
-          if (el.points2Manual) el.points2Manual.textContent = "40";
-        } else if (ptText.includes("AD - J2")) {
-          if (el.points1) el.points1.textContent = "40";
-          if (el.points2) el.points2.textContent = "AD";
-          if (el.points2Manual) el.points2Manual.textContent = "AD";
-        } else {
-          const parts = String(ptText).split("x");
-          if (el.points1) el.points1.textContent = parts[0] ?? "0";
-          if (el.points2) el.points2.textContent = parts[1] ?? "0";
-          if (el.points2Manual) el.points2Manual.textContent = parts[1] ?? "0";
-        }
-      }
-
-      if (el.games1) el.games1.textContent = score.games1 ?? 0;
-      if (el.games2) el.games2.textContent = score.games2 ?? 0;
-      if (el.sets1) el.sets1.textContent = score.sets1 ?? 0;
-      if (el.sets2) el.sets2.textContent = score.sets2 ?? 0;
-      if (el.gamesVal1) el.gamesVal1.textContent = score.games1 ?? 0;
-      if (el.gamesVal2) el.gamesVal2.textContent = score.games2 ?? 0;
-      if (el.editGames1) el.editGames1.value = score.games1 ?? 0;
-      if (el.editGames2) el.editGames2.value = score.games2 ?? 0;
-
-      updateStartBtn(data.status);
-      updateMatchControls(data.status);
-      applyUndoLockState(data);
-      updateControlsState(data);
-      renderInfoTop(data);
-      updateServeUI(data);
-
-      // CORREÇÃO CIRÚRGICA: Força o realinhamento visual do modo de input ativo (games/points/stats)
-      // impedindo que as linhas manuais vazem na tela de abertura do aplicativo
-      applyInputMode(inputMode || "games");
-
-      if (data.status === "live") {
-        const accumulated = Number(data.accumulatedSeconds || 0) * 1000;
-        const started = data.startedAt?.toDate ? data.startedAt.toDate() : (data.startedAt ? new Date(data.startedAt) : null);
-
-        if (started && !isNaN(started.getTime())) {
-          const baseMs = Date.now() - started.getTime() + accumulated;
-          liveStartedAtMs = Date.now() - baseMs;
-        }
-
-        if (liveStartedAtMs !== null) {
-          if (!timer) startTimer(liveStartedAtMs);
-          else if (el.durationEl) el.durationEl.textContent = durationText(Date.now() - liveStartedAtMs);
-        } else if (el.durationEl) {
-          el.durationEl.textContent = "00:00:00";
-        }
-      } else if (data.status === "suspended") {
-        stopTimer();
-        liveStartedAtMs = null;
-        const accumulated = Number(data.accumulatedSeconds || 0);
-        if (el.durationEl) el.durationEl.textContent = durationText(accumulated * 1000);
-      } else {
-        liveStartedAtMs = null;
-        stopTimer();
-        if (el.durationEl) el.durationEl.textContent = getFinishedDurationText(data);
-      }
-    }
-
     function renderMatch(data) {
-      // Transmite as atualizacoes via radio local para a TV de forma segura
-      new BroadcastChannel("tennis_tv_channel").postMessage(data);
-
       const score = normalizeScore(data.score);
       const fmt = data.matchFormat || "";
 
@@ -783,8 +713,8 @@
         if (el.points2) el.points2.textContent = String(score.lastTieBreakPoints2 ?? 0);
         if (el.points2Manual) el.points2Manual.textContent = String(score.lastTieBreakPoints2 ?? 0);
       } else {
-        const ptText = typeof window.getPointDisplay === "function"
-          ? window.getPointDisplay(score.points1, score.points2, fmt, score)
+        const ptText = typeof getPointDisplay === "function"
+          ? getPointDisplay(score.points1, score.points2, fmt, score)
           : `${score.points1}x${score.points2}`;
 
         if (ptText.includes("AD - J1")) {
@@ -823,7 +753,9 @@
 
       if (data.status === "live") {
         const accumulated = Number(data.accumulatedSeconds || 0) * 1000;
-        const started = data.startedAt?.toDate ? data.startedAt.toDate() : (data.startedAt ? new Date(data.startedAt) : null);
+        const started = data.startedAt?.toDate
+          ? data.startedAt.toDate()
+          : (data.startedAt ? new Date(data.startedAt) : null);
 
         if (started && !isNaN(started.getTime())) {
           const baseMs = Date.now() - started.getTime() + accumulated;
@@ -921,51 +853,6 @@
       }
     }
 
-        // =========================================================================
-    // MOTOR DO CRONÔMETRO E EXIBIÇÃO DE MENSAGENS (MOVIDO PARA O TOPO)
-    // =========================================================================
-    function setMsg(text, type = "") {
-      if (!el.msg) return;
-      el.msg.textContent = text || "";
-      el.msg.className = type ? `msg ${type}` : "msg";
-      if (msgTimer) {
-        clearTimeout(msgTimer);
-        msgTimer = null;
-      }
-      if (text) {
-        msgTimer = setTimeout(() => {
-          if (el.msg) el.msg.textContent = "";
-        }, 2500);
-      }
-    }
-
-    function stopTimer() {
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
-      }
-    }
-
-    function durationText(ms) {
-      const s = Math.floor(ms / 1000);
-      const h = String(Math.floor(s / 3600)).padStart(2, "0");
-      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-      const sec = String(s % 60).padStart(2, "0");
-      return `${h}:${m}:${sec}`;
-    }
-
-    function startTimer(baseMs) {
-      stopTimer();
-      if (!baseMs || Number.isNaN(baseMs)) return;
-      liveStartedAtMs = baseMs;
-      const update = () => {
-        if (el.durationEl) el.durationEl.textContent = durationText(Date.now() - liveStartedAtMs);
-      };
-      update();
-      timer = setInterval(update, 1000);
-    }
-
-
     function buildFinalSetHistory(score) {
       const s = normalizeScore(score);
       const history = Array.isArray(s.setHistory) ? [...s.setHistory] : [];
@@ -1030,371 +917,660 @@
           tieBreakMode: null,
           tieBreakPoints1: 0,
           tieBreakPoints2: 0
-        });}
-        return cleanedHistory;}
-        async function registerPoint(winnerPos) {
-          if (!id) return;
-          const ref = __db.collection("matches").doc(id);
-    
-          try {
-            const snap = await ref.get();
-            if (!snap.exists) return setMsg("Partida nao encontrada.", "error");
-    
-            let data = snap.data();
-            if (isMatchLocked(data)) return setMsg("A partida ja foi finalizada.", "error");
-            if (data.status === "suspended") return setMsg("A partida esta suspensa. Clique em Recomecar.", "error");
-    
-            if (data.status !== "live") {
-              await ensureMatchStarted(ref, data);
-              data = (await ref.get()).data();
-            }
-    
-            const lastAction = buildLastActionSnapshot(data);
-            const scoreBefore = normalizeScore(data.score);
-            const result = typeof updateScoreWithPoint === "function"
-              ? updateScoreWithPoint(scoreBefore, winnerPos, data.matchFormat)
-              : { score: scoreBefore, gameWon: false, setWon: false, winner: 0, tieBreakStarted: false };
-    
-            const score = result.score || scoreBefore;
-    
-            pushLastPoint(score, winnerPos);
-            winnerPos === 1 ? score.totalPoints1++ : score.totalPoints2++;
-            applyBreakPointStats(scoreBefore, score, data, winnerPos);
-    
-            if (result.gameWon) {
-              score.server = score.server === "player1" ? "player2" : "player1";
-            }
-    
-            const finished = typeof isMatchFinished === "function"
-              ? isMatchFinished(score, data.matchFormat)
-              : result.winner > 0;
-    
-            const winner = typeof getMatchWinner === "function"
-              ? getMatchWinner(score, data.matchFormat)
-              : result.winner || 0;
-    
-            if (finished) score.setHistory = buildFinalSetHistory(score);
-    
-            await ref.update({
-              lastAction,
-              score: buildScorePayload(score),
-              server: score.server,
-              status: finished ? "finished" : data.status,
-              finishedAt: finished ? firebase.firestore.FieldValue.serverTimestamp() : (data.finishedAt || null),
-              winnerByWO: winner ? (winner === 1 ? "player1" : "player2") : (data.winnerByWO || ""),
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-              startedAt: data.startedAt || null,
-              accumulatedSeconds: data.accumulatedSeconds || 0
-            });
-    
-            if (finished) setMsg(`Partida encerrada! Vencedor: Jogador ${winner}`, "success");
-            else if (result.tieBreakStarted) setMsg(score.tieBreakMode === "super10" ? "Super Tie-break iniciado!" : "Tie-break iniciado!", "info");
-            else if (result.setWon) setMsg("Set encerrado!", "info");
-            else setMsg(`Ponto do Jogador ${winnerPos} salvo.`, "success");
-          } catch (err) {
-            console.error(err);
-            setMsg(err.message || "Erro ao salvar ponto.", "error");
-          }
+        });
+      }
+
+      return cleanedHistory;
+    }
+
+    async function registerPoint(winnerPos) {
+      if (!id) return;
+      const ref = __db.collection("matches").doc(id);
+
+      try {
+        const snap = await ref.get();
+        if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+        let data = snap.data();
+        if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+        if (data.status === "suspended") return setMsg("A partida está suspensa. Clique em Recomeçar.", "error");
+
+        if (data.status !== "live") {
+          await ensureMatchStarted(ref, data);
+          data = (await ref.get()).data();
         }
-    
-        async function decrementPoint(winnerPos) {
-          if (!id) return;
-          const ref = __db.collection("matches").doc(id);
-    
-          try {
-            const snap = await ref.get();
-            if (!snap.exists) return setMsg("Partida nao encontrada.", "error");
-    
-            let data = snap.data();
-            if (isMatchLocked(data)) return setMsg("A partida ja foi finalizada.", "error");
-            if (data.status === "suspended") return setMsg("A partida esta suspensa.", "error");
-    
-            if (data.status !== "live") {
-              await ensureMatchStarted(ref, data);
-              data = (await ref.get()).data();
-            }
-    
-            const lastAction = buildLastActionSnapshot(data);
-            const score = normalizeScore(data.score);
-            const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
-            if (history.length > 0) history.pop();
-            score.lastPoints = history;
-    
-            if (winnerPos === 1) score.totalPoints1 = Math.max(0, Number(score.totalPoints1 || 0) - 1);
-            else score.totalPoints2 = Math.max(0, Number(score.totalPoints2 || 0) - 1);
-    
-            if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-              if (winnerPos === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
-              if (winnerPos === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
-            } else {
-              if (winnerPos === 1) score.points1 = Math.max(0, score.points1 - 1);
-              if (winnerPos === 2) score.points2 = Math.max(0, score.points2 - 1);
-            }
-    
-            await ref.update({
-              lastAction,
-              score: buildScorePayload(score),
-              server: score.server,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          } catch (err) {
-            console.error(err);
-            setMsg(err.message || "Erro ao decrementar ponto.", "error");
-          }
+
+        const lastAction = buildLastActionSnapshot(data);
+        const scoreBefore = normalizeScore(data.score);
+        const result = typeof updateScoreWithPoint === "function"
+          ? updateScoreWithPoint(scoreBefore, winnerPos, data.matchFormat)
+          : { score: scoreBefore, gameWon: false, setWon: false, winner: 0, tieBreakStarted: false };
+
+        const score = result.score || scoreBefore;
+
+        pushLastPoint(score, winnerPos);
+        winnerPos === 1 ? score.totalPoints1++ : score.totalPoints2++;
+        applyBreakPointStats(scoreBefore, score, data, winnerPos);
+
+        if (result.gameWon) {
+          score.server = score.server === "player1" ? "player2" : "player1";
         }
-        async function saveGames(playerTarget, newValue) {
-          if (!id) return;
-          const value = Number(newValue);
-          if (Number.isNaN(value) || value < 0) return setMsg("Valor invalido.", "error");
-          if (value > 9) return setMsg("Maximo 9 games.", "error");
-    
-          const ref = __db.collection("matches").doc(id);
-    
-          try {
-            const snap = await ref.get();
-            if (!snap.exists) return setMsg("Partida nao encontrada.", "error");
-    
-            let data = snap.data();
-            if (isMatchLocked(data)) return setMsg("A partida ja foi finalizada.", "error");
-            if (data.status === "suspended") return setMsg("A partida esta suspensa.", "error");
-    
-            if (data.status !== "live") {
-              await ensureMatchStarted(ref, data);
-              data = (await ref.get()).data();
-            }
-    
-            const lastAction = buildLastActionSnapshot(data);
-            const score = normalizeScore(data.score);
-    
-            if (playerTarget === "player1") score.games1 = value;
-            if (playerTarget === "player2") score.games2 = value;
-    
-            const setResult = typeof evaluateSet === "function"
-              ? evaluateSet(score, data.matchFormat)
-              : { setWon: false, winner: 0, tieBreakStarted: false };
-    
-            const finished = typeof isMatchFinished === "function"
-              ? isMatchFinished(score, data.matchFormat)
-              : false;
-    
-            const winner = typeof getMatchWinner === "function"
-              ? getMatchWinner(score, data.matchFormat)
-              : 0;
-    
-            if (finished) score.setHistory = buildFinalSetHistory(score);
-    
-            await ref.update({
-              lastAction,
-              score: buildScorePayload(score),
-              server: score.server,
-              status: finished ? "finished" : data.status,
-              finishedAt: finished ? firebase.firestore.FieldValue.serverTimestamp() : (data.finishedAt || null),
-              winnerByWO: winner ? (winner === 1 ? "player1" : "player2") : (data.winnerByWO || ""),
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-    
-            if (setResult.tieBreakStarted) setMsg(score.tieBreakMode === "super10" ? "Super Tie-break!" : "Tie-break!", "info");
-            else if (setResult.setWon) setMsg("Set gravado.", "success");
-            else setMsg("Games atualizados.", "success");
-          } catch (err) {
-            console.error(err);
-            setMsg(err.message, "error");
-          }
+
+        const finished = typeof isMatchFinished === "function"
+          ? isMatchFinished(score, data.matchFormat)
+          : result.winner > 0;
+
+        const winner = typeof getMatchWinner === "function"
+          ? getMatchWinner(score, data.matchFormat)
+          : result.winner || 0;
+
+        if (finished) score.setHistory = buildFinalSetHistory(score);
+
+        await ref.update({
+          lastAction,
+          score: buildScorePayload(score),
+          server: score.server,
+          status: finished ? "finished" : data.status,
+          finishedAt: finished ? firebase.firestore.FieldValue.serverTimestamp() : (data.finishedAt || null),
+          winnerByWO: winner ? (winner === 1 ? "player1" : "player2") : (data.winnerByWO || ""),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          startedAt: data.startedAt || null,
+          accumulatedSeconds: data.accumulatedSeconds || 0
+        });
+
+        if (finished) setMsg(`🏆 Partida encerrada! Vencedor: Jogador ${winner}`, "success");
+        else if (result.tieBreakStarted) setMsg(score.tieBreakMode === "super10" ? "🎾 Super Tie-break iniciado!" : "🎾 Tie-break iniciado!", "info");
+        else if (result.setWon) setMsg("✅ Set encerrado!", "info");
+        else setMsg(`Ponto do Jogador ${winnerPos} salvo.`, "success");
+      } catch (err) {
+        console.error(err);
+        setMsg(err.message || "Erro ao salvar ponto.", "error");
+      }
+    }
+
+    async function decrementPoint(winnerPos) {
+      if (!id) return;
+      const ref = __db.collection("matches").doc(id);
+
+      try {
+        const snap = await ref.get();
+        if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+        let data = snap.data();
+        if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+        if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
+
+        if (data.status !== "live") {
+          await ensureMatchStarted(ref, data);
+          data = (await ref.get()).data();
         }
-    
-        async function setServe(server) {
-          if (!id) return;
-          try {
-            const ref = __db.collection("matches").doc(id);
-            const snap = await ref.get();
-            if (!snap.exists) return setMsg("Partida nao encontrada.", "error");
-    
-            const data = snap.data();
-            if (isMatchLocked(data)) return setMsg("A partida ja foi finalizada.", "error");
-            if (data.status === "suspended") return setMsg("A partida esta suspensa.", "error");
-    
-            const lastAction = buildLastActionSnapshot(data);
-            const score = normalizeScore(data.score);
-            score.server = server;
-    
-            await ref.update({
-              lastAction,
-              score: buildScorePayload(score),
-              server,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-    
-            syncServeUI(server);
-            setMsg(`Saque: Jogador ${server === "player1" ? 1 : 2}.`, "info");
-          } catch (err) {
-            console.error(err);
-            setMsg(err.message || "Erro ao alterar o saque.", "error");
-          }
+
+        const lastAction = buildLastActionSnapshot(data);
+        const score = normalizeScore(data.score);
+        const history = Array.isArray(score.lastPoints) ? [...score.lastPoints] : [];
+        if (history.length > 0) history.pop();
+        score.lastPoints = history;
+
+        if (winnerPos === 1) score.totalPoints1 = Math.max(0, Number(score.totalPoints1 || 0) - 1);
+        else score.totalPoints2 = Math.max(0, Number(score.totalPoints2 || 0) - 1);
+
+        if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+          if (winnerPos === 1) score.tieBreakPoints1 = Math.max(0, score.tieBreakPoints1 - 1);
+          if (winnerPos === 2) score.tieBreakPoints2 = Math.max(0, score.tieBreakPoints2 - 1);
+        } else {
+          if (winnerPos === 1) score.points1 = Math.max(0, score.points1 - 1);
+          if (winnerPos === 2) score.points2 = Math.max(0, score.points2 - 1);
         }
-    
-        function bindButtons() {
-          bindInputModeToggle();
-          bindStatsViewToggle();
-    
-          // REATIVAÇÃO BLINDADA: Captura o clique do seu botão HTML nativo
-          const botaoCompartilhar = document.getElementById("shareBtn");
-          if (botaoCompartilhar) {
-            botaoCompartilhar.addEventListener("click", (e) => {
-              e.preventDefault();
-              
-              const urlParams = new URLSearchParams(window.location.search);
-              const currentMatchId = urlParams.get("id");
-              if (!currentMatchId) return setMsg("ID da partida nao encontrado.", "error");
-    
-              // ROTA SEGURA ANTI-ISOLAMENTO: Se o cache local falhar por escopo,
-              // puxamos os tokens diretamente do banco de dados que ja foi carregado
-              __db.collection("matches").doc(currentMatchId).get().then((snap) => {
-                if (snap.exists) {
-                  const matchData = snap.data();
-                  const owner = matchData.ownerId || "";
-                  const token = matchData.shareToken || "";
-    
-                  // Monta a URL publica padrao do ecossistema TennisPro
-                  const linkPublico = `${window.location.origin}/public.html?ownerId=${owner}&shareToken=${token}&id=${currentMatchId}`;
-    
-                  // Copia para a area de transferencia do celular ou computador
-                  navigator.clipboard.writeText(linkPublico).then(() => {
-                    setMsg("Link da partida copiado!", "success");
-                  }).catch((err) => {
-                    console.error("Erro ao copiar:", err);
-                    setMsg("Erro ao copiar link.", "error");
-                  });
-                } else {
-                  setMsg("Erro ao buscar dados da partida.", "error");
-                }
-              }).catch((err) => {
-                console.error(err);
-                setMsg("Erro de conexao ao gerar link.", "error");
-              });
-            });
-          }
-    
-          // Mantém as suas rotinas originais abaixo sem alterações:
-          document.querySelectorAll("[data-delta]").forEach((btn) => {
-            btn.addEventListener("click", async () => {
-              const target = btn.dataset.target;
-              const delta = Number(btn.dataset.delta);
-              const pos = target === "player1" ? 1 : 2;
-              if (delta > 0) await registerPoint(pos);
-              else await decrementPoint(pos);
-            });
+
+        await ref.update({
+          lastAction,
+          score: buildScorePayload(score),
+          server: score.server,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (err) {
+        console.error(err);
+        setMsg(err.message || "Erro ao decrementar ponto.", "error");
+      }
+    }
+
+    async function saveGames(playerTarget, newValue) {
+      if (!id) return;
+      const value = Number(newValue);
+      if (Number.isNaN(value) || value < 0) return setMsg("Valor inválido.", "error");
+      if (value > 9) return setMsg("Máximo 9 games.", "error");
+
+      const ref = __db.collection("matches").doc(id);
+
+      try {
+        const snap = await ref.get();
+        if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+        let data = snap.data();
+        if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+        if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
+
+        if (data.status !== "live") {
+          await ensureMatchStarted(ref, data);
+          data = (await ref.get()).data();
+        }
+
+        const lastAction = buildLastActionSnapshot(data);
+        const score = normalizeScore(data.score);
+
+        if (playerTarget === "player1") score.games1 = value;
+        if (playerTarget === "player2") score.games2 = value;
+
+        const setResult = typeof evaluateSet === "function"
+          ? evaluateSet(score, data.matchFormat)
+          : { setWon: false, winner: 0, tieBreakStarted: false };
+
+        const finished = typeof isMatchFinished === "function"
+          ? isMatchFinished(score, data.matchFormat)
+          : false;
+
+        const winner = typeof getMatchWinner === "function"
+          ? getMatchWinner(score, data.matchFormat)
+          : 0;
+
+        if (finished) score.setHistory = buildFinalSetHistory(score);
+
+        await ref.update({
+          lastAction,
+          score: buildScorePayload(score),
+          server: score.server,
+          status: finished ? "finished" : data.status,
+          finishedAt: finished ? firebase.firestore.FieldValue.serverTimestamp() : (data.finishedAt || null),
+          winnerByWO: winner ? (winner === 1 ? "player1" : "player2") : (data.winnerByWO || ""),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        if (setResult.tieBreakStarted) setMsg(score.tieBreakMode === "super10" ? "🎾 Super Tie-break!" : "🎾 Tie-break!", "info");
+        else if (setResult.setWon) setMsg("✅ Set gravado.", "success");
+        else setMsg("Games atualizados.", "success");
+      } catch (err) {
+        console.error(err);
+        setMsg(err.message, "error");
+      }
+    }
+
+    async function getCurrentMatchData() {
+      if (!id) return null;
+      const snap = await __db.collection("matches").doc(id).get();
+      return snap.exists ? snap.data() : null;
+    }
+
+    async function setServe(server) {
+      if (!id) return;
+      try {
+        const ref = __db.collection("matches").doc(id);
+        const snap = await ref.get();
+        if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+        const data = snap.data();
+        if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+        if (data.status === "suspended") return setMsg("A partida está suspensa.", "error");
+
+        const lastAction = buildLastActionSnapshot(data);
+        const score = normalizeScore(data.score);
+        score.server = server;
+
+        await ref.update({
+          lastAction,
+          score: buildScorePayload(score),
+          server,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        syncServeUI(server);
+        setMsg(`Saque: Jogador ${server === "player1" ? 1 : 2}.`, "info");
+      } catch (err) {
+        console.error(err);
+        setMsg(err.message || "Erro ao alterar o saque.", "error");
+      }
+    }
+
+    function getShareUrl() {
+      const url = new URL(window.location.href);
+      url.searchParams.set("id", id);
+      if (shareTokenFromUrl) url.searchParams.set("shareToken", shareTokenFromUrl);
+      return url.toString();
+    }
+
+    async function copyToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (_) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+
+    async function handleShare() {
+      if (!id) return;
+      const shareUrl = getShareUrl();
+      const title = document.title || "Live Scores Tennis";
+
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title,
+            text: "Acesse esta partida para computar o placar.",
+            url: shareUrl
           });
-    
-          document.querySelectorAll("[data-games-delta]").forEach((btn) => {
-            btn.addEventListener("click", async () => {
-              const target = btn.dataset.gamesTarget;
-              const delta = Number(btn.dataset.gamesDelta);
-              const valEl = target === "player1" ? el.gamesVal1 : el.gamesVal2;
-              const current = Number(valEl?.textContent || 0);
-              const newVal = Math.max(0, Math.min(9, current + delta));
-              if (valEl) valEl.textContent = String(newVal);
-              await saveGames(target, newVal);
-            });
-          });
-    
-          const handleServeChange = async (server) => {
-            await setServe(server);
-          };
-    
-          ["servePlayer1", "servePlayer1Stats"].forEach((idEl) => {
-            document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player1"));
-          });
-          ["servePlayer2", "servePlayer2Manual"].forEach((idEl) => {
-            document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player2"));
-          });
-    
-          if (serveOption1) serveOption1.addEventListener("click", () => setServe("player1"));
-          if (serveOption2) serveOption2.addEventListener("click", () => setServe("player2"));
-          if (manualServeOption1) manualServeOption1.addEventListener("click", () => setServe("player1"));
-          if (manualServeOption2) manualServeOption2.addEventListener("click", () => setServe("player2"));
+          setMsg("Link compartilhado.", "success");
+          return;
         }
+
+        const copied = await copyToClipboard(shareUrl);
+        if (copied) setMsg("Link copiado para a área de transferência.", "success");
+        else prompt("Copie o link compartilhável:", shareUrl);
+      } catch (err) {
+        console.error(err);
+        const copied = await copyToClipboard(shareUrl);
+        if (copied) setMsg("Link copiado para a área de transferência.", "success");
+        else prompt("Copie o link compartilhável:", shareUrl);
+      }
+    }
+
+    function createRetirementModal(player1Name, player2Name) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.72); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px;";
     
+        const box = document.createElement("div");
+        box.style.cssText = "width:min(420px, 100%); background:#1f2937; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,0.45); font-family:inherit;";
     
+        box.innerHTML = ` <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;">Deseja abandonar a partida?</div> <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;">Selecione quem abandonou a partida.</div> <div style="display:flex;flex-direction:column;gap:10px;"> <button id="retPlayer1" style="padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer;">${player1Name}</button> <button id="retPlayer2" style="padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer;">${player2Name}</button> </div> `;
     
-        function loadMatch() {
-          if (!id) return setMsg("ID da partida nao informado.", "error");
-          __db.collection("matches").doc(id).onSnapshot(
-            (snap) => {
-              if (!snap.exists) return setMsg("Partida nao encontrada.", "error");
-              const data = snap.data();
-              cacheMatchDataLocal = data;
-              
-              // Dispara um broadcast ativamente via radio local para sincronizar a TV
-              new BroadcastChannel("tennis_tv_channel").postMessage(data);
-              
-              renderMatch(data);
-            },
-            (err) => {
-              console.error(err);
-              setMsg(err.message || "Erro ao carregar partida.", "error");
-            }
-          );
-        }
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
     
-        // Receptor ativo para escutar quando a TV pedir o placar atualizado em tempo real
-        new BroadcastChannel("tennis_tv_channel").onmessage = (event) => {
-          if (event.data === "PEDIR_PLACAR_ATUAL" && cacheMatchDataLocal) {
-            new BroadcastChannel("tennis_tv_channel").postMessage(cacheMatchDataLocal);
-          }
+        const cleanup = () => {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
         };
     
-        function applyInputMode(mode) {
-          inputMode = mode;
+        box.querySelector("#retPlayer1").addEventListener("click", () => {
+          cleanup();
+          resolve("player1");
+        });
     
-          const isGames = mode === "games";
-          const isPoints = mode === "points";
-          const isStats = mode === "stats";
+        box.querySelector("#retPlayer2").addEventListener("click", () => {
+          cleanup();
+          resolve("player2");
+        });
     
-          if (el.modeGamesLabel) el.modeGamesLabel.classList.toggle("active", isGames);
-          if (el.modePointsLabel) el.modePointsLabel.classList.toggle("active", isPoints);
-          if (el.modeStatsLabel) el.modeStatsLabel.classList.toggle("active", isStats);
-    
-          // CORREÇÃO VISUAL: Controla rigidamente a exibição para que uma aba nunca vaze na outra
-          if (el.gamesControl1) el.gamesControl1.style.display = isGames ? "flex" : "none";
-          if (el.gamesControl2) el.gamesControl2.style.display = isGames ? "flex" : "none";
-          if (el.pointControl1) el.pointControl1.style.display = isPoints ? "flex" : "none";
-          if (el.pointControl2) el.pointControl2.style.display = isPoints ? "flex" : "none";
-          if (el.scoreModesArea) el.scoreModesArea.style.display = isStats ? "none" : "";
-          if (el.statsControlPanel) el.statsControlPanel.style.display = isStats ? "" : "none";
-          if (el.statsModeToggle) el.statsModeToggle.style.display = isStats ? "flex" : "none";
-    
-          if (isStats) applyStatsView(statsViewMode || "single");
-        }
-    
-        function init() {
-          // MOTOR ANTITRAVAMENTO: Se a página veio de um redirecionamento de nova partida,
-          // força um refresh limpo de memória uma única vez em background antes de ligar os botões.
-          const queryUnica = new URLSearchParams(window.location.search);
-          const idMatchAtual = queryUnica.get("id") || "";
-          const chaveCheck = "tpl_last_match_id_loaded";
-          const ultimaPartidaCarregada = localStorage.getItem(chaveCheck);
-    
-          if (idMatchAtual && idMatchAtual !== ultimaPartidaCarregada) {
-            localStorage.setItem(chaveCheck, idMatchAtual);
-            window.location.reload();
+        // Não permite cancelar clicando fora
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) {
+            e.stopPropagation();
+          }
+        });
+      });
+    }
+
+    function bindButtons() {
+      bindInputModeToggle();
+      bindStatsViewToggle();
+
+      el.shareBtn?.addEventListener("click", handleShare);
+
+      el.startBtn?.addEventListener("click", async () => {
+        if (!id) return;
+        try {
+          const ref = __db.collection("matches").doc(id);
+          const snap = await ref.get();
+          if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+          const data = snap.data();
+          const status = data.status || "scheduled";
+
+          if (status === "scheduled" || status === "not_started") {
+            if (!confirm("Deseja iniciar a partida?")) return;
+
+            const lastAction = buildLastActionSnapshot(data);
+            const startedAt = firebase.firestore.Timestamp.now();
+            liveStartedAtMs = startedAt.toDate().getTime();
+
+            await ref.update({
+              lastAction,
+              status: "live",
+              startedAt,
+              accumulatedSeconds: 0,
+              suspendedAt: null,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            stopTimer();
+            setTimeout(() => startTimer(liveStartedAtMs), 0);
+            setMsg("Partida iniciada.", "success");
             return;
           }
-    
-          bindButtons();
-          bindStatsButtonFlash();
-          bindStatsActions();
-          
-          // FORÇA O ALINHAMENTO DA ABA INICIAL: Garante que o estado físico do HTML nasça limpo 
-          // e respeite a regra de exibição única da aba 'games' logo na largada da página
-          applyInputMode("games"); 
-          
-          loadMatch();
+
+          if (status === "live") {
+            if (!confirm("Deseja interromper (suspender) a partida?")) return;
+
+            const lastAction = buildLastActionSnapshot(data);
+            const started = data.startedAt?.toDate
+              ? data.startedAt.toDate()
+              : (data.startedAt ? new Date(data.startedAt) : null);
+
+            const previousAccumulated = Number(data.accumulatedSeconds || 0);
+            const newAccumulated = started && !isNaN(started.getTime())
+              ? previousAccumulated + Math.floor((Date.now() - started.getTime()) / 1000)
+              : previousAccumulated;
+
+            stopTimer();
+            liveStartedAtMs = null;
+
+            await ref.update({
+              lastAction,
+              status: "suspended",
+              suspendedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              accumulatedSeconds: newAccumulated,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            setMsg("Partida suspensa.", "info");
+            return;
+          }
+
+          if (status === "suspended") {
+            if (!confirm("Deseja recomeçar a partida?")) return;
+
+            const lastAction = buildLastActionSnapshot(data);
+            const startedAt = firebase.firestore.Timestamp.now();
+
+            await ref.update({
+              lastAction,
+              status: "live",
+              startedAt,
+              suspendedAt: null,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            const accumulated = Number(data.accumulatedSeconds || 0) * 1000;
+            liveStartedAtMs = Date.now() - accumulated;
+            stopTimer();
+            setTimeout(() => startTimer(liveStartedAtMs), 0);
+
+            setMsg("Partida recomeçada.", "success");
+            return;
+          }
+        } catch (err) {
+          console.error(err);
+          setMsg(err.message, "error");
         }
-    
-        return { init };
+      });
+
+      el.finishBtn?.addEventListener("click", async () => {
+        if (!id) return;
+
+        try {
+          const ref = __db.collection("matches").doc(id);
+          const snap = await ref.get();
+          if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+          const data = snap.data();
+          if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+
+          const team1Name = getTeam1Name(data);
+          const team2Name = getTeam2Name(data);
+
+          const action = await createRetirementModal(team1Name, team2Name);
+          if (!action) {
+            const normalConfirm = confirm("Deseja encerrar a partida?");
+            if (!normalConfirm) return;
+          }
+
+          const wasRetirement = action === "player1" || action === "player2";
+          const lastAction = buildLastActionSnapshot(data);
+
+          let durationSeconds = Number(data.accumulatedSeconds || 0);
+          if (data.status === "live") {
+            const started = data.startedAt?.toDate
+              ? data.startedAt.toDate()
+              : (data.startedAt ? new Date(data.startedAt) : null);
+
+            if (started && !isNaN(started.getTime())) {
+              durationSeconds += Math.floor((Date.now() - started.getTime()) / 1000);
+            } else if (liveStartedAtMs) {
+              durationSeconds += Math.floor((Date.now() - liveStartedAtMs) / 1000);
+            }
+          }
+
+          liveStartedAtMs = null;
+          stopTimer();
+
+          const score = normalizeScore(data.score);
+          const finishedAt = firebase.firestore.Timestamp.now();
+          score.setHistory = buildFinalSetHistory(score);
+
+          let statusToSave = "finished";
+          let winnerByWO = data.winnerByWO || "";
+          let abandonedBy = "";
+          let winnerByRet = "";
+
+          if (wasRetirement) {
+            statusToSave = "ret";
+            abandonedBy = action;
+            winnerByRet = action === "player1" ? "player2" : "player1";
+          }
+
+          await ref.update({
+            lastAction,
+            status: statusToSave,
+            finishedAt,
+            durationSeconds: Math.max(1, durationSeconds),
+            accumulatedSeconds: durationSeconds,
+            score: buildScorePayload(score),
+            server: score.server || data.server || "player1",
+            startedAt: data.startedAt || null,
+            suspendedAt: null,
+            winnerByWO,
+            abandonedBy,
+            winnerByRet,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          if (el.durationEl) el.durationEl.textContent = durationText(durationSeconds * 1000);
+          if (wasRetirement) {
+            const winnerName = action === "player1" ? team2Name : team1Name;
+            setMsg(`Partida finalizada por abandono. Vencedor: ${winnerName}`, "success");
+          } else {
+            setMsg("Partida finalizada com sucesso.", "success");
+          }
+        } catch (err) {
+          console.error(err);
+          setMsg(err.message, "error");
+        }
+      });
+
+      el.resetScoreBtn?.addEventListener("click", async () => {
+        if (!id || !confirm("Deseja zerar o placar e as estatísticas?")) return;
+
+        try {
+          const ref = __db.collection("matches").doc(id);
+          const snap = await ref.get();
+          if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+          const data = snap.data();
+          if (isMatchLocked(data)) return setMsg("A partida já foi finalizada.", "error");
+
+          const lastAction = buildLastActionSnapshot(data);
+          liveStartedAtMs = null;
+          stopTimer();
+
+          const cleanStats = {
+            player1: {
+              currentServeType: 1,
+              serve1Attempts: 0, serve1Won: 0, serve2Attempts: 0, serve2Won: 0,
+              serveTotal: 0, serveSuccessPct: 0,
+              doubleFault: 0, ace: 0,
+              dropshotWinner: 0, dropshotError: 0,
+              smashWinner: 0, smashError: 0,
+              voleioWinner: 0, voleioError: 0,
+              forehandWinner: 0, forehandError: 0,
+              backhandWinner: 0, backhandError: 0,
+              enfFH: 0, enfBH: 0, forcedError: 0,
+              normalPoint: 0, returnPoint: 0, returnError: 0,
+              baselineError: 0, baselinePoint: 0,
+              totalPointsWon: 0
+            },
+            player2: {
+              currentServeType: 1,
+              serve1Attempts: 0, serve1Won: 0, serve2Attempts: 0, serve2Won: 0,
+              serveTotal: 0, serveSuccessPct: 0,
+              doubleFault: 0, ace: 0,
+              dropshotWinner: 0, dropshotError: 0,
+              smashWinner: 0, smashError: 0,
+              voleioWinner: 0, voleioError: 0,
+              forehandWinner: 0, forehandError: 0,
+              backhandWinner: 0, backhandError: 0,
+              enfFH: 0, enfBH: 0, forcedError: 0,
+              normalPoint: 0, returnPoint: 0, returnError: 0,
+              baselineError: 0, baselinePoint: 0,
+              totalPointsWon: 0
+            }
+          };
+
+          await ref.update({
+            lastAction,
+            score: defaultScore(),
+            stats: cleanStats,
+            startedAt: firebase.firestore.Timestamp.now(),
+            accumulatedSeconds: 0,
+            durationSeconds: 0,
+            suspendedAt: null,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          setMsg("Placar e estatísticas zerados com sucesso.", "success");
+        } catch (err) {
+          console.error(err);
+          setMsg(err.message || "Erro ao zerar placar e estatísticas.", "error");
+        }
+      });
+
+      el.undoBtn?.addEventListener("click", async () => {
+        if (!id || !confirm("Deseja desfazer a última ação?")) return;
+
+        try {
+          const ref = __db.collection("matches").doc(id);
+          const snap = await ref.get();
+          if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+
+          const data = snap.data();
+          if (!data.lastAction) return setMsg("Não há ação anterior para desfazer.", "error");
+
+          const isFinished = data.status === "finished" || data.status === "wo";
+          if (isFinished && data.finishedAt?.toDate) {
+            const finishedAt = data.finishedAt.toDate();
+            const elapsedMs = Date.now() - finishedAt.getTime();
+            if (elapsedMs > 5 * 60 * 1000) {
+              return setMsg("O desfazer foi bloqueado após 5 minutos da finalização.", "error");
+            }
+          }
+
+          const prev = data.lastAction;
+          await ref.update({
+            score: prev.score || defaultScore(),
+            status: prev.status || "live",
+            finishedAt: prev.finishedAt || null,
+            winnerByWO: prev.winnerByWO || "",
+            server: prev.server || "player1",
+            durationSeconds: prev.durationSeconds || 0,
+            accumulatedSeconds: prev.accumulatedSeconds || 0,
+            startedAt: prev.startedAt || null,
+            suspendedAt: prev.suspendedAt || null,
+            lastAction: null,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          if (prev.status !== "live") {
+            liveStartedAtMs = null;
+            stopTimer();
+          }
+
+          setMsg("Última ação desfeita.", "info");
+        } catch (err) {
+          console.error(err);
+          setMsg(err.message, "error");
+        }
+      });
+
+      document.querySelectorAll("[data-delta]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const target = btn.dataset.target;
+          const delta = Number(btn.dataset.delta);
+          const pos = target === "player1" ? 1 : 2;
+          if (delta > 0) await registerPoint(pos);
+          else await decrementPoint(pos);
+        });
+      });
+
+      document.querySelectorAll("[data-games-delta]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const target = btn.dataset.gamesTarget;
+          const delta = Number(btn.dataset.gamesDelta);
+          const valEl = target === "player1" ? el.gamesVal1 : el.gamesVal2;
+          const current = Number(valEl?.textContent || 0);
+          const newVal = Math.max(0, Math.min(9, current + delta));
+          if (valEl) valEl.textContent = String(newVal);
+          await saveGames(target, newVal);
+        });
+      });
+
+      const handleServeChange = async (server) => {
+        await setServe(server);
+      };
+
+      ["servePlayer1", "servePlayer1Stats"].forEach((idEl) => {
+        document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player1"));
+      });
+      ["servePlayer2", "servePlayer2Manual"].forEach((idEl) => {
+        document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player2"));
+      });
+
+      serveOption1?.addEventListener("click", () => setServe("player1"));
+      serveOption2?.addEventListener("click", () => setServe("player2"));
+      manualServeOption1?.addEventListener("click", () => setServe("player1"));
+      manualServeOption2?.addEventListener("click", () => setServe("player2"));
+    }
+
+    function loadMatch() {
+      if (!id) return setMsg("ID da partida não informado.", "error");
+      __db.collection("matches").doc(id).onSnapshot(
+        (snap) => {
+          if (!snap.exists) return setMsg("Partida não encontrada.", "error");
+          renderMatch(snap.data());
+        },
+        (err) => {
+          console.error(err);
+          setMsg(err.message || "Erro ao carregar partida.", "error");
+        }
+      );
+    }
+
+    function init() {
+      bindButtons();
+      bindStatsButtonFlash();
+      loadMatch();
+    }
+
+    return { init };
   })();
 
   document.addEventListener("DOMContentLoaded", () => PlayerApp.init());
 })();
-
-        
