@@ -56,14 +56,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------------------------------------------------------------------
     // DEBUG NA TELA
     // ---------------------------------------------------------------------
+    function escapeHtml(str = "") {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function appendDebug(msg, isError = false) {
       const time = new Date().toLocaleTimeString("pt-BR");
       const text = `[${time}] ${msg}`;
-
       console.log(text);
 
       if (cameraStatus) {
-        cameraStatus.innerHTML = ` <div style="font-size:13px; line-height:1.4; color:${isError ? '#ffb4b4' : '#fff'}; white-space:pre-wrap;"> ${escapeHtml(text)} </div> `;
+        cameraStatus.innerHTML = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap;"> ${escapeHtml(text)} </div> `;
       }
     }
 
@@ -77,29 +85,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ? "#ffd37a"
             : "#ffffff";
 
-        return `<div style="font-size:13px; line-height:1.45; color:${color}; white-space:pre-wrap; margin-bottom:${idx < lines.length - 1 ? '4px' : '0'};"> ${escapeHtml(line.text)} </div>`;
+        return `<div style="font-size:13px; line-height:1.45; color:${color}; white-space:pre-wrap; margin-bottom:${idx < lines.length - 1 ? "4px" : "0"};"> ${escapeHtml(line.text)} </div>`;
       }).join("");
-    }
-
-    function setCameraStatus(msg = "") {
-      if (cameraStatus) {
-        cameraStatus.textContent = msg;
-      }
     }
 
     function setTvInfo(msg = "") {
       if (tvInfoBox) tvInfoBox.textContent = msg;
     }
 
-    function escapeHtml(str = "") {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
+    // ---------------------------------------------------------------------
+    // CÂMERA
+    // ---------------------------------------------------------------------
     function stopCamera() {
       if (cameraStream && typeof cameraStream.getTracks === "function") {
         cameraStream.getTracks().forEach((track) => track.stop());
@@ -137,7 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
         stopCamera();
 
         let stream = null;
-        let firstError = null;
 
         try {
           appendDebug("Tentando câmera traseira com facingMode environment...");
@@ -150,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
             audio: false
           });
         } catch (e1) {
-          firstError = e1;
           appendDebug(`Falhou o primeiro teste: ${e1.name || "Erro"} - ${e1.message || e1}`, true);
 
           try {
@@ -186,8 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        setCameraStatus("");
         appendDebug("Câmera iniciada com sucesso.");
+        return true;
       } catch (error) {
         console.error("Erro ao acessar a câmera traseira:", error);
 
@@ -205,19 +199,25 @@ document.addEventListener("DOMContentLoaded", () => {
           { type: "error", text: "Falha ao iniciar a câmera." },
           { type: "error", text: `Erro: ${error.name || "Sem nome"} - ${error.message || error}` },
           { type: "warn", text: `Mensagem exibida: ${msg}` },
-          { type: "info", text: "Dica: teste no Chrome, permita a câmera e confirme que a página não está em iframe sem allow=camera." }
+          { type: "info", text: "Teste no Chrome mobile e confirme a permissão de câmera." }
         ]);
+
+        return false;
       }
     }
 
     async function iniciarFluxoTransmissaoNativa() {
-      const telaInicial = document.getElementById("telaInicial");
-      if (telaInicial) telaInicial.style.display = "none";
-
       appendDebug("Botão pressionado. Iniciando fluxo...");
-      await ligarCameraTraseira();
 
-      pedirPlacarAtual();
+      const sucesso = await ligarCameraTraseira();
+
+      if (sucesso) {
+        const telaInicial = document.getElementById("telaInicial");
+        if (telaInicial) telaInicial.style.display = "none";
+        pedirPlacarAtual();
+      } else {
+        appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
+      }
     }
 
     window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ---------------------------------------------------------------------
-    // REGRAS E UTILITÁRIOS DO PLACAR
+    // UTILITÁRIOS DE PLACAR
     // ---------------------------------------------------------------------
     function getGameFormat(match) {
       return String(match?.gameFormat || "Simples").trim();
@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ---------------------------------------------------------------------
-    // PLACAR
+    // RENDER DO PLACAR
     // ---------------------------------------------------------------------
     function renderPlacar(data) {
       if (!data || !data.score || !tvGridPlacar) return;
@@ -517,6 +517,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+    // ---------------------------------------------------------------------
+    // RECEPTOR DE DADOS
+    // ---------------------------------------------------------------------
     function processPayload(payload) {
       if (!payload) return;
 
@@ -559,6 +562,9 @@ document.addEventListener("DOMContentLoaded", () => {
       processPayload(event.data);
     });
 
+    // ---------------------------------------------------------------------
+    // FIRESTORE DIRETO, SE HOUVER ID NA URL
+    // ---------------------------------------------------------------------
     if (matchId && matchId !== "null" && window.__db) {
       appendDebug(`Escuta Firestore iniciada para ID: ${matchId}`);
 
@@ -586,6 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
       appendDebug("Sem parâmetro id. A TV vai aguardar mensagens da aba pública.");
     }
 
+    // Enquanto não chega payload, pede atualização
     relayInterval = setInterval(() => {
       if (!latestPayload) {
         pedirPlacarAtual();
