@@ -658,6 +658,37 @@ document.addEventListener("DOMContentLoaded", () => {
       processPayload(event.data);
     });
 
+    function detectarModoApp() {
+  const el = document.getElementById("modoAppInfo");
+  if (!el) return;
+
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  const isFullscreen = window.matchMedia("(display-mode: fullscreen)").matches;
+  const isMinimalUi = window.matchMedia("(display-mode: minimal-ui)").matches;
+  const isBrowser = window.matchMedia("(display-mode: browser)").matches;
+
+  let modo = "Chrome normal";
+
+  if (isFullscreen) {
+    modo = "standalone / fullscreen";
+  } else if (isStandalone) {
+    modo = "PWA / standalone";
+  } else if (isMinimalUi) {
+    modo = "PWA / minimal-ui";
+  } else if (isBrowser) {
+    modo = "Chrome normal";
+  }
+
+  el.textContent =
+    `Modo detectado: ${modo}\n` +
+    `standalone: ${isStandalone}\n` +
+    `fullscreen: ${isFullscreen}\n` +
+    `minimal-ui: ${isMinimalUi}\n` +
+    `browser: ${isBrowser}`;
+}
+
+document.addEventListener("DOMContentLoaded", detectarModoApp);
+
     // ---------------------------------------------------------------------
     // FIRESTORE DIRETO, SE HOUVER ID NA URL
     // ---------------------------------------------------------------------
