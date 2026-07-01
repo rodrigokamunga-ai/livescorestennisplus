@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cameraStatus = document.getElementById("cameraStatus");
     const cameraDebug = document.getElementById("cameraDebug");
     const cameraHint = document.getElementById("cameraHint");
+    const modoAppInfo = document.getElementById("modoAppInfo");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
@@ -112,6 +113,28 @@ document.addEventListener("DOMContentLoaded", () => {
     function hidePermissionHelp() {
       setCameraHint("");
       if (btnTentarNovamente) btnTentarNovamente.style.display = "none";
+    }
+
+    function mostrarModoApp() {
+      if (!modoAppInfo) return;
+
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+      const isFullscreen = window.matchMedia("(display-mode: fullscreen)").matches;
+      const isMinimalUi = window.matchMedia("(display-mode: minimal-ui)").matches;
+      const isBrowser = window.matchMedia("(display-mode: browser)").matches;
+
+      let modo = "Chrome normal";
+      if (isStandalone) modo = "PWA / standalone";
+      else if (isFullscreen) modo = "fullscreen";
+      else if (isMinimalUi) modo = "minimal-ui";
+      else if (isBrowser) modo = "Chrome normal";
+
+      modoAppInfo.textContent =
+        `Modo detectado: ${modo}\n` +
+        `standalone: ${isStandalone}\n` +
+        `fullscreen: ${isFullscreen}\n` +
+        `minimal-ui: ${isMinimalUi}\n` +
+        `browser: ${isBrowser}`;
     }
 
     // ---------------------------------------------------------------------
@@ -723,5 +746,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pedirPlacarAtual();
       }
     }, 1000);
+
+    mostrarModoApp();
   }
 });
