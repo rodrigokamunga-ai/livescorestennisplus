@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Confronto direto entre jogadores" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>TennisPro Head2Head</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/confronto.css" />
+</head>
+
+<body class="confronto-page">
+  <main class="container dashboard-container confronto-container">
+    <section class="panel panel-glass confronto-card">
+
+      <div class="dashboard-title confronto-header">
+        <div class="title-with-icon confronto-header-title">
+          <span class="section-icon">🎾</span>
+          <h3>Head2Head</h3>
+        </div>
+        <span class="badge" id="matchesLabel">Carregando...</span>
+      </div>
+
+      <p id="confrontoSubtitle" class="confronto-subtitle hidden"></p>
+
+      <!-- HERO PREMIUM -->
+      <div class="confronto-hero premium">
+
+        <!-- JOGADOR 1: dados à esquerda, foto à direita -->
+        <div class="confronto-player-box left premium-card">
+          <div class="confronto-player-info left">
+            <div id="player1Name" class="confronto-player-name">Jogador 1</div>
+            <div id="player1Meta" class="confronto-player-meta"></div>
+          </div>
+
+          <div class="confronto-player-avatar-wrap right">
+            <div id="player1AvatarPlaceholder" class="avatar-placeholder hidden">J1</div>
+            <img id="imgPlayer1" class="confronto-player-avatar hidden" src="" alt="Imagem do Jogador 1" />
+          </div>
+        </div>
+
+        <!-- PLACAR CENTRAL -->
+        <div class="confronto-vs premium-vs">
+          <div class="confronto-vs-card">
+            <div class="confronto-vs-label">Vitórias no histórico</div>
+            <div class="confronto-vs-score-line">
+              <span class="confronto-vs-side"></span>
+              <div id="confrontoScore" class="confronto-score">0 : 0</div>
+              <span class="confronto-vs-side"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOGADOR 2: foto à esquerda, dados à direita -->
+        <div class="confronto-player-box right premium-card">
+          <div class="confronto-player-avatar-wrap left">
+            <div id="player2AvatarPlaceholder" class="avatar-placeholder hidden">J2</div>
+            <img id="imgPlayer2" class="confronto-player-avatar hidden" src="" alt="Imagem do Jogador 2" />
+          </div>
+
+          <div class="confronto-player-info right">
+            <div id="player2Name" class="confronto-player-name">Jogador 2</div>
+            <div id="player2Meta" class="confronto-player-meta"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="confronto-divider"></div>
+
+      <div class="confronto-search-wrap">
+        <button type="button" id="btnSearchOpponent" class="confronto-search-btn">
+          <span class="confronto-search-icon">🔎</span>
+          <span class="confronto-search-text">Pesquisar adversário</span>
+        </button>
+      </div>
+
+      <div class="confronto-filter-wrap">
+        <div class="confronto-filter-bar">
+          <button type="button" class="confronto-filter-btn active" data-filter="all">Todos</button>
+          <button type="button" class="confronto-filter-btn" data-filter="simples">Simples</button>
+          <button type="button" class="confronto-filter-btn" data-filter="duplas">Duplas</button>
+        </div>
+      </div>
+
+      <div class="confronto-list">
+        <div class="confronto-list-head">
+          <h3>Jogos encontrados</h3>
+          <span id="matchesLabelSecondary">Nenhum jogo carregado ainda</span>
+        </div>
+
+        <div id="confrontoMatchesList" class="confronto-list">
+          <div class="confronto-empty">Carregando jogos...</div>
+        </div>
+
+        <div class="career-pagination confronto-pagination">
+          <button type="button" id="prevPageBtn" class="career-page-btn">
+            <span class="career-page-btn-icon">⬅️</span>
+            <span class="career-page-btn-label">Anterior</span>
+          </button>
+
+          <span id="pageInfo" class="career-page-info">Página 1 de 1</span>
+
+          <button type="button" id="nextPageBtn" class="career-page-btn">
+            <span class="career-page-btn-icon">➡️</span>
+            <span class="career-page-btn-label">Próximo</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="emptyState" class="confronto-empty hidden" style="margin-top: 14px;">
+      Nenhum confronto encontrado para os jogadores selecionados.
+    </section>
+  </main>
+
+  <nav class="admin-bottom-nav">
+    <a href="menu.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">🏠</span>
+      <span class="admin-bottom-label">Início</span>
+    </a>
+
+    <a href="dashboard.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">📊</span>
+      <span class="admin-bottom-label">Dashboard</span>
+    </a>
+
+    <a href="carreira.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">🏆</span>
+      <span class="admin-bottom-label">Carreira</span>
+    </a>
+
+    <a href="admin.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">🎾</span>
+      <span class="admin-bottom-label">Partida</span>
+    </a>
+
+    <button type="button" id="logoutBtnBottom" class="admin-bottom-btn logout">
+      <span class="admin-bottom-icon">🚪</span>
+      <span class="admin-bottom-label">Sair</span>
+    </button>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/confronto.js?v=19"></script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("/service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration.scope); registration.update(); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
+</body>
+</html>
