@@ -18,8 +18,6 @@
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/admin.css" />
-
-  <style> .admin-form-btn { min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; } .admin-form-btn .admin-bottom-icon, .admin-form-btn .admin-bottom-label { pointer-events: none; } .admin-form-btn.primary { background: #0d6efd; color: #fff; } .admin-form-btn.primary:hover { background: #0b5ed7; } .score-block { grid-column: 1 / -1; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-top: 8px; background: rgba(255,255,255,0.03); } .score-block h4 { margin: 0 0 12px; } .score-set { margin-bottom: 12px; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); } .score-set strong { display: block; margin-bottom: 8px; } .score-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media (max-width: 768px) { .score-grid-2 { grid-template-columns: 1fr; } } </style>
 </head>
 
 <body class="admin-page">
@@ -63,7 +61,6 @@
             <option value="">Informe o formato do jogo</option>
             <option value="Simples">Simples</option>
             <option value="Duplas">Duplas</option>
-            
           </select>
         </label>
 
@@ -83,8 +80,6 @@
             <option value="Grama">Grama</option>
           </select>
         </label>
-
-        
 
         <label>Formato da partida
           <select id="matchFormat" required>
@@ -111,15 +106,24 @@
         </label>
 
         <label>Nome do jogador 2
-          <input type="text" id="player2" required placeholder="Informe o nome do jogador 2" />
+          <input type="text" id="player2" required placeholder="Informe o nome do jogador 2" autocomplete="off" />
+          <button type="button" class="search-player-btn" data-target="player2">
+            Pesquisar jogador 2
+          </button>
         </label>
 
         <label id="player3Wrapper" style="display: none;">Nome do jogador 3
-          <input type="text" id="player3" placeholder="Informe o nome do jogador 3" />
+          <input type="text" id="player3" placeholder="Informe o nome do jogador 3" autocomplete="off" />
+          <button type="button" class="search-player-btn" data-target="player3">
+            Pesquisar jogador 3
+          </button>
         </label>
 
         <label id="player4Wrapper" style="display: none;">Nome do jogador 4
-          <input type="text" id="player4" placeholder="Informe o nome do jogador 4" />
+          <input type="text" id="player4" placeholder="Informe o nome do jogador 4" autocomplete="off" />
+          <button type="button" class="search-player-btn" data-target="player4">
+            Pesquisar jogador 4
+          </button>
         </label>
 
         <label id="probPlayer1Wrapper" style="display: none;">
@@ -144,7 +148,6 @@
           <select id="status">
             <option value="scheduled">Informe o status da partida</option>
             <option value="scheduled">Jogos do dia</option>
-            
             <option value="finished">Finalizada</option>
             <option value="wo">Finalizada por WO</option>
           </select>
@@ -240,17 +243,14 @@
 
         <div class="actions full admin-form-actions">
           <button type="submit" class="btn btn-clear-filters admin-form-btn primary">
-            
             <span class="admin-bottom-label">Salvar Partida</span>
           </button>
 
           <button type="button" id="clearBtn" class="btn btn-clear-filters admin-form-btn">
-            
             <span class="admin-bottom-label">Limpar</span>
           </button>
 
           <button type="button" id="cancelBtn" class="btn btn-clear-filters admin-form-btn">
-            
             <span class="admin-bottom-label">Cancelar</span>
           </button>
         </div>
@@ -366,9 +366,28 @@
       <span class="admin-bottom-icon">🚪</span>
       <span class="admin-bottom-label">Sair</span>
     </button>
-
-    
   </nav>
+
+ <!-- MODAL DE PESQUISA DE JOGADORES -->
+<div id="playerSearchModal" class="player-search-modal hidden">
+  <div class="player-search-modal-card">
+    <div class="player-search-modal-head">
+      <div>
+        <h3>Pesquisar jogador</h3>
+        <p class="muted">Digite o nome para localizar um jogador já cadastrado.</p>
+      </div>
+
+      <button type="button" class="player-search-modal-close" id="closePlayerSearchModalBtn">×</button>
+    </div>
+
+    <div class="player-search-modal-body">
+      <input type="text" id="playerSearchInput" class="player-search-modal-input" placeholder="Digite o nome do jogador" autocomplete="off" />
+
+      <div id="playerSearchStatus" class="player-search-modal-status muted"></div>
+      <div id="playerSearchResults" class="player-search-results"></div>
+    </div>
+  </div>
+</div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
