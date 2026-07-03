@@ -1795,16 +1795,3 @@ body.admin-page .confronto-controls input {
   border: 1px solid rgba(255,255,255,0.08);
 }
 
-body.admin-page .admin-bottom-btn,
-body.admin-page .admin-page-btn,
-body.admin-page .btn-clear-filters,
-body.admin-page .icon-btn,
-body.admin-page .search-player-btn,
-body.admin-page .admin-action-btn {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  min-width: auto !important;
-  min-height: auto !important;
-}
