@@ -1131,3 +1131,68 @@ body.confronto-page .confronto-summary-line {
   gap: 6px;
   flex-wrap: wrap;
 }
+
+@media (max-width: 768px) {
+  body.confronto-page .confronto-filter-bar {
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  body.confronto-page .confronto-filter-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 8px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+
+  body.confronto-page .confronto-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  body.confronto-page .confronto-pagination .career-page-btn {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 0 10px;
+  }
+
+  body.confronto-page .confronto-pagination .career-page-info {
+    flex: 1 1 auto;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 0.78rem;
+  }
+
+  body.confronto-page .confronto-pagination .career-page-btn-label {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  body.confronto-page .confronto-filter-bar {
+    gap: 4px;
+  }
+
+  body.confronto-page .confronto-filter-btn {
+    padding: 0 6px;
+    font-size: 0.72rem;
+  }
+
+  body.confronto-page .confronto-pagination {
+    gap: 4px;
+  }
+
+  body.confronto-page .confronto-pagination .career-page-btn {
+    padding: 0 8px;
+  }
+
+  body.confronto-page .confronto-pagination .career-page-info {
+    font-size: 0.72rem;
+  }
+}
