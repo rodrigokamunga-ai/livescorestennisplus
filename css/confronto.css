@@ -1196,3 +1196,36 @@ body.confronto-page .confronto-summary-line {
     font-size: 0.72rem;
   }
 }
+
+body.confronto-page .confronto-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+body.confronto-page .confronto-pagination .career-page-btn,
+body.confronto-page .confronto-pagination .career-page-info {
+  min-height: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+body.confronto-page .confronto-pagination .career-page-btn {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+body.confronto-page .confronto-pagination .career-page-info {
+  flex: 1 1 auto;
+  text-align: center;
+}
