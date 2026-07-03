@@ -156,15 +156,21 @@
     }
 
     async function doLogout() {
+      const confirmed = window.confirm("Deseja realmente sair do sistema?");
+      if (!confirmed) return;
+    
       try {
         localStorage.removeItem(SESSION_KEY);
         localStorage.removeItem(BIOMETRIC_SESSION_KEY);
         localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
-
+        localStorage.removeItem(BIOMETRIC_UID_KEY);
+    
         const auth = getAuth();
-        if (auth) await auth.signOut();
-
-        goLogin();
+        if (auth) {
+          await auth.signOut();
+        }
+    
+        window.location.replace("login.html");
       } catch (err) {
         console.error("Erro ao sair:", err);
         alert("Não foi possível sair. Tente novamente.");
