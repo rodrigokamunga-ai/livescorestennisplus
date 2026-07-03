@@ -1,4 +1,4 @@
-/* ========================================================= ADMIN.CSS — Layout, formulário, filtros, tabela, paginação, modal e mobile cards ========================================================= */
+/* ========================================================= ADMIN.CSS — Layout, formulário, filtros, tabela, paginação, modal, cards mobile e busca de jogadores ========================================================= */
 
 /* ========================= BASE ADMIN ========================= */
 body.admin-page {
@@ -143,7 +143,10 @@ body.admin-page .btn,
 body.admin-page .admin-bottom-btn,
 body.admin-page .admin-page-btn,
 body.admin-page .btn-clear-filters,
-body.admin-page .icon-btn {
+body.admin-page .icon-btn,
+body.admin-page .search-player-btn,
+body.admin-page .player-search-modal-close,
+body.admin-page .confronto-search-result {
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
@@ -155,7 +158,10 @@ body.admin-page .btn:hover,
 body.admin-page .admin-bottom-btn:hover,
 body.admin-page .admin-page-btn:hover,
 body.admin-page .btn-clear-filters:hover,
-body.admin-page .icon-btn:hover {
+body.admin-page .icon-btn:hover,
+body.admin-page .search-player-btn:hover,
+body.admin-page .player-search-modal-close:hover,
+body.admin-page .confronto-search-result:hover {
   transform: translateY(-1px);
 }
 
@@ -195,7 +201,8 @@ body.admin-page .btn-clear-filters,
 body.admin-page .admin-page-btn,
 body.admin-page .admin-bottom-btn,
 body.admin-page .icon-btn,
-body.admin-page .admin-form-actions .admin-form-btn {
+body.admin-page .admin-form-actions .admin-form-btn,
+body.admin-page .search-player-btn {
   min-height: 44px;
   min-width: 0;
   padding: 0 14px;
@@ -216,7 +223,8 @@ body.admin-page .btn-clear-filters:hover,
 body.admin-page .admin-page-btn:hover,
 body.admin-page .admin-bottom-btn:hover,
 body.admin-page .icon-btn:hover,
-body.admin-page .admin-form-actions .admin-form-btn:hover {
+body.admin-page .admin-form-actions .admin-form-btn:hover,
+body.admin-page .search-player-btn:hover {
   border-color: rgba(216, 255, 99, 0.22);
   background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.05));
   box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
@@ -238,6 +246,14 @@ body.admin-page .admin-form-actions .admin-form-btn .admin-bottom-label {
   font-size: 0.88rem;
   line-height: 1;
   pointer-events: none;
+}
+
+/* botão de busca do jogador */
+body.admin-page .search-player-btn {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 40px;
+  font-size: 0.86rem;
 }
 
 /* ========================= MENSAGEM ========================= */
@@ -326,7 +342,6 @@ body.admin-page .action-bottom-row {
   display: contents;
 }
 
-/* aqui entra o texto dos botões */
 body.admin-page .admin-action-btn {
   display: inline-flex;
   flex-direction: column;
@@ -921,6 +936,229 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   margin-top: 4px;
 }
 
+/* ========================= MODAL DE PESQUISA DE JOGADORES ========================= */
+body.admin-page .player-search-modal.hidden {
+  display: none !important;
+}
+
+body.admin-page .player-search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(4, 8, 18, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+body.admin-page .player-search-modal-card {
+  width: min(100%, 720px);
+  max-height: min(86vh, 760px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(24, 33, 51, 0.98), rgba(15, 23, 38, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.38);
+}
+
+body.admin-page .player-search-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page .player-search-modal-head h3 {
+  margin: 0;
+  color: #f4f8ff;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+body.admin-page .player-search-modal-head p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+body.admin-page .player-search-modal-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef4ff;
+  font-size: 1.35rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+body.admin-page .player-search-modal-close:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(216, 255, 99, 0.20);
+}
+
+body.admin-page .player-search-modal-body {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  overflow: hidden;
+}
+
+body.admin-page .player-search-modal-input {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f8ff;
+  padding: 0 16px;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.admin-page .player-search-modal-input::placeholder {
+  color: rgba(232, 238, 252, 0.45);
+}
+
+body.admin-page .player-search-modal-input:focus {
+  border-color: rgba(216, 255, 99, 0.34);
+  box-shadow: 0 0 0 4px rgba(216, 255, 99, 0.10);
+}
+
+body.admin-page .player-search-modal-status {
+  font-size: 0.86rem;
+  line-height: 1.35;
+  min-height: 20px;
+}
+
+body.admin-page .player-search-results {
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 2px;
+  max-height: 52vh;
+}
+
+body.admin-page .player-search-empty {
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  color: rgba(232, 238, 252, 0.72);
+  text-align: center;
+  font-weight: 700;
+}
+
+body.admin-page .player-search-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  padding: 12px;
+  border-radius: 18px;
+  background: #1b232b;
+  color: #eef4ff;
+  border: 1px solid #2f3948;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+body.admin-page .player-search-card:hover {
+  transform: translateY(-1px);
+  background: #24303b;
+  border-color: #4b5563;
+}
+
+body.admin-page .player-search-card.selected {
+  background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.05));
+  border-color: rgba(216, 255, 99, 0.32);
+  box-shadow: 0 10px 22px rgba(216, 255, 99, 0.10);
+}
+
+body.admin-page .player-search-avatar {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: rgba(12, 18, 30, 0.72);
+  border: 2px solid rgba(216, 255, 99, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(232, 238, 252, 0.82);
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+body.admin-page .player-search-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+body.admin-page .player-search-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #0f1726, #1f2937);
+  color: #cbd5e1;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+body.admin-page .player-search-content {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+
+body.admin-page .player-search-name {
+  font-weight: 900;
+  color: #f4f8ff;
+  line-height: 1.2;
+  font-size: 1.05rem;
+  word-break: break-word;
+  margin-bottom: 4px;
+}
+
+body.admin-page .player-search-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: rgba(232, 238, 252, 0.68);
+  align-items: center;
+  word-break: break-word;
+}
+
+body.admin-page .player-search-line strong {
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+body.admin-page .player-search-line span {
+  color: #e5e7eb;
+}
+
 /* ========================= MOBILE: LISTA EM CARDS ========================= */
 @media (max-width: 768px) {
   html,
@@ -1201,6 +1439,16 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   body.admin-page .score-grid-2 input {
     width: 100%;
   }
+
+  body.admin-page .player-search-modal-card {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 22px;
+  }
+
+  body.admin-page .player-search-results {
+    max-height: 48vh;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1249,6 +1497,31 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   body.admin-page .score-grid-2 input {
     width: 100%;
     padding: 10px 8px;
+  }
+
+  body.admin-page .player-search-modal {
+    padding: 12px;
+  }
+
+  body.admin-page .player-search-modal-head,
+  body.admin-page .player-search-modal-body {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  body.admin-page .player-search-modal-input {
+    min-height: 48px;
+    border-radius: 14px;
+  }
+
+  body.admin-page .player-search-card {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  body.admin-page .player-search-avatar {
+    width: 48px;
+    height: 48px;
   }
 }
 
@@ -1329,9 +1602,17 @@ body.admin-page #scoreTieBreakSet3Wrapper {
     gap: 8px;
   }
 
-  /* texto menor no mobile */
   body.admin-page .admin-action-label {
     font-size: 0.62rem;
+  }
+
+  body.admin-page .player-search-name {
+    font-size: 0.98rem;
+  }
+
+  body.admin-page .player-search-line {
+    font-size: 0.76rem;
+    gap: 4px 10px;
   }
 }
 
@@ -1346,7 +1627,6 @@ body.admin-page #scoreTieBreakSet3Wrapper {
 }
 
 /* ========================================================= MOBILE — Resumo da partida com valores lado a lado ========================================================= */
-
 @media (max-width: 768px) {
   body.admin-page .detail-summary-grid {
     grid-template-columns: 1fr;
@@ -1416,7 +1696,6 @@ body.admin-page #scoreTieBreakSet3Wrapper {
     width: 100%;
   }
 
-  /* mantém o resumo da partida em 2 colunas se você quiser */
   body.admin-page .detail-section-final-stats .detail-summary-grid {
     grid-template-columns: 1fr;
   }
@@ -1428,6 +1707,7 @@ body.admin-page #scoreTieBreakSet3Wrapper {
   }
 }
 
+/* ========================= BLOCO CONFRONTO/DETALHES ========================= */
 body.admin-page .confronto-card {
   background: rgba(12, 18, 30, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1513,4 +1793,18 @@ body.admin-page .confronto-controls input {
   background: rgba(12, 18, 30, 0.62);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.08);
+}
+
+body.admin-page .admin-bottom-btn,
+body.admin-page .admin-page-btn,
+body.admin-page .btn-clear-filters,
+body.admin-page .icon-btn,
+body.admin-page .search-player-btn,
+body.admin-page .admin-action-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-width: auto !important;
+  min-height: auto !important;
 }
