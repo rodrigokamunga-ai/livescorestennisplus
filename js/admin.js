@@ -1280,16 +1280,31 @@
       const totalPages = Math.max(1, Math.ceil(state.filteredMatches.length / PAGE_SIZE));
       if (state.currentPage > totalPages) state.currentPage = totalPages;
       if (state.currentPage < 1) state.currentPage = 1;
-
+    
       const start = (state.currentPage - 1) * PAGE_SIZE;
       const end = Math.min(start + PAGE_SIZE, state.filteredMatches.length);
-
+    
       if (el.pageInfo) el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
       if (el.totalPagesEl) el.totalPagesEl.textContent = String(totalPages);
       if (el.prevPageBtn) el.prevPageBtn.disabled = state.currentPage <= 1;
       if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
       if (el.itemsTotal) el.itemsTotal.textContent = String(state.filteredMatches.length);
       if (el.itemsShown) el.itemsShown.textContent = String(state.filteredMatches.length ? end : 0);
+    
+      // Atualiza os ícones para estilo Ionic
+      if (el.prevPageBtn) {
+        const icon = el.prevPageBtn.querySelector(".admin-page-btn-icon ion-icon");
+        const label = el.prevPageBtn.querySelector(".admin-page-btn-label");
+        if (icon) icon.setAttribute("name", "chevron-back-outline");
+        if (label) label.textContent = "Anterior";
+      }
+    
+      if (el.nextPageBtn) {
+        const icon = el.nextPageBtn.querySelector(".admin-page-btn-icon ion-icon");
+        const label = el.nextPageBtn.querySelector(".admin-page-btn-label");
+        if (icon) icon.setAttribute("name", "chevron-forward-outline");
+        if (label) label.textContent = "Próximo";
+      }
     }
 
     function getMatchDuration(d) {
@@ -1529,16 +1544,38 @@
         }
       }
     
+      // Botão inferior
       if (el.toggleMatchesBtnBottom) {
-        const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon");
+        const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon ion-icon");
         const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
     
-        if (icon) icon.textContent = state.filtersVisible ? "📋" : "🔎";
-        if (label) label.textContent = state.filtersVisible ? "Lista" : "Filtros";
+        if (icon) {
+          icon.setAttribute(
+            "name",
+            state.filtersVisible ? "list-outline" : "search-outline"
+          );
+        }
+    
+        if (label) {
+          label.textContent = state.filtersVisible ? "Lista" : "Filtros";
+        }
       }
     
+      // Botão superior, se existir
       if (el.toggleMatchesBtn) {
-        el.toggleMatchesBtn.textContent = state.filtersVisible ? "Lista" : "Filtros";
+        const icon = el.toggleMatchesBtn.querySelector(".admin-bottom-icon ion-icon");
+        const label = el.toggleMatchesBtn.querySelector(".admin-bottom-label");
+    
+        if (icon) {
+          icon.setAttribute(
+            "name",
+            state.filtersVisible ? "list-outline" : "search-outline"
+          );
+        }
+    
+        if (label) {
+          label.textContent = state.filtersVisible ? "Lista" : "Filtros";
+        }
       }
     }
 
@@ -1638,8 +1675,8 @@
       const d = docSnap.data();
       const statusText = String(d.status || "scheduled").trim().toLowerCase();
       const label = U.getStatusLabel(statusText);
-
-      return `<tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td><span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span></td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon">▶</span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon">👁️</span> <span class="admin-action-label">Detalhar</span> </button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon">✏️</span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon">⚔️</span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon">🗑️</span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
+    
+      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> </td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
     }
 
     function mobileCardHTML(docSnap) {
@@ -1647,8 +1684,8 @@
       const statusText = String(d.status || "scheduled").trim().toLowerCase();
       const label = U.getStatusLabel(statusText);
       const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
-
-      return `<tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Fase-Treino-Ranking:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon">▶</span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon">👁️</span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon">✏️</span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon">⚔️</span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon">🗑️</span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
+    
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Fase-Treino-Ranking:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
     }
 
     function renderCurrentPage() {
@@ -1785,9 +1822,113 @@
           }, 50);
         }
       });
+
+      function openAppModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.classList.remove("hidden");
+        modalEl.setAttribute("aria-hidden", "false");
+      }
+      
+      function closeAppModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.classList.add("hidden");
+        modalEl.setAttribute("aria-hidden", "true");
+      }
+      
+      function showConfirmModal(message) {
+        return new Promise((resolve) => {
+          const confirmModal = document.getElementById("confirmModal");
+          const confirmModalMessage = document.getElementById("confirmModalMessage");
+          const confirmModalYesBtn = document.getElementById("confirmModalYesBtn");
+          const confirmModalNoBtn = document.getElementById("confirmModalNoBtn");
+      
+          if (!confirmModal || !confirmModalMessage || !confirmModalYesBtn || !confirmModalNoBtn) {
+            resolve(window.confirm(message));
+            return;
+          }
+      
+          confirmModalMessage.textContent = message;
+          openAppModal(confirmModal);
+      
+          const cleanup = () => {
+            confirmModalYesBtn.removeEventListener("click", onYes);
+            confirmModalNoBtn.removeEventListener("click", onNo);
+            confirmModal.removeEventListener("click", onBackdrop);
+            document.removeEventListener("keydown", onEscape);
+          };
+      
+          const finish = (value) => {
+            cleanup();
+            closeAppModal(confirmModal);
+            resolve(value);
+          };
+      
+          const onYes = () => finish(true);
+          const onNo = () => finish(false);
+          const onBackdrop = (e) => {
+            if (e.target === confirmModal) finish(false);
+          };
+          const onEscape = (e) => {
+            if (e.key === "Escape") finish(false);
+          };
+      
+          confirmModalYesBtn.addEventListener("click", onYes);
+          confirmModalNoBtn.addEventListener("click", onNo);
+          confirmModal.addEventListener("click", onBackdrop);
+          document.addEventListener("keydown", onEscape);
+        });
+      }
+      
+      function showSuccessModal(message) {
+        return new Promise((resolve) => {
+          const successModal = document.getElementById("successModal");
+          const successModalMessage = document.getElementById("successModalMessage");
+          const successModalOkBtn = document.getElementById("successModalOkBtn");
+      
+          if (!successModal || !successModalMessage || !successModalOkBtn) {
+            window.alert(message);
+            resolve();
+            return;
+          }
+      
+          successModalMessage.textContent = message;
+          openAppModal(successModal);
+      
+          const cleanup = () => {
+            successModalOkBtn.removeEventListener("click", onOk);
+            successModal.removeEventListener("click", onBackdrop);
+            document.removeEventListener("keydown", onEscape);
+          };
+      
+          const finish = () => {
+            cleanup();
+            closeAppModal(successModal);
+            resolve();
+          };
+      
+          const onOk = () => finish();
+          const onBackdrop = (e) => {
+            if (e.target === successModal) finish();
+          };
+          const onEscape = (e) => {
+            if (e.key === "Escape") finish();
+          };
+      
+          successModalOkBtn.addEventListener("click", onOk);
+          successModal.addEventListener("click", onBackdrop);
+          document.addEventListener("keydown", onEscape);
+        });
+      }
       
       el.form?.addEventListener("submit", async (e) => {
         e.preventDefault();
+      
+        const confirmar = await showConfirmModal("Deseja cadastrar a partida?");
+        if (!confirmar) {
+          setMsg("Cadastro cancelado.");
+          return;
+        }
+      
         setMsg("Salvando...");
 
         const selectedModality = "Tênis";
@@ -1916,10 +2057,13 @@
 
           if (isEditing) {
             await ref.update(data);
-            setMsg(woWinner ? "Partida salva como WO." : "Partida atualizada com sucesso!");
+            await showSuccessModal("Partida atualizada com sucesso!");
           } else {
-            await __db.collection("matches").add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            setMsg(woWinner ? "Partida cadastrada como WO." : "Partida cadastrada com sucesso!");
+            await __db.collection("matches").add({
+              ...data,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            await showSuccessModal("Partida registrada com sucesso!");
           }
 
           clearForm();
@@ -2024,14 +2168,19 @@
       if (el.filtersBar) el.filtersBar.style.display = "none";
 
       if (el.toggleMatchesBtnBottom) {
-        const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon");
+        const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon ion-icon");
         const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
-        if (icon) icon.textContent = "🔎";
+      
+        if (icon) icon.setAttribute("name", "search-outline");
         if (label) label.textContent = "Filtros";
       }
-
+      
       if (el.toggleMatchesBtn) {
-        el.toggleMatchesBtn.textContent = "Filtros";
+        const icon = el.toggleMatchesBtn.querySelector(".admin-bottom-icon ion-icon");
+        const label = el.toggleMatchesBtn.querySelector(".admin-bottom-label");
+      
+        if (icon) icon.setAttribute("name", "search-outline");
+        if (label) label.textContent = "Filtros";
       }
 
       if (!hasAdminSession() && !hasBiometricSession()) {
