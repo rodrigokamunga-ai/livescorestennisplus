@@ -1,0 +1,856 @@
+/* ========================================================= RELATORIO.CSS — Estilos exclusivos da página relatorio.html Base visual alinhada ao carreira.css ========================================================= */
+
+.relatorio-page {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body.relatorio-page {
+  background:
+    radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%),
+    linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
+  color: #e8eefc;
+  min-height: 100vh;
+  padding-bottom: 36px;
+}
+
+body.relatorio-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body.relatorio-page button,
+body.relatorio-page input,
+body.relatorio-page select,
+body.relatorio-page textarea {
+  font: inherit;
+}
+
+body.relatorio-page * {
+  box-sizing: border-box;
+}
+
+body.relatorio-page .muted {
+  color: rgba(232, 238, 252, 0.68);
+}
+
+/* ========================= LAYOUT BASE ========================= */
+
+.relatorio-page .wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+}
+
+.relatorio-page .panel {
+  border-radius: 18px;
+}
+
+.relatorio-page .header {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(145deg, rgba(31, 40, 60, 0.92), rgba(20, 28, 44, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(18px);
+  border-radius: 24px;
+  padding: 16px;
+}
+
+.relatorio-page .title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* ========================= TÍTULO / CABEÇALHO ========================= */
+
+.relatorio-page .career-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.relatorio-page .career-header h1,
+.relatorio-page .career-header h2,
+.relatorio-page #pageTitle {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #f4f8ff;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.relatorio-page .career-header p,
+.relatorio-page #subtitle {
+  color: rgba(232, 238, 252, 0.72);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.relatorio-page h1 {
+  margin: 0;
+  font-size: clamp(1.15rem, 3.5vw, 1.8rem);
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+  color: #d8ff63;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.relatorio-page .report-status {
+  margin-top: 8px;
+  font-size: 0.92rem;
+  color: rgba(232, 238, 252, 0.72);
+}
+
+/* ========================= FILTROS ========================= */
+
+.relatorio-page .report-filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-top: 10px;
+}
+
+.relatorio-page .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.relatorio-page .filter-group label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(232, 238, 252, 0.86);
+}
+
+.relatorio-page .filter-group select,
+.relatorio-page .filter-group input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 18, 30, 0.62);
+  color: #f4f8ff;
+  outline: none;
+}
+
+.relatorio-page .filter-group select:focus,
+.relatorio-page .filter-group input:focus {
+  border-color: rgba(110, 165, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(110, 165, 255, 0.15);
+}
+
+/* ========================= DADOS DA PARTIDA ========================= */
+
+.relatorio-page .match-header {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.relatorio-page .match-header-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #d8ff63;
+  margin-bottom: 2px;
+}
+
+.relatorio-page .match-header-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.relatorio-page .match-header-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.relatorio-page .match-header-item .k {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(232, 238, 252, 0.68);
+}
+
+.relatorio-page .match-header-item .v {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* ========================= CONTROLES ========================= */
+
+.relatorio-page .controls {
+  width: min(100%, 360px);
+  display: grid;
+  gap: 10px;
+}
+
+.relatorio-page select,
+.relatorio-page .btn {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 14px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.relatorio-page select {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f8ff;
+}
+
+.relatorio-page .btn {
+  cursor: pointer;
+  transition: 0.18s ease;
+  background: #d8ff63;
+  color: #08101b;
+  box-shadow: 0 10px 24px rgba(216, 255, 99, 0.12);
+}
+
+.relatorio-page .btn:hover {
+  transform: translateY(-1px);
+}
+
+.relatorio-page .btn.secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4f8ff;
+}
+
+.relatorio-page .btn-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* ========================= GRID GERAL ========================= */
+
+.relatorio-page .grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.relatorio-page .panel {
+  background: linear-gradient(145deg, rgba(31, 40, 60, 0.92), rgba(20, 28, 44, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  padding: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.relatorio-page .panel h2 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #d8ff63;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.relatorio-page .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.relatorio-page .panel-header h2 {
+  margin: 0;
+}
+
+/* ========================= RESUMO ========================= */
+
+.relatorio-page .summary {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.relatorio-page .summary-card,
+.relatorio-page .stat-card,
+.relatorio-page .mini,
+.relatorio-page .player-box {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.relatorio-page .summary-card {
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.relatorio-page .summary-card .label,
+.relatorio-page .stat-card .label,
+.relatorio-page .mini .k {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(232, 238, 252, 0.68);
+}
+
+.relatorio-page .summary-card .value,
+.relatorio-page .stat-card .value,
+.relatorio-page .mini .v {
+  margin-top: 8px;
+  font-weight: 950;
+  font-size: clamp(1rem, 3vw, 1.15rem);
+  color: #f8fafc;
+}
+
+.relatorio-page .sum-total {
+  background: linear-gradient(145deg, rgba(34,197,94,.18), rgba(34,197,94,.06));
+}
+
+.relatorio-page .sum-games {
+  background: linear-gradient(145deg, rgba(56,189,248,.18), rgba(56,189,248,.06));
+}
+
+.relatorio-page .sum-sets {
+  background: linear-gradient(145deg, rgba(167,139,250,.18), rgba(167,139,250,.06));
+}
+
+.relatorio-page .sum-performance {
+  background: linear-gradient(145deg, rgba(251,191,36,.18), rgba(251,191,36,.06));
+}
+
+/* ========================= ESTATÍSTICAS ========================= */
+
+.relatorio-page .stats-wide {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.relatorio-page .stat-card {
+  padding: 14px;
+}
+
+.relatorio-page .bp-card {
+  background: linear-gradient(145deg, rgba(251,191,36,.18), rgba(251,191,36,.06));
+}
+
+.relatorio-page .serve-card {
+  background: linear-gradient(145deg, rgba(190,242,100,.18), rgba(190,242,100,.06));
+}
+
+.relatorio-page .error-card {
+  background: linear-gradient(145deg, rgba(251,113,133,.14), rgba(251,113,133,.05));
+}
+
+.relatorio-page .winner-card {
+  background: linear-gradient(145deg, rgba(34,197,94,.18), rgba(34,197,94,.06));
+}
+
+/* ========================= JOGADORES ========================= */
+
+.relatorio-page .players {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.relatorio-page .player-box {
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.relatorio-page .player-box.active {
+  outline: 2px solid rgba(190,242,100,.35);
+  box-shadow: 0 0 0 1px rgba(190,242,100,.18), 0 0 22px rgba(190,242,100,.08);
+}
+
+.relatorio-page .player-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.relatorio-page .player-name {
+  font-size: 1.08rem;
+  font-weight: 950;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+  color: #f8fafc;
+}
+
+.relatorio-page .winner-tag {
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(34,197,94,.16);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,.28);
+}
+
+.relatorio-page .player-badge {
+  display: inline-flex;
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  background: rgba(190,242,100,.15);
+  color: #d8ff63;
+  border: 1px solid rgba(190,242,100,.25);
+  position: relative;
+  z-index: 1;
+}
+
+.relatorio-page .toggle-btn {
+  width: auto;
+  min-width: 110px;
+  padding: 9px 12px;
+  font-size: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.05);
+  color: #f8fafc;
+  cursor: pointer;
+  transition: 0.18s ease;
+  font-weight: 800;
+}
+
+.relatorio-page .toggle-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.08);
+}
+
+.relatorio-page .small {
+  color: rgba(232, 238, 252, 0.68);
+  font-size: 0.85rem;
+}
+
+.relatorio-page .mini-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
+  transition: 0.25s ease;
+}
+
+.relatorio-page .mini {
+  padding: 10px;
+}
+
+.relatorio-page .player-box.collapsed .mini-stats {
+  display: none;
+}
+
+.relatorio-page .player-box.collapsed .player-badge {
+  margin-bottom: 6px;
+}
+
+/* ========================= TABELA ========================= */
+
+.relatorio-page .comparison {
+  grid-column: span 12;
+}
+
+.relatorio-page table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,.03);
+  table-layout: fixed;
+}
+
+.relatorio-page th,
+.relatorio-page td {
+  padding: 9px 8px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.relatorio-page th {
+  color: #d8ff63;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255,255,255,.04);
+}
+
+.relatorio-page td {
+  color: #f8fafc;
+  font-size: 0.88rem;
+}
+
+.relatorio-page tr:hover td {
+  background: rgba(255,255,255,.02);
+}
+
+.relatorio-page table th:nth-child(1),
+.relatorio-page table td:nth-child(1) {
+  width: 45%;
+}
+
+.relatorio-page table th:nth-child(2),
+.relatorio-page table td:nth-child(2),
+.relatorio-page table th:nth-child(3),
+.relatorio-page table td:nth-child(3) {
+  width: 27.5%;
+}
+
+.relatorio-page .collapsible-body.hide {
+  display: none;
+}
+
+.relatorio-page .hide {
+  display: none !important;
+}
+
+/* ========================= GRÁFICO / LEGENDA ========================= */
+
+.relatorio-page .chart-wrap {
+  width: 100%;
+  height: 340px;
+  margin-top: 12px;
+}
+
+.relatorio-page .chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.relatorio-page .legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.relatorio-page .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+}
+
+.relatorio-page .legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  flex: 0 0 12px;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.04);
+}
+
+.relatorio-page .legend-item .txt {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.relatorio-page .legend-item .v {
+  font-weight: 900;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  line-height: 1.1;
+}
+
+/* ========================= RODAPÉ ========================= */
+
+.relatorio-page .footer {
+  margin: 18px 0 24px;
+  color: rgba(232, 238, 252, 0.68);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ========================= AJUSTES VISUAIS EXTRAS ========================= */
+
+.relatorio-page .panel,
+.relatorio-page .summary-card,
+.relatorio-page .stat-card,
+.relatorio-page .player-box,
+.relatorio-page .legend-item,
+.relatorio-page .match-header-item {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.relatorio-page .panel:hover,
+.relatorio-page .summary-card:hover,
+.relatorio-page .stat-card:hover,
+.relatorio-page .player-box:hover,
+.relatorio-page .legend-item:hover,
+.relatorio-page .match-header-item:hover {
+  transform: translateY(-1px);
+}
+
+/* ========================= RESPONSIVO ========================= */
+
+@media (max-width: 1280px) {
+  .relatorio-page .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 980px) {
+  .relatorio-page .report-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .relatorio-page .match-header-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .relatorio-page .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .relatorio-page .players {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-page .report-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-page .player-box {
+    padding: 12px;
+  }
+
+  .relatorio-page .mini-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .relatorio-page .stat-card .value,
+  .relatorio-page .summary-card .value,
+  .relatorio-page .mini .v {
+    font-size: 1rem;
+  }
+
+  .relatorio-page td,
+  .relatorio-page th {
+    padding: 8px 6px;
+  }
+
+  .relatorio-page th {
+    font-size: 0.66rem;
+  }
+
+  .relatorio-page td {
+    font-size: 0.8rem;
+  }
+
+  .relatorio-page .chart-wrap {
+    height: 280px;
+  }
+
+  .relatorio-page .legend-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.relatorio-page {
+    padding-bottom: 24px;
+  }
+
+  .relatorio-page .header {
+    position: relative;
+    border-radius: 18px;
+  }
+
+  .relatorio-page .btn-row {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-page .controls {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .relatorio-page .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .relatorio-page .summary-card {
+    padding: 12px;
+  }
+
+  .relatorio-page .summary-card strong {
+    font-size: 1.2rem;
+  }
+
+  .relatorio-page .mini-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .relatorio-page .player-name {
+    font-size: 1rem;
+  }
+
+  .relatorio-page .toggle-btn {
+    min-width: 0;
+    padding: 8px 10px;
+    font-size: 0.74rem;
+    border-radius: 11px;
+  }
+
+  .relatorio-page .filter-group select,
+  .relatorio-page .filter-group input {
+    padding: 10px 12px;
+    padding-right: 34px;
+  }
+
+  .relatorio-page .btn-row {
+    gap: 8px;
+  }
+
+  .relatorio-page .btn {
+    padding: 11px 12px;
+  }
+
+  .relatorio-page .legend-item .v {
+    font-size: 0.86rem;
+  }
+
+  .relatorio-page .match-header-item {
+    padding: 9px 10px;
+  }
+
+  .relatorio-page .match-header-item .v {
+    font-size: 0.88rem;
+  }
+
+  .relatorio-page .match-header-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .relatorio-page .report-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .relatorio-page .mini-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-page .summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .relatorio-page .report-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-page .match-header-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .relatorio-page .match-header-item .k {
+    font-size: 0.68rem;
+  }
+
+  .relatorio-page .match-header-item .v {
+    font-size: 0.84rem;
+  }
+}
+
+.relatorio-page .report-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.relatorio-page .back-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #6fb1ff;
+  padding: 0;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.relatorio-page .back-btn:hover {
+  transform: translateX(-2px);
+  color: #93c5fd;
+}
+
+.relatorio-page .back-btn-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.relatorio-page .report-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.relatorio-page .back-inline {
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin-bottom: -2px;
+  align-self: flex-start;
+  color: #6fb1ff;
+}
+
+.relatorio-page .back-inline:hover {
+  transform: translateX(-2px);
+  color: #93c5fd;
+}
+
+.relatorio-page .back-btn-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
