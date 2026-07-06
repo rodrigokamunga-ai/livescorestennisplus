@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Live Scores Tennis Plus - Relatórios" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>Relatório | TennisPro</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/relatorio.css" />
+
+  <!-- jsPDF e Chart.js carregados uma vez, no head -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="relatorio-page">
+  <main class="container stack">
+    <section class="panel panel-glass" style="padding: 22px;">
+      <div class="career-header">
+        <div>
+          <span class="section-kicker">Relatórios</span>
+
+          <h1 id="pageTitle" class="report-title">
+            <button type="button" class="report-back-btn" onclick="history.back()" aria-label="Voltar">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <span>Relatórios</span>
+          </h1>
+
+          <p id="subtitle">Relatório de partidas finalizadas do usuário</p>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="header">
+          <div class="title-row">
+            <div class="report-top-block">
+              <div class="report-filters">
+                <div class="filter-group">
+                  <label for="yearFilter">Ano da Partida</label>
+                  <select id="yearFilter">
+                    <option value="">Todos os anos</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label for="matchTypeFilter">Tipo de partida</label>
+                  <select id="matchTypeFilter">
+                    <option value="simples">Simples</option>
+                    <option value="duplas">Duplas</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label for="adversaryFilter">Adversário</label>
+                  <select id="adversaryFilter">
+                    <option value="">Selecione um adversário</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label for="matchFilter">Partida finalizada</label>
+                  <select id="matchFilter">
+                    <option value="">Selecione uma partida</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label for="viewMode">Comparativo</label>
+                  <select id="viewMode" onchange="renderAll()">
+                    <option value="both">Selecione o jogador</option>
+                    <option value="1">Jogador 1</option>
+                    <option value="2">Jogador 2</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <label>&nbsp;</label>
+                  <button class="btn" type="button" onclick="gerarPDF()">Gerar PDF</button>
+                </div>
+              </div>
+
+              <div class="report-status" id="reportStatus">Carregando partidas finalizadas...</div>
+
+              <div class="match-header" id="matchHeader">
+                <div class="match-header-title">Dados da Partida</div>
+
+                <div class="match-header-grid">
+                  <div class="match-header-item">
+                    <span class="k">Fase do Torneio</span>
+                    <span class="v" id="meta-phase">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Nome do Torneio</span>
+                    <span class="v" id="meta-tournament">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Nome da categoria</span>
+                    <span class="v" id="meta-cat">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Tipo de piso</span>
+                    <span class="v" id="meta-surface">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Formato da partida</span>
+                    <span class="v" id="meta-format">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Data e hora da partida</span>
+                    <span class="v" id="meta-datetime">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Quadra</span>
+                    <span class="v" id="meta-court">-</span>
+                  </div>
+
+                  <div class="match-header-item">
+                    <span class="k">Duração da Partida</span>
+                    <span class="v" id="meta-duration">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          
+
+          <div class="panel stats-wide">
+            
+         
+
+          <div class="panel players" id="playersArea">
+            <div class="player-box" id="box-p1">
+              <div class="player-head">
+                <div>
+                  <div class="player-badge" id="p1-badge">Jogador 1</div>
+                  <div class="player-name" id="p1-name">Jogador 1</div>
+                </div>
+                <button class="toggle-btn" id="toggle-p1" type="button" onclick="togglePlayer(1)">Recolher</button>
+              </div>
+              <div class="small">Resumo visual do jogador</div>
+              <div class="mini-stats" id="mini-p1">
+                <div class="mini"><div class="k">Aces</div><div class="v" id="p1-ace">0</div></div>
+                <div class="mini"><div class="k">DF</div><div class="v" id="p1-df">0</div></div>
+                <div class="mini"><div class="k">1º Serviço</div><div class="v" id="p1-s1">0%</div></div>
+                <div class="mini"><div class="k">2º Serviço</div><div class="v" id="p1-s2">0%</div></div>
+                <div class="mini"><div class="k">Winners FH/BH</div><div class="v" id="p1-win">0/0</div></div>
+                <div class="mini"><div class="k">Erro Forçado</div><div class="v" id="p1-ef">0</div></div>
+                <div class="mini"><div class="k">Break Points</div><div class="v" id="p1-bp">0/0</div></div>
+                <div class="mini"><div class="k">Pontos na Rede</div><div class="v" id="p1-rede">0/0</div></div>
+                <div class="mini"><div class="k">Erros de Devolução</div><div class="v" id="p1-ed">0</div></div>
+                <div class="mini"><div class="k">Pontos de Devolução</div><div class="v" id="p1-pd">0</div></div>
+                <div class="mini"><div class="k">Linha de Base</div><div class="v" id="p1-lb">0/0</div></div>
+                <div class="mini"><div class="k">Performance</div><div class="v" id="p1-perf">0.0</div></div>
+              </div>
+            </div>
+
+            <div class="player-box" id="box-p2">
+              <div class="player-head">
+                <div>
+                  <div class="player-badge" id="p2-badge">Jogador 2</div>
+                  <div class="player-name" id="p2-name">Jogador 2</div>
+                </div>
+                <button class="toggle-btn" id="toggle-p2" type="button" onclick="togglePlayer(2)">Recolher</button>
+              </div>
+              <div class="small">Resumo visual do jogador</div>
+              <div class="mini-stats" id="mini-p2">
+                <div class="mini"><div class="k">Aces</div><div class="v" id="p2-ace">0</div></div>
+                <div class="mini"><div class="k">DF</div><div class="v" id="p2-df">0</div></div>
+                <div class="mini"><div class="k">1º Serviço</div><div class="v" id="p2-s1">0%</div></div>
+                <div class="mini"><div class="k">2º Serviço</div><div class="v" id="p2-s2">0%</div></div>
+                <div class="mini"><div class="k">Winners FH/BH</div><div class="v" id="p2-win">0/0</div></div>
+                <div class="mini"><div class="k">Erro Forçado</div><div class="v" id="p2-ef">0</div></div>
+                <div class="mini"><div class="k">Break Points</div><div class="v" id="p2-bp">0/0</div></div>
+                <div class="mini"><div class="k">Pontos na Rede</div><div class="v" id="p2-rede">0/0</div></div>
+                <div class="mini"><div class="k">Erros de Devolução</div><div class="v" id="p2-ed">0</div></div>
+                <div class="mini"><div class="k">Pontos de Devolução</div><div class="v" id="p2-pd">0</div></div>
+                <div class="mini"><div class="k">Linha de Base</div><div class="v" id="p2-lb">0/0</div></div>
+                <div class="mini"><div class="k">Performance</div><div class="v" id="p2-perf">0.0</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel comparison" id="comparisonPanel">
+            <div class="panel-header">
+              <h2>Tabela de Comparação Completa</h2>
+              <button class="toggle-btn" id="toggle-comparison" type="button" onclick="toggleComparison()">Recolher</button>
+            </div>
+
+            <div id="comparisonBody" class="collapsible-body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Indicador</th>
+                    <th id="col-p1">Jogador 1</th>
+                    <th id="col-p2">Jogador 2</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Aces</td><td id="t-ace1">0</td><td id="t-ace2">0</td></tr>
+                  <tr><td>Duplas Faltas</td><td id="t-df1">0</td><td id="t-df2">0</td></tr>
+                  <tr><td>Winners Forehand</td><td id="t-fw1">0</td><td id="t-fw2">0</td></tr>
+                  <tr><td>Winners Backhand</td><td id="t-bw1">0</td><td id="t-bw2">0</td></tr>
+                  <tr><td>Erros Não Forçados FH</td><td id="t-enffh1">0</td><td id="t-enffh2">0</td></tr>
+                  <tr><td>Erros Não Forçados BH</td><td id="t-enfbh1">0</td><td id="t-enfbh2">0</td></tr>
+                  <tr><td>Pontos na Rede</td><td id="t-rede1">0</td><td id="t-rede2">0</td></tr>
+                  <tr><td>Erros na Rede</td><td id="t-redeerr1">0</td><td id="t-redeerr2">0</td></tr>
+                  <tr><td>Erros Forçados</td><td id="t-ef1">0</td><td id="t-ef2">0</td></tr>
+                  <tr><td>Erros de Devolução</td><td id="t-ed1">0</td><td id="t-ed2">0</td></tr>
+                  <tr><td>Pontos de Devolução</td><td id="t-pd1">0</td><td id="t-pd2">0</td></tr>
+                  <tr><td>Pontos da Linha de Base</td><td id="t-plb1">0</td><td id="t-plb2">0</td></tr>
+                  <tr><td>Erros da Linha de Base</td><td id="t-elb1">0</td><td id="t-elb2">0</td></tr>
+                  <tr><td>Break Points</td><td id="t-bp1">0/0</td><td id="t-bp2">0/0</td></tr>
+                  <tr><td>Performance</td><td id="t-perf1">0.0</td><td id="t-perf2">0.0</td></tr>
+                  <tr><td>Total de Pontos Vencidos</td><td id="t-total1">0</td><td id="t-total2">0</td></tr>
+                  <tr><td>Games</td><td id="t-g1">0</td><td id="t-g2">0</td></tr>
+                  <tr><td>Sets</td><td id="t-s1">0</td><td id="t-s2">0</td></tr>
+                </tbody>
+              </table>
+
+              <div class="panel" style="margin-top:12px; padding:14px;">
+                <div class="panel-header" style="margin-bottom:8px;">
+                  <h2>📊 Gráfico da Partida</h2>
+                  <button class="toggle-btn" id="toggle-chart" type="button" onclick="toggleChart()">Recolher</button>
+                </div>
+
+                <div id="chartBody" class="collapsible-body">
+                  <div class="chart-wrap">
+                    <canvas id="matchChart"></canvas>
+                  </div>
+                  <div class="legend-grid" id="chartLegend"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="career-bottom-nav">
+    <a href="menu.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">🏠</span>
+      <span class="career-bottom-label">Início</span>
+    </a>
+
+    <button type="button" id="toggleFiltersBtn" class="career-bottom-btn">
+      <span class="career-bottom-icon">📋</span>
+      <span class="career-bottom-label">Filtros</span>
+    </button>
+
+    <a href="dashboard.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">📊</span>
+      <span class="career-bottom-label">Dashboard</span>
+    </a>
+
+    <a href="admin.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">🎾</span>
+      <span class="career-bottom-label">Partida</span>
+    </a>
+
+    <button type="button" id="logoutBtnBottom" class="career-bottom-btn">
+      <span class="career-bottom-icon">🚪</span>
+      <span class="career-bottom-label">Sair</span>
+    </button>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/relatorio.js"></script>
+</body>
+</html>
