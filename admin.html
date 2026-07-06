@@ -18,6 +18,10 @@
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/admin.css" />
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
 </head>
 
 <body class="admin-page">
@@ -246,10 +250,6 @@
             <span class="admin-bottom-label">Salvar Partida</span>
           </button>
 
-          <button type="button" id="clearBtn" class="btn btn-clear-filters admin-form-btn">
-            <span class="admin-bottom-label">Limpar</span>
-          </button>
-
           <button type="button" id="cancelBtn" class="btn btn-clear-filters admin-form-btn">
             <span class="admin-bottom-label">Cancelar</span>
           </button>
@@ -262,6 +262,10 @@
     <section id="matchesSection" class="panel panel-glass">
       <div class="section-head section-head-space">
         <div>
+          <a href="menu.html" class="admin-back-link" aria-label="Voltar para o menu">
+            <ion-icon name="arrow-undo-outline"></ion-icon>
+          </a>
+      
           <span class="section-kicker">Lista de partidas</span>
           <h3>Partidas cadastradas</h3>
           <p class="muted section-subtitle">Filtre e gerencie as partidas</p>
@@ -316,14 +320,18 @@
 
         <div class="admin-pagination">
           <button type="button" id="prevPageBtn" class="admin-page-btn">
-            <span class="admin-page-btn-icon">⬅️</span>
+            <span class="admin-page-btn-icon">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </span>
             <span class="admin-page-btn-label">Anterior</span>
           </button>
 
           <span id="pageInfo" class="admin-page-info">Página 1 de 1</span>
 
           <button type="button" id="nextPageBtn" class="admin-page-btn">
-            <span class="admin-page-btn-icon">➡️</span>
+            <span class="admin-page-btn-icon">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </span>
             <span class="admin-page-btn-label">Próximo</span>
           </button>
         </div>
@@ -343,51 +351,101 @@
 
   <nav class="admin-bottom-nav">
     <a href="menu.html" class="admin-bottom-btn">
-      <span class="admin-bottom-icon">🏠</span>
+      <span class="admin-bottom-icon">
+        <ion-icon name="home-outline"></ion-icon>
+      </span>
       <span class="admin-bottom-label">Início</span>
     </a>
 
     <button type="button" id="showFormBtnBottom" class="admin-bottom-btn">
-      <span class="admin-bottom-icon">➕</span>
+      <span class="admin-bottom-icon">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </span>
       <span class="admin-bottom-label">Incluir</span>
     </button>
 
     <button type="button" id="toggleMatchesBtnBottom" class="admin-bottom-btn">
-      <span class="admin-bottom-icon">📋</span>
+      <span class="admin-bottom-icon">
+        <ion-icon name="list-outline"></ion-icon>
+      </span>
       <span class="admin-bottom-label">Lista</span>
     </button>
 
     <a href="carreira.html" class="admin-bottom-btn">
-      <span class="admin-bottom-icon">🏆</span>
+      <span class="admin-bottom-icon">
+        <ion-icon name="trophy-outline"></ion-icon>
+      </span>
       <span class="admin-bottom-label">Carreira</span>
     </a>
 
-    <button type="button" id="logoutBtnBottom" class="admin-bottom-btn logout">
-      <span class="admin-bottom-icon">🚪</span>
-      <span class="admin-bottom-label">Sair</span>
-    </button>
+    <a href="relatorio.html" class="admin-bottom-btn">
+      <span class="admin-bottom-icon">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </span>
+      <span class="admin-bottom-label">Relatórios</span>
+    </a>
   </nav>
 
- <!-- MODAL DE PESQUISA DE JOGADORES -->
-<div id="playerSearchModal" class="player-search-modal hidden">
-  <div class="player-search-modal-card">
-    <div class="player-search-modal-head">
-      <div>
-        <h3>Pesquisar jogador</h3>
-        <p class="muted">Digite o nome para localizar um jogador já cadastrado.</p>
+  <div id="playerSearchModal" class="player-search-modal hidden">
+    <div class="player-search-modal-card">
+      <div class="player-search-modal-head">
+        <div>
+          <h3>Pesquisar jogador</h3>
+          <p class="muted">Digite o nome para localizar um jogador já cadastrado.</p>
+        </div>
+
+        <button type="button" class="player-search-modal-close" id="closePlayerSearchModalBtn">×</button>
       </div>
 
-      <button type="button" class="player-search-modal-close" id="closePlayerSearchModalBtn">×</button>
-    </div>
+      <div class="player-search-modal-body">
+        <input type="text" id="playerSearchInput" class="player-search-modal-input" placeholder="Digite o nome do jogador" autocomplete="off" />
 
-    <div class="player-search-modal-body">
-      <input type="text" id="playerSearchInput" class="player-search-modal-input" placeholder="Digite o nome do jogador" autocomplete="off" />
-
-      <div id="playerSearchStatus" class="player-search-modal-status muted"></div>
-      <div id="playerSearchResults" class="player-search-results"></div>
+        <div id="playerSearchStatus" class="player-search-modal-status muted"></div>
+        <div id="playerSearchResults" class="player-search-results"></div>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- MODAL DE CONFIRMAÇÃO -->
+  <div id="confirmModal" class="app-modal hidden" aria-hidden="true">
+    <div class="app-modal-card">
+      <div class="app-modal-head">
+        <h3 id="confirmModalTitle">Confirmar ação</h3>
+      </div>
+
+      <div class="app-modal-body">
+        <p id="confirmModalMessage">Deseja continuar?</p>
+      </div>
+
+      <div class="app-modal-actions">
+        <button type="button" id="confirmModalNoBtn" class="app-modal-btn app-modal-btn-secondary">
+          Não
+        </button>
+        <button type="button" id="confirmModalYesBtn" class="app-modal-btn app-modal-btn-primary">
+          Sim
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE SUCESSO -->
+  <div id="successModal" class="app-modal hidden" aria-hidden="true">
+    <div class="app-modal-card app-modal-card-success">
+      <div class="app-modal-head">
+        <h3>Sucesso</h3>
+      </div>
+
+      <div class="app-modal-body">
+        <p id="successModalMessage">Partida cadastrada com sucesso!</p>
+      </div>
+
+      <div class="app-modal-actions">
+        <button type="button" id="successModalOkBtn" class="app-modal-btn app-modal-btn-primary">
+          Entendi
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
