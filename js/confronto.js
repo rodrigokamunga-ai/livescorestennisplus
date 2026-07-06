@@ -699,7 +699,7 @@
 
   function getPlayerStatsFromMatches(playerName) {
     const nameNorm = normalize(playerName || "");
-
+  
     if (!nameNorm || !Array.isArray(state.allOwnerMatches) || !state.allOwnerMatches.length) {
       return {
         total: 0,
@@ -710,12 +710,12 @@
         lossesPct: "0.0"
       };
     }
-
+  
     let wins = 0;
     let losses = 0;
     let titles = 0;
     let total = 0;
-
+  
     state.allOwnerMatches.forEach((match) => {
       const candidates = [
         match.player1,
@@ -729,27 +729,27 @@
       ]
         .map((v) => normalize(v || ""))
         .filter(Boolean);
-
+  
       const appears = candidates.some((p) =>
         p === nameNorm || p.includes(nameNorm) || nameNorm.includes(p)
       );
-
+  
       if (!appears) return;
-
+  
       total++;
-
+  
       const result = getPlayerMatchResult(match, playerName);
       if (result === "win") wins++;
       if (result === "loss") losses++;
-
+  
       if (isPlayerTournamentChampion(match, playerName)) {
         titles++;
       }
     });
-
+  
     const winsPct = total > 0 ? ((wins / total) * 100).toFixed(1) : "0.0";
     const lossesPct = total > 0 ? ((losses / total) * 100).toFixed(1) : "0.0";
-
+  
     return {
       total,
       wins,
@@ -1482,16 +1482,34 @@
     const player2 = getParam("player2");
     const opponentId = getParam("opponentId");
     const ownerIdFromUrl = getParam("ownerId");
-
+  
     const subtitle = document.getElementById("confrontoSubtitle");
     const list = document.getElementById("confrontoMatchesList");
     const emptyState = document.getElementById("emptyState");
-
+  
     const imgPlayer1 = document.getElementById("imgPlayer1");
     const imgPlayer2 = document.getElementById("imgPlayer2");
     const ph1 = document.getElementById("player1AvatarPlaceholder");
     const ph2 = document.getElementById("player2AvatarPlaceholder");
-
+  
+    const setInitialUi = () => {
+      setText("player1Name", "Jogador 1");
+      setText("player2Name", "Pesquisar adversário");
+      setText("confrontoScore", "0 : 0");
+      setText("matchesLabel", "Pesquise um adversário");
+      setText("matchesLabelSecondary", "Nenhum confronto definido ainda");
+      setText("pageInfo", "Página 1 de 1");
+  
+      if (list) {
+        list.innerHTML = `<div class="confronto-empty">Nenhum confronto definido. Clique em <strong>Pesquisar adversário</strong> para iniciar.</div>`;
+      }
+  
+      show(emptyState);
+    };
+  
+    // UI inicial imediata para nunca ficar presa em "Carregando..."
+    setInitialUi();
+  
     if (typeof __db === "undefined") {
       if (subtitle) hide(subtitle);
       if (list) {
@@ -1500,124 +1518,211 @@
       show(emptyState);
       return;
     }
-
+  
     const authUser = await waitForAuthUser();
-
+  
     state.currentOwnerId = ownerIdFromUrl || authUser?.uid || "";
-    state.currentPlayer1 = player1;
-    state.currentPlayer2 = player2;
+    state.currentPlayer1 = player1 || "";
+    state.currentPlayer2 = player2 || "";
     state.currentOpponentId = opponentId || "";
-
-    if (!state.currentOwnerId || !player1 || !player2) {
+  
+    const hasDefinedOpponent = Boolean(player2 || opponentId);
+  
+    if (!state.currentOwnerId) {
       if (subtitle) hide(subtitle);
       if (list) {
-        list.innerHTML = `<div class="confronto-empty">Parâmetros inválidos para carregar o confronto.</div>`;
+        list.innerHTML = `<div class="confronto-empty">Não foi possível identificar o usuário logado.</div>`;
       }
       show(emptyState);
       return;
     }
-
-    setText("player1Name", player1);
-    setText("player2Name", player2);
-    setText("confrontoScore", "0 : 0");
-    setText("matchesLabel", "Carregando...");
-    setText("matchesLabelSecondary", "Carregando...");
-    setText("pageInfo", "Página 1 de 1");
-
-    if (subtitle) {
-      subtitle.textContent = "";
-      hide(subtitle);
-    }
-
+  
     try {
-      let ownerProfile = await getLoggedUserProfile();
-      if (!ownerProfile && player1) {
-        ownerProfile = await findProfileByName(player1);
-      }
-
-      let opponentProfile = null;
-      if (opponentId) {
-        opponentProfile = await getOpponentProfile(opponentId);
-      }
-      if (!opponentProfile && player2) {
-        opponentProfile = await findProfileByName(player2);
-      }
-
-      state.ownerProfile = ownerProfile;
-      state.opponentProfile = opponentProfile;
-
-      const ownerPhoto = getPhotoFromProfile(ownerProfile);
-      const opponentPhoto = getPhotoFromProfile(opponentProfile);
-
-      state.ownerProfilePhoto = ownerPhoto;
-      state.opponentProfilePhoto = opponentPhoto;
-
-      setPlayerAvatar({
-        name: player1,
-        imgEl: imgPlayer1,
-        placeholderEl: ph1,
-        photoURL: ownerPhoto
-      });
-
-      setPlayerAvatar({
-        name: player2,
-        imgEl: imgPlayer2,
-        placeholderEl: ph2,
-        photoURL: opponentPhoto
-      });
-
+      // 1) Carrega primeiro todos os jogos do usuário logado
       const snap = await __db.collection("matches")
         .where("ownerId", "==", state.currentOwnerId)
         .get();
-
+  
       state.allOwnerMatches = snap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
       }));
+  
+      // 2) Busca o perfil do jogador 1
+      let ownerProfile = await getLoggedUserProfile();
+      if (!ownerProfile && player1) {
+        ownerProfile = await findProfileByName(player1);
+      }
+  
+      // Fallback se não vier player1 na URL
+      const resolvedPlayer1Name =
+  player1 ||
+  ownerProfile?.displayName ||
+  ownerProfile?.name ||
+  ownerProfile?.fullName ||
+  authUser?.displayName ||
+  "Jogador 1";
 
+state.currentPlayer1 = resolvedPlayer1Name;
+
+const pageTitleEl = document.getElementById("pageTitle");
+if (pageTitleEl) {
+  pageTitleEl.textContent = `Confrontos - ${resolvedPlayer1Name}`;
+}
+
+document.title = `Confrontos - ${resolvedPlayer1Name}`;
+  
+      if (!ownerProfile && authUser) {
+        ownerProfile = {
+          uid: authUser.uid || "",
+          displayName: resolvedPlayer1Name,
+          email: authUser.email || "",
+          country: "-",
+          city: "-",
+          birthDate: null,
+          height: "-",
+          weight: "-",
+          forehand: "-",
+          backhand: "-",
+          wins: 0,
+          losses: 0,
+          titles: 0
+        };
+      }
+  
+      // 3) Busca o perfil do adversário, se houver
+      let opponentProfile = null;
+      let resolvedPlayer2Name = "Pesquisar adversário";
+  
+      if (hasDefinedOpponent) {
+        if (opponentId) {
+          opponentProfile = await getOpponentProfile(opponentId);
+        }
+  
+        if (!opponentProfile && player2) {
+          opponentProfile = await findProfileByName(player2);
+        }
+  
+        resolvedPlayer2Name =
+          player2 ||
+          opponentProfile?.displayName ||
+          opponentProfile?.name ||
+          opponentProfile?.fullName ||
+          "Adversário";
+  
+        state.currentPlayer2 = resolvedPlayer2Name;
+      } else {
+        state.currentPlayer2 = "";
+      }
+  
+      state.ownerProfile = ownerProfile;
+      state.opponentProfile = opponentProfile;
+  
+      state.ownerProfilePhoto = getPhotoFromProfile(ownerProfile);
+      state.opponentProfilePhoto = getPhotoFromProfile(opponentProfile);
+  
+      // 4) Agora sim monta os metadados, com state.allOwnerMatches já carregado
+      setText("player1Name", resolvedPlayer1Name);
+      setPlayerAvatar({
+        name: resolvedPlayer1Name,
+        imgEl: imgPlayer1,
+        placeholderEl: ph1,
+        photoURL: state.ownerProfilePhoto
+      });
       setPlayerMeta("player1Meta", ownerProfile || {}, "full");
-      setPlayerMeta("player2Meta", opponentProfile || {}, "full");
-
+  
+      if (hasDefinedOpponent) {
+        setText("player2Name", resolvedPlayer2Name);
+        setPlayerAvatar({
+          name: resolvedPlayer2Name,
+          imgEl: imgPlayer2,
+          placeholderEl: ph2,
+          photoURL: state.opponentProfilePhoto
+        });
+        setPlayerMeta("player2Meta", opponentProfile || {}, "full");
+      } else {
+        setText("player2Name", "Pesquisar adversário");
+        setPlayerAvatar({
+          name: "Pesquisar adversário",
+          imgEl: imgPlayer2,
+          placeholderEl: ph2,
+          photoURL: ""
+        });
+        setPlayerMeta("player2Meta", {
+          displayName: "Pesquisar adversário",
+          country: "-",
+          city: "-",
+          birthDate: null,
+          height: "-",
+          weight: "-",
+          forehand: "-",
+          backhand: "-",
+          wins: 0,
+          losses: 0,
+          titles: 0
+        }, "full");
+      }
+  
+      // 5) Se não há adversário definido, encerra aqui
+      if (!hasDefinedOpponent) {
+        state.items = [];
+        state.currentPage = 1;
+  
+        setText("confrontoScore", "0 : 0");
+        setText("matchesLabel", "Pesquise um adversário");
+        setText("matchesLabelSecondary", "Nenhum confronto definido ainda");
+        setText("pageInfo", "Página 1 de 1");
+  
+        if (list) {
+          list.innerHTML = `<div class="confronto-empty">Nenhum confronto definido. Clique em <strong>Pesquisar adversário</strong> para iniciar.</div>`;
+        }
+  
+        show(emptyState);
+        return;
+      }
+  
+      // 6) Monta o confronto entre os dois jogadores
       let wins1 = 0;
       let wins2 = 0;
       const items = [];
-
+  
       snap.forEach((doc) => {
         const d = doc.data() || {};
-
+  
         const matchP1 = d.player1 || d.player1Name || d.ownerName || "";
         const matchP2 = d.player2 || d.player2Name || d.opponentName || "";
-
-        const normalizedPlayer1 = normalize(player1);
-        const normalizedPlayer2 = normalize(player2);
+  
+        const normalizedPlayer1 = normalize(resolvedPlayer1Name);
+        const normalizedPlayer2 = normalize(resolvedPlayer2Name);
         const normalizedMatchP1 = normalize(matchP1);
         const normalizedMatchP2 = normalize(matchP2);
-
+  
         const pairMatches =
           (normalizedMatchP1.includes(normalizedPlayer1) && normalizedMatchP2.includes(normalizedPlayer2)) ||
           (normalizedMatchP1.includes(normalizedPlayer2) && normalizedMatchP2.includes(normalizedPlayer1)) ||
-          samePair(matchP1, matchP2, player1, player2);
-
+          samePair(matchP1, matchP2, resolvedPlayer1Name, resolvedPlayer2Name);
+  
         if (!pairMatches) return;
-
+  
         const status = String(d.status || "").trim().toLowerCase();
         if (status !== "finished" && status !== "wo" && status !== "ret") return;
-
+  
         const winner = getWinner(d);
         if (winner === 1) wins1++;
         if (winner === 2) wins2++;
-
+  
         items.push({
           dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
           html: buildMatchLine(d),
           data: d
         });
       });
-
+  
       items.sort((a, b) => b.dateMs - a.dateMs);
-
+  
       state.items = items;
-
+      state.currentPage = 1;
+  
       setText("confrontoScore", `${wins1} : ${wins2}`);
       setText(
         "matchesLabel",
@@ -1627,10 +1732,10 @@
         "matchesLabelSecondary",
         items.length ? `${items.length} jogo(s)` : "Nenhum jogo encontrado"
       );
-
+  
       const filtered = applyFilter();
       renderPageItems(filtered);
-
+  
       if (!items.length) {
         if (list) {
           list.innerHTML = `<div class="confronto-empty">Nenhum jogo finalizado entre esses jogadores.</div>`;
@@ -1639,7 +1744,7 @@
       } else {
         hide(emptyState);
       }
-
+  
       const historical = await getPlayersFromMatches();
       state.historicalPlayersCache = historical;
     } catch (err) {
@@ -1651,6 +1756,7 @@
       show(emptyState);
     }
   }
+
 
   document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("btnReload")?.addEventListener("click", () => location.reload());
