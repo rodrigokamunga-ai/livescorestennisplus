@@ -14,8 +14,13 @@
   <link rel="apple-touch-icon" href="img/icon-192.png" />
 
   <title>Carreira | TennisPro</title>
+
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/carreira.css" />
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
 </head>
 
 <body class="career-page">
@@ -24,223 +29,237 @@
     <section class="panel panel-glass" style="padding: 22px;">
       <div class="career-header">
         <div>
+          <a href="menu.html" class="admin-back-link" aria-label="Voltar para o menu">
+            <ion-icon name="arrow-undo-outline"></ion-icon>
+          </a>
           <span class="section-kicker">Histórico e Conquistas do atleta</span>
           <h1 id="pageTitle">Carreira</h1>
-          <p id="subtitle">Histórico de partidas finalizadas do usuário </p>
+          <p id="subtitle">Histórico de partidas finalizadas do usuário</p>
         </div>
       </div>
 
-      <!-- ── RESUMO ── -->
-      <!-- ── RESUMO ── -->
-<!-- ── RESUMO ── -->
-<div class="career-summary">
+      <div class="career-summary">
+        <div class="career-summary-card total matches" data-filter="all">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M3 9h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="8.5" cy="14" r="1.2" fill="currentColor"/>
+            <circle cx="12" cy="14" r="1.2" fill="currentColor"/>
+            <circle cx="15.5" cy="14" r="1.2" fill="currentColor"/>
+          </svg>
+          <span>Total de partidas</span>
+          <strong id="totalMatches">0</strong>
+        </div>
 
-  <div class="career-summary-card total matches" data-filter="all">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M3 9h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="8.5" cy="14" r="1.2" fill="currentColor"/>
-      <circle cx="12" cy="14" r="1.2" fill="currentColor"/>
-      <circle cx="15.5" cy="14" r="1.2" fill="currentColor"/>
-    </svg>
-    <span>Total de partidas</span>
-    <strong id="totalMatches">0</strong>
-  </div>
+        <div class="career-summary-card tournament" data-filter="tournaments">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M5 3h14v8a7 7 0 0 1-14 0V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M5 6H2a1 1 0 0 0-1 1v2a4 4 0 0 0 4 4M19 6h3a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Torneios Disputados</span>
+          <strong id="totalTournaments">0</strong>
+        </div>
 
-  <div class="career-summary-card tournament" data-filter="tournaments">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M5 3h14v8a7 7 0 0 1-14 0V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-      <path d="M5 6H2a1 1 0 0 0-1 1v2a4 4 0 0 0 4 4M19 6h3a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-    <span>Torneios Disputados</span>
-    <strong id="totalTournaments">0</strong>
-  </div>
+        <div class="career-summary-card win" data-filter="wins">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M7.5 12.5l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Vitórias</span>
+          <strong id="totalWins">0</strong>
+        </div>
 
-  <div class="career-summary-card win" data-filter="wins">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M7.5 12.5l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>Vitórias</span>
-    <strong id="totalWins">0</strong>
-  </div>
+        <div class="career-summary-card loss" data-filter="losses">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Derrotas</span>
+          <strong id="totalLosses">0</strong>
+        </div>
 
-  <div class="career-summary-card loss" data-filter="losses">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-    <span>Derrotas</span>
-    <strong id="totalLosses">0</strong>
-  </div>
+        <div class="career-summary-card champion" data-filter="champion">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Conquistas</span>
+          <strong id="totalChampion">0</strong>
+        </div>
 
-  <div class="career-summary-card champion" data-filter="champion">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2l2.6 5.2 5.8.85-4.2 4.1.99 5.77L12 15.2l-5.19 2.72.99-5.77L3.6 8.05l5.8-.85L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-      <path d="M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-    <span>Conquistas</span>
-    <strong id="totalChampion">0</strong>
-  </div>
+        <div class="career-summary-card runnerup" data-filter="runnerup">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9 12.5L7.5 21l4.5-2 4.5 2L15 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Vice-campeonato</span>
+          <strong id="totalRunnerup">0</strong>
+        </div>
 
-  <div class="career-summary-card runnerup" data-filter="runnerup">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M9 12.5L7.5 21l4.5-2 4.5 2L15 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>Vice-campeonato</span>
-    <strong id="totalRunnerup">0</strong>
-  </div>
+        <div class="career-summary-card ranking" data-filter="ranking">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="14" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="10" y="9" width="4" height="12" rx="1" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="18" y="4" width="4" height="17" rx="1" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M4 10l4-4 4 4 4-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Ranking</span>
+          <strong id="totalRanking">0</strong>
+        </div>
 
-  <div class="career-summary-card ranking" data-filter="ranking">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="14" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
-      <rect x="10" y="9" width="4" height="12" rx="1" stroke="currentColor" stroke-width="1.8"/>
-      <rect x="18" y="4" width="4" height="17" rx="1" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M4 10l4-4 4 4 4-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>Ranking</span>
-    <strong id="totalRanking">0</strong>
-  </div>
-  
-  <div class="career-summary-card training" data-filter="training">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M12 3c2.4 2.4 3 5.4 3 9s-.6 6.6-3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M12 3c-2.4 2.4-3 5.4-3 9s.6 6.6 3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M3 12h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-    <span>Treinos</span>
-    <strong id="totalTraining">0</strong>
-  </div>
+        <div class="career-summary-card training" data-filter="training">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 3c2.4 2.4 3 5.4 3 9s-.6 6.6-3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 3c-2.4 2.4-3 5.4-3 9s.6 6.6 3 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M3 12h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Treinos</span>
+          <strong id="totalTraining">0</strong>
+        </div>
 
-  <div class="career-summary-card simple" data-filter="simple">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-    <span>Simples</span>
-    <strong id="totalSimple">0</strong>
-  </div>
-  
-  <div class="career-summary-card doubles" data-filter="doubles">
-    <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/>
-      <circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/>
-      <path d="M5.5 20c0-2.5 1.9-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M14 20c0-2.5 1.9-4.5 4.5-4.5S23 17.5 23 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" transform="translate(-2 -0.2)"/>
-    </svg>
-    <span>Duplas</span>
-    <strong id="totalDoubles">0</strong>
-  </div>
+        <div class="career-summary-card simple" data-filter="simple">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Simples</span>
+          <strong id="totalSimple">0</strong>
+        </div>
 
-</div>
-      <!-- ── FILTROS ── -->
-<div id="careerFiltersSection" class="career-filters">
+        <div class="career-summary-card doubles" data-filter="doubles">
+          <svg class="career-card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M5.5 20c0-2.5 1.9-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M14 20c0-2.5 1.9-4.5 4.5-4.5S23 17.5 23 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" transform="translate(-2 -0.2)"/>
+          </svg>
+          <span>Duplas</span>
+          <strong id="totalDoubles">0</strong>
+        </div>
+      </div>
 
-  
+      
 
-  <label>
-    Pesquisar adversário
-    <input type="text" id="playerName" placeholder="Filtrar pelo adversário" />
-  </label>
+      <div id="careerFiltersSection" class="career-filters">
 
-  <label>
-    Torneio
-    <select id="tournamentFilter">
-      <option value="">Todos os torneios</option>
-    </select>
-  </label>
+        <label>
+          Ano da Partida
+          <select id="yearFilter">
+            <option value="">Todos os anos</option>
+          </select>
+        </label>
 
- 
-  
-  <label>
-    Fase do Torneio
-    <select id="stageFilter">
-      <option value="">Todas</option>
-      <option value="Primeira Rodada">Primeira Rodada</option>
-      <option value="Segunda Rodada">Segunda Rodada</option>
-      <option value="Terceira Rodada">Terceira Rodada</option>
-      <option value="Oitavas de Final">Oitavas de Final</option>
-      <option value="Quartas de Final">Quartas de Final</option>
-      <option value="Semifinais">Semifinais</option>
-      <option value="Final">Final</option>
-      <option value="Grupos">Grupos</option>
-    </select>
-  </label>
 
-  
 
-  <label>
-    Ano
-    <select id="yearFilter">
-      <option value="">Todos os anos</option>
-    </select>
-  </label>
+        <label>
+          Pesquisar adversário
+          <input type="text" id="playerName" placeholder="Filtrar pelo adversário" />
+        </label>
 
-  <div class="career-filter-actions">
-    <button type="button" class="btn primary career-filter-btn" id="applyFilterBtn">
-      <span class="career-btn-icon">🔎</span>
-      <span>Filtrar</span>
-    </button>
+        <label>
+          Torneio
+          <select id="tournamentFilter">
+            <option value="">Todos os torneios</option>
+          </select>
+        </label>
 
-    <button type="button" class="btn career-filter-btn" id="clearFilterBtn">
-      <span class="career-btn-icon">🧹</span>
-      <span>Limpar</span>
-    </button>
-  </div>
-</div>
+        <label>
+          Fase do Torneio
+          <select id="stageFilter">
+            <option value="">Todas</option>
+            <option value="Primeira Rodada">Primeira Rodada</option>
+            <option value="Segunda Rodada">Segunda Rodada</option>
+            <option value="Terceira Rodada">Terceira Rodada</option>
+            <option value="Oitavas de Final">Oitavas de Final</option>
+            <option value="Quartas de Final">Quartas de Final</option>
+            <option value="Semifinais">Semifinais</option>
+            <option value="Final">Final</option>
+            <option value="Grupos">Grupos</option>
+          </select>
+        </label>
+
+        
+
+        <div class="career-filter-actions">
+          <button type="button" class="btn primary career-filter-btn" id="applyFilterBtn">
+            <span class="career-btn-icon">
+              <ion-icon name="search-outline"></ion-icon>
+            </span>
+            <span>Filtrar</span>
+          </button>
+
+          <button type="button" class="btn career-filter-btn" id="clearFilterBtn">
+            <span class="career-btn-icon">
+              <ion-icon name="brush-outline"></ion-icon>
+            </span>
+            <span>Limpar</span>
+          </button>
+        </div>
+      </div>
 
       <div id="summaryMessage" class="career-message"></div>
 
       <div id="historyList" class="career-history-list"></div>
 
-      <!-- ── PAGINAÇÃO ── -->
       <div class="career-pagination">
         <button type="button" id="prevPageBtn" class="career-page-btn">
-          <span class="career-page-btn-icon">⬅️</span>
+          <span class="career-page-btn-icon">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+          </span>
           <span class="career-page-btn-label">Anterior</span>
         </button>
 
         <span id="pageInfo" class="career-page-info">Página 1 de 1</span>
 
         <button type="button" id="nextPageBtn" class="career-page-btn">
-          <span class="career-page-btn-icon">➡️</span>
+          <span class="career-page-btn-icon">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </span>
           <span class="career-page-btn-label">Próximo</span>
         </button>
       </div>
     </section>
-
   </main>
 
   <nav class="career-bottom-nav">
     <a href="menu.html" class="career-bottom-btn">
-      <span class="career-bottom-icon">🏠</span>
+      <span class="career-bottom-icon">
+        <ion-icon name="home-outline"></ion-icon>
+      </span>
       <span class="career-bottom-label">Início</span>
     </a>
 
     <button type="button" id="toggleFiltersBtn" class="career-bottom-btn">
-      <span class="career-bottom-icon">📋</span>
-      <span class="career-bottom-label">Lista</span>
+      <span class="career-bottom-icon">
+        <ion-icon name="search-outline"></ion-icon>
+      </span>
+      <span class="career-bottom-label">Filtros</span>
     </button>
 
     <a href="dashboard.html" class="career-bottom-btn">
-      <span class="career-bottom-icon">📊</span>
+      <span class="career-bottom-icon">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+      </span>
       <span class="career-bottom-label">Dashboard</span>
     </a>
 
     <a href="admin.html" class="career-bottom-btn">
-      <span class="career-bottom-icon">🎾</span>
+      <span class="career-bottom-icon">
+        <ion-icon name="tennisball-outline"></ion-icon>
+      </span>
       <span class="career-bottom-label">Partida</span>
     </a>
 
-    <button type="button" id="logoutBtnBottom" class="career-bottom-btn">
-      <span class="career-bottom-icon">🚪</span>
-      <span class="career-bottom-label">Sair</span>
-    </button>
+    <a href="relatorio.html" class="career-bottom-btn">
+      <span class="career-bottom-icon">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </span>
+      <span class="career-bottom-label">Relatórios</span>
+    </a>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
