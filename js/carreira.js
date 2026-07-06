@@ -850,10 +850,20 @@
     function updateToggleButtonUI() {
       const btn = el.toggleFiltersBtn;
       if (!btn) return;
-      const icon = btn.querySelector(".career-bottom-icon");
+    
+      const icon = btn.querySelector(".career-bottom-icon ion-icon");
       const label = btn.querySelector(".career-bottom-label");
-      if (icon) icon.textContent = state.filtersCollapsed ? "🔎" : "📋";
-      if (label) label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
+    
+      if (icon) {
+        icon.setAttribute(
+          "name",
+          state.filtersCollapsed ? "search-outline" : "list-outline"
+        );
+      }
+    
+      if (label) {
+        label.textContent = state.filtersCollapsed ? "Filtros" : "Lista";
+      }
     }
 
     function setFiltersCollapsed(collapsed) {
