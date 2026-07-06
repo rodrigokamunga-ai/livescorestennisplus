@@ -14,8 +14,13 @@
   <link rel="apple-touch-icon" href="img/icon-192.png" />
 
   <title>Jogador | TennisPro</title>
+
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/player.css" />
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
 </head>
 
 <body class="player-page">
@@ -24,8 +29,14 @@
 
       <!-- Cabeçalho -->
       <div class="player-hero-top">
+        
+
         <div class="brand-wrap">
           <div>
+
+            <a href="menu.html" class="player-back-link" aria-label="Voltar para o menu">
+              <ion-icon name="arrow-undo-outline"></ion-icon>
+            </a>
             <span class="section-kicker">Controle da Partida</span>
             <h2 id="matchTitle">Partida</h2>
             <div class="match-meta-top">
@@ -34,8 +45,8 @@
           </div>
         </div>
 
-        <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida">
-          <span class="share-match-icon">🔗</span>
+        <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida" aria-label="Compartilhar partida" >
+          <ion-icon name="share-social-outline" class="share-match-icon"></ion-icon>
         </button>
       </div>
 
@@ -117,14 +128,12 @@
               <span class="player-col-name" id="player1Name">Jogador 1</span>
             </label>
 
-            <!-- Pontos -->
             <div class="point-control" id="pointControl1">
               <button class="point-btn" data-delta="-1" data-target="player1">−</button>
               <strong class="point-value" id="points1">0</strong>
               <button class="point-btn" data-delta="1" data-target="player1">+</button>
             </div>
 
-            <!-- Games -->
             <div class="games-control" id="gamesControl1">
               <div class="games-control-btns">
                 <button class="games-mini-btn" data-games-delta="-1" data-games-target="player1">−</button>
@@ -153,14 +162,12 @@
               <span class="player-col-name" id="player2Name">Jogador 2</span>
             </label>
 
-            <!-- Pontos -->
             <div class="point-control" id="pointControl2">
               <button class="point-btn" data-delta="-1" data-target="player2">−</button>
               <strong class="point-value" id="points2">0</strong>
               <button class="point-btn" data-delta="1" data-target="player2">+</button>
             </div>
 
-            <!-- Games -->
             <div class="games-control" id="gamesControl2">
               <div class="games-control-btns">
                 <button class="games-mini-btn" data-games-delta="-1" data-games-target="player2">−</button>
@@ -193,7 +200,6 @@
               <div class="serve-status" id="serve-status-p1">1º SERVIÇO</div>
               <span class="section-title" id="statsTitle1">Stats Jogador 1</span>
 
-              <!-- Seleção de saque do jogador 1 -->
               <div class="group saque-selecao">
                 <div class="group-title">Saque</div>
                 <label class="manual-player-name-row" for="servePlayer1Stats">
@@ -207,21 +213,25 @@
                 <div class="group-title">Saque</div>
                 <div class="stats-grid">
                   <button class="play-btn play-serve" id="j1_servico_1" onclick="marcarServico(1,1)">
+                    <ion-icon name="flash-outline"></ion-icon>
                     <span class="play-label">1º SERVIÇO</span>
                     <span class="play-sub">Saque inicial</span>
                   </button>
 
                   <button class="play-btn play-serve-second" id="j1_servico_2" onclick="marcarServico(1,2)">
+                    <ion-icon name="flash-outline"></ion-icon>
                     <span class="play-label">2º SERVIÇO</span>
                     <span class="play-sub">Saque de segurança</span>
                   </button>
 
                   <button class="play-btn play-doublefault" id="j1_df" onclick="marcarServicoFalha(1,'df')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">DUPLA FALTA</span>
                     <span class="play-sub">Erro no saque</span>
                   </button>
 
                   <button class="play-btn play-ace" id="j1_ace" onclick="addPoint(1,'ace')">
+                    <ion-icon name="sparkles-outline"></ion-icon>
                     <span class="play-label">ACE</span>
                     <span class="play-sub">Ponto direto</span>
                   </button>
@@ -232,21 +242,25 @@
                 <div class="group-title">Rede</div>
                 <div class="stats-grid">
                   <button class="play-btn play-winner" id="j1_smash_win" onclick="addPoint(1,'smash_win')">
+                    <ion-icon name="tennisball-outline"></ion-icon>
                     <span class="play-label">SMASH WINNER</span>
                     <span class="play-sub">Winner de smash</span>
                   </button>
 
                   <button class="play-btn play-error" id="j1_smash_err" onclick="addPoint(1,'smash_err')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">SMASH ERRO</span>
                     <span class="play-sub">Erro no smash</span>
                   </button>
 
                   <button class="play-btn play-winner" id="j1_voleio_win" onclick="addPoint(1,'voleio_win')">
+                    <ion-icon name="tennisball-outline"></ion-icon>
                     <span class="play-label">VOLEIO WINNER</span>
                     <span class="play-sub">Winner de voleio</span>
                   </button>
 
                   <button class="play-btn play-error" id="j1_voleio_err" onclick="addPoint(1,'voleio_err')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">VOLEIO ERRO</span>
                     <span class="play-sub">Erro no voleio</span>
                   </button>
@@ -256,34 +270,38 @@
               <div class="group winner">
                 <div class="group-title">Winner / Erros</div>
                 <div class="stats-grid">
-                  
-
                   <button class="play-btn play-ace" id="j1_bw" onclick="addPoint(1,'bw')">
+                    <ion-icon name="pulse-outline"></ion-icon>
                     <span class="play-label">BACKHAND WINNER</span>
                     <span class="play-sub">Vencedor de BH</span>
                   </button>
 
                   <button class="play-btn play-ace" id="j1_fw" onclick="addPoint(1,'fw')">
+                    <ion-icon name="pulse-outline"></ion-icon>
                     <span class="play-label">FOREHAND WINNER</span>
                     <span class="play-sub">Vencedor de FH</span>
                   </button>
 
                   <button class="play-btn play-doublefault" id="j1_enf_fh" onclick="addPoint(1,'enf_fh')">
+                    <ion-icon name="remove-circle-outline"></ion-icon>
                     <span class="play-label">ERRO FH NF</span>
                     <span class="play-sub">Não forçado</span>
                   </button>
 
                   <button class="play-btn play-doublefault" id="j1_enf_bh" onclick="addPoint(1,'enf_bh')">
+                    <ion-icon name="remove-circle-outline"></ion-icon>
                     <span class="play-label">ERRO BH NF</span>
                     <span class="play-sub">Não forçado</span>
                   </button>
 
                   <button class="play-btn play-error" id="j1_ef" onclick="addPoint(1,'ef')">
+                    <ion-icon name="warning-outline"></ion-icon>
                     <span class="play-label">ERRO FORÇADO</span>
                     <span class="play-sub">Erro induzido</span>
                   </button>
 
                   <button class="play-btn play-serve" id="j1_ponto_normal" onclick="addPoint(1,'normal')">
+                    <ion-icon name="add-circle-outline"></ion-icon>
                     <span class="play-label">+ PONTO NORMAL</span>
                     <span class="play-sub">Pontuação padrão</span>
                   </button>
@@ -294,11 +312,13 @@
                 <div class="group-title">Dropshot</div>
                 <div class="stats-grid">
                   <button class="play-btn play-winner" id="j1_dropshot_win" onclick="addPoint(1,'dropshot_win')">
+                    <ion-icon name="tennisball-outline"></ion-icon>
                     <span class="play-label">DROPSHOT WINNER</span>
                     <span class="play-sub">Winner de dropshot</span>
                   </button>
 
                   <button class="play-btn play-error" id="j1_dropshot_err" onclick="addPoint(1,'dropshot_err')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">DROPSHOT ERRO</span>
                     <span class="play-sub">Erro no dropshot</span>
                   </button>
@@ -309,21 +329,25 @@
                 <div class="group-title">Devolução / Base</div>
                 <div class="stats-grid">
                   <button class="play-btn play-return" id="j1_ponto_devolucao" onclick="addPoint(1,'ponto_devolucao')">
+                    <ion-icon name="return-up-forward-outline"></ion-icon>
                     <span class="play-label">PONTO DE DEVOLUÇÃO</span>
                     <span class="play-sub">Devolução ganha</span>
                   </button>
 
                   <button class="play-btn play-error" id="j1_erro_devolucao" onclick="addPoint(1,'erro_devolucao')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">ERRO DE DEVOLUÇÃO</span>
                     <span class="play-sub">Falha na devolução</span>
                   </button>
 
                   <button class="play-btn play-error" id="j1_erro_linha_base" onclick="addPoint(1,'erro_linha_base')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">ERRO DA LINHA DE BASE</span>
                     <span class="play-sub">Erro do fundo</span>
                   </button>
 
                   <button class="play-btn play-baseline" id="j1_ponto_linha_base" onclick="addPoint(1,'ponto_linha_base')">
+                    <ion-icon name="ribbon-outline"></ion-icon>
                     <span class="play-label">PONTO DA LINHA DE BASE</span>
                     <span class="play-sub">Winner do fundo</span>
                   </button>
@@ -363,21 +387,25 @@
                 <div class="group-title">Saque</div>
                 <div class="stats-grid">
                   <button class="play-btn play-serve" id="j2_servico_1" onclick="marcarServico(2,1)">
+                    <ion-icon name="flash-outline"></ion-icon>
                     <span class="play-label">1º SERVIÇO</span>
                     <span class="play-sub">Saque inicial</span>
                   </button>
 
                   <button class="play-btn play-serve-second" id="j2_servico_2" onclick="marcarServico(2,2)">
+                    <ion-icon name="flash-outline"></ion-icon>
                     <span class="play-label">2º SERVIÇO</span>
                     <span class="play-sub">Saque de segurança</span>
                   </button>
 
                   <button class="play-btn play-doublefault" id="j2_df" onclick="marcarServicoFalha(2,'df')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">DUPLA FALTA</span>
                     <span class="play-sub">Erro no saque</span>
                   </button>
 
                   <button class="play-btn play-ace" id="j2_ace" onclick="addPoint(2,'ace')">
+                    <ion-icon name="sparkles-outline"></ion-icon>
                     <span class="play-label">ACE</span>
                     <span class="play-sub">Ponto direto</span>
                   </button>
@@ -388,21 +416,25 @@
                 <div class="group-title">Rede</div>
                 <div class="stats-grid">
                   <button class="play-btn play-winner" id="j2_smash_win" onclick="addPoint(2,'smash_win')">
+                    <ion-icon name="tennisball-outline"></ion-icon>
                     <span class="play-label">SMASH WINNER</span>
                     <span class="play-sub">Winner de smash</span>
                   </button>
 
                   <button class="play-btn play-error" id="j2_smash_err" onclick="addPoint(2,'smash_err')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">SMASH ERRO</span>
                     <span class="play-sub">Erro no smash</span>
                   </button>
 
                   <button class="play-btn play-winner" id="j2_voleio_win" onclick="addPoint(2,'voleio_win')">
+                    <ion-icon name="tennisball-outline"></ion-icon>
                     <span class="play-label">VOLEIO WINNER</span>
                     <span class="play-sub">Winner de voleio</span>
                   </button>
 
                   <button class="play-btn play-error" id="j2_voleio_err" onclick="addPoint(2,'voleio_err')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">VOLEIO ERRO</span>
                     <span class="play-sub">Erro no voleio</span>
                   </button>
@@ -412,34 +444,38 @@
               <div class="group winner">
                 <div class="group-title">Winner / Erros</div>
                 <div class="stats-grid">
-                  
-
                   <button class="play-btn play-ace" id="j2_bw" onclick="addPoint(2,'bw')">
+                    <ion-icon name="pulse-outline"></ion-icon>
                     <span class="play-label">BACKHAND WINNER</span>
                     <span class="play-sub">Vencedor de BH</span>
                   </button>
 
                   <button class="play-btn play-ace" id="j2_fw" onclick="addPoint(2,'fw')">
+                    <ion-icon name="pulse-outline"></ion-icon>
                     <span class="play-label">FOREHAND WINNER</span>
                     <span class="play-sub">Vencedor de FH</span>
                   </button>
 
                   <button class="play-btn play-doublefault" id="j2_enf_fh" onclick="addPoint(2,'enf_fh')">
+                    <ion-icon name="remove-circle-outline"></ion-icon>
                     <span class="play-label">ERRO FH NF</span>
                     <span class="play-sub">Não forçado</span>
                   </button>
 
                   <button class="play-btn play-doublefault" id="j2_enf_bh" onclick="addPoint(2,'enf_bh')">
+                    <ion-icon name="remove-circle-outline"></ion-icon>
                     <span class="play-label">ERRO BH NF</span>
                     <span class="play-sub">Não forçado</span>
                   </button>
 
                   <button class="play-btn play-error" id="j2_ef" onclick="addPoint(2,'ef')">
+                    <ion-icon name="warning-outline"></ion-icon>
                     <span class="play-label">ERRO FORÇADO</span>
                     <span class="play-sub">Erro induzido</span>
                   </button>
 
                   <button class="play-btn play-serve" id="j2_ponto_normal" onclick="addPoint(2,'normal')">
+                    <ion-icon name="add-circle-outline"></ion-icon>
                     <span class="play-label">+ PONTO NORMAL</span>
                     <span class="play-sub">Pontuação padrão</span>
                   </button>
@@ -450,11 +486,13 @@
                 <div class="group-title">Dropshot</div>
                 <div class="stats-grid">
                   <button class="play-btn play-winner" id="j2_dropshot_win" onclick="addPoint(2,'dropshot_win')">
+                    <ion-icon name="tennisball-outline"></ion-icon>
                     <span class="play-label">DROPSHOT WINNER</span>
                     <span class="play-sub">Winner de dropshot</span>
                   </button>
 
                   <button class="play-btn play-error" id="j2_dropshot_err" onclick="addPoint(2,'dropshot_err')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">DROPSHOT ERRO</span>
                     <span class="play-sub">Erro no dropshot</span>
                   </button>
@@ -465,21 +503,25 @@
                 <div class="group-title">Devolução / Base</div>
                 <div class="stats-grid">
                   <button class="play-btn play-return" id="j2_ponto_devolucao" onclick="addPoint(2,'ponto_devolucao')">
+                    <ion-icon name="return-up-forward-outline"></ion-icon>
                     <span class="play-label">PONTO DE DEVOLUÇÃO</span>
                     <span class="play-sub">Devolução ganha</span>
                   </button>
 
                   <button class="play-btn play-error" id="j2_erro_devolucao" onclick="addPoint(2,'erro_devolucao')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">ERRO DE DEVOLUÇÃO</span>
                     <span class="play-sub">Falha na devolução</span>
                   </button>
 
                   <button class="play-btn play-error" id="j2_erro_linha_base" onclick="addPoint(2,'erro_linha_base')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     <span class="play-label">ERRO DA LINHA DE BASE</span>
                     <span class="play-sub">Erro do fundo</span>
                   </button>
 
                   <button class="play-btn play-baseline" id="j2_ponto_linha_base" onclick="addPoint(2,'ponto_linha_base')">
+                    <ion-icon name="ribbon-outline"></ion-icon>
                     <span class="play-label">PONTO DA LINHA DE BASE</span>
                     <span class="play-sub">Winner do fundo</span>
                   </button>
@@ -507,23 +549,37 @@
   <!-- Bottom Nav -->
   <nav class="player-bottom-nav">
     <a href="admin.html" class="player-bottom-btn" id="matchPageBtn">
-      <span class="player-bottom-icon">🎾</span>
+      <span class="player-bottom-icon">
+        <ion-icon name="tennisball-outline"></ion-icon>
+      </span>
       <span class="player-bottom-label">Partida</span>
     </a>
+
     <button id="startBtn" class="player-bottom-btn primary-action" type="button">
-      <span class="player-bottom-icon" id="startBtnIcon">▶️</span>
+      <span class="player-bottom-icon" id="startBtnIcon">
+        <ion-icon name="play-outline"></ion-icon>
+      </span>
       <span class="player-bottom-label" id="startBtnLabel">Iniciar</span>
     </button>
+
     <button id="finishBtn" class="player-bottom-btn danger" type="button">
-      <span class="player-bottom-icon">🏁</span>
+      <span class="player-bottom-icon">
+        <ion-icon name="flag-outline"></ion-icon>
+      </span>
       <span class="player-bottom-label">Finalizar</span>
     </button>
+
     <button id="resetScoreBtn" class="player-bottom-btn danger" type="button">
-      <span class="player-bottom-icon">🧹</span>
+      <span class="player-bottom-icon">
+        <ion-icon name="trash-outline"></ion-icon>
+      </span>
       <span class="player-bottom-label">Zerar</span>
     </button>
+
     <button id="undoBtn" class="player-bottom-btn" type="button">
-      <span class="player-bottom-icon">↩️</span>
+      <span class="player-bottom-icon">
+        <ion-icon name="arrow-undo-outline"></ion-icon>
+      </span>
       <span class="player-bottom-label">Desfazer</span>
     </button>
   </nav>
