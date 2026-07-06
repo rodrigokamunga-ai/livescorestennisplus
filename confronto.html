@@ -22,14 +22,18 @@
 
 <body class="confronto-page">
   <main class="container dashboard-container confronto-container">
-    <section class="panel panel-glass confronto-card">
+    <section class="panel panel-glass" style="padding: 22px;">
 
-      <div class="dashboard-title confronto-header">
-        <div class="title-with-icon confronto-header-title">
-          <span class="section-icon">🎾</span>
-          <h3>Head2Head</h3>
+      <div class="career-header">
+        <div>
+          <a href="menu.html" class="admin-back-link" aria-label="Voltar para o menu">
+            <ion-icon name="arrow-undo-outline"></ion-icon>
+          </a>
+          <span class="section-kicker">Confrontos HeadToHead</span>
+          <h1 id="pageTitle">Confrontos - </h1>
+          <p id="subtitle">Histórico de vitórias/derrotas no confronto</p>
         </div>
-        <span class="badge" id="matchesLabel">Carregando...</span>
+        <span class="badge" id="matchesLabel">Pesquise um adversário</span>
       </div>
 
       <p id="confrontoSubtitle" class="confronto-subtitle hidden"></p>
@@ -70,7 +74,7 @@
           </div>
 
           <div class="confronto-player-info right">
-            <div id="player2Name" class="confronto-player-name">Jogador 2</div>
+            <div id="player2Name" class="confronto-player-name">Pesquisar adversário</div>
             <div id="player2Meta" class="confronto-player-meta"></div>
           </div>
         </div>
@@ -96,11 +100,11 @@
       <div class="confronto-list">
         <div class="confronto-list-head">
           <h3>Jogos encontrados</h3>
-          <span id="matchesLabelSecondary">Nenhum jogo carregado ainda</span>
+          <span id="matchesLabelSecondary">Nenhum confronto definido ainda</span>
         </div>
 
         <div id="confrontoMatchesList" class="confronto-list">
-          <div class="confronto-empty">Carregando jogos...</div>
+          <div class="confronto-empty">Nenhum confronto definido. Clique em <strong>Pesquisar adversário</strong>.</div>
         </div>
 
         <div class="career-pagination confronto-pagination">
@@ -156,7 +160,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <script src="js/firebase.js"></script>
-  <script src="js/confronto.js?v=19"></script>
+  <script src="js/confronto.js?v=21"></script>
 
   <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("/service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration.scope); registration.update(); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
