@@ -140,13 +140,12 @@ body.admin-page .actions.full {
 
 /* ========================= BOTÕES ========================= */
 body.admin-page .btn,
-body.admin-page .admin-bottom-btn,
 body.admin-page .admin-page-btn,
 body.admin-page .btn-clear-filters,
 body.admin-page .icon-btn,
 body.admin-page .search-player-btn,
 body.admin-page .player-search-modal-close,
-body.admin-page .confronto-search-result {
+body.admin-page .admin-dropdown-item {
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
@@ -155,13 +154,12 @@ body.admin-page .confronto-search-result {
 }
 
 body.admin-page .btn:hover,
-body.admin-page .admin-bottom-btn:hover,
 body.admin-page .admin-page-btn:hover,
 body.admin-page .btn-clear-filters:hover,
 body.admin-page .icon-btn:hover,
 body.admin-page .search-player-btn:hover,
 body.admin-page .player-search-modal-close:hover,
-body.admin-page .confronto-search-result:hover {
+body.admin-page .admin-dropdown-item:hover {
   transform: translateY(-1px);
 }
 
@@ -199,7 +197,6 @@ body.admin-page .admin-page-btn:disabled {
 /* ========================= BOTÕES PADRÃO DO TIPO “LIMPAR FILTROS” ========================= */
 body.admin-page .btn-clear-filters,
 body.admin-page .admin-page-btn,
-body.admin-page .admin-bottom-btn,
 body.admin-page .icon-btn,
 body.admin-page .admin-form-actions .admin-form-btn,
 body.admin-page .search-player-btn {
@@ -221,7 +218,6 @@ body.admin-page .search-player-btn {
 
 body.admin-page .btn-clear-filters:hover,
 body.admin-page .admin-page-btn:hover,
-body.admin-page .admin-bottom-btn:hover,
 body.admin-page .icon-btn:hover,
 body.admin-page .admin-form-actions .admin-form-btn:hover,
 body.admin-page .search-player-btn:hover {
@@ -348,17 +344,38 @@ body.admin-page .admin-action-btn {
   align-items: center;
   justify-content: center;
   gap: 3px;
-  min-width: 68px;
-  min-height: 48px;
-  border-radius: 12px;
-  padding: 6px 8px;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
   line-height: 1;
+  color: #eef4ff;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease;
+}
+
+body.admin-page .admin-action-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+  background: transparent;
+  box-shadow: none;
 }
 
 body.admin-page .admin-action-icon {
   font-size: 1rem;
   line-height: 1;
   pointer-events: none;
+}
+
+body.admin-page .admin-action-icon ion-icon,
+body.admin-page .admin-page-btn-icon ion-icon,
+body.admin-page .admin-bottom-icon ion-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  display: block;
 }
 
 body.admin-page .admin-action-label {
@@ -370,25 +387,39 @@ body.admin-page .admin-action-label {
 }
 
 body.admin-page .action-cell .icon-btn {
-  min-width: 68px;
-  min-height: 48px;
-  border-radius: 12px;
-  padding: 6px 8px;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
   justify-self: center;
+  color: #eef4ff;
+}
+
+body.admin-page .action-cell .icon-btn:hover {
+  transform: translateY(-1px);
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  opacity: 0.92;
 }
 
 body.admin-page .action-cell .icon-btn.danger {
-  background: linear-gradient(180deg, rgba(255, 123, 123, 0.18), rgba(255, 123, 123, 0.08));
-  border-color: rgba(255, 123, 123, 0.18);
+  background: transparent;
+  border: none;
+  color: #ffb6b6;
 }
 
 body.admin-page .action-cell .icon-btn:not(.danger) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  background: transparent;
+  border: none;
 }
 
 /* ========================= STATUS TAG ========================= */
@@ -832,7 +863,7 @@ body.admin-page .detail-summary-line strong {
   font-variant-numeric: tabular-nums;
 }
 
-/* ========================= BOTÕES FIXOS INFERIORES ========================= */
+/* ========================= BOTÕES FIXOS INFERIORES — LIMPOS ========================= */
 body.admin-page .admin-bottom-nav {
   position: fixed;
   left: 0;
@@ -841,8 +872,8 @@ body.admin-page .admin-bottom-nav {
   z-index: 1000;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  padding: 6px 10px 8px;
+  gap: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   background: rgba(10, 16, 28, 0.92);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px);
@@ -852,32 +883,47 @@ body.admin-page .admin-bottom-nav {
 }
 
 body.admin-page .admin-bottom-btn {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
+  appearance: none;
+  border: none;
+  background: transparent;
   color: #eef4ff;
   text-decoration: none;
-  border-radius: 16px;
-  min-height: 60px;
+  border-radius: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   font-weight: 800;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   cursor: pointer;
   width: 100%;
-  padding: 6px 8px;
+  padding: 4px 2px;
+  transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+  opacity: 0.88;
 }
 
 body.admin-page .admin-bottom-btn:hover {
-  border-color: rgba(216, 255, 99, 0.22);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.05));
+  transform: translateY(-1px);
+  opacity: 1;
+  background: transparent;
+  box-shadow: none;
 }
 
 body.admin-page .admin-bottom-icon {
   font-size: 1.12rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.admin-page .admin-bottom-icon ion-icon {
+  font-size: 1.12rem;
 }
 
 body.admin-page .admin-bottom-label {
@@ -885,11 +931,87 @@ body.admin-page .admin-bottom-label {
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
-body.admin-page .admin-bottom-btn.logout .admin-bottom-icon,
-body.admin-page .menu-bottom-btn.logout .menu-bottom-icon {
+body.admin-page .admin-bottom-btn.logout .admin-bottom-icon {
   color: #ff7b7b;
+}
+
+/* ========================= MENU SUSPENSO NO RODAPÉ ========================= */
+body.admin-page .admin-bottom-dropdown-wrap {
+  position: relative;
+  width: 100%;
+}
+
+body.admin-page .admin-more-btn {
+  width: 100%;
+}
+
+body.admin-page .admin-bottom-dropdown {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  min-width: 190px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(12, 18, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1500;
+}
+
+body.admin-page .admin-bottom-dropdown.hidden {
+  display: none !important;
+}
+
+body.admin-page .admin-dropdown-item {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  color: #eef4ff;
+  width: 100%;
+  border-radius: 14px;
+  padding: 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+body.admin-page .admin-dropdown-item ion-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  color: #9bc0ff;
+}
+
+body.admin-page .admin-dropdown-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(216, 255, 99, 0.22);
+  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.05));
+}
+
+body.admin-page .admin-dropdown-item.danger {
+  color: #ffd3d3;
+}
+
+body.admin-page .admin-dropdown-item.danger ion-icon {
+  color: #ff7b7b;
+}
+
+body.admin-page .admin-dropdown-item.danger:hover {
+  border-color: rgba(255, 123, 123, 0.22);
+  background: linear-gradient(180deg, rgba(255, 123, 123, 0.14), rgba(255, 255, 255, 0.05));
 }
 
 /* ========================= AJUSTE DOS CAMPOS DO PLACAR ========================= */
@@ -919,7 +1041,6 @@ body.admin-page .score-set strong {
   margin-bottom: 8px;
 }
 
-/* Jogador 1 e Jogador 2 sempre na mesma linha */
 body.admin-page .score-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1344,25 +1465,38 @@ body.admin-page .player-search-line span {
   body.admin-page .mobile-match-actions .icon-btn {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 56px;
-    height: 56px;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
+    min-height: 0;
+    height: auto;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
     padding: 6px 4px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 3px;
+    color: #eef4ff;
+    transition: transform 0.16s ease, opacity 0.16s ease;
+  }
+
+  body.admin-page .mobile-match-actions .icon-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.92;
+    background: transparent;
+    box-shadow: none;
   }
 
   body.admin-page .mobile-match-actions .icon-btn.danger {
-    background: linear-gradient(180deg, rgba(255, 123, 123, 0.18), rgba(255, 123, 123, 0.08));
-    border-color: rgba(255, 123, 123, 0.18);
+    background: transparent;
+    border: none;
+    color: #ffb6b6;
   }
 
   body.admin-page .mobile-match-actions .icon-btn:not(.danger) {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    background: transparent;
+    border: none;
   }
 
   body.admin-page .mobile-match-card .status-tag {
@@ -1416,14 +1550,14 @@ body.admin-page .player-search-line span {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
-    gap: 6px;
+    gap: 0;
     padding: 5px 8px 7px;
   }
 
   body.admin-page .admin-bottom-btn {
     min-width: 0;
     min-height: 56px;
-    border-radius: 14px;
+    border-radius: 0;
     box-sizing: border-box;
   }
 
@@ -1477,7 +1611,7 @@ body.admin-page .player-search-line span {
   body.admin-page .mobile-match-actions .icon-btn {
     min-height: 44px;
     height: 44px;
-    border-radius: 11px;
+    border-radius: 0;
     font-size: 0.95rem;
   }
 
@@ -1795,3 +1929,25 @@ body.admin-page .confronto-controls input {
   border: 1px solid rgba(255,255,255,0.08);
 }
 
+body.admin-page .admin-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: #d8ff63;
+  border-radius: 10px;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+body.admin-page .admin-back-link:hover {
+  transform: translateY(-1px);
+  background: rgba(216, 255, 99, 0.10);
+}
+
+body.admin-page .admin-back-link ion-icon {
+  font-size: 1.3rem;
+  color: inherit;
+}
