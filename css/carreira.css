@@ -7,6 +7,7 @@ body.career-page {
   color: #e8eefc;
   min-height: 100vh;
   padding-bottom: 92px;
+  overflow-x: hidden;
 }
 
 body.career-page a {
@@ -29,6 +30,8 @@ body.career-page .muted {
   color: rgba(232, 238, 252, 0.68);
 }
 
+/* ========================= CABEÇALHO ========================= */
+
 .career-page .career-header {
   display: flex;
   flex-direction: column;
@@ -41,11 +44,40 @@ body.career-page .muted {
   font-size: 1.45rem;
   font-weight: 900;
   color: #f4f8ff;
+  margin: 0;
 }
 
 .career-page .career-header p {
   color: rgba(232, 238, 252, 0.72);
   font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ========================= BOTÃO VOLTAR ========================= */
+
+body.career-page .admin-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 2px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: #d8ff63;
+  border-radius: 10px;
+  transition: transform 0.16s ease, background 0.16s ease;
+  flex-shrink: 0;
+}
+
+body.career-page .admin-back-link:hover {
+  transform: translateY(-1px);
+  background: rgba(216, 255, 99, 0.10);
+}
+
+body.career-page .admin-back-link ion-icon {
+  font-size: 1.3rem;
+  color: #d8ff63;
 }
 
 /* ========================= RESUMO ========================= */
@@ -63,6 +95,8 @@ body.career-page .muted {
   background: linear-gradient(180deg, rgba(31, 40, 60, 0.92), rgba(20, 28, 44, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  position: relative;
+  overflow: hidden;
 }
 
 .career-page .career-summary-card span {
@@ -73,6 +107,8 @@ body.career-page .muted {
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
 }
 
 .career-page .career-summary-card strong {
@@ -81,6 +117,8 @@ body.career-page .muted {
   font-weight: 900;
   color: #fff;
   line-height: 1;
+  position: relative;
+  z-index: 1;
 }
 
 /* Cores dos cards */
@@ -117,6 +155,165 @@ body.career-page .muted {
 
 .career-page .career-summary-card.runnerup {
   border-color: #04a241;
+}
+
+.career-page .career-summary-card.ranking {
+  border-color: #38bdf8;
+}
+
+.career-page .career-summary-card.training {
+  border-color: #fb923c;
+}
+
+.career-page .career-summary-card.simple {
+  border-color: #f59e0b;
+}
+
+.career-page .career-summary-card.doubles {
+  border-color: #14b8a6;
+}
+
+/* ========================= ÍCONES DOS CARDS RESUMO ========================= */
+
+.career-page .career-card-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  opacity: 0.18;
+  color: #ffffff;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.career-page .career-summary-card:hover .career-card-icon {
+  opacity: 0.38;
+  transform: scale(1.08) rotate(-4deg);
+}
+
+.career-page .career-summary-card.matches .career-card-icon {
+  color: #e8eefc;
+}
+
+.career-page .career-summary-card.tournament .career-card-icon {
+  color: #a78bfa;
+  opacity: 0.28;
+}
+
+.career-page .career-summary-card.win .career-card-icon {
+  color: #60a5fa;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.loss .career-card-icon {
+  color: #f87171;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.champion .career-card-icon {
+  color: #d8ff63;
+  opacity: 0.32;
+}
+
+.career-page .career-summary-card.runnerup .career-card-icon {
+  color: #04a241;
+  opacity: 0.38;
+}
+
+.career-page .career-summary-card.ranking .career-card-icon {
+  color: #38bdf8;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.training .career-card-icon {
+  color: #fb923c;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.simple .career-card-icon {
+  color: #f59e0b;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.doubles .career-card-icon {
+  color: #14b8a6;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.ranking:hover .career-card-icon,
+.career-page .career-summary-card.training:hover .career-card-icon,
+.career-page .career-summary-card.simple:hover .career-card-icon,
+.career-page .career-summary-card.doubles:hover .career-card-icon {
+  opacity: 0.55;
+}
+
+.career-page .career-summary-card span,
+.career-page .career-summary-card strong {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================= CARDS CLICÁVEIS ========================= */
+
+.career-page .career-summary-card[data-filter] {
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    border-color 0.18s ease;
+  user-select: none;
+}
+
+.career-page .career-summary-card[data-filter]:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+.career-page .career-summary-card[data-filter]:active {
+  transform: scale(0.97);
+}
+
+.career-page .career-summary-card.career-card-filter-active {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 0 2px currentColor, 0 16px 36px rgba(0, 0, 0, 0.28);
+}
+
+.career-page .career-summary-card.win.career-card-filter-active {
+  box-shadow: 0 0 0 2px #60a5fa, 0 16px 36px rgba(96, 165, 250, 0.22);
+  border-color: #60a5fa;
+}
+
+.career-page .career-summary-card.loss.career-card-filter-active {
+  box-shadow: 0 0 0 2px #f87171, 0 16px 36px rgba(248, 113, 113, 0.22);
+  border-color: #f87171;
+}
+
+.career-page .career-summary-card.tournament.career-card-filter-active {
+  box-shadow: 0 0 0 2px #a78bfa, 0 16px 36px rgba(167, 139, 250, 0.22);
+  border-color: #a78bfa;
+}
+
+.career-page .career-summary-card.champion.career-card-filter-active {
+  box-shadow: 0 0 0 2px #d8ff63, 0 16px 36px rgba(216, 255, 99, 0.22);
+  border-color: #d8ff63;
+}
+
+.career-page .career-summary-card.runnerup.career-card-filter-active {
+  box-shadow: 0 0 0 2px #04a241, 0 16px 36px rgba(4, 162, 65, 0.22);
+  border-color: #04a241;
+}
+
+.career-page .career-summary-card.matches.career-card-filter-active {
+  box-shadow: 0 0 0 2px #e8eefc, 0 16px 36px rgba(232, 238, 252, 0.18);
+  border-color: rgba(232, 238, 252, 0.5);
+}
+
+.career-page .career-summary-card.career-card-filter-inactive {
+  opacity: 0.42;
+  transform: scale(0.97);
 }
 
 /* ========================= FILTROS ========================= */
@@ -195,6 +392,8 @@ body.career-page .muted {
   flex-direction: column;
   gap: 12px;
   min-height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .career-page .career-card-win {
@@ -214,6 +413,13 @@ body.career-page .muted {
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
+  padding-right: 110px;
+}
+
+.career-page .career-card-top-status {
+  padding-right: 110px;
+  position: relative;
+  z-index: 1;
 }
 
 .career-page .career-card-title {
@@ -377,44 +583,56 @@ body.career-page .muted {
   z-index: 1000;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  padding: 6px 10px 8px;
+  gap: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   background: rgba(10, 16, 28, 0.92);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
 }
 
 .career-bottom-btn {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+  border: none;
+  background: transparent;
   color: #eef4ff;
   text-decoration: none;
-  border-radius: 16px;
-  min-height: 60px;
+  border-radius: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   font-weight: 800;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   cursor: pointer;
   width: 100%;
-  padding: 6px 8px;
+  padding: 4px 2px;
+  transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+  opacity: 0.88;
 }
 
 .career-bottom-btn:hover {
   transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
-  border-color: rgba(216, 255, 99, 0.22);
+  opacity: 1;
 }
 
 .career-bottom-icon {
   font-size: 1.12rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.career-bottom-icon ion-icon {
+  font-size: 1.12rem;
 }
 
 .career-bottom-label {
@@ -422,6 +640,9 @@ body.career-page .muted {
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .career-bottom-btn.logout .career-bottom-icon {
@@ -431,10 +652,6 @@ body.career-page .muted {
 /* ========================= RESPONSIVO ========================= */
 
 @media (max-width: 980px) {
-  .career-page .career-history-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .career-page .career-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -443,10 +660,6 @@ body.career-page .muted {
 @media (max-width: 768px) {
   .career-page .career-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .career-page .career-history-list {
-    grid-template-columns: 1fr;
   }
 
   .career-page .career-filters {
@@ -470,7 +683,6 @@ body.career-page .muted {
     align-self: flex-start;
   }
 
-  /* paginação */
   .career-pagination {
     gap: 6px;
     padding: 12px 0 0;
@@ -507,13 +719,13 @@ body.career-page .muted {
   }
 
   .career-bottom-nav {
-    gap: 6px;
+    gap: 0;
     padding: 5px 8px 7px;
   }
 
   .career-bottom-btn {
     min-height: 56px;
-    border-radius: 14px;
+    border-radius: 0;
   }
 
   .career-bottom-label {
@@ -643,12 +855,32 @@ body.career-page .muted {
   opacity: 0.38;
 }
 
-/* Hover com cor mais viva */
-.career-page .career-summary-card.tournament:hover .career-card-icon { opacity: 0.55; }
-.career-page .career-summary-card.win:hover .career-card-icon        { opacity: 0.55; }
-.career-page .career-summary-card.loss:hover .career-card-icon       { opacity: 0.55; }
-.career-page .career-summary-card.champion:hover .career-card-icon   { opacity: 0.60; }
-.career-page .career-summary-card.runnerup:hover .career-card-icon   { opacity: 0.60; }
+.career-page .career-summary-card.ranking .career-card-icon {
+  color: #38bdf8;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.training .career-card-icon {
+  color: #fb923c;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.simple .career-card-icon {
+  color: #f59e0b;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.doubles .career-card-icon {
+  color: #14b8a6;
+  opacity: 0.30;
+}
+
+.career-page .career-summary-card.ranking:hover .career-card-icon,
+.career-page .career-summary-card.training:hover .career-card-icon,
+.career-page .career-summary-card.simple:hover .career-card-icon,
+.career-page .career-summary-card.doubles:hover .career-card-icon {
+  opacity: 0.55;
+}
 
 /* Garante que texto não sobreponha o ícone */
 .career-page .career-summary-card span,
@@ -738,8 +970,13 @@ body.career-page .muted {
   opacity: 0.30;
 }
 
-.career-page .career-summary-card.ranking:hover .career-card-icon  { opacity: 0.55; }
-.career-page .career-summary-card.training:hover .career-card-icon { opacity: 0.55; }
+.career-page .career-summary-card.ranking:hover .career-card-icon {
+  opacity: 0.55;
+}
+
+.career-page .career-summary-card.training:hover .career-card-icon {
+  opacity: 0.55;
+}
 
 .career-page .career-summary-card.ranking.career-card-filter-active {
   box-shadow: 0 0 0 2px #38bdf8, 0 16px 36px rgba(56, 189, 248, 0.22);
