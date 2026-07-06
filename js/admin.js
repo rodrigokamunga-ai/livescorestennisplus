@@ -1824,106 +1824,106 @@
       });
 
       function openAppModal(modalEl) {
-        if (!modalEl) return;
-        modalEl.classList.remove("hidden");
-        modalEl.setAttribute("aria-hidden", "false");
-      }
-      
-      function closeAppModal(modalEl) {
-        if (!modalEl) return;
-        modalEl.classList.add("hidden");
-        modalEl.setAttribute("aria-hidden", "true");
-      }
-      
-      function showConfirmModal(message) {
-        return new Promise((resolve) => {
-          const confirmModal = document.getElementById("confirmModal");
-          const confirmModalMessage = document.getElementById("confirmModalMessage");
-          const confirmModalYesBtn = document.getElementById("confirmModalYesBtn");
-          const confirmModalNoBtn = document.getElementById("confirmModalNoBtn");
-      
-          if (!confirmModal || !confirmModalMessage || !confirmModalYesBtn || !confirmModalNoBtn) {
-            resolve(window.confirm(message));
-            return;
-          }
-      
-          confirmModalMessage.textContent = message;
-          openAppModal(confirmModal);
-      
-          const cleanup = () => {
-            confirmModalYesBtn.removeEventListener("click", onYes);
-            confirmModalNoBtn.removeEventListener("click", onNo);
-            confirmModal.removeEventListener("click", onBackdrop);
-            document.removeEventListener("keydown", onEscape);
-          };
-      
-          const finish = (value) => {
-            cleanup();
-            closeAppModal(confirmModal);
-            resolve(value);
-          };
-      
-          const onYes = () => finish(true);
-          const onNo = () => finish(false);
-          const onBackdrop = (e) => {
-            if (e.target === confirmModal) finish(false);
-          };
-          const onEscape = (e) => {
-            if (e.key === "Escape") finish(false);
-          };
-      
-          confirmModalYesBtn.addEventListener("click", onYes);
-          confirmModalNoBtn.addEventListener("click", onNo);
-          confirmModal.addEventListener("click", onBackdrop);
-          document.addEventListener("keydown", onEscape);
-        });
-      }
-      
-      function showSuccessModal(message) {
-        return new Promise((resolve) => {
-          const successModal = document.getElementById("successModal");
-          const successModalMessage = document.getElementById("successModalMessage");
-          const successModalOkBtn = document.getElementById("successModalOkBtn");
-      
-          if (!successModal || !successModalMessage || !successModalOkBtn) {
-            window.alert(message);
-            resolve();
-            return;
-          }
-      
-          successModalMessage.textContent = message;
-          openAppModal(successModal);
-      
-          const cleanup = () => {
-            successModalOkBtn.removeEventListener("click", onOk);
-            successModal.removeEventListener("click", onBackdrop);
-            document.removeEventListener("keydown", onEscape);
-          };
-      
-          const finish = () => {
-            cleanup();
-            closeAppModal(successModal);
-            resolve();
-          };
-      
-          const onOk = () => finish();
-          const onBackdrop = (e) => {
-            if (e.target === successModal) finish();
-          };
-          const onEscape = (e) => {
-            if (e.key === "Escape") finish();
-          };
-      
-          successModalOkBtn.addEventListener("click", onOk);
-          successModal.addEventListener("click", onBackdrop);
-          document.addEventListener("keydown", onEscape);
-        });
-      }
+  if (!modalEl) return;
+  modalEl.classList.remove("hidden");
+  modalEl.setAttribute("aria-hidden", "false");
+}
+
+function closeAppModal(modalEl) {
+  if (!modalEl) return;
+  modalEl.classList.add("hidden");
+  modalEl.setAttribute("aria-hidden", "true");
+}
+
+function showConfirmModal(message) {
+  return new Promise((resolve) => {
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmModalMessage = document.getElementById("confirmModalMessage");
+    const confirmModalYesBtn = document.getElementById("confirmModalYesBtn");
+    const confirmModalNoBtn = document.getElementById("confirmModalNoBtn");
+
+    if (!confirmModal || !confirmModalMessage || !confirmModalYesBtn || !confirmModalNoBtn) {
+      resolve(window.confirm(message));
+      return;
+    }
+
+    confirmModalMessage.textContent = message;
+    openAppModal(confirmModal);
+
+    const cleanup = () => {
+      confirmModalYesBtn.removeEventListener("click", onYes);
+      confirmModalNoBtn.removeEventListener("click", onNo);
+      confirmModal.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onEscape);
+    };
+
+    const finish = (value) => {
+      cleanup();
+      closeAppModal(confirmModal);
+      resolve(value);
+    };
+
+    const onYes = () => finish(true);
+    const onNo = () => finish(false);
+    const onBackdrop = (e) => {
+      if (e.target === confirmModal) finish(false);
+    };
+    const onEscape = (e) => {
+      if (e.key === "Escape") finish(false);
+    };
+
+    confirmModalYesBtn.addEventListener("click", onYes);
+    confirmModalNoBtn.addEventListener("click", onNo);
+    confirmModal.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onEscape);
+  });
+}
+
+function showSuccessModal(message) {
+  return new Promise((resolve) => {
+    const successModal = document.getElementById("successModal");
+    const successModalMessage = document.getElementById("successModalMessage");
+    const successModalOkBtn = document.getElementById("successModalOkBtn");
+
+    if (!successModal || !successModalMessage || !successModalOkBtn) {
+      window.alert(message);
+      resolve();
+      return;
+    }
+
+    successModalMessage.textContent = message;
+    openAppModal(successModal);
+
+    const cleanup = () => {
+      successModalOkBtn.removeEventListener("click", onOk);
+      successModal.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onEscape);
+    };
+
+    const finish = () => {
+      cleanup();
+      closeAppModal(successModal);
+      resolve();
+    };
+
+    const onOk = () => finish();
+    const onBackdrop = (e) => {
+      if (e.target === successModal) finish();
+    };
+    const onEscape = (e) => {
+      if (e.key === "Escape") finish();
+    };
+
+    successModalOkBtn.addEventListener("click", onOk);
+    successModal.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onEscape);
+  });
+}
       
       el.form?.addEventListener("submit", async (e) => {
         e.preventDefault();
       
-        const confirmar = await showConfirmModal("Deseja cadastrar a partida?");
+        const confirmar = confirm("Deseja cadastrar a partida?");
         if (!confirmar) {
           setMsg("Cadastro cancelado.");
           return;
@@ -2057,13 +2057,10 @@
 
           if (isEditing) {
             await ref.update(data);
-            await showSuccessModal("Partida atualizada com sucesso!");
+            alert("Partida atualizada com sucesso!");
           } else {
-            await __db.collection("matches").add({
-              ...data,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            await showSuccessModal("Partida registrada com sucesso!");
+            await __db.collection("matches").add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            alert("Partida cadastrada com sucesso!");
           }
 
           clearForm();
