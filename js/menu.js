@@ -31,10 +31,17 @@
       profileAvatar: document.getElementById("menuProfileAvatar"),
       viewPublicBtn:
         document.getElementById("viewPublicBtn") ||
-        document.querySelector('a[href="public.html"]')
+        document.querySelector('a[href="public.html"]'),
+
+      // Dropdown menu
+      menuMoreBtn: document.getElementById("menuMoreBtn"),
+      menuMoreDropdown: document.getElementById("menuMoreDropdown"),
+      aboutAppBtn: document.getElementById("aboutAppBtn"),
+      supportBtn: document.getElementById("supportBtn")
     };
 
     let currentAlertsSignature = "";
+    let menuDropdownOpen = false;
 
     // ─── Helpers gerais ──────────────────────────────────────────────────
 
@@ -158,23 +165,114 @@
     async function doLogout() {
       const confirmed = window.confirm("Deseja realmente sair do sistema?");
       if (!confirmed) return;
-    
+
       try {
         localStorage.removeItem(SESSION_KEY);
         localStorage.removeItem(BIOMETRIC_SESSION_KEY);
         localStorage.removeItem(BIOMETRIC_CURRENT_KEY);
         localStorage.removeItem(BIOMETRIC_UID_KEY);
-    
+
         const auth = getAuth();
         if (auth) {
           await auth.signOut();
         }
-    
+
         window.location.replace("login.html");
       } catch (err) {
         console.error("Erro ao sair:", err);
         alert("Não foi possível sair. Tente novamente.");
       }
+    }
+
+    // ─── Dropdown menu ───────────────────────────────────────────────────
+
+    function openMenuDropdown() {
+      if (!el.menuMoreDropdown || !el.menuMoreBtn) return;
+      el.menuMoreDropdown.classList.remove("hidden");
+      el.menuMoreBtn.setAttribute("aria-expanded", "true");
+      menuDropdownOpen = true;
+    }
+
+    function closeMenuDropdown() {
+      if (!el.menuMoreDropdown || !el.menuMoreBtn) return;
+      el.menuMoreDropdown.classList.add("hidden");
+      el.menuMoreBtn.setAttribute("aria-expanded", "false");
+      menuDropdownOpen = false;
+    }
+
+    function toggleMenuDropdown() {
+      if (menuDropdownOpen) closeMenuDropdown();
+      else openMenuDropdown();
+    }
+
+    function showAboutApp() {
+      closeMenuDropdown();
+      alert(
+        "TennisPro\n\n" +
+        "Gerencie sua carreira no tênis de forma simples e prática. O app foi desenvolvido para acompanhar partidas ao vivo, estatísticas, histórico e confrontos. Crie partidas, compartilhe os jogos em tempo real e visualize seu desempenho contra adversários. E mais: com a funcionalidade Relatórios, você tem uma visão completa do seu rendimento e das suas partidas.\n\n" +
+        "Versão: Testes - Em desenvolvimento"
+      );
+    }
+
+    function openSupport() {
+      closeMenuDropdown();
+
+      // Ajuste este e-mail se quiser um destino real de suporte
+      const supportEmail = "rodrigokamunga@hotmail.com";
+      const subject = encodeURIComponent("Suporte/Sugestões - TennisPro");
+      const body = encodeURIComponent(
+        "Olá, preciso de ajuda com o TennisPro.\n\nDescreva aqui o problema:"
+      );
+
+      window.location.href = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
+    }
+
+    function bindDropdownEvents() {
+      el.menuMoreBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMenuDropdown();
+      });
+
+      el.aboutAppBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showAboutApp();
+      });
+
+      el.supportBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupport();
+      });
+
+      el.logoutBtnBottom?.addEventListener("click", (e) => {
+        // se o logout estiver dentro do dropdown
+        if (el.menuMoreDropdown && el.menuMoreDropdown.contains(e.currentTarget)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        doLogout();
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!menuDropdownOpen) return;
+
+        const clickedInside =
+          el.menuMoreDropdown?.contains(e.target) ||
+          el.menuMoreBtn?.contains(e.target);
+
+        if (!clickedInside) {
+          closeMenuDropdown();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeMenuDropdown();
+          closeAlertModal();
+        }
+      });
     }
 
     // ─── Token de compartilhamento ───────────────────────────────────────
@@ -538,7 +636,6 @@
           const format = String(item.gameFormat || "").trim().toLowerCase();
           const isTreinoOrRanking = format === "treino" || format === "ranking";
 
-          // Treino / Ranking -> mostrar apenas nome do torneio e data/hora
           if (isTreinoOrRanking) {
             const infoParts = [];
 
@@ -553,7 +650,6 @@
             return ` <div class="alert-game-item"> <div class="alert-game-top"> <div class="alert-game-info"> <div class="alert-game-kicker">Jogo do dia</div> ${item.playersHTML || ""} </div> </div> <div class="alert-game-meta"> ${infoParts.length ? `<div class="alert-game-extra">${infoParts.join("")}</div>` : ""} </div> </div> `;
           }
 
-          // Outros formatos -> mantém torneio + fase, sem "-"
           const infoParts = [];
 
           if (item.tournamentName) {
@@ -641,7 +737,10 @@
       el.logoutBtnBottom?.addEventListener("click", doLogout);
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeAlertModal();
+        if (e.key === "Escape") {
+          closeMenuDropdown();
+          closeAlertModal();
+        }
       });
     }
 
@@ -649,7 +748,9 @@
 
     async function init() {
       bindEvents();
+      bindDropdownEvents();
       setDefaultAvatar();
+      closeMenuDropdown();
 
       const auth = getAuth();
       if (!auth) {
