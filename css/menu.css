@@ -21,9 +21,10 @@ html,
 body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
   width: 100%;
+  min-height: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -57,7 +58,7 @@ body.menu-page {
 }
 
 .menu-hero {
-  padding: 16px;
+  padding: 14px;
   border-radius: 28px;
   background: linear-gradient(180deg, rgba(31, 40, 60, 0.94), rgba(15, 22, 36, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -73,7 +74,7 @@ body.menu-page {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .menu-welcome {
@@ -127,36 +128,88 @@ body.menu-page {
   line-height: 1.35;
 }
 
-/* ========================= ALERTA NO CANTO DIREITO ========================= */
+/* ========================= TOPO: MENU / PERFIL / ALERTA ========================= */
 
-#alertBtnTop {
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-  color: var(--text);
-  text-decoration: none;
-  border-radius: 14px;
-  width: 42px;
-  height: 42px;
+.menu-navbar-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-navbar-toggler {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-navbar-toggler:hover,
+.menu-navbar-toggler:focus,
+.menu-navbar-toggler:active {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.menu-navbar-toggler .navbar-toggler-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.menu-navbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-header-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #eef4ff;
+  text-decoration: none;
+  box-shadow: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  padding: 0;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
-  position: relative;
-  margin-top: 2px;
 }
 
-#alertBtnTop:hover {
-  border-color: rgba(216, 255, 99, 0.22);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
+.menu-header-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
-.header-icon {
-  font-size: 1rem;
+.menu-header-btn .header-icon {
+  font-size: 1.22rem;
   line-height: 1;
+}
+
+#profileBtnTop,
+#alertBtnTop {
+  color: #eef4ff;
+  background: transparent;
+}
+
+#profileBtnTop:hover,
+#alertBtnTop:hover {
+  background: transparent;
 }
 
 .header-alert-badge {
@@ -282,7 +335,7 @@ body.menu-page {
   margin-top: 2px;
 }
 
-/* ========================= RODAPÉ FIXO LIMPO Apenas ícone + nome ========================= */
+/* ========================= RODAPÉ FIXO ========================= */
 
 .menu-bottom-nav {
   position: fixed;
@@ -661,7 +714,7 @@ body.menu-page {
   }
 
   .menu-hero {
-    padding: 14px;
+    padding: 12px;
     border-radius: 24px;
   }
 
@@ -720,6 +773,20 @@ body.menu-page {
     width: 100%;
     border-radius: 20px;
   }
+
+  .menu-header-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .menu-header-btn .header-icon {
+    font-size: 1.08rem;
+  }
+
+  .menu-navbar-toggler {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 @media (max-width: 430px) {
@@ -775,6 +842,20 @@ body.menu-page {
   .menu-dropdown-item {
     padding: 10px 10px;
     font-size: 0.9rem;
+  }
+
+  .menu-header-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .menu-header-btn .header-icon {
+    font-size: 1.02rem;
+  }
+
+  .menu-navbar-toggler {
+    width: 44px;
+    height: 44px;
   }
 }
 
