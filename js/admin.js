@@ -1405,48 +1405,51 @@
     function renderScoreBlock(d) {
       const score = U.normalizeScore(d.score || {});
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-
+    
       const normalizeText = (text) =>
         String(text || "")
           .replace(/\((\d+)-(\d+)\)/g, "$1-$2")
           .replace(/\s+/g, " ")
           .trim();
-
+    
       const parts = [];
       const seen = new Set();
-
+    
       for (const setObj of history) {
         const item = getSetDisplayFromHistory(setObj);
         const text = String(item?.text || "--").trim();
         if (!text || text === "--") continue;
-
+    
         const norm = normalizeText(text);
         if (seen.has(norm)) continue;
-
+    
         seen.add(norm);
         parts.push(text);
       }
-
+    
       const placar = parts.join(" • ");
-
+    
       const duration = getMatchDuration(d);
       const status = String(d?.status || "").trim().toLowerCase();
       const isWO = status === "wo";
       const winnerPos = U.getWinnerPosition(score, d);
       const teamHTML = U.getMatchDisplayHTML(d);
-
-      let resultBadge = "";
+    
       let rowClass = "";
-
+      let resultBadge = "";
+      let cardClass = "detail-score-card single-score-card";
+    
       if (winnerPos === 1) {
         rowClass = "winner-row";
-        resultBadge = `<span class="winner-badge">${isWO ? "WO VENCEDOR" : "VENCEU"}</span>`;
+        resultBadge = `<span class="winner-badge">VENCEU</span>`;
+        cardClass += " score-winner";
       } else if (winnerPos === 2) {
         rowClass = "loser-row";
         resultBadge = `<span class="winner-badge loser-badge">PERDEU</span>`;
+        cardClass += " score-loser";
       }
-
-      return `<section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="detail-score-card single-score-card"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> `} </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section>`;
+    
+      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="${cardClass}"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
     }
 
     function renderSummaryBlock(d) {
@@ -1468,73 +1471,69 @@
       const p1 = stats.player1 || {};
       const p2 = stats.player2 || {};
       const score = U.normalizeScore(d?.score || {});
-
+    
       const team1HTML = U.escapeHtml(U.getTeam1NameFromData(d));
       const team2HTML = U.escapeHtml(U.getTeam2NameFromData(d));
-
+    
       const pct = (won, attempts) => {
         const a = Number(attempts || 0);
         const w = Number(won || 0);
         if (a <= 0) return "0.0%";
         return `${((w / a) * 100).toFixed(1)}%`;
       };
-
-      const service1Text1 = `${Number(p1.serve1Won || 0)}/${Number(p1.serve1Attempts || 0)}`;
-      const service1Text2 = `${Number(p2.serve1Won || 0)}/${Number(p2.serve1Attempts || 0)}`;
-
-      const service2Text1 = `${Number(p1.serve2Won || 0)}/${Number(p1.serve2Attempts || 0)}`;
-      const service2Text2 = `${Number(p2.serve2Won || 0)}/${Number(p2.serve2Attempts || 0)}`;
-
-      const netWon1 = Number(
-        p1.netWon ??
-        (Number(p1.dropshotWinner || 0) + Number(p1.smashWinner || 0) + Number(p1.voleioWinner || 0))
-      );
-      const netLost1 = Number(
-        p1.netLost ??
-        (Number(p1.dropshotError || 0) + Number(p1.smashError || 0) + Number(p1.voleioError || 0))
-      );
-
-      const netWon2 = Number(
-        p2.netWon ??
-        (Number(p2.dropshotWinner || 0) + Number(p2.smashWinner || 0) + Number(p2.voleioWinner || 0))
-      );
-      const netLost2 = Number(
-        p2.netLost ??
-        (Number(p2.dropshotError || 0) + Number(p2.smashError || 0) + Number(p2.voleioError || 0))
-      );
-
-      const unforcedText1 = `${Number(p1.enfFH || 0)}/${Number(p1.enfBH || 0)}`;
-      const unforcedText2 = `${Number(p2.enfFH || 0)}/${Number(p2.enfBH || 0)}`;
-
-      const winnersText1 = `${Number(p1.forehandWinner || 0)}/${Number(p1.backhandWinner || 0)}`;
-      const winnersText2 = `${Number(p2.forehandWinner || 0)}/${Number(p2.backhandWinner || 0)}`;
-
-      const dropshotText1 = `${Number(p1.dropshotWinner || 0)}/${Number(p1.dropshotError || 0)}`;
-      const dropshotText2 = `${Number(p2.dropshotWinner || 0)}/${Number(p2.dropshotError || 0)}`;
-
-      const returnText1 = `${Number(p1.returnPoint || 0)}/${Number(p1.returnError || 0)}`;
-      const returnText2 = `${Number(p2.returnPoint || 0)}/${Number(p2.returnError || 0)}`;
-
-      const baselineText1 = `${Number(p1.baselinePoint || 0)}/${Number(p1.baselineError || 0)}`;
-      const baselineText2 = `${Number(p2.baselinePoint || 0)}/${Number(p2.baselineError || 0)}`;
-
-      const breakText1 = `${Number(score.breakPointsWon1 || p1.breakPointsWon || 0)}/${Number(score.breakPointsChances1 || p1.breakPointsChances || 0)}`;
-      const breakText2 = `${Number(score.breakPointsWon2 || p2.breakPointsWon || 0)}/${Number(score.breakPointsChances2 || p2.breakPointsChances || 0)}`;
-
+    
       const totalPoints1 = Number(score.totalPoints1 || p1.totalPointsWon || 0);
       const totalPoints2 = Number(score.totalPoints2 || p2.totalPointsWon || 0);
-
+    
+      const serve1Won1 = Number(p1.serve1Won || 0);
+      const serve1Won2 = Number(p2.serve1Won || 0);
+      const serve2Won1 = Number(p1.serve2Won || 0);
+      const serve2Won2 = Number(p2.serve2Won || 0);
+    
+      const winner1 =
+        Number(p1.winner || 0) +
+        Number(p1.forehandWinner || 0) +
+        Number(p1.backhandWinner || 0) +
+        Number(p1.dropshotWinner || 0) +
+        serve1Won1 +
+        serve2Won1;
+    
+      const winner2 =
+        Number(p2.winner || 0) +
+        Number(p2.forehandWinner || 0) +
+        Number(p2.backhandWinner || 0) +
+        Number(p2.dropshotWinner || 0) +
+        serve1Won2 +
+        serve2Won2;
+    
+      const erro1 =
+        Number(p1.erros || 0) +
+        Number(p1.unforcedError || 0) +
+        Number(p1.forcedError || 0) +
+        Number(p1.dropshotError || 0) +
+        Number(p1.pointsLost || 0);
+    
+      const erro2 =
+        Number(p2.erros || 0) +
+        Number(p2.unforcedError || 0) +
+        Number(p2.forcedError || 0) +
+        Number(p2.dropshotError || 0) +
+        Number(p2.pointsLost || 0);
+    
+      const breakText1 = `${Number(score.breakPointsWon1 || p1.breakPointsWon || 0)}/${Number(score.breakPointsChances1 || p1.breakPointsChances || 0)}`;
+      const breakText2 = `${Number(score.breakPointsWon2 || p2.breakPointsWon || 0)}/${Number(score.breakPointsChances2 || p2.breakPointsChances || 0)}`;
+    
       const performanceText1 = Number(p1.serveSuccessPct || 0).toFixed(1) + "%";
       const performanceText2 = Number(p2.serveSuccessPct || 0).toFixed(1) + "%";
-
-      const playerBlock = (name, totalPoints, service1Text, service2Text, s1Pct, s2Pct, dropshotWinner, dropshotError, performanceText, netWon, netLost, winnersText, unforcedText, forcedError, returnText, baselineText, breakText) => ` <div class="detail-summary-card detail-summary-card-vertical"> <div class="detail-player-title">${name}</div> <div class="detail-summary-line"><span>Pontos totais</span><strong>${totalPoints}</strong></div> <div class="detail-summary-line"><span>Pontos vencidos no 1º serviço</span><strong>${service1Text}</strong></div> <div class="detail-summary-line"><span>Pontos vencidos no 2º serviço</span><strong>${service2Text}</strong></div> <div class="detail-summary-line"><span>Taxa do 1º serviço</span><strong>${s1Pct}</strong></div> <div class="detail-summary-line"><span>Taxa do 2º serviço</span><strong>${s2Pct}</strong></div> <div class="detail-summary-line"><span>Dropshot winner</span><strong>${dropshotWinner}</strong></div> <div class="detail-summary-line"><span>Dropshot erro</span><strong>${dropshotError}</strong></div> <div class="detail-summary-line"><span>Performance</span><strong>${performanceText}</strong></div> <div class="detail-summary-line"><span>Pontos na rede</span><strong>${netWon}/${netLost}</strong></div> <div class="detail-summary-line"><span>Winners (FH/BH)</span><strong>${winnersText}</strong></div> <div class="detail-summary-line"><span>Erros não forçados (FH/BH)</span><strong>${unforcedText}</strong></div> <div class="detail-summary-line"><span>Erros forçados</span><strong>${forcedError}</strong></div> <div class="detail-summary-line"><span>Pontos de devolução</span><strong>${returnText}</strong></div> <div class="detail-summary-line"><span>Pontos da linha de base</span><strong>${baselineText}</strong></div> <div class="detail-summary-line"><span>Break points</span><strong>${breakText}</strong></div> </div> `;
-
-      return `<section class="detail-section detail-section-final-stats"> <div class="detail-section-header"> <h4>Estatísticas da partida finalizada</h4> <span class="detail-section-subtitle">Desempenho consolidado dos jogadores</span> </div> <div class="detail-summary-stack"> ${playerBlock( team1HTML, totalPoints1, service1Text1, service2Text1, pct(p1.serve1Won, p1.serve1Attempts), pct(p1.serve2Won, p1.serve2Attempts), Number(p1.dropshotWinner || 0), Number(p1.dropshotError || 0), performanceText1, netWon1, netLost1, winnersText1, unforcedText1, Number(p1.forcedError || 0), returnText1, baselineText1, breakText1 )} ${playerBlock( team2HTML, totalPoints2, service1Text2, service2Text2, pct(p2.serve1Won, p2.serve1Attempts), pct(p2.serve2Won, p2.serve2Attempts), Number(p2.dropshotWinner || 0), Number(p2.dropshotError || 0), performanceText2, netWon2, netLost2, winnersText2, unforcedText2, Number(p2.forcedError || 0), returnText2, baselineText2, breakText2 )} </div> </section>`;
+    
+      const playerBlock = ( name, totalPoints, winnerTotal, erroTotal, s1Pct, s2Pct, performanceText, breakText ) => ` <div class="detail-summary-card detail-summary-card-vertical"> <div class="detail-player-title">${name}</div> <div class="detail-summary-line"> <span>Pontos totais</span> <strong>${totalPoints}</strong> </div> <div class="detail-summary-line"> <span>Winners</span> <strong>${winnerTotal}</strong> </div> <div class="detail-summary-line"> <span>Erros</span> <strong>${erroTotal}</strong> </div> <div class="detail-summary-line"> <span>Taxa do 1º serviço</span> <strong>${s1Pct}</strong> </div> <div class="detail-summary-line"> <span>Taxa do 2º serviço</span> <strong>${s2Pct}</strong> </div> <div class="detail-summary-line"> <span>Performance</span> <strong>${performanceText}</strong> </div> <div class="detail-summary-line"> <span>Break points</span> <strong>${breakText}</strong> </div> </div> `;
+    
+      return ` <section class="detail-section detail-section-final-stats"> <div class="detail-section-header"> <h4>Resumo da Partida</h4> <span class="detail-section-subtitle">Desempenho consolidado dos jogadores</span> </div> <div class="detail-summary-stack"> ${playerBlock( team1HTML, totalPoints1, winner1, erro1, pct(p1.serve1Won, p1.serve1Attempts), pct(p1.serve2Won, p1.serve2Attempts), performanceText1, breakText1 )} ${playerBlock( team2HTML, totalPoints2, winner2, erro2, pct(p2.serve1Won, p2.serve1Attempts), pct(p2.serve2Won, p2.serve2Attempts), performanceText2, breakText2 )} </div> </section> `;
     }
 
     function detailsHTML(d) {
       try {
-        return `<div class="details-layout"> ${renderGeneralBlock(d)} ${renderScoreBlock(d)} ${renderSummaryBlock(d)} ${renderFinalStatsBlock(d)} </div>`;
+        return `<div class="details-layout"> ${renderGeneralBlock(d)} ${renderScoreBlock(d)} ${renderFinalStatsBlock(d)} </div>`;
       } catch (err) {
         console.error("Erro ao montar detalhes:", err, d);
         return `<div class="details-layout"><p>Erro ao carregar os detalhes da partida.</p></div>`;
