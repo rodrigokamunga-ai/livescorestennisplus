@@ -7,6 +7,7 @@ body.admin-page {
     linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
   color: #e8eefc;
   min-height: 100vh;
+  padding-top: 52px;
   padding-bottom: 78px;
   overflow-x: hidden;
 }
@@ -34,6 +35,126 @@ body.admin-page .is-collapsed {
 
 body.admin-page .muted {
   color: rgba(232, 238, 252, 0.68);
+}
+
+/* ========================= TOPO / NAVBAR ========================= */
+body.admin-page .menu-fixed-top {
+  background: rgba(10, 16, 28, 0.96) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  min-height: 52px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.admin-page .menu-navbar-top {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.admin-page .menu-back-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #d8ff63;
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+body.admin-page .menu-back-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+  background: rgba(216, 255, 99, 0.08);
+}
+
+body.admin-page .menu-back-btn ion-icon {
+  font-size: 1.55rem;
+  color: inherit;
+}
+
+body.admin-page .navbar-brand {
+  margin-left: 0;
+  padding-left: 0;
+  color: #eef4ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.admin-page .navbar-brand span {
+  line-height: 1;
+}
+
+body.admin-page .menu-navbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Botões perfil e alerta sem quadrado */
+body.admin-page .menu-header-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #eef4ff;
+  text-decoration: none;
+  box-shadow: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+body.admin-page .menu-header-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+  background: transparent;
+}
+
+body.admin-page .menu-header-btn .header-icon {
+  font-size: 1.32rem;
+  line-height: 1;
+}
+
+body.admin-page .header-alert-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ff4d4d;
+  color: #fff;
+  border: 2px solid rgba(10, 16, 28, 0.94);
+  box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.18);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 /* ========================= LAYOUT / CONTAINERS ========================= */
@@ -738,6 +859,14 @@ body.admin-page .detail-score-row.winner-row {
     0 0 20px rgba(216, 255, 99, 0.12);
 }
 
+body.admin-page .detail-score-row.loser-row {
+  border-color: rgba(239, 68, 68, 0.55);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.16), rgba(12, 18, 30, 0.68));
+  box-shadow:
+    0 0 0 1px rgba(239, 68, 68, 0.16),
+    0 0 20px rgba(239, 68, 68, 0.12);
+}
+
 body.admin-page .detail-player-title {
   display: flex;
   align-items: center;
@@ -1290,6 +1419,7 @@ body.admin-page .player-search-line span {
   }
 
   body.admin-page {
+    padding-top: 52px;
     padding-bottom: 78px;
     overflow-x: hidden !important;
   }
@@ -1590,6 +1720,7 @@ body.admin-page .player-search-line span {
 
 @media (max-width: 480px) {
   body.admin-page {
+    padding-top: 52px;
     padding-bottom: 72px;
   }
 
@@ -1965,4 +2096,78 @@ body.admin-page .admin-back-link:hover {
 body.admin-page .admin-back-link ion-icon {
   font-size: 1.3rem;
   color: inherit;
+}
+
+/* ========================================================= AJUSTE: DADOS GERAIS EM LISTA VERTICAL, SEM CARDS ========================================================= */
+
+body.admin-page .detail-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+body.admin-page .detail-info-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  min-width: 0;
+  box-shadow: none;
+}
+
+body.admin-page .detail-info-item span {
+  font-size: 0.82rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: rgba(232, 238, 252, 0.72);
+  font-weight: 700;
+  min-width: fit-content;
+  white-space: nowrap;
+}
+
+body.admin-page .detail-info-item strong {
+  font-size: 0.9rem;
+  color: #f4f8ff;
+  font-weight: 800;
+  word-break: break-word;
+  flex: 1;
+}
+
+/* Se quiser manter o bloco visualmente limpo também no mobile */
+@media (max-width: 768px) {
+  body.admin-page .detail-info-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  body.admin-page .detail-info-item {
+    gap: 6px;
+  }
+
+  body.admin-page .detail-info-item span {
+    font-size: 0.78rem;
+  }
+
+  body.admin-page .detail-info-item strong {
+    font-size: 0.86rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body.admin-page .detail-info-item {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  body.admin-page .detail-info-item span {
+    white-space: normal;
+  }
+
+  body.admin-page .detail-info-item strong {
+    font-size: 0.84rem;
+  }
 }
