@@ -29,17 +29,33 @@
 
   <!-- NAVBAR FIXA NO TOPO -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal">
-    <div class="container-xl">
-      <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="menu.html">
+    <div class="container-xl menu-navbar-top">
+
+      <!-- Botão do menu à esquerda -->
+      <button class="navbar-toggler menu-navbar-toggler order-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample08" aria-controls="navbarsExample08" aria-expanded="false" aria-label="Abrir menu" >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Marca / título -->
+      <a class="navbar-brand fw-bold d-flex align-items-center gap-2 order-2 order-lg-1" href="menu.html">
         <ion-icon name="tennisball-outline" style="font-size: 1.2rem;"></ion-icon>
         <span>TennisPro</span>
       </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample08" aria-controls="navbarsExample08" aria-expanded="false" aria-label="Toggle navigation" >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <!-- Ações à direita -->
+      <div class="menu-navbar-actions order-3 ms-auto d-flex align-items-center gap-2">
+        <a href="perfil.html" class="header-btn menu-header-btn" id="profileBtnTop" aria-label="Perfil" title="Perfil" >
+          <ion-icon name="person-outline" class="header-icon"></ion-icon>
+        </a>
 
-      <div class="collapse navbar-collapse" id="navbarsExample08">
+        <button type="button" id="alertBtnTop" class="header-btn menu-header-btn" aria-label="Alertas" title="Alertas" >
+          <ion-icon name="notifications-outline" class="header-icon"></ion-icon>
+          <span class="header-alert-badge" id="alertBadge" aria-hidden="true" style="display:none;">0</span>
+        </button>
+      </div>
+
+      <!-- Menu colapsável -->
+      <div class="collapse navbar-collapse order-4 w-100" id="navbarsExample08">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2" href="menu.html">
@@ -108,18 +124,13 @@
           <a href="perfil.html" class="menu-avatar-link" aria-label="Abrir perfil">
             <img id="menuProfileAvatar" class="menu-welcome-avatar" src="img/avatar-default.png" alt="Foto de perfil" />
           </a>
-        
+
           <div class="menu-welcome-text">
             <span class="section-kicker">Acesso rápido</span>
             <h1 id="welcomeTitle">Bem-vindo</h1>
             <p id="welcomeText">Escolha uma área para abrir.</p>
           </div>
         </div>
-
-        <button type="button" id="alertBtnTop" class="header-btn" aria-label="Alertas">
-          <ion-icon name="notifications-outline" class="header-icon"></ion-icon>
-          <span class="header-alert-badge" id="alertBadge" aria-hidden="true" style="display:none;">0</span>
-        </button>
       </div>
 
       <div class="menu-grid">
