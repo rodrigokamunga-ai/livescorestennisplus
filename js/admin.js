@@ -360,12 +360,23 @@
       updateSurfaceVisibility();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
+      placeScoreBlockAfterStage();
     }
 
     function handleGameFormatChange() {
       updatePlayersVisibility();
       updateProbabilitiesVisibility();
       updateScoreFieldsVisibility();
+    }
+
+    function placeScoreBlockAfterStage() {
+      const stageLabel = el.tournamentStage?.closest("label");
+      const scoreWrapper = el.scoreFieldsWrapper;
+    
+      if (!stageLabel || !scoreWrapper) return;
+      if (scoreWrapper.parentElement !== stageLabel.parentElement) return;
+    
+      stageLabel.insertAdjacentElement("afterend", scoreWrapper);
     }
 
     function updateTournamentStageVisibility() {
@@ -382,6 +393,8 @@
         el.categoryName.required = showCategory;
         if (!showCategory) el.categoryName.value = "";
       }
+    
+      placeScoreBlockAfterStage();
     }
 
     function clearScoreFields() {
@@ -757,6 +770,8 @@
       handleGameFormatChange();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
+      placeScoreBlockAfterStage();
+      
       setMsg("");
       closePlayerSearchModal();
     }
@@ -1685,7 +1700,7 @@
       const label = U.getStatusLabel(statusText);
       const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
     
-      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Fase-Treino-Ranking:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Fase-Treino-Ranking:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div><div><strong>Resultado da partida:</strong> ${U.escapeHtml(getResultadoPartida(d))}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
     }
 
     function renderCurrentPage() {
@@ -1729,6 +1744,20 @@
         behavior: "smooth",
         block: "start"
       });
+    }
+
+    function getResultadoPartida(d) {
+      const score = U.normalizeScore(d?.score || {});
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+    
+      if (!history.length) return "-";
+    
+      const parts = history.map((setObj) => {
+        const item = getSetDisplayFromHistory(setObj);
+        return item?.text && item.text !== "--" ? item.text : null;
+      }).filter(Boolean);
+    
+      return parts.length ? parts.join(" • ") : "-";
     }
 
     function bindEvents() {
@@ -2203,6 +2232,7 @@ function showSuccessModal(message) {
       handleGameFormatChange();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
+      placeScoreBlockAfterStage();
 
       initPlayerSearchModule();
       refreshList();
