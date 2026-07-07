@@ -894,17 +894,17 @@ body.admin-page .admin-bottom-btn {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   font-weight: 800;
   box-shadow: none;
   cursor: pointer;
   width: 100%;
-  padding: 4px 2px;
+  padding: 8px 4px;
   transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
   white-space: nowrap;
-  opacity: 0.88;
+  opacity: 0.92;
 }
 
 body.admin-page .admin-bottom-btn:hover {
@@ -915,7 +915,7 @@ body.admin-page .admin-bottom-btn:hover {
 }
 
 body.admin-page .admin-bottom-icon {
-  font-size: 1.12rem;
+  font-size: 1.22rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -923,11 +923,11 @@ body.admin-page .admin-bottom-icon {
 }
 
 body.admin-page .admin-bottom-icon ion-icon {
-  font-size: 1.12rem;
+  font-size: 1.22rem;
 }
 
 body.admin-page .admin-bottom-label {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
@@ -1360,10 +1360,10 @@ body.admin-page .player-search-line span {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 14px;
-    margin-bottom: 10px;
-    border-radius: 20px;
+    gap: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border-radius: 24px;
     overflow: hidden;
     background:
       radial-gradient(circle at top right, rgba(216, 255, 99, 0.12), transparent 24%),
@@ -1402,7 +1402,7 @@ body.admin-page .player-search-line span {
   }
 
   body.admin-page .mobile-match-players {
-    font-size: 0.92rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: #f4f8ff;
     line-height: 1.28;
@@ -1416,7 +1416,7 @@ body.admin-page .player-search-line span {
   body.admin-page .mobile-match-players strong {
     display: block;
     line-height: 1.22;
-    font-size: 0.92rem;
+    font-size: 1.05rem;
     letter-spacing: -0.01em;
   }
 
@@ -1471,12 +1471,12 @@ body.admin-page .player-search-line span {
     background: transparent;
     box-shadow: none;
     border-radius: 0;
-    padding: 6px 4px;
+    padding: 8px 4px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     color: #eef4ff;
     transition: transform 0.16s ease, opacity 0.16s ease;
   }
@@ -1551,14 +1551,17 @@ body.admin-page .player-search-line span {
     max-width: 100%;
     overflow-x: hidden;
     gap: 0;
-    padding: 5px 8px 7px;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   }
 
   body.admin-page .admin-bottom-btn {
     min-width: 0;
-    min-height: 56px;
-    border-radius: 0;
-    box-sizing: border-box;
+    min-height: 0;
+    padding: 8px 4px;
+  }
+
+  body.admin-page .admin-bottom-icon {
+    font-size: 1.22rem;
   }
 
   body.admin-page .admin-bottom-label {
@@ -1591,8 +1594,8 @@ body.admin-page .player-search-line span {
   }
 
   body.admin-page .mobile-match-card {
-    padding: 12px;
-    border-radius: 16px;
+    padding: 16px;
+    border-radius: 20px;
   }
 
   body.admin-page .mobile-match-players {
@@ -1656,6 +1659,18 @@ body.admin-page .player-search-line span {
   body.admin-page .player-search-avatar {
     width: 48px;
     height: 48px;
+  }
+
+  body.admin-page .admin-bottom-btn {
+    padding: 8px 2px;
+  }
+
+  body.admin-page .admin-bottom-icon {
+    font-size: 1rem;
+  }
+
+  body.admin-page .admin-bottom-label {
+    font-size: 0.58rem;
   }
 }
 
