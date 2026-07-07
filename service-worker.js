@@ -1,4 +1,4 @@
-const CACHE_NAME = "tennispro-v3";
+const CACHE_NAME = "tennispro-v7";
 
 const ASSETS_TO_CACHE = [
   "./",
@@ -13,7 +13,9 @@ const ASSETS_TO_CACHE = [
   "./perfil.html",
   "./public.html",
   "./users-admin.html",
+  "./confronto.html",
   "./manifest.json",
+
   "./css/style.css",
   "./css/menu.css",
   "./css/perfil.css",
@@ -21,6 +23,8 @@ const ASSETS_TO_CACHE = [
   "./css/carreira.css",
   "./css/admin.css",
   "./css/users-admin.css",
+  "./css/confronto.css",
+
   "./js/firebase.js",
   "./js/login.js",
   "./js/register.js",
@@ -34,6 +38,8 @@ const ASSETS_TO_CACHE = [
   "./js/users-admin.js",
   "./js/dashboard.js",
   "./js/public.js",
+  "./js/confronto.js",
+
   "./img/icon-192.png",
   "./img/icon-512.png",
   "./img/logo.png",
@@ -43,41 +49,42 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const requests = ASSETS_TO_CACHE.map(async (url) => {
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      for (const url of ASSETS_TO_CACHE) {
         try {
           const response = await fetch(url, { cache: "no-store" });
-          if (response.ok) {
+          if (response && response.ok) {
             await cache.put(url, response.clone());
-          } else {
-            console.warn("Não foi possível cachear:", url, response.status);
           }
         } catch (error) {
           console.warn("Erro ao cachear:", url, error);
         }
-      });
+      }
 
-      await Promise.all(requests);
-    })
+      await self.skipWaiting();
+    })()
   );
-
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    (async () => {
+      const cacheNames = await caches.keys();
+
+      await Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
+          return Promise.resolve();
         })
       );
-    })
-  );
 
-  self.clients.claim();
+      await self.clients.claim();
+    })()
+  );
 });
 
 self.addEventListener("fetch", (event) => {
@@ -85,37 +92,77 @@ self.addEventListener("fetch", (event) => {
 
   const requestUrl = new URL(event.request.url);
 
-  // HTML: tenta rede primeiro, depois cache
+  // Não intercepta terceiros nem bibliotecas externas
+  if (
+    requestUrl.origin !== self.location.origin ||
+    requestUrl.pathname.includes("/firebase") ||
+    requestUrl.pathname.includes("/googleapis") ||
+    requestUrl.pathname.includes("/gstatic")
+  ) {
+    return;
+  }
+
+  // HTML / navegação: rede primeiro, fallback cache
   if (event.request.mode === "navigate" || event.request.destination === "document") {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./login.html")))
+      (async () => {
+        try {
+          const networkResponse = await fetch(event.request, {
+            cache: "no-store"
+          });
+
+          if (networkResponse && networkResponse.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request.url, networkResponse.clone());
+          }
+
+          return networkResponse;
+        } catch (error) {
+          const cached = await caches.match(event.request.url);
+          if (cached) return cached;
+
+          const fallback = await caches.match("./login.html");
+          if (fallback) return fallback;
+
+          return new Response("Offline", {
+            status: 503,
+            statusText: "Offline"
+          });
+        }
+      })()
     );
     return;
   }
 
-  // CSS/JS/Imagens: cache primeiro, depois rede
+  // CSS / JS / imagens: cache com atualização em segundo plano
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const cachedResponse = await cache.match(event.request.url);
 
-      return fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => {
-          if (requestUrl.pathname.endsWith(".js") || requestUrl.pathname.endsWith(".css")) {
-            return new Response("", { status: 503, statusText: "Offline" });
+      const networkFetch = fetch(event.request, { cache: "no-store" })
+        .then(async (networkResponse) => {
+          if (networkResponse && networkResponse.ok) {
+            await cache.put(event.request.url, networkResponse.clone());
           }
-          return new Response("", { status: 503, statusText: "Offline" });
-        });
-    })
+          return networkResponse;
+        })
+        .catch(() => null);
+
+      // Se já existe cache, entrega rápido e atualiza em segundo plano
+      if (cachedResponse) {
+        event.waitUntil(networkFetch);
+        return cachedResponse;
+      }
+
+      // Se não existe cache, tenta rede
+      const networkResponse = await networkFetch;
+      if (networkResponse) return networkResponse;
+
+      return new Response("", {
+        status: 503,
+        statusText: "Offline"
+      });
+    })()
   );
 });
