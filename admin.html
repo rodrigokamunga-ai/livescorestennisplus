@@ -48,231 +48,286 @@
 
   <main class="container stack">
 
-    <div id="matchFormWrapper" class="match-form-wrapper" style="display: none;">
+    <div id="matchFormWrapper" class="match-form-wrapper ionic-form-wrapper" style="display: none;">
       <div class="section-head">
         <div>
+          <span class="section-kicker">Cadastro da partida</span>
           <h2 id="formTitle">Nova partida</h2>
           <p class="muted">Cadastre e gerencie os jogos ao vivo</p>
         </div>
       </div>
 
-      <form id="matchForm" class="form grid-form">
+      <form id="matchForm" class="form grid-form ionic-form-grid">
         <input type="hidden" id="docId" />
 
-        <label>Modalidade
-          <select id="modality" required disabled>
-            <option value="Tênis" selected>Tênis</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Modalidade</span>
+            <select id="modality" class="ionic-select" required disabled>
+              <option value="Tênis" selected>Tênis</option>
+            </select>
+          </label>
+        </div>
 
-        <label>Partida
-          <select id="tournamentStage" required>
-            <option value="">Selecione uma opção</option>
-            <option value="Primeira Rodada">Primeira Rodada</option>
-            <option value="Segunda Rodada">Segunda Rodada</option>
-            <option value="Terceira Rodada">Terceira Rodada</option>
-            <option value="Oitavas de Final">Oitavas de Final</option>
-            <option value="Quartas de Final">Quartas de Final</option>
-            <option value="Semifinais">Semifinais</option>
-            <option value="Final">Final</option>
-            <option value="Grupos">Grupos</option>
-            <option value="Treino">Treino</option>
-            <option value="Ranking">Ranking</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Partida</span>
+            <select id="tournamentStage" class="ionic-select" required>
+              <option value="">Selecione uma opção</option>
+              <option value="Primeira Rodada">Primeira Rodada</option>
+              <option value="Segunda Rodada">Segunda Rodada</option>
+              <option value="Terceira Rodada">Terceira Rodada</option>
+              <option value="Oitavas de Final">Oitavas de Final</option>
+              <option value="Quartas de Final">Quartas de Final</option>
+              <option value="Semifinais">Semifinais</option>
+              <option value="Final">Final</option>
+              <option value="Grupos">Grupos</option>
+              <option value="Treino">Treino</option>
+              <option value="Ranking">Ranking</option>
+            </select>
+          </label>
+        </div>
 
-        <label>Formato do jogo
-          <select id="gameFormat" required>
-            <option value="">Informe o formato do jogo</option>
-            <option value="Simples">Simples</option>
-            <option value="Duplas">Duplas</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Formato do jogo</span>
+            <select id="gameFormat" class="ionic-select" required>
+              <option value="">Informe o formato do jogo</option>
+              <option value="Simples">Simples</option>
+              <option value="Duplas">Duplas</option>
+            </select>
+          </label>
+        </div>
 
-        <label id="tournamentNameWrapper">Nome do torneio
-          <input type="text" id="tournamentName" placeholder="Informe o nome do torneio" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field" id="tournamentNameWrapper">
+            <span class="ionic-label">Nome do torneio</span>
+            <input type="text" id="tournamentName" class="ionic-input" placeholder="Informe o nome do torneio" />
+          </label>
+        </div>
 
-        <label id="categoryNameWrapper">Nome da categoria
-          <input type="text" id="categoryName" required placeholder="Informe o nome da categoria" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field" id="categoryNameWrapper">
+            <span class="ionic-label">Nome da categoria</span>
+            <input type="text" id="categoryName" class="ionic-input" required placeholder="Informe o nome da categoria" />
+          </label>
+        </div>
 
-        <label id="surfaceTypeWrapper">Tipo de piso
-          <select id="surfaceType">
-            <option value="">Informe o tipo de piso</option>
-            <option value="Rápida">Rápida</option>
-            <option value="Saibro">Saibro</option>
-            <option value="Grama">Grama</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field" id="surfaceTypeWrapper">
+            <span class="ionic-label">Tipo de piso</span>
+            <select id="surfaceType" class="ionic-select">
+              <option value="">Informe o tipo de piso</option>
+              <option value="Rápida">Rápida</option>
+              <option value="Saibro">Saibro</option>
+              <option value="Grama">Grama</option>
+            </select>
+          </label>
+        </div>
 
-        <label>Formato da partida
-          <select id="matchFormat" required>
-            <option value="">Informe o formato da partida</option>
-            <option value="1 set no AD + um super tie-break">1 set no AD + um super tie-break</option>
-            <option value="2 sets sem vantagem + um super tie-break">2 sets sem vantagem + um super tie-break</option>
-            <option value="2 sets com vantagem + um super tie-break">2 sets com vantagem + um super tie-break</option>
-            <option value="3 sets com vantagem">3 sets com vantagem</option>
-            <option value="1 set com vantagem">1 set com vantagem</option>
-            <option value="1 set pro de 8 games no AD + um super tie-break">1 set pro de 8 games no AD + um super tie-break</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Formato da partida</span>
+            <select id="matchFormat" class="ionic-select" required>
+              <option value="">Informe o formato da partida</option>
+              <option value="1 set no AD + um super tie-break">1 set no AD + um super tie-break</option>
+              <option value="2 sets sem vantagem + um super tie-break">2 sets sem vantagem + um super tie-break</option>
+              <option value="2 sets com vantagem + um super tie-break">2 sets com vantagem + um super tie-break</option>
+              <option value="3 sets com vantagem">3 sets com vantagem</option>
+              <option value="1 set com vantagem">1 set com vantagem</option>
+              <option value="1 set pro de 8 games no AD + um super tie-break">1 set pro de 8 games no AD + um super tie-break</option>
+            </select>
+          </label>
+        </div>
 
-        <label>Data e hora da partida
-          <input type="datetime-local" id="matchDateTime" required />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Data e hora da partida</span>
+            <input type="datetime-local" id="matchDateTime" class="ionic-input" required />
+          </label>
+        </div>
 
-        <label>Quadra
-          <input type="text" id="court" required placeholder="Informe local ou quadra de jogo" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Quadra</span>
+            <input type="text" id="court" class="ionic-input" required placeholder="Informe local ou quadra de jogo" />
+          </label>
+        </div>
 
-        <label>Nome do jogador 1
-          <input type="text" id="player1" required />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Nome do jogador 1</span>
+            <input type="text" id="player1" class="ionic-input" required />
+          </label>
+        </div>
 
-        <label>Nome do jogador 2
-          <input type="text" id="player2" required placeholder="Informe o nome do jogador 2" autocomplete="off" />
-          <button type="button" class="search-player-btn" data-target="player2">
-            Pesquisar jogador 2
-          </button>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Nome do jogador 2</span>
+            <input type="text" id="player2" class="ionic-input" required placeholder="Informe o nome do jogador 2" autocomplete="off" />
+            <button type="button" class="ionic-btn secondary search-player-btn" data-target="player2">
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Pesquisar jogador 2</span>
+            </button>
+          </label>
+        </div>
 
-        <label id="player3Wrapper" style="display: none;">Nome do jogador 3
-          <input type="text" id="player3" placeholder="Informe o nome do jogador 3" autocomplete="off" />
-          <button type="button" class="search-player-btn" data-target="player3">
-            Pesquisar jogador 3
-          </button>
-        </label>
+        <div class="ionic-form-card" id="player3Wrapper" style="display: none;">
+          <label class="ionic-field">
+            <span class="ionic-label">Nome do jogador 3</span>
+            <input type="text" id="player3" class="ionic-input" placeholder="Informe o nome do jogador 3" autocomplete="off" />
+            <button type="button" class="ionic-btn secondary search-player-btn" data-target="player3">
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Pesquisar jogador 3</span>
+            </button>
+          </label>
+        </div>
 
-        <label id="player4Wrapper" style="display: none;">Nome do jogador 4
-          <input type="text" id="player4" placeholder="Informe o nome do jogador 4" autocomplete="off" />
-          <button type="button" class="search-player-btn" data-target="player4">
-            Pesquisar jogador 4
-          </button>
-        </label>
+        <div class="ionic-form-card" id="player4Wrapper" style="display: none;">
+          <label class="ionic-field">
+            <span class="ionic-label">Nome do jogador 4</span>
+            <input type="text" id="player4" class="ionic-input" placeholder="Informe o nome do jogador 4" autocomplete="off" />
+            <button type="button" class="ionic-btn secondary search-player-btn" data-target="player4">
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Pesquisar jogador 4</span>
+            </button>
+          </label>
+        </div>
 
-        <label id="probPlayer1Wrapper" style="display: none;">
-          Probabilidade de vitória Jogador 1 (%)
-          <input type="number" id="probPlayer1" min="0" max="100" step="0.01" value="50" />
-        </label>
+        <div class="ionic-form-card" id="probPlayer1Wrapper" style="display: none;">
+          <label class="ionic-field">
+            <span class="ionic-label">Probabilidade de vitória Jogador 1 (%)</span>
+            <input type="number" id="probPlayer1" class="ionic-input" min="0" max="100" step="0.01" value="50" />
+          </label>
+        </div>
 
-        <label id="probPlayer2Wrapper" style="display: none;">
-          Probabilidade de vitória Jogador 2 (%)
-          <input type="number" id="probPlayer2" min="0" max="100" step="0.01" value="50" />
-        </label>
+        <div class="ionic-form-card" id="probPlayer2Wrapper" style="display: none;">
+          <label class="ionic-field">
+            <span class="ionic-label">Probabilidade de vitória Jogador 2 (%)</span>
+            <input type="number" id="probPlayer2" class="ionic-input" min="0" max="100" step="0.01" value="50" />
+          </label>
+        </div>
 
-        <label>Vencedor por WO
-          <select id="winnerByWO">
-            <option value="">Nenhum</option>
-            <option value="player1">Jogador 1</option>
-            <option value="player2">Jogador 2</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Vencedor por WO</span>
+            <select id="winnerByWO" class="ionic-select">
+              <option value="">Nenhum</option>
+              <option value="player1">Jogador 1</option>
+              <option value="player2">Jogador 2</option>
+            </select>
+          </label>
+        </div>
 
-        <label>Status inicial
-          <select id="status">
-            <option value="scheduled">Informe o status da partida</option>
-            <option value="scheduled">Jogos do dia</option>
-            <option value="finished">Finalizada</option>
-            <option value="wo">WO</option>
-            <option value="ret">Abandono</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Status inicial</span>
+            <select id="status" class="ionic-select">
+              <option value="scheduled">Informe o status da partida</option>
+              <option value="scheduled">Jogos do dia</option>
+              <option value="finished">Finalizada</option>
+              <option value="wo">WO</option>
+              <option value="ret">Abandono</option>
+            </select>
+          </label>
+        </div>
 
-        <div id="scoreFieldsWrapper" class="score-block" style="display:none;">
+        <div id="scoreFieldsWrapper" class="score-block ionic-score-block" style="display:none;">
           <h4>Placar da partida</h4>
 
-          <div id="scoreSet1Wrapper" class="score-set" style="display:none;">
+          <div id="scoreSet1Wrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>1º set</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="set1Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="set1Player1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="set1Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="set1Player2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
 
-          <div id="scoreTieBreakSet1Wrapper" class="score-set" style="display:none;">
+          <div id="scoreTieBreakSet1Wrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>Tie-break 1º set</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="tbSet1Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSet1Player1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="tbSet1Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSet1Player2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
 
-          <div id="scoreSet2Wrapper" class="score-set" style="display:none;">
+          <div id="scoreSet2Wrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>2º set</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="set2Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="set2Player1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="set2Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="set2Player2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
 
-          <div id="scoreTieBreakSet2Wrapper" class="score-set" style="display:none;">
+          <div id="scoreTieBreakSet2Wrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>Tie-break 2º set</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="tbSet2Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSet2Player1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="tbSet2Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSet2Player2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
 
-          <div id="scoreSet3Wrapper" class="score-set" style="display:none;">
+          <div id="scoreSet3Wrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>3º set</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="set3Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="set3Player1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="set3Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="set3Player2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
 
-          <div id="scoreTieBreakSet3Wrapper" class="score-set" style="display:none;">
+          <div id="scoreTieBreakSet3Wrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>Tie-break 3º set</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="tbSet3Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSet3Player1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="tbSet3Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSet3Player2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
 
-          <div id="scoreSuperTieBreakWrapper" class="score-set" style="display:none;">
+          <div id="scoreSuperTieBreakWrapper" class="score-set ionic-score-set" style="display:none;">
             <strong>Super tie-break</strong>
-            <div class="score-grid-2">
+            <div class="score-grid-2 ionic-score-grid-2">
               <label>Jogador 1
-                <input type="text" id="tbSuperPlayer1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSuperPlayer1" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="text" id="tbSuperPlayer2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+                <input type="text" id="tbSuperPlayer2" class="ionic-input" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
         </div>
 
-        <div class="actions full admin-form-actions">
-          <button type="submit" class="btn btn-clear-filters admin-form-btn primary">
+        <div class="actions full admin-form-actions ionic-actions">
+          <button type="submit" class="ionic-btn primary admin-form-btn">
+            <ion-icon name="save-outline"></ion-icon>
             <span class="admin-bottom-label">Salvar Partida</span>
           </button>
 
-          <button type="button" id="cancelBtn" class="btn btn-clear-filters admin-form-btn">
+          <button type="button" id="cancelBtn" class="ionic-btn secondary admin-form-btn">
+            <ion-icon name="close-outline"></ion-icon>
             <span class="admin-bottom-label">Cancelar</span>
           </button>
         </div>
@@ -291,34 +346,62 @@
       </div>
 
       <div class="matches-body">
-        <div class="filters-bar" id="filtersBar">
-          <input type="text" id="filterPlayers" placeholder="Pesquisar por jogador" />
+        <div class="filters-bar ionic-filters" id="filtersBar">
+          <div class="ionic-filter-card">
+            <label for="filterPlayers">
+              <span class="ionic-label">Pesquisar por jogador</span>
+              <input type="text" id="filterPlayers" class="ionic-input" placeholder="Pesquisar por jogador" />
+            </label>
+          </div>
 
-          <select id="filterGameFormat">
-            <option value="">Todos os formatos</option>
-            <option value="Simples">Simples</option>
-            <option value="Duplas">Duplas</option>
-          </select>
+          <div class="ionic-filter-card">
+            <label for="filterGameFormat">
+              <span class="ionic-label">Formato do jogo</span>
+              <select id="filterGameFormat" class="ionic-select">
+                <option value="">Todos os formatos</option>
+                <option value="Simples">Simples</option>
+                <option value="Duplas">Duplas</option>
+              </select>
+            </label>
+          </div>
 
-          <input type="text" id="filterTournament" placeholder="Pesquisar por torneio" />
+          <div class="ionic-filter-card">
+            <label for="filterTournament">
+              <span class="ionic-label">Pesquisar por torneio</span>
+              <input type="text" id="filterTournament" class="ionic-input" placeholder="Pesquisar por torneio" />
+            </label>
+          </div>
 
-          <select id="filterStatus">
-            <option value="">Todas as Situações</option>
-            <option value="scheduled">Jogos do dia</option>
-            <option value="live">Em andamento</option>
-            <option value="finished">Finalizada</option>
-            <option value="suspended">Suspensa</option>
-            <option value="wo">WO</option>
-            <option value="ret">Abandono</option>
-          </select>
+          <div class="ionic-filter-card">
+            <label for="filterStatus">
+              <span class="ionic-label">Situação</span>
+              <select id="filterStatus" class="ionic-select">
+                <option value="">Todas as Situações</option>
+                <option value="scheduled">Jogos do dia</option>
+                <option value="live">Em andamento</option>
+                <option value="finished">Finalizada</option>
+                <option value="suspended">Suspensa</option>
+                <option value="wo">WO</option>
+                <option value="ret">Abandono</option>
+              </select>
+            </label>
+          </div>
 
-          <select id="filterYear">
-            <option value="">Todos os anos</option>
-          </select>
+          <div class="ionic-filter-card">
+            <label for="filterYear">
+              <span class="ionic-label">Ano</span>
+              <select id="filterYear" class="ionic-select">
+                <option value="">Todos os anos</option>
+              </select>
+            </label>
+          </div>
 
-          <button type="button" id="clearFiltersBtn" class="btn btn-clear-filters">
-            Limpar filtros
-          </button>
+          <div class="admin-filter-actions ionic-actions">
+            <button type="button" id="clearFiltersBtn" class="ionic-btn secondary">
+              <ion-icon name="refresh-outline"></ion-icon>
+              <span>Limpar filtros</span>
+            </button>
+          </div>
         </div>
 
         <div class="table-wrap desktop-table">
