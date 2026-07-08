@@ -6,6 +6,7 @@ body.career-page {
     linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
   color: #e8eefc;
   min-height: 100vh;
+  padding-top: 72px;
   padding-bottom: 92px;
   overflow-x: hidden;
 }
@@ -32,37 +33,51 @@ body.career-page .muted {
 
 /* ========================= CABEÇALHO ========================= */
 
-.career-page .career-header {
+.career-page .menu-navbar-top {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   gap: 10px;
-  margin-bottom: 18px;
+  width: 100%;
 }
 
-.career-page .career-header h1,
-.career-page .career-header h2 {
-  font-size: 1.45rem;
-  font-weight: 900;
+body.career-page .menu-fixed-top .container-xl {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.career-page .career-navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-align: left;
+  color: #f4f8ff !important;
+  flex: 0 0 auto;
+}
+
+.career-page .navbar-brand {
+  margin: 0;
+}
+
+.career-page .navbar-brand span {
   color: #f4f8ff;
-  margin: 0;
-}
-
-.career-page .career-header p {
-  color: rgba(232, 238, 252, 0.72);
-  font-size: 0.95rem;
-  margin: 0;
+  text-align: left;
 }
 
 /* ========================= BOTÃO VOLTAR ========================= */
 
-body.career-page .admin-back-link {
+body.career-page .menu-back-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
   margin-top: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   text-decoration: none;
   color: #d8ff63;
   border-radius: 10px;
@@ -70,12 +85,12 @@ body.career-page .admin-back-link {
   flex-shrink: 0;
 }
 
-body.career-page .admin-back-link:hover {
+body.career-page .menu-back-btn:hover {
   transform: translateY(-1px);
   background: rgba(216, 255, 99, 0.10);
 }
 
-body.career-page .admin-back-link ion-icon {
+body.career-page .menu-back-btn ion-icon {
   font-size: 1.3rem;
   color: #d8ff63;
 }
@@ -121,7 +136,6 @@ body.career-page .admin-back-link ion-icon {
   z-index: 1;
 }
 
-/* Cores dos cards */
 @media (max-width: 480px) {
   .career-page .career-summary-card span {
     min-height: 2.4em;
@@ -316,7 +330,7 @@ body.career-page .admin-back-link ion-icon {
   transform: scale(0.97);
 }
 
-/* ========================= FILTROS ========================= */
+/* ========================= FILTROS — VISUAL IONIC ========================= */
 
 .career-page .career-filters {
   display: grid;
@@ -326,30 +340,67 @@ body.career-page .admin-back-link ion-icon {
   margin-bottom: 18px;
 }
 
-.career-page .career-filters label {
+.career-page .career-filters.ionic-filters {
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(18, 27, 45, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.ionic-filter-card {
+  border-radius: 18px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(44,54,74,.72), rgba(30,39,58,.82));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.16);
+}
+
+.ionic-filter-card label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.88rem;
   font-weight: 700;
   color: rgba(232, 238, 252, 0.86);
 }
 
-.career-page .career-filters input,
-.career-page .career-filters select {
-  width: 100%;
-  padding: 11px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(12, 18, 30, 0.62);
-  color: #f4f8ff;
-  outline: none;
+.ionic-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 252, 0.72);
 }
 
-.career-page .career-filters input:focus,
-.career-page .career-filters select:focus {
-  border-color: rgba(110, 165, 255, 0.55);
-  box-shadow: 0 0 0 3px rgba(110, 165, 255, 0.15);
+.ionic-select,
+.ionic-input {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255,255,255,0.10);
+  background-color: rgba(12, 18, 30, 0.72);
+  color: #f4f8ff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 0.92rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.ionic-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.ionic-select:focus,
+.ionic-input:focus {
+  border-color: rgba(104, 166, 255, 0.62);
+  box-shadow: 0 0 0 3px rgba(104, 166, 255, 0.16);
 }
 
 .career-filter-actions {
@@ -358,12 +409,58 @@ body.career-page .admin-back-link ion-icon {
   flex-wrap: wrap;
 }
 
-.career-filter-btn {
-  min-width: 132px;
+.ionic-actions {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+}
+
+.ionic-btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ionic-btn ion-icon {
+  font-size: 1.05rem;
+}
+
+.ionic-btn.primary {
+  background: linear-gradient(180deg, #d8ff63, #b9e84f);
+  color: #0f1726;
+}
+
+.ionic-btn.secondary {
+  background: rgba(255,255,255,0.08);
+  color: #f4f8ff;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.ionic-btn:hover {
+  transform: none;
+  opacity: 0.95;
+}
+
+.ionic-btn:active {
+  transform: scale(0.98);
 }
 
 .career-btn-icon {
   line-height: 1;
+}
+
+.career-filter-btn {
+  min-width: 132px;
 }
 
 /* ========================= MENSAGEM ========================= */
@@ -551,9 +648,9 @@ body.career-page .admin-back-link ion-icon {
 
 .career-page-btn:hover {
   transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(216,255,99,0.14), rgba(255,255,255,0.04));
-  border-color: rgba(216,255,99,0.22);
-  box-shadow: 0 12px 22px rgba(0,0,0,0.18);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border-color: rgba(255,255,255,0.10);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.14);
 }
 
 .career-page-btn:disabled {
@@ -600,17 +697,17 @@ body.career-page .admin-back-link ion-icon {
   color: #eef4ff;
   text-decoration: none;
   border-radius: 0;
-  min-height: 0;
+  min-height: 62px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   font-weight: 800;
   box-shadow: none;
   cursor: pointer;
   width: 100%;
-  padding: 4px 2px;
+  padding: 8px 4px;
   transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
@@ -619,12 +716,14 @@ body.career-page .admin-back-link ion-icon {
 }
 
 .career-bottom-btn:hover {
-  transform: translateY(-1px);
-  opacity: 1;
+  transform: none;
+  opacity: 0.92;
+  background: transparent;
+  box-shadow: none;
 }
 
 .career-bottom-icon {
-  font-size: 1.12rem;
+  font-size: 1.25rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -632,11 +731,11 @@ body.career-page .admin-back-link ion-icon {
 }
 
 .career-bottom-icon ion-icon {
-  font-size: 1.12rem;
+  font-size: 1.25rem;
 }
 
 .career-bottom-label {
-  font-size: 0.7rem;
+  font-size: 0.76rem;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
@@ -658,12 +757,21 @@ body.career-page .admin-back-link ion-icon {
 }
 
 @media (max-width: 768px) {
+  body.career-page {
+    padding-top: 68px;
+    padding-bottom: 84px;
+  }
+
   .career-page .career-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .career-page .career-filters {
     grid-template-columns: 1fr;
+  }
+
+  .career-page .career-filters.ionic-filters {
+    padding: 12px;
   }
 
   .career-page .career-card {
@@ -714,22 +822,35 @@ body.career-page .admin-back-link ion-icon {
     font-size: 0.7rem;
   }
 
-  body.career-page {
-    padding-bottom: 84px;
-  }
-
   .career-bottom-nav {
     gap: 0;
-    padding: 5px 8px 7px;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
   }
 
   .career-bottom-btn {
-    min-height: 56px;
+    min-height: 64px;
     border-radius: 0;
+    padding: 8px 4px;
+  }
+
+  .career-bottom-icon {
+    font-size: 1.3rem;
+  }
+
+  .career-bottom-icon ion-icon {
+    font-size: 1.3rem;
   }
 
   .career-bottom-label {
-    font-size: 0.66rem;
+    font-size: 0.72rem;
+  }
+
+  .ionic-actions {
+    flex-direction: column;
+  }
+
+  .ionic-btn {
+    width: 100%;
   }
 }
 
@@ -797,195 +918,35 @@ body.career-page .admin-back-link ion-icon {
   .career-page-btn-label {
     font-size: 0.66rem;
   }
-}
 
-/* ========================= ÍCONES DOS CARDS DE RESUMO ========================= */
+  .career-bottom-btn {
+    min-height: 66px;
+    padding: 8px 3px;
+  }
 
-.career-page .career-summary-card {
-  position: relative;
-  overflow: hidden;
-}
+  .career-bottom-icon {
+    font-size: 1.35rem;
+  }
 
-.career-page .career-card-icon {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  opacity: 0.18;
-  color: #ffffff;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  flex-shrink: 0;
-}
+  .career-bottom-icon ion-icon {
+    font-size: 1.35rem;
+  }
 
-/* Hover sutil no card para destacar o ícone */
-.career-page .career-summary-card:hover .career-card-icon {
-  opacity: 0.38;
-  transform: scale(1.08) rotate(-4deg);
-}
+  .career-bottom-label {
+    font-size: 0.68rem;
+  }
 
-/* Cor temática por tipo de card */
-.career-page .career-summary-card.matches .career-card-icon {
-  color: #e8eefc;
-}
+  .career-page .career-summary-card.total.matches span {
+    max-width: 78px;
+    white-space: normal;
+    line-height: 1.05;
+  }
 
-.career-page .career-summary-card.tournament .career-card-icon {
-  color: #a78bfa;
-  opacity: 0.28;
-}
-
-.career-page .career-summary-card.win .career-card-icon {
-  color: #60a5fa;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.loss .career-card-icon {
-  color: #f87171;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.champion .career-card-icon {
-  color: #d8ff63;
-  opacity: 0.32;
-}
-
-.career-page .career-summary-card.runnerup .career-card-icon {
-  color: #04a241;
-  opacity: 0.38;
-}
-
-.career-page .career-summary-card.ranking .career-card-icon {
-  color: #38bdf8;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.training .career-card-icon {
-  color: #fb923c;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.simple .career-card-icon {
-  color: #f59e0b;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.doubles .career-card-icon {
-  color: #14b8a6;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.ranking:hover .career-card-icon,
-.career-page .career-summary-card.training:hover .career-card-icon,
-.career-page .career-summary-card.simple:hover .career-card-icon,
-.career-page .career-summary-card.doubles:hover .career-card-icon {
-  opacity: 0.55;
-}
-
-/* Garante que texto não sobreponha o ícone */
-.career-page .career-summary-card span,
-.career-page .career-summary-card strong {
-  position: relative;
-  z-index: 1;
-}
-
-/* ========================= CARDS CLICÁVEIS ========================= */
-
-.career-page .career-summary-card[data-filter] {
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    opacity 0.18s ease,
-    border-color 0.18s ease;
-  user-select: none;
-}
-
-.career-page .career-summary-card[data-filter]:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
-}
-
-.career-page .career-summary-card[data-filter]:active {
-  transform: scale(0.97);
-}
-
-/* Card ativo (filtro aplicado) */
-.career-page .career-summary-card.career-card-filter-active {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 0 0 2px currentColor, 0 16px 36px rgba(0, 0, 0, 0.28);
-}
-
-.career-page .career-summary-card.win.career-card-filter-active {
-  box-shadow: 0 0 0 2px #60a5fa, 0 16px 36px rgba(96, 165, 250, 0.22);
-  border-color: #60a5fa;
-}
-
-.career-page .career-summary-card.loss.career-card-filter-active {
-  box-shadow: 0 0 0 2px #f87171, 0 16px 36px rgba(248, 113, 113, 0.22);
-  border-color: #f87171;
-}
-
-.career-page .career-summary-card.tournament.career-card-filter-active {
-  box-shadow: 0 0 0 2px #a78bfa, 0 16px 36px rgba(167, 139, 250, 0.22);
-  border-color: #a78bfa;
-}
-
-.career-page .career-summary-card.champion.career-card-filter-active {
-  box-shadow: 0 0 0 2px #d8ff63, 0 16px 36px rgba(216, 255, 99, 0.22);
-  border-color: #d8ff63;
-}
-
-.career-page .career-summary-card.runnerup.career-card-filter-active {
-  box-shadow: 0 0 0 2px #04a241, 0 16px 36px rgba(4, 162, 65, 0.22);
-  border-color: #04a241;
-}
-
-.career-page .career-summary-card.matches.career-card-filter-active {
-  box-shadow: 0 0 0 2px #e8eefc, 0 16px 36px rgba(232, 238, 252, 0.18);
-  border-color: rgba(232, 238, 252, 0.5);
-}
-
-/* Cards inativos ficam levemente apagados */
-.career-page .career-summary-card.career-card-filter-inactive {
-  opacity: 0.42;
-  transform: scale(0.97);
-}
-
-.career-page .career-summary-card.ranking {
-  border-color: #38bdf8;
-}
-
-.career-page .career-summary-card.training {
-  border-color: #fb923c;
-}
-
-.career-page .career-summary-card.ranking .career-card-icon {
-  color: #38bdf8;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.training .career-card-icon {
-  color: #fb923c;
-  opacity: 0.30;
-}
-
-.career-page .career-summary-card.ranking:hover .career-card-icon {
-  opacity: 0.55;
-}
-
-.career-page .career-summary-card.training:hover .career-card-icon {
-  opacity: 0.55;
-}
-
-.career-page .career-summary-card.ranking.career-card-filter-active {
-  box-shadow: 0 0 0 2px #38bdf8, 0 16px 36px rgba(56, 189, 248, 0.22);
-  border-color: #38bdf8;
-}
-
-.career-page .career-summary-card.training.career-card-filter-active {
-  box-shadow: 0 0 0 2px #fb923c, 0 16px 36px rgba(251, 146, 60, 0.22);
-  border-color: #fb923c;
+  .career-page .career-summary-card.runnerup span {
+    max-width: 92px;
+    white-space: normal;
+    line-height: 1.05;
+  }
 }
 
 /* ========================= SELECT TORNEIO COM SCROLL ========================= */
@@ -996,7 +957,6 @@ body.career-page .admin-back-link ion-icon {
   overflow-y: auto;
 }
 
-/* Estilo nativo aprimorado para o select */
 .career-page .career-filters select {
   appearance: none;
   -webkit-appearance: none;
@@ -1038,7 +998,6 @@ body.career-page .admin-back-link ion-icon {
   opacity: 0.9;
 }
 
-/* ícone do resultado */
 .career-page .career-match-icon.outcome {
   color: #ffffff;
   opacity: 0.28;
@@ -1054,7 +1013,6 @@ body.career-page .admin-back-link ion-icon {
   opacity: 0.38;
 }
 
-/* ícone da fase */
 .career-page .career-match-icon.stage {
   color: #d8ff63;
   opacity: 0.25;
@@ -1064,8 +1022,6 @@ body.career-page .admin-back-link ion-icon {
 .career-page .career-card-loss .career-match-icon.stage {
   opacity: 0.22;
 }
-
-/* ajuste no topo do card para não colidir com os ícones */
 
 .career-page .career-card-top-status {
   padding-right: 110px;
@@ -1123,18 +1079,4 @@ body.career-page .admin-back-link ion-icon {
 .career-page .career-card-loss .career-match-icon.format {
   color: #14b8a6;
   opacity: 0.35;
-}
-
-@media (max-width: 480px) {
-  .career-page .career-summary-card.total.matches span {
-    max-width: 78px;
-    white-space: normal;
-    line-height: 1.05;
-  }
-
-  .career-page .career-summary-card.runnerup span {
-    max-width: 92px;
-    white-space: normal;
-    line-height: 1.05;
-  }
 }
