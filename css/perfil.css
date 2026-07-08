@@ -99,6 +99,79 @@ img {
   color: #fff;
 }
 
+/* ========================= TOPO / NAVBAR ========================= */
+body.profile-page .menu-fixed-top {
+  background: rgba(10, 16, 28, 0.96) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  min-height: 52px;
+  padding-top: 0;
+  padding-bottom: 0;
+  z-index: 1100;
+}
+
+body.profile-page .menu-navbar-top {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.profile-page .menu-back-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #d8ff63;
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+body.profile-page .menu-back-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+  background: transparent;
+}
+
+body.profile-page .menu-back-btn ion-icon {
+  font-size: 1.55rem;
+  color: inherit;
+}
+
+body.profile-page .navbar-brand {
+  margin-left: 0;
+  padding-left: 0;
+  color: #eef4ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.profile-page .navbar-brand span {
+  line-height: 1;
+}
+
+body.profile-page .profile-navbar-brand {
+  color: #eef4ff !important;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+body.profile-page .profile-navbar-brand ion-icon {
+  font-size: 1.45rem !important;
+}
+
 /* ========================= PÁGINA PERFIL ========================= */
 body.profile-page {
   min-height: 100vh;
@@ -106,7 +179,7 @@ body.profile-page {
     radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%),
     linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
   color: #e8eefc;
-  padding: 20px 0 108px;
+  padding: 74px 0 110px;
 }
 
 .profile-shell {
@@ -175,7 +248,6 @@ body.profile-page {
   color: rgba(232, 238, 252, 0.6);
 }
 
-/* NOVO BLOCO: botões da foto em coluna */
 .photo-actions {
   display: flex;
   flex-direction: column;
@@ -206,6 +278,17 @@ body.profile-page {
 
 .btn-upload:hover {
   background: rgba(110, 165, 255, 0.18);
+}
+
+.ionic-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ionic-upload-btn ion-icon {
+  font-size: 1rem;
 }
 
 /* Botão excluir foto */
@@ -288,6 +371,75 @@ body.profile-page {
   grid-column: 1 / -1;
 }
 
+/* ========================= VISUAL IONIC NO FORM ========================= */
+.ionic-form {
+  gap: 12px;
+}
+
+.ionic-form-card {
+  border-radius: 18px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(44,54,74,.72), rgba(30,39,58,.82));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.16);
+}
+
+.ionic-field {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.ionic-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 252, 0.72);
+}
+
+.ionic-input,
+.ionic-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255,255,255,0.10);
+  background-color: rgba(12, 18, 30, 0.72);
+  color: #f4f8ff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 0.92rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.ionic-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.ionic-input:focus,
+.ionic-select:focus {
+  border-color: rgba(104, 166, 255, 0.62);
+  box-shadow: 0 0 0 3px rgba(104, 166, 255, 0.16);
+}
+
+.ionic-toggle-label {
+  margin-bottom: -4px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 252, 0.72);
+}
+
+.ionic-toggle-group {
+  margin-bottom: 4px;
+}
+
 /* ========================= TOGGLES ========================= */
 .toggle-group {
   display: flex;
@@ -331,11 +483,90 @@ body.profile-page {
   margin-top: 6px;
 }
 
+.ionic-actions {
+  grid-column: 1 / -1;
+}
+
+.ionic-primary-btn,
+.ionic-secondary-btn,
+.ionic-danger-btn,
+.ionic-inline-btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ionic-primary-btn ion-icon,
+.ionic-secondary-btn ion-icon,
+.ionic-danger-btn ion-icon,
+.ionic-inline-btn ion-icon {
+  font-size: 1.05rem;
+}
+
+.ionic-primary-btn {
+  background: linear-gradient(180deg, #d8ff63, #b9e84f);
+  color: #0f1726;
+}
+
+.ionic-secondary-btn {
+  background: rgba(255,255,255,0.08);
+  color: #f4f8ff;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.ionic-danger-btn {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border: 1px solid rgba(248, 113, 113, 0.26) !important;
+  color: #f87171 !important;
+}
+
+.ionic-inline-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgba(216,255,99,0.12);
+  border: 1px solid rgba(216,255,99,0.22);
+  color: #d8ff63;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.ionic-primary-btn:hover,
+.ionic-secondary-btn:hover,
+.ionic-danger-btn:hover,
+.ionic-inline-btn:hover {
+  transform: none;
+  opacity: 0.95;
+}
+
 .profile-msg {
   margin-top: 14px;
   min-height: 22px;
   color: rgba(232, 238, 252, 0.9);
   font-size: 0.95rem;
+}
+
+/* ========================= SENHA EM LINHA ========================= */
+.password-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.password-input {
+  flex: 1;
+  min-width: 0;
 }
 
 /* ========================= SEGURANÇA ========================= */
@@ -503,8 +734,8 @@ body.profile-page {
   z-index: 1000;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  padding: 6px 10px 8px;
+  gap: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   background: rgba(10, 16, 28, 0.92);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px);
@@ -515,40 +746,59 @@ body.profile-page {
 
 .profile-bottom-btn {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+  border: none;
+  background: transparent;
   color: #eef4ff;
   text-decoration: none;
-  border-radius: 16px;
-  min-height: 60px;
+  border-radius: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   font-weight: 800;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   cursor: pointer;
   width: 100%;
-  padding: 6px 8px;
-  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  padding: 8px 4px;
+  transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
+  white-space: nowrap;
+  opacity: 0.92;
 }
 
+/* remove o quadrado e o efeito amarelado */
 .profile-bottom-btn:hover {
   transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
-  border-color: rgba(216, 255, 99, 0.22);
+  opacity: 1;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.profile-bottom-btn:focus,
+.profile-bottom-btn:active {
+  outline: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .profile-bottom-icon {
-  font-size: 1.12rem;
+  font-size: 1.22rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-bottom-icon ion-icon {
+  font-size: 1.22rem;
 }
 
 .profile-bottom-label {
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
@@ -556,10 +806,6 @@ body.profile-page {
 
 .profile-bottom-btn.logout .profile-bottom-icon {
   color: #ff7b7b;
-}
-
-.profile-bottom-btn.logout {
-  background: linear-gradient(180deg, rgba(255, 123, 123, 0.12), rgba(255, 255, 255, 0.03));
 }
 
 /* ========================= RESPONSIVO ========================= */
@@ -594,31 +840,41 @@ body.profile-page {
 
   .profile-bottom-nav,
   .profile-actions-fixed {
-    gap: 6px;
-    padding: 5px 8px 7px;
+    gap: 0;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   }
 
   .profile-bottom-btn {
-    min-height: 56px;
-    border-radius: 14px;
+    min-height: 64px;
+    border-radius: 0;
+    padding: 8px 4px;
   }
 
   .profile-bottom-label {
-    font-size: 0.66rem;
+    font-size: 0.68rem;
   }
 
   body.profile-page {
-    padding-bottom: 92px;
+    padding: 74px 0 96px;
   }
 
   #removePhotoBtn {
+    width: 100%;
+  }
+
+  .password-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ionic-inline-btn {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
   body.profile-page {
-    padding-bottom: 86px;
+    padding: 74px 0 90px;
   }
 
   .profile-card {
@@ -656,15 +912,24 @@ body.profile-page {
   }
 
   .profile-bottom-btn {
-    min-height: 52px;
-    border-radius: 14px;
+    min-height: 62px;
+    border-radius: 0;
+    padding: 8px 2px;
   }
 
   .profile-bottom-label {
-    font-size: 0.62rem;
+    font-size: 0.64rem;
   }
 
   #removePhotoBtn {
     width: 100%;
+  }
+
+  .ionic-form-card {
+    padding: 10px;
+  }
+
+  .ionic-label {
+    font-size: 0.74rem;
   }
 }
