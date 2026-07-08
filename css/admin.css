@@ -204,173 +204,134 @@ body.admin-page .muted {
   color: rgba(232, 238, 252, 0.68);
 }
 
-/* ========================= FORMULÁRIO ========================= */
-body.admin-page .form.grid-form {
+/* ========================= FORMULÁRIO — VISUAL IONIC ========================= */
+body.admin-page .ionic-form-wrapper {
+  background: linear-gradient(180deg, rgba(31, 40, 60, 0.92), rgba(20, 28, 44, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+body.admin-page .ionic-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   padding: 0 22px 22px;
 }
 
-body.admin-page .form label {
+body.admin-page .ionic-form-card {
+  border-radius: 18px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(44,54,74,.72), rgba(30,39,58,.82));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.16);
+}
+
+body.admin-page .ionic-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: rgba(232, 238, 252, 0.84);
-  font-weight: 700;
-  font-size: 0.92rem;
 }
 
-body.admin-page .form input,
-body.admin-page .form select,
-body.admin-page .filters-bar input,
-body.admin-page .filters-bar select,
-body.admin-page .dialog input,
-body.admin-page .dialog select,
-body.admin-page .dialog textarea {
+body.admin-page .ionic-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 252, 0.72);
+}
+
+body.admin-page .ionic-input,
+body.admin-page .ionic-select {
   width: 100%;
-  padding: 11px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(12, 18, 30, 0.62);
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255,255,255,0.10);
+  background-color: rgba(12, 18, 30, 0.72);
   color: #f4f8ff;
+  border-radius: 14px;
+  padding: 12px 14px;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  font-size: 0.92rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
-body.admin-page .form input:focus,
-body.admin-page .form select:focus,
-body.admin-page .filters-bar input:focus,
-body.admin-page .filters-bar select:focus,
-body.admin-page .dialog input:focus,
-body.admin-page .dialog select:focus,
-body.admin-page .dialog textarea:focus {
-  border-color: rgba(110, 165, 255, 0.55);
-  box-shadow: 0 0 0 3px rgba(110, 165, 255, 0.15);
+body.admin-page .ionic-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
 }
 
-body.admin-page .form input[readonly] {
+body.admin-page .ionic-input:focus,
+body.admin-page .ionic-select:focus {
+  border-color: rgba(104, 166, 255, 0.62);
+  box-shadow: 0 0 0 3px rgba(104, 166, 255, 0.16);
+}
+
+body.admin-page .ionic-input[readonly] {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-body.admin-page .actions.full {
+body.admin-page .ionic-actions {
   grid-column: 1 / -1;
-  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 2px;
 }
 
-/* ========================= BOTÕES ========================= */
-body.admin-page .btn,
-body.admin-page .admin-page-btn,
-body.admin-page .btn-clear-filters,
-body.admin-page .icon-btn,
-body.admin-page .search-player-btn,
-body.admin-page .player-search-modal-close,
-body.admin-page .admin-dropdown-item {
+body.admin-page .ionic-btn {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
   -webkit-tap-highlight-color: transparent;
 }
 
-body.admin-page .btn:hover,
-body.admin-page .admin-page-btn:hover,
-body.admin-page .btn-clear-filters:hover,
-body.admin-page .icon-btn:hover,
-body.admin-page .search-player-btn:hover,
-body.admin-page .player-search-modal-close:hover,
-body.admin-page .admin-dropdown-item:hover {
-  transform: translateY(-1px);
+body.admin-page .ionic-btn ion-icon {
+  font-size: 1.05rem;
 }
 
-body.admin-page .btn {
-  border-radius: 14px;
-  padding: 11px 16px;
-  color: #eef4ff;
-  background: rgba(255, 255, 255, 0.06);
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+body.admin-page .ionic-btn.primary {
+  background: linear-gradient(180deg, #d8ff63, #b9e84f);
+  color: #0f1726;
 }
 
-body.admin-page .btn.primary {
-  background: linear-gradient(180deg, #6fb1ff, #4b84f0);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.10);
+body.admin-page .ionic-btn.secondary {
+  background: rgba(255,255,255,0.08);
+  color: #f4f8ff;
+  border: 1px solid rgba(255,255,255,0.10);
 }
 
-body.admin-page .btn.danger {
-  background: linear-gradient(180deg, #ff6d6d, #e44f4f);
-  color: #fff;
-}
-
-body.admin-page .btn:disabled,
-body.admin-page .admin-page-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+body.admin-page .ionic-btn:hover {
   transform: none;
-  box-shadow: none;
+  opacity: 0.95;
 }
 
-/* ========================= BOTÕES PADRÃO DO TIPO “LIMPAR FILTROS” ========================= */
-body.admin-page .btn-clear-filters,
-body.admin-page .admin-page-btn,
-body.admin-page .icon-btn,
-body.admin-page .admin-form-actions .admin-form-btn,
-body.admin-page .search-player-btn {
-  min-height: 44px;
-  min-width: 0;
-  padding: 0 14px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
-  color: #eef4ff;
-  font-weight: 800;
-  font-size: 0.88rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  white-space: nowrap;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
-}
-
-body.admin-page .btn-clear-filters:hover,
-body.admin-page .admin-page-btn:hover,
-body.admin-page .icon-btn:hover,
-body.admin-page .admin-form-actions .admin-form-btn:hover,
-body.admin-page .search-player-btn:hover {
-  border-color: rgba(216, 255, 99, 0.22);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.05));
-  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
-}
-
-body.admin-page .admin-form-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-body.admin-page .admin-form-actions .admin-form-btn.primary {
-  border-color: rgba(216, 255, 99, 0.18);
-}
-
-body.admin-page .admin-form-actions .admin-form-btn .admin-bottom-icon,
-body.admin-page .admin-form-actions .admin-form-btn .admin-bottom-label {
-  font-size: 0.88rem;
-  line-height: 1;
-  pointer-events: none;
+body.admin-page .ionic-btn:active {
+  transform: scale(0.98);
 }
 
 /* botão de busca do jogador */
 body.admin-page .search-player-btn {
   margin-top: 8px;
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   font-size: 0.86rem;
+  border-radius: 14px;
 }
 
 /* ========================= MENSAGEM ========================= */
@@ -381,18 +342,101 @@ body.admin-page .msg {
   font-size: 0.95rem;
 }
 
-/* ========================= BARRA DE FILTROS ========================= */
-body.admin-page .filters-bar {
+/* ========================= FILTROS — VISUAL IONIC ========================= */
+body.admin-page .filters-bar.ionic-filters {
   display: grid;
-  grid-template-columns: 1.3fr 1.3fr 1fr auto;
+  grid-template-columns: 1.3fr 1fr 1.3fr 1fr 0.7fr auto;
   gap: 12px;
   padding: 0 22px 18px;
+  align-items: end;
+}
+
+body.admin-page .ionic-filter-card {
+  border-radius: 18px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(44,54,74,.72), rgba(30,39,58,.82));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.16);
+}
+
+body.admin-page .ionic-filter-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: rgba(232, 238, 252, 0.86);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+body.admin-page .ionic-input,
+body.admin-page .ionic-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255,255,255,0.10);
+  background-color: rgba(12, 18, 30, 0.72);
+  color: #f4f8ff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 0.92rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+body.admin-page .ionic-input:focus,
+body.admin-page .ionic-select:focus {
+  border-color: rgba(104, 166, 255, 0.62);
+  box-shadow: 0 0 0 3px rgba(104, 166, 255, 0.16);
+}
+
+body.admin-page .admin-filter-actions.ionic-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  margin-top: 2px;
   align-items: center;
 }
 
-body.admin-page .filters-bar input,
-body.admin-page .filters-bar select {
-  min-height: 44px;
+body.admin-page .ionic-btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.admin-page .ionic-btn ion-icon {
+  font-size: 1.05rem;
+}
+
+body.admin-page .ionic-btn.primary {
+  background: linear-gradient(180deg, #d8ff63, #b9e84f);
+  color: #0f1726;
+}
+
+body.admin-page .ionic-btn.secondary {
+  background: rgba(255,255,255,0.08);
+  color: #f4f8ff;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+body.admin-page .ionic-btn:hover {
+  transform: none;
+  opacity: 0.95;
+}
+
+body.admin-page .ionic-btn:active {
+  transform: scale(0.98);
 }
 
 /* ========================= TABELA DESKTOP ========================= */
@@ -1444,7 +1488,7 @@ body.admin-page .player-search-line span {
     padding: 18px 16px 0;
   }
 
-  body.admin-page .form.grid-form,
+  body.admin-page .ionic-form-grid,
   body.admin-page .filters-bar,
   body.admin-page .table-wrap,
   body.admin-page .msg {
@@ -1452,12 +1496,34 @@ body.admin-page .player-search-line span {
     padding-right: 16px;
   }
 
-  body.admin-page .form.grid-form {
+  body.admin-page .ionic-form-grid {
     grid-template-columns: 1fr;
   }
 
   body.admin-page .filters-bar {
     grid-template-columns: 1fr;
+  }
+
+  body.admin-page .filters-bar.ionic-filters {
+    grid-template-columns: 1fr;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  body.admin-page .ionic-filter-card {
+    padding: 10px;
+  }
+
+  body.admin-page .ionic-label {
+    font-size: 0.74rem;
+  }
+
+  body.admin-page .admin-filter-actions.ionic-actions {
+    flex-direction: column;
+  }
+
+  body.admin-page .ionic-btn {
+    width: 100%;
   }
 
   body.admin-page .actions {
@@ -1671,9 +1737,12 @@ body.admin-page .player-search-line span {
     gap: 8px;
   }
 
-  body.admin-page .admin-form-actions .admin-form-btn {
+  body.admin-page .ionic-actions {
+    flex-direction: column;
+  }
+
+  body.admin-page .ionic-btn {
     width: 100%;
-    min-height: 48px;
   }
 
   body.admin-page .admin-bottom-nav {
@@ -1826,7 +1895,21 @@ body.admin-page .player-search-line span {
   }
 
   body.admin-page .dialog-head .btn {
-    width: 100%;
+    min-height: 44px;
+    min-width: 120px;
+    padding: 0 16px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(216, 255, 99, 0.14), rgba(255, 255, 255, 0.05));
+    color: #eef4ff;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+  }
+  
+  body.admin-page .dialog-head .btn:hover {
+    background: linear-gradient(180deg, rgba(216, 255, 99, 0.20), rgba(255, 255, 255, 0.06));
+    border-color: rgba(216, 255, 99, 0.22);
+    transform: translateY(-1px);
   }
 
   body.admin-page .detail-section {
@@ -2099,7 +2182,6 @@ body.admin-page .admin-back-link ion-icon {
 }
 
 /* ========================================================= AJUSTE: DADOS GERAIS EM LISTA VERTICAL, SEM CARDS ========================================================= */
-
 body.admin-page .detail-info-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -2171,4 +2253,3 @@ body.admin-page .detail-info-item strong {
     font-size: 0.84rem;
   }
 }
-
