@@ -52,6 +52,8 @@
         return `${h}:${m}:${sec}`;
       },
 
+      
+
       statusLabel(status) {
         switch (status) {
           case "live": return "EM ANDAMENTO";
@@ -110,7 +112,8 @@
           breakPointsWon1: Number(score.breakPointsWon1 || 0),
           breakPointsWon2: Number(score.breakPointsWon2 || 0),
           breakPointsChances1: Number(score.breakPointsChances1 || 0),
-          breakPointsChances2: Number(score.breakPointsChances2 || 0)
+          breakPointsChances2: Number(score.breakPointsChances2 || 0),
+          breakPointsBySet: score.breakPointsBySet || {}
         };
       },
 
@@ -247,21 +250,21 @@
         const stats = match.stats || {};
         const p1Stats = stats.player1 || {};
         const p2Stats = stats.player2 || {};
-
+      
         const total1 = Number(
           summary.totalPoints1 ??
           score.totalPoints1 ??
           p1Stats.totalPointsWon ??
           0
         );
-
+      
         const total2 = Number(
           summary.totalPoints2 ??
           score.totalPoints2 ??
           p2Stats.totalPointsWon ??
           0
         );
-
+      
         return {
           totalPoints1: total1,
           totalPoints2: total2,
@@ -272,9 +275,34 @@
         };
       },
 
+    countBreakPointsWonFromMap(match, playerKey = "player1") {
+      const score = U.normalizeScore(match.score || {});
+      const raw = score.breakPointsBySet || match.breakPointsBySet || {};
+    
+      let total = 0;
+    
+      Object.keys(raw || {}).forEach((setKey) => {
+        const setData = raw[setKey] || {};
+    
+        // Se o mapa guarda QUEM FOI QUEBRADO:
+        // jogador que QUEBROU é o oposto.
+        const breakerKey = playerKey === "player1" ? "player2" : "player1";
+        const list = Array.isArray(setData[breakerKey]) ? setData[breakerKey] : [];
+    
+        total += list.length;
+      });
+    
+      return total;
+    },
+
+    
+
       formatBreakPoints(won, chances) {
         return `${Number(won || 0)} / ${Number(chances || 0)}`;
       },
+
+
+      
 
       getWinnerPosition(match, score) {
         const status = String(match?.status || "").trim().toLowerCase();
@@ -422,7 +450,7 @@
       if (document.getElementById("publicAppInlineStyles")) return;
       const style = document.createElement("style");
       style.id = "publicAppInlineStyles";
-      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .stats-block { margin-top: 14px; } .stats-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin-top:10px; } .stat-card { background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 18px; padding: 14px 16px 16px; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(0,0,0,0.15); } .stat-title { text-align:center; color:#a9c6e6; font-size:0.88rem; line-height:1.15; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; } .stat-values { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 10px; } .stat-values span { font-size:1.1rem; font-weight:800; color:#b9ff5f; min-width:44px; text-align:center; } .values-multi span { min-width:64px; } .last-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .last-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .last-points-balls { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; } .last-point-ball { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .last-point-ball.empty { background: transparent; } .last-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .last-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board[data-status="live"] .player-name, .match-board[data-status="suspended"] .player-name, .match-board[data-status="finished"] .player-name { padding-right: 6px !important; } .match-board .set-tb { font-size: 0.55em !important; top: -0.5em !important; margin-left: 1px !important; } .stats-grid { grid-template-columns: 1fr; } .stat-card { min-height: 80px; } } `;
+      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .stats-block { margin-top: 14px; } .stats-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin-top:10px; } .stat-card { background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 18px; padding: 14px 16px 16px; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(0,0,0,0.15); } .stat-title { text-align:center; color:#a9c6e6; font-size:0.88rem; line-height:1.15; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; } .stat-values { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 10px; } .stat-values span { font-size:1.1rem; font-weight:800; color:#b9ff5f; min-width:44px; text-align:center; } .values-multi span { min-width:64px; } .last-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .last-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .last-points-balls { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; } .last-point-ball { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .last-point-ball.empty { background: transparent; } .last-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .last-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } .break-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .break-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .break-points-balls { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 8px; } .break-point-ball-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; } .break-point-number { font-size: 11px; font-weight: 800; color: #cbd5e1; line-height: 1; } .break-point-ball { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .break-point-ball.empty { background: transparent; } .break-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .break-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board .set-tb { font-size: 0.55em !important; top: -0.5em !important; margin-left: 1px !important; } .stats-grid { grid-template-columns: 1fr; } .stat-card { min-height: 80px; } .break-points-balls { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; } .break-point-ball { width: 12px; height: 12px; } .break-point-number { font-size: 10px; } } `;
       document.head.appendChild(style);
     }
 
@@ -546,6 +574,83 @@
       }
 
       return ` <div class="last-points-block"> <div class="last-points-title">Últimos 10 pontos Jogados</div> <div class="last-points-balls">${balls.join("")}</div> </div> `;
+    }
+
+    function getCurrentSetNumber(match, score) {
+      const fmt = String(match?.matchFormat || "").toLowerCase();
+      const hasTwoSets = fmt.includes("2 sets");
+      const hasThreeSets = fmt.includes("3 sets");
+
+      const totalSetsAllowed = hasThreeSets ? 3 : (hasTwoSets ? 2 : 1);
+      const playedSets = Number(score.sets1 || 0) + Number(score.sets2 || 0);
+      const historyCount = Array.isArray(score.setHistory) ? score.setHistory.length : 0;
+
+      return Math.min(totalSetsAllowed, Math.max(1, playedSets + 1, historyCount + 1));
+    }
+
+    function normalizeBreakPointsStructure(raw) {
+      if (!raw || typeof raw !== "object") return {};
+
+      const normalized = {};
+      Object.keys(raw).forEach((k) => {
+        const key = String(k).toLowerCase().trim();
+        const setKey = key.startsWith("set") ? key : `set${key}`;
+        const setValue = raw[k] || {};
+
+        normalized[setKey] = {
+          player1: Array.isArray(setValue.player1) ? setValue.player1.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0) : [],
+          player2: Array.isArray(setValue.player2) ? setValue.player2.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0) : []
+        };
+      });
+
+      return normalized;
+    }
+
+    function getBreakPointsForSet(match, score, setNumber, playerKey) {
+      const fromScore = score?.breakPointsBySet || {};
+      const fromMatch = match?.breakPointsBySet || {};
+
+      const raw = {
+        ...normalizeBreakPointsStructure(fromMatch),
+        ...normalizeBreakPointsStructure(fromScore)
+      };
+
+      const setKey = `set${setNumber}`;
+      const setData = raw?.[setKey] || raw?.[String(setNumber)] || {};
+
+      const list = Array.isArray(setData?.[playerKey]) ? setData[playerKey] : [];
+      return list
+        .map((v) => Number(v))
+        .filter((v) => Number.isFinite(v) && v > 0);
+    }
+
+    function renderBreakPointBalls(match) {
+      const score = U.normalizeScore(match.score || {});
+      const currentSet = getCurrentSetNumber(match, score);
+
+      const p1Breaks = getBreakPointsForSet(match, score, currentSet, "player1");
+      const p2Breaks = getBreakPointsForSet(match, score, currentSet, "player2");
+
+      const balls = [];
+      for (let i = 1; i <= 12; i++) {
+        const p1Active = p1Breaks.includes(i);
+        const p2Active = p2Breaks.includes(i);
+
+        let cls = "empty";
+        let title = `Game ${i}: sem quebra`;
+
+        if (p1Active) {
+          cls = "p1";
+          title = `Game ${i}: Jogador 1 foi quebrado`;
+        } else if (p2Active) {
+          cls = "p2";
+          title = `Game ${i}: Jogador 2 foi quebrado`;
+        }
+
+        balls.push(` <div class="break-point-ball-wrap"> <span class="break-point-number">${i}</span> <span class="break-point-ball ${cls}" title="${U.escapeHtml(title)}"></span> </div> `);
+      }
+
+      return ` <div class="break-points-block"> <div class="break-points-title">Break Point</div> <div class="break-points-balls">${balls.join("")}</div> </div> `;
     }
 
     function renderMatchSummary(match) {
@@ -813,7 +918,7 @@
       if (court) row2Parts.push(`<span>Quadra: <strong>${court}</strong></span>`);
       if (matchDate) row2Parts.push(`<span>Data: <strong>${matchDate}</strong></span>`);
 
-      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderLastPointsLine(match) : ""} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} ${!isSuspended ? renderStatistics(match) : ""} <div class="match-footer compact-footer match-footer-live"> ${row1Parts.length ? `<div class="match-footer-live-row">${row1Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} ${row2Parts.length ? `<div class="match-footer-live-row">${row2Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} </div> </article>`;
+      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderLastPointsLine(match) : ""} ${!isSuspended ? renderBreakPointBalls(match) : ""} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} ${!isSuspended ? renderStatistics(match) : ""} <div class="match-footer compact-footer match-footer-live"> ${row1Parts.length ? `<div class="match-footer-live-row">${row1Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} ${row2Parts.length ? `<div class="match-footer-live-row">${row2Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} </div> </article> `;
     }
 
     function createScheduledCard(match) {
@@ -824,7 +929,7 @@
       const status = U.normalizeStatus(match.status);
       const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
 
-      return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name team-name-compact">${team1Html}</span> <span class="vs-separator">X</span> <span class="player-name team-name-compact">${team2Html}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span>` : ""} </div> </article>`;
+      return ` <article class="public-card match-board compact-match-board scheduled-match" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(status)}">${U.statusLabel(status)}</div> </div> <div class="scheduled-player-line"> <span class="player-name team-name-compact">${team1Html}</span> <span class="vs-separator">X</span> <span class="player-name team-name-compact">${team2Html}</span> </div> <div class="match-footer compact-footer scheduled-footer"> ${stage || matchDate ? `<span> ${stage ? `<strong>${stage}</strong>` : ""} ${stage && matchDate ? " • " : ""} ${matchDate ? `<strong>${matchDate}</strong>` : ""} </span>` : ""} </div> </article> `;
     }
 
     function createCard(match) {
@@ -903,90 +1008,84 @@
     function renderLists(matches) {
       applyFilterAndRender(matches);
     }
-        // INJETADO: Repassa os dados reativos em background para a aba da TV se ela estiver aberta na tela
-        if (window.tvAbaRef && !window.tvAbaRef.closed && Array.isArray(matches)) {
-          // Procura a partida ao vivo correspondente na sua lista reativa e envia
-          const paramsTv = new URLSearchParams(window.location.search);
-          const matchIdTv = paramsTv.get("id") || "";
-          const jogoAtivo = matches.find(m => m.id === matchIdTv || m.status === "live");
-          if (jogoAtivo) window.tvAbaRef.postMessage(jogoAtivo, "*");
-        }
-    
 
-        function listenPublicMatches() {
-          state.unsubscribe?.();
-          state.unsubscribe = null;
-    
-          if (!ownerId) {
+    if (window.tvAbaRef && !window.tvAbaRef.closed && Array.isArray(state.cachedMatches)) {
+      const paramsTv = new URLSearchParams(window.location.search);
+      const matchIdTv = paramsTv.get("id") || "";
+      const jogoAtivo = state.cachedMatches.find(m => m.id === matchIdTv || m.status === "live");
+      if (jogoAtivo) window.tvAbaRef.postMessage(jogoAtivo, "*");
+    }
+
+    function listenPublicMatches() {
+      state.unsubscribe?.();
+      state.unsubscribe = null;
+
+      if (!ownerId) {
+        [el.scheduledList, el.liveList, el.finishedList].forEach(
+          (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o identificador do usuário."))
+        );
+        return;
+      }
+
+      if (!shareToken) {
+        [el.scheduledList, el.liveList, el.finishedList].forEach(
+          (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o token de compartilhamento."))
+        );
+        return;
+      }
+
+      state.unsubscribe = db.collection("matches")
+        .where("ownerId", "==", ownerId)
+        .where("shareEnabled", "==", true)
+        .onSnapshot(
+          (snapshot) => {
+            state.cachedMatches = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            renderLists(state.cachedMatches);
+          },
+          (err) => {
+            console.error("Erro ao carregar partidas públicas:", err);
             [el.scheduledList, el.liveList, el.finishedList].forEach(
-              (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o identificador do usuário."))
+              (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos públicos"))
             );
-            return;
           }
-    
-          if (!shareToken) {
-            [el.scheduledList, el.liveList, el.finishedList].forEach(
-              (e) => e && (e.innerHTML = renderEmpty("Link inválido. Falta o token de compartilhamento."))
-            );
-            return;
+        );
+    }
+
+    function listenSingleMatch() {
+      if (!matchId) return;
+
+      state.unsubscribeSingle?.();
+      state.unsubscribeSingle = null;
+
+      state.unsubscribeSingle = db.collection("matches")
+        .doc(matchId)
+        .onSnapshot(
+          (snap) => {
+            if (!snap.exists) return;
+
+            const match = { id: snap.id, ...snap.data() };
+
+            const idx = state.cachedMatches.findIndex((m) => m.id === match.id);
+            if (idx >= 0) {
+              state.cachedMatches[idx] = match;
+            } else {
+              state.cachedMatches.push(match);
+            }
+
+            const idsVistos = new Set();
+            state.cachedMatches = state.cachedMatches.filter(m => {
+              if (idsVistos.has(m.id)) return false;
+              idsVistos.add(m.id);
+              return true;
+            });
+
+            renderLists(state.cachedMatches);
+          },
+          (err) => {
+            console.error("Erro ao escutar partida individual:", err);
           }
-    
-          state.unsubscribe = db.collection("matches")
-            .where("ownerId", "==", ownerId)
-            .where("shareEnabled", "==", true)
-            .onSnapshot(
-              (snapshot) => {
-                state.cachedMatches = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-                renderLists(state.cachedMatches);
-              },
-              (err) => {
-                console.error("Erro ao carregar partidas públicas:", err);
-                [el.scheduledList, el.liveList, el.finishedList].forEach(
-                  (e) => e && (e.innerHTML = renderEmpty("Erro ao carregar jogos públicos"))
-                );
-              }
-            );
-        }
-    
-        function listenSingleMatch() {
-          if (!matchId) return;
-    
-          state.unsubscribeSingle?.();
-          state.unsubscribeSingle = null;
-    
-          state.unsubscribeSingle = db.collection("matches")
-            .doc(matchId)
-            .onSnapshot(
-              (snap) => {
-                if (!snap.exists) return;
-    
-                const match = { id: snap.id, ...snap.data() };
-    
-                // CORREÇÃO DEFINTIVA: Verifica rigorosamente se a partida já existe na lista.
-                // Se existir, atualiza o índice correto. Se não existir, ela insere o push.
-                const idx = state.cachedMatches.findIndex((m) => m.id === match.id);
-                if (idx >= 0) {
-                  state.cachedMatches[idx] = match;
-                } else {
-                  state.cachedMatches.push(match);
-                }
-    
-                // LIMPEZA ADICIONAL ANTI-DUPLICAÇÃO: Filtra o array para eliminar qualquer ID repetido residual
-                const idsVistos = new Set();
-                state.cachedMatches = state.cachedMatches.filter(m => {
-                  if (idsVistos.has(m.id)) return false;
-                  idsVistos.add(m.id);
-                  return true;
-                });
-    
-                renderLists(state.cachedMatches);
-              },
-              (err) => {
-                console.error("Erro ao escutar partida individual:", err);
-              }
-            );
-        }
-    
+        );
+    }
 
     function refreshLiveDurations() {
       if (state.cachedMatches.length) renderLists(state.cachedMatches);
@@ -1014,4 +1113,3 @@
 
   document.addEventListener("DOMContentLoaded", () => PublicApp.init());
 })();
-
