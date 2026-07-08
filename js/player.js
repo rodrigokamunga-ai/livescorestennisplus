@@ -392,31 +392,30 @@
 
     function updateStartBtn(status) {
       if (!el.startBtn) return;
-
+    
+      const setBtnState = (iconName, label, isPause = false, disabled = false) => {
+        el.startBtn.disabled = disabled;
+    
+        if (el.startBtnIcon) {
+          el.startBtnIcon.innerHTML = `<ion-icon name="${iconName}"></ion-icon>`;
+        }
+    
+        if (el.startBtnLabel) {
+          el.startBtnLabel.textContent = label;
+        }
+    
+        el.startBtn.classList.toggle("pause-action", isPause);
+        el.startBtn.classList.toggle("primary-action", !isPause);
+      };
+    
       if (status === "live") {
-        el.startBtn.disabled = false;
-        if (el.startBtnIcon) el.startBtnIcon.textContent = "⏸️";
-        if (el.startBtnLabel) el.startBtnLabel.textContent = "Interromper";
-        el.startBtn.classList.remove("primary-action");
-        el.startBtn.classList.add("pause-action");
+        setBtnState("pause-outline", "Interromper", true, false);
       } else if (status === "suspended") {
-        el.startBtn.disabled = false;
-        if (el.startBtnIcon) el.startBtnIcon.textContent = "▶️";
-        if (el.startBtnLabel) el.startBtnLabel.textContent = "Recomeçar";
-        el.startBtn.classList.remove("pause-action");
-        el.startBtn.classList.add("primary-action");
+        setBtnState("play-outline", "Recomeçar", false, false);
       } else if (status === "finished" || status === "wo") {
-        el.startBtn.disabled = true;
-        if (el.startBtnIcon) el.startBtnIcon.textContent = "▶️";
-        if (el.startBtnLabel) el.startBtnLabel.textContent = "Iniciar";
-        el.startBtn.classList.remove("pause-action");
-        el.startBtn.classList.add("primary-action");
+        setBtnState("play-outline", "Iniciar", false, true);
       } else {
-        el.startBtn.disabled = false;
-        if (el.startBtnIcon) el.startBtnIcon.textContent = "▶️";
-        if (el.startBtnLabel) el.startBtnLabel.textContent = "Iniciar";
-        el.startBtn.classList.remove("pause-action");
-        el.startBtn.classList.add("primary-action");
+        setBtnState("play-outline", "Iniciar", false, false);
       }
     }
 
@@ -517,7 +516,8 @@
         breakPointsWon1: 0,
         breakPointsWon2: 0,
         breakPointsChances1: 0,
-        breakPointsChances2: 0
+        breakPointsChances2: 0,
+        breakPointsBySet: {}
       };
     }
 
@@ -536,7 +536,8 @@
         breakPointsWon1: Number(score.breakPointsWon1 || 0),
         breakPointsWon2: Number(score.breakPointsWon2 || 0),
         breakPointsChances1: Number(score.breakPointsChances1 || 0),
-        breakPointsChances2: Number(score.breakPointsChances2 || 0)
+        breakPointsChances2: Number(score.breakPointsChances2 || 0),
+        breakPointsBySet: score.breakPointsBySet || {}
       };
     }
 
@@ -816,43 +817,111 @@
         breakPointsWon1: Number(score.breakPointsWon1 || 0),
         breakPointsWon2: Number(score.breakPointsWon2 || 0),
         breakPointsChances1: Number(score.breakPointsChances1 || 0),
-        breakPointsChances2: Number(score.breakPointsChances2 || 0)
+        breakPointsChances2: Number(score.breakPointsChances2 || 0),
+        breakPointsBySet: score.breakPointsBySet || {}
       };
     }
 
-    function applyBreakPointStats(scoreBefore, scoreAfter, data, winnerPos) {
-      const s = scoreAfter;
-      const server = String(scoreBefore.server || data.server || "player1");
-      const srvPos = server === "player2" ? 2 : 1;
-      const rcvPos = srvPos === 1 ? 2 : 1;
-
-      const isTBBefore = scoreBefore.tieBreakMode === "tb7" || scoreBefore.tieBreakMode === "super10";
-      if (isTBBefore) return;
-
-      const sp = srvPos === 1 ? Number(scoreBefore.points1 || 0) : Number(scoreBefore.points2 || 0);
-      const rp = srvPos === 1 ? Number(scoreBefore.points2 || 0) : Number(scoreBefore.points1 || 0);
-
-      const fmt = String(data.matchFormat || "").toLowerCase();
-      const noAd = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
-
-      const isAdvantageForReceiver =
-        scoreBefore.advantage !== null &&
-        ((rcvPos === 1 && scoreBefore.advantage === "player1") ||
-         (rcvPos === 2 && scoreBefore.advantage === "player2"));
-
-      const isDecisiveNoAd = noAd && sp === 3 && rp === 3;
-      const isBreakPoint = (rp === 3 && sp < 3) || isAdvantageForReceiver || isDecisiveNoAd;
-      if (!isBreakPoint) return;
-
-      if (rcvPos === 1) s.breakPointsChances1++;
-      if (rcvPos === 2) s.breakPointsChances2++;
-
-      if (winnerPos === rcvPos) {
-        if (rcvPos === 1) s.breakPointsWon1++;
-        if (rcvPos === 2) s.breakPointsWon2++;
+    function ensureBreakPointsBySet(score) {
+      if (!score.breakPointsBySet || typeof score.breakPointsBySet !== "object") {
+        score.breakPointsBySet = {};
       }
+      return score.breakPointsBySet;
+    }
+    
+    function getCurrentSetNumber(score) {
+      const sets1 = Number(score.sets1 || 0);
+      const sets2 = Number(score.sets2 || 0);
+      const history = Array.isArray(score.setHistory) ? score.setHistory.length : 0;
+      return Math.max(1, sets1 + sets2 + 1, history + 1);
+    }
+    
+    function getCurrentGameNumberInSet(scoreBefore) {
+      const g1 = Number(scoreBefore.games1 || 0);
+      const g2 = Number(scoreBefore.games2 || 0);
+    
+      // O break deve ser salvo no game que acabou de ser disputado
+      return Math.max(1, g1 + g2);
+    }
+    
+    function registerBreakPointGame(score, scoreBefore, serverPos) {
+      const brokenPlayer = serverPos === 1 ? "player1" : "player2";
+      const setNumber = getCurrentSetNumber(scoreBefore);
+      const gameNumber = getCurrentGameNumberInSet(scoreBefore);
+    
+      ensureBreakPointsBySet(score);
+    
+      const setKey = `set${setNumber}`;
+    
+      if (!score.breakPointsBySet[setKey]) {
+        score.breakPointsBySet[setKey] = {
+          player1: [],
+          player2: []
+        };
+      }
+    
+      const arr = score.breakPointsBySet[setKey][brokenPlayer] || [];
+      if (!arr.includes(gameNumber)) {
+        arr.push(gameNumber);
+        arr.sort((a, b) => a - b);
+      }
+    
+      score.breakPointsBySet[setKey][brokenPlayer] = arr;
+      return score;
     }
 
+    function applyBreakPointStats(scoreBefore, scoreAfter, data, winnerPos, result) {
+      const server = String(scoreBefore.server || data.server || "player1");
+      const serverPos = server === "player2" ? 2 : 1;
+      const receiverPos = serverPos === 1 ? 2 : 1;
+    
+      const isTBBefore =
+        scoreBefore.tieBreakMode === "tb7" ||
+        scoreBefore.tieBreakMode === "super10";
+      if (isTBBefore) return;
+    
+      const sp = serverPos === 1
+        ? Number(scoreBefore.points1 || 0)
+        : Number(scoreBefore.points2 || 0);
+    
+      const rp = serverPos === 1
+        ? Number(scoreBefore.points2 || 0)
+        : Number(scoreBefore.points1 || 0);
+    
+      const fmt = String(data.matchFormat || "").toLowerCase();
+      const noAd =
+        fmt.includes("sem vantagem") ||
+        fmt.includes("no ad") ||
+        fmt.includes("no-ad");
+    
+      const isAdvantageForReceiver =
+        scoreBefore.advantage !== null &&
+        ((receiverPos === 1 && scoreBefore.advantage === "player1") ||
+         (receiverPos === 2 && scoreBefore.advantage === "player2"));
+    
+      const isDecisiveNoAd = noAd && sp === 3 && rp === 3;
+    
+      const isBreakPoint =
+        (rp === 3 && sp < 3) ||
+        isAdvantageForReceiver ||
+        isDecisiveNoAd;
+    
+      if (!isBreakPoint) return;
+    
+      // conta a chance
+      if (receiverPos === 1) scoreAfter.breakPointsChances1++;
+      if (receiverPos === 2) scoreAfter.breakPointsChances2++;
+    
+      // só conta a quebra quando o game realmente foi ganho pelo recebedor
+      const gameEndedWithBreak =
+        result?.gameWon === true &&
+        winnerPos === receiverPos;
+    
+      if (gameEndedWithBreak) {
+        if (receiverPos === 1) scoreAfter.breakPointsWon1++;
+        if (receiverPos === 2) scoreAfter.breakPointsWon2++;
+      }
+    }
     function buildFinalSetHistory(score) {
       const s = normalizeScore(score);
       const history = Array.isArray(s.setHistory) ? [...s.setHistory] : [];
@@ -953,6 +1022,12 @@
         applyBreakPointStats(scoreBefore, score, data, winnerPos);
 
         if (result.gameWon) {
+          const serverPos = String(scoreBefore.server || data.server || "player1") === "player2" ? 2 : 1;
+        
+          if (winnerPos !== serverPos) {
+            registerBreakPointGame(score, scoreBefore, serverPos);
+          }
+        
           score.server = score.server === "player1" ? "player2" : "player1";
         }
 
