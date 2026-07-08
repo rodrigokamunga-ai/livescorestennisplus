@@ -34,8 +34,6 @@
       resizeTimer: null,
       mobileMql: window.matchMedia(MOBILE_QUERY),
       biometricMode: false,
-
-      // NOVO: busca de jogadores
       playerSearchTarget: "",
       playerSearchDebounce: null
     };
@@ -100,7 +98,6 @@
       scoreSet1Wrapper: document.getElementById("scoreSet1Wrapper"),
       scoreSet2Wrapper: document.getElementById("scoreSet2Wrapper"),
       scoreSet3Wrapper: document.getElementById("scoreSet3Wrapper"),
-
       scoreTieBreakSet1Wrapper: document.getElementById("scoreTieBreakSet1Wrapper"),
       scoreTieBreakSet2Wrapper: document.getElementById("scoreTieBreakSet2Wrapper"),
       scoreSuperTieBreakWrapper: document.getElementById("scoreSuperTieBreakWrapper"),
@@ -122,7 +119,6 @@
       tbSet3Player1: document.getElementById("tbSet3Player1"),
       tbSet3Player2: document.getElementById("tbSet3Player2"),
 
-      // NOVO: modal de busca de jogadores
       playerSearchModal: document.getElementById("playerSearchModal"),
       closePlayerSearchModalBtn: document.getElementById("closePlayerSearchModalBtn"),
       playerSearchInput: document.getElementById("playerSearchInput"),
@@ -218,12 +214,54 @@
       getWinnerPosition(score, d) {
         const status = String(d?.status || "").trim().toLowerCase();
         const woWinner = String(d?.winnerByWO || "").trim().toLowerCase();
+    
+        // WO continua funcionando normalmente
         if (status === "wo") {
           if (woWinner === "player1") return 1;
           if (woWinner === "player2") return 2;
+          return null;
         }
-        if (Number(score.sets1 || 0) > Number(score.sets2 || 0)) return 1;
-        if (Number(score.sets2 || 0) > Number(score.sets1 || 0)) return 2;
+    
+        // Primeiro tenta pelos sets salvos
+        const sets1 = Number(score?.sets1 || 0);
+        const sets2 = Number(score?.sets2 || 0);
+    
+        if (sets1 > sets2) return 1;
+        if (sets2 > sets1) return 2;
+    
+        // Fallback: tenta descobrir pelo histórico
+        const history = Array.isArray(score?.setHistory) ? score.setHistory : [];
+    
+        let p1Sets = 0;
+        let p2Sets = 0;
+    
+        for (const setObj of history) {
+          if (!setObj) continue;
+    
+          const g1 = Number(setObj.games1 || 0);
+          const g2 = Number(setObj.games2 || 0);
+          const tbMode = String(setObj.tieBreakMode || "").trim();
+    
+          let winner = null;
+    
+          if (tbMode === "super10" || tbMode === "tb7") {
+            const tb1 = Number(setObj.tieBreakPoints1 || 0);
+            const tb2 = Number(setObj.tieBreakPoints2 || 0);
+    
+            if (tb1 > tb2) winner = 1;
+            else if (tb2 > tb1) winner = 2;
+          } else {
+            if (g1 > g2) winner = 1;
+            else if (g2 > g1) winner = 2;
+          }
+    
+          if (winner === 1) p1Sets++;
+          if (winner === 2) p2Sets++;
+        }
+    
+        if (p1Sets > p2Sets) return 1;
+        if (p2Sets > p1Sets) return 2;
+    
         return null;
       },
       getWONumberOrName(d) {
@@ -272,13 +310,12 @@
           live: "Em andamento",
           finished: "Finalizada",
           wo: "WO",
-          ret: "RET",
+          ret: "Abandono",
           suspended: "Suspensa"
         };
         return map[s] || status || "Jogos do dia";
       }
     };
-
     function setMsg(text) { if (el.msg) el.msg.textContent = text || ""; }
     function goLogin() { window.location.replace("login.html"); }
     function hasAdminSession() { return localStorage.getItem(ADMIN_KEY) === "1"; }
@@ -294,9 +331,6 @@
         return { uid: parsed.uid || "", email: parsed.email || "", displayName: parsed.displayName || "" };
       } catch (_) { return null; }
     }
-
-    // PARTE 2 virá em seguida
-
 
     function fillPlayer1Field() {
       if (!el.player1) return;
@@ -346,7 +380,9 @@
     function updateMatchFormatOptions() {
       if (!el.matchFormat) return;
       const current = el.matchFormat.value;
-      el.matchFormat.innerHTML = `<option value="">Selecione o formato da partida</option>` + ALLOWED_FORMATS_TENNIS.map(opt => `<option value="${opt}">${opt}</option>`).join("");
+      el.matchFormat.innerHTML =
+        `<option value="">Selecione o formato da partida</option>` +
+        ALLOWED_FORMATS_TENNIS.map(opt => `<option value="${opt}">${opt}</option>`).join("");
       if (ALLOWED_FORMATS_TENNIS.includes(current)) el.matchFormat.value = current;
     }
 
@@ -355,28 +391,28 @@
       if (el.surfaceType) el.surfaceType.required = true;
     }
 
+    function placeScoreBlockAfterStatus() {
+      const statusLabel = el.status?.closest("label");
+      const scoreWrapper = el.scoreFieldsWrapper;
+    
+      if (!statusLabel || !scoreWrapper) return;
+      if (scoreWrapper.parentElement !== statusLabel.parentElement) return;
+    
+      statusLabel.insertAdjacentElement("afterend", scoreWrapper);
+    }
+
     function handleModalityChange() {
       updateMatchFormatOptions();
       updateSurfaceVisibility();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
-      placeScoreBlockAfterStage();
+      placeScoreBlockAfterStatus();
     }
 
     function handleGameFormatChange() {
       updatePlayersVisibility();
       updateProbabilitiesVisibility();
       updateScoreFieldsVisibility();
-    }
-
-    function placeScoreBlockAfterStage() {
-      const stageLabel = el.tournamentStage?.closest("label");
-      const scoreWrapper = el.scoreFieldsWrapper;
-    
-      if (!stageLabel || !scoreWrapper) return;
-      if (scoreWrapper.parentElement !== stageLabel.parentElement) return;
-    
-      stageLabel.insertAdjacentElement("afterend", scoreWrapper);
     }
 
     function updateTournamentStageVisibility() {
@@ -393,8 +429,7 @@
         el.categoryName.required = showCategory;
         if (!showCategory) el.categoryName.value = "";
       }
-    
-      placeScoreBlockAfterStage();
+      
     }
 
     function clearScoreFields() {
@@ -480,19 +515,15 @@
         if (wrapper.parentElement !== target.parentElement) return;
         target.insertAdjacentElement("afterend", wrapper);
       };
-
+    
+      // Ordem correta dos blocos
       moveAfter(el.scoreTieBreakSet1Wrapper, el.scoreSet1Wrapper);
       moveAfter(el.scoreTieBreakSet2Wrapper, el.scoreSet2Wrapper);
       moveAfter(el.scoreTieBreakSet3Wrapper, el.scoreSet3Wrapper);
-
-      if (el.scoreSuperTieBreakWrapper) {
-        if (el.scoreSet3Wrapper && el.scoreSet3Wrapper.style.display !== "none") {
-          moveAfter(el.scoreSuperTieBreakWrapper, el.scoreSet3Wrapper);
-        } else if (el.scoreSet2Wrapper && el.scoreSet2Wrapper.style.display !== "none") {
-          moveAfter(el.scoreSuperTieBreakWrapper, el.scoreSet2Wrapper);
-        } else {
-          moveAfter(el.scoreSuperTieBreakWrapper, el.scoreSet1Wrapper);
-        }
+    
+      // Super tie-break sempre depois do tie-break do 2º set
+      if (el.scoreSuperTieBreakWrapper && el.scoreTieBreakSet2Wrapper) {
+        moveAfter(el.scoreSuperTieBreakWrapper, el.scoreTieBreakSet2Wrapper);
       }
     }
 
@@ -500,77 +531,94 @@
       const isFinished = getSelectedStatus() === "finished";
       const setCount = getExpectedSetCount();
       const matchDecided = isMatchAlreadyDecidedAfterTwoSets();
-
       const cfg = getMatchRuleConfig();
-
+    
       const set1p1 = Number(el.set1Player1?.value || 0);
       const set1p2 = Number(el.set1Player2?.value || 0);
       const set2p1 = Number(el.set2Player1?.value || 0);
       const set2p2 = Number(el.set2Player2?.value || 0);
       const set3p1 = Number(el.set3Player1?.value || 0);
       const set3p2 = Number(el.set3Player2?.value || 0);
-
+    
       const mode1 = setCount >= 1 ? getTieBreakModeForSet(1, set1p1, set1p2) : null;
       const mode2 = setCount >= 2 ? getTieBreakModeForSet(2, set2p1, set2p2) : null;
       const mode3 = setCount >= 3 && !matchDecided ? getTieBreakModeForSet(3, set3p1, set3p2) : null;
-
+    
       const splitSets =
         (set1p1 > set1p2 && set2p2 > set2p1) ||
         (set1p2 > set1p1 && set2p1 > set2p2);
-
+    
       const needsSuperBecauseOneSetAdSuper = cfg.oneSetAdSuper && mode1 === "tb7";
       const needsSuperBecauseTwoSetsSuper =
         (cfg.twoSetsNoAdSuper || cfg.twoSetsAdSuper) && splitSets;
-
+    
+      const setControlState = (input, visible) => {
+        if (!input) return;
+        input.required = !!visible;
+        input.disabled = !visible;
+        if (!visible) input.value = "";
+      };
+    
       setFieldVisible(el.scoreFieldsWrapper, isFinished);
       setFieldVisible(el.scoreSet1Wrapper, isFinished && setCount >= 1);
       setFieldVisible(el.scoreSet2Wrapper, isFinished && setCount >= 2);
       setFieldVisible(el.scoreSet3Wrapper, isFinished && setCount >= 3 && !matchDecided);
-
+    
       if (!isFinished) {
         setFieldVisible(el.scoreTieBreakSet1Wrapper, false);
         setFieldVisible(el.scoreTieBreakSet2Wrapper, false);
         setFieldVisible(el.scoreTieBreakSet3Wrapper, false);
         setFieldVisible(el.scoreSuperTieBreakWrapper, false);
+    
+        [
+          el.tbSet1Player1, el.tbSet1Player2,
+          el.tbSet2Player1, el.tbSet2Player2,
+          el.tbSet3Player1, el.tbSet3Player2,
+          el.tbSuperPlayer1, el.tbSuperPlayer2
+        ].forEach(input => {
+          if (input) {
+            input.required = false;
+            input.disabled = true;
+          }
+        });
+    
         clearScoreFields();
         return;
       }
-
+    
       const showTieBreakSet1 = mode1 === "tb7" && !cfg.oneSetAdSuper;
       const showTieBreakSet2 = mode2 === "tb7";
       const showTieBreakSet3 = mode3 === "tb7";
-
+    
       setFieldVisible(el.scoreTieBreakSet1Wrapper, showTieBreakSet1);
       setFieldVisible(el.scoreTieBreakSet2Wrapper, showTieBreakSet2);
       setFieldVisible(el.scoreTieBreakSet3Wrapper, showTieBreakSet3);
-
+    
       const showSuperTieBreak =
         mode1 === "super10" ||
         mode2 === "super10" ||
         mode3 === "super10" ||
         needsSuperBecauseOneSetAdSuper ||
         needsSuperBecauseTwoSetsSuper;
-
+    
       setFieldVisible(el.scoreSuperTieBreakWrapper, showSuperTieBreak);
-
-      if (el.tbSet1Player1) el.tbSet1Player1.required = showTieBreakSet1;
-      if (el.tbSet1Player2) el.tbSet1Player2.required = showTieBreakSet1;
-      if (el.tbSet2Player1) el.tbSet2Player1.required = showTieBreakSet2;
-      if (el.tbSet2Player2) el.tbSet2Player2.required = showTieBreakSet2;
-      if (el.tbSet3Player1) el.tbSet3Player1.required = showTieBreakSet3;
-      if (el.tbSet3Player2) el.tbSet3Player2.required = showTieBreakSet3;
-
-      if (el.tbSuperPlayer1) el.tbSuperPlayer1.required = showSuperTieBreak;
-      if (el.tbSuperPlayer2) el.tbSuperPlayer2.required = showSuperTieBreak;
-
+    
+      setControlState(el.tbSet1Player1, showTieBreakSet1);
+      setControlState(el.tbSet1Player2, showTieBreakSet1);
+      setControlState(el.tbSet2Player1, showTieBreakSet2);
+      setControlState(el.tbSet2Player2, showTieBreakSet2);
+      setControlState(el.tbSet3Player1, showTieBreakSet3);
+      setControlState(el.tbSet3Player2, showTieBreakSet3);
+      setControlState(el.tbSuperPlayer1, showSuperTieBreak);
+      setControlState(el.tbSuperPlayer2, showSuperTieBreak);
+    
       if (el.scoreTieBreakSet1Wrapper) el.scoreTieBreakSet1Wrapper.style.order = "11";
       if (el.scoreTieBreakSet2Wrapper) el.scoreTieBreakSet2Wrapper.style.order = "21";
       if (el.scoreTieBreakSet3Wrapper) el.scoreTieBreakSet3Wrapper.style.order = "31";
       if (el.scoreSuperTieBreakWrapper) el.scoreSuperTieBreakWrapper.style.order = "40";
-
+    
       placeTieBreakWrappers();
     }
-
     function normalizeGameScore(a, b) {
       const n1 = Number(a);
       const n2 = Number(b);
@@ -600,26 +648,26 @@
     function validateTieBreakPoints(v1, v2, mode = "tb7") {
       const a = Number(v1);
       const b = Number(v2);
-
+    
       if (Number.isNaN(a) || Number.isNaN(b)) return false;
       if (a < 0 || b < 0) return false;
-
+    
       const max = Math.max(a, b);
       const min = Math.min(a, b);
       const diff = max - min;
-
+    
       if (mode === "tb7") {
         if (max < 7) return false;
         if (max === 7) return min <= 6;
         return diff >= 2;
       }
-
+    
       if (mode === "super10") {
         if (max < 10) return false;
         if (max === 10) return min <= 9;
         return diff >= 2;
       }
-
+    
       return false;
     }
 
@@ -686,7 +734,7 @@
         const v1 = Number(el.tbSuperPlayer1?.value || 0);
         const v2 = Number(el.tbSuperPlayer2?.value || 0);
         if (!(v1 > 0 || v2 > 0)) return "Informe os pontos do super tie-break.";
-        if (!validateTieBreakPoints(v1, v2, "super10")) return "Valor inválido.";
+        if (!validateTieBreakPoints(v1, v2, "super10")) return "Placar inválido.";
       }
 
       return null;
@@ -770,8 +818,8 @@
       handleGameFormatChange();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
-      placeScoreBlockAfterStage();
-      
+      placeScoreBlockAfterStatus();
+
       setMsg("");
       closePlayerSearchModal();
     }
@@ -779,11 +827,7 @@
     function scrollToFiltersBar() {
       const target = document.querySelector("#filtersBar");
       if (!target) return;
-    
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function clearFilters() {
@@ -793,26 +837,17 @@
       if (el.filterStatus) el.filterStatus.value = "";
       if (el.filterYear) el.filterYear.value = "";
       refreshList();
-    
-      setTimeout(() => {
-        scrollToFirstCard();
-      }, 50);
+      setTimeout(() => scrollToFirstCard(), 50);
     }
 
     function calcAgeFromBirthDate(birthDate) {
       if (!birthDate) return "-";
-    
       const d = new Date(birthDate);
       if (isNaN(d.getTime())) return "-";
-    
       const today = new Date();
       let age = today.getFullYear() - d.getFullYear();
       const m = today.getMonth() - d.getMonth();
-    
-      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) {
-        age--;
-      }
-    
+      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
       return age;
     }
 
@@ -824,27 +859,16 @@
 
     function openPlayerSearchModal(targetField) {
       state.playerSearchTarget = targetField || "";
-
       if (el.playerSearchInput) el.playerSearchInput.value = "";
       if (el.playerSearchStatus) el.playerSearchStatus.textContent = "Digite o nome para pesquisar.";
       if (el.playerSearchResults) el.playerSearchResults.innerHTML = "";
-
-      if (el.playerSearchModal) {
-        el.playerSearchModal.classList.remove("hidden");
-      }
-
-      setTimeout(() => {
-        el.playerSearchInput?.focus();
-      }, 100);
+      if (el.playerSearchModal) el.playerSearchModal.classList.remove("hidden");
+      setTimeout(() => { el.playerSearchInput?.focus(); }, 100);
     }
 
     function closePlayerSearchModal() {
       state.playerSearchTarget = "";
-
-      if (el.playerSearchModal) {
-        el.playerSearchModal.classList.add("hidden");
-      }
-
+      if (el.playerSearchModal) el.playerSearchModal.classList.add("hidden");
       if (el.playerSearchResults) el.playerSearchResults.innerHTML = "";
       if (el.playerSearchStatus) el.playerSearchStatus.textContent = "";
     }
@@ -852,41 +876,28 @@
     async function searchPlayersByName(query) {
       const q = U.normalizePlayerName(query);
       if (!q || q.length < 2) return [];
-    
+
       try {
         const collectionsToTry = ["users", "profiles"];
-        const results = [];
         const byUid = new Map();
-    
+
         for (const collectionName of collectionsToTry) {
           try {
             const snap = await __db.collection(collectionName).get();
-    
+
             snap.forEach((doc) => {
               const data = doc.data() || {};
-    
-              const displayName = String(
-                data.displayName ||
-                data.name ||
-                data.nome ||
-                ""
-              ).trim();
-    
+              const displayName = String(data.displayName || data.name || data.nome || "").trim();
+
               const searchText = U.normalizePlayerName(
-                [
-                  data.displayName,
-                  data.searchName,
-                  data.name,
-                  data.nome,
-                  data.email
-                ].filter(Boolean).join(" ")
+                [data.displayName, data.searchName, data.name, data.nome, data.email].filter(Boolean).join(" ")
               );
-    
+
               if (!searchText.includes(q)) return;
-    
+
               const uid = String(data.uid || doc.id || "").trim();
               const existing = byUid.get(uid);
-    
+
               const item = {
                 id: doc.id,
                 uid,
@@ -894,8 +905,7 @@
                 data,
                 collection: collectionName
               };
-    
-              // Se já existir o mesmo jogador vindo de users, substitui por profiles
+
               if (!existing) {
                 byUid.set(uid, item);
               } else if (existing.collection !== "profiles" && collectionName === "profiles") {
@@ -906,7 +916,7 @@
             console.warn(`Erro ao buscar na coleção ${collectionName}:`, err);
           }
         }
-    
+
         return Array.from(byUid.values()).slice(0, 10);
       } catch (err) {
         console.error("Erro geral ao buscar jogadores:", err);
@@ -916,49 +926,37 @@
 
     function renderPlayerSearchResults(players) {
       if (!el.playerSearchResults) return;
-    
+
       if (!players.length) {
-        el.playerSearchResults.innerHTML = ` <div class="player-search-empty"> Nenhum jogador encontrado. Você pode digitar manualmente no campo. </div> `;
+        el.playerSearchResults.innerHTML = `<div class="player-search-empty">Nenhum jogador encontrado. Você pode digitar manualmente no campo.</div>`;
         return;
       }
-    
+
       el.playerSearchResults.innerHTML = players.map((player) => {
         const data = player.data || {};
-    
-        const displayName = String(
-          data.displayName ||
-          player.name ||
-          ""
-        ).trim();
-    
+        const displayName = String(data.displayName || player.name || "").trim();
         const uid = String(data.uid || player.uid || player.id || "").trim();
         const shortId = buildShortPlayerId(displayName, uid);
-    
         const country = String(data.country || "BR").trim();
         const city = String(data.city || "-").trim();
         const age = calcAgeFromBirthDate(data.birthDate);
-    
         const avatarBase64 = String(data.photoBase64 || "").trim();
         const avatarLetter = (displayName.charAt(0) || "?").toUpperCase();
-    
+
         const avatarHtml = avatarBase64
           ? `<img src="${U.escapeHtml(avatarBase64)}" alt="${U.escapeHtml(displayName)}" />`
           : `<div class="player-search-avatar-placeholder">${U.escapeHtml(avatarLetter)}</div>`;
-    
-        return ` <button type="button" class="player-search-card" data-name="${U.escapeHtml(displayName)}" data-id="${U.escapeHtml(shortId)}" > <div class="player-search-avatar"> ${avatarHtml} </div> <div class="player-search-content"> <div class="player-search-name"> ${U.escapeHtml(displayName)} </div> <div class="player-search-line"> <strong>ID:</strong> <span>${U.escapeHtml(shortId)}</span> <strong>País:</strong> <span>${U.escapeHtml(country)}</span> </div> <div class="player-search-line"> <strong>Cidade:</strong> <span>${U.escapeHtml(city)}</span> <strong>Idade:</strong> <span>${U.escapeHtml(String(age))}</span> </div> </div> </button> `;
+
+        return ` <button type="button" class="player-search-card" data-name="${U.escapeHtml(displayName)}" data-id="${U.escapeHtml(shortId)}"> <div class="player-search-avatar">${avatarHtml}</div> <div class="player-search-content"> <div class="player-search-name">${U.escapeHtml(displayName)}</div> <div class="player-search-line"> <strong>ID:</strong> <span>${U.escapeHtml(shortId)}</span> <strong>País:</strong> <span>${U.escapeHtml(country)}</span> </div> <div class="player-search-line"> <strong>Cidade:</strong> <span>${U.escapeHtml(city)}</span> <strong>Idade:</strong> <span>${U.escapeHtml(String(age))}</span> </div> </div> </button> `;
       }).join("");
     }
 
     function handlePlayerSearchInput() {
       clearTimeout(state.playerSearchDebounce);
-
       state.playerSearchDebounce = setTimeout(async () => {
         const query = el.playerSearchInput?.value || "";
-
         if (el.playerSearchStatus) {
-          el.playerSearchStatus.textContent = query.trim()
-            ? "Pesquisando..."
-            : "Digite o nome para pesquisar.";
+          el.playerSearchStatus.textContent = query.trim() ? "Pesquisando..." : "Digite o nome para pesquisar.";
         }
 
         const players = await searchPlayersByName(query);
@@ -978,7 +976,6 @@
 
       const name = btn.dataset.name || "";
       const target = state.playerSearchTarget;
-
       if (!target || !el[target]) return;
 
       el[target].value = name;
@@ -996,26 +993,18 @@
       });
 
       el.closePlayerSearchModalBtn?.addEventListener("click", closePlayerSearchModal);
-
       el.playerSearchModal?.addEventListener("click", (e) => {
         if (e.target === el.playerSearchModal) closePlayerSearchModal();
       });
-
       el.playerSearchInput?.addEventListener("input", handlePlayerSearchInput);
       el.playerSearchResults?.addEventListener("click", handlePlayerSearchResultClick);
 
       document.addEventListener("keydown", (e) => {
-        if (
-          e.key === "Escape" &&
-          el.playerSearchModal &&
-          !el.playerSearchModal.classList.contains("hidden")
-        ) {
+        if (e.key === "Escape" && el.playerSearchModal && !el.playerSearchModal.classList.contains("hidden")) {
           closePlayerSearchModal();
         }
       });
     }
-
-    // PARTE 3 virá em seguida
 
     function getFormattedSetFromInput(p1, p2, setIndex = 1) {
       const res = normalizeGameScore(p1, p2);
@@ -1059,24 +1048,22 @@
       const setCount = getExpectedSetCount();
       const history = [];
       const cfg = getMatchRuleConfig();
-
+    
       if (setCount >= 1) {
         const set1 = getFormattedSetFromInput(el.set1Player1?.value, el.set1Player2?.value, 1);
         if (set1.error) return { error: set1.error };
-
-        const isOneSetAdSuper = cfg.oneSetAdSuper;
-
-        if (isOneSetAdSuper) {
+    
+        if (cfg.oneSetAdSuper) {
           const super1 = Number(el.tbSuperPlayer1?.value || 0);
           const super2 = Number(el.tbSuperPlayer2?.value || 0);
-
+    
           history.push({
             games1: Number(set1.games1 || 0),
             games2: Number(set1.games2 || 0),
-            tieBreakMode: "tb7",
+            tieBreakMode: "super10",
             tieBreakPoints1: super1,
             tieBreakPoints2: super2,
-            lastTieBreakMode: "tb7",
+            lastTieBreakMode: "super10",
             lastTieBreakPoints1: super1,
             lastTieBreakPoints2: super2
           });
@@ -1090,11 +1077,11 @@
           });
         }
       }
-
+    
       if (setCount >= 2) {
         const set2 = getFormattedSetFromInput(el.set2Player1?.value, el.set2Player2?.value, 2);
         if (set2.error) return { error: set2.error };
-
+      
         history.push({
           games1: Number(set2.games1 || 0),
           games2: Number(set2.games2 || 0),
@@ -1102,12 +1089,33 @@
           tieBreakPoints1: Number(set2.tieBreakPoints1 || 0),
           tieBreakPoints2: Number(set2.tieBreakPoints2 || 0)
         });
+      
+        const splitSets =
+          (Number(el.set1Player1?.value || 0) > Number(el.set1Player2?.value || 0) &&
+            Number(el.set2Player2?.value || 0) > Number(el.set2Player1?.value || 0)) ||
+          (Number(el.set1Player2?.value || 0) > Number(el.set1Player1?.value || 0) &&
+            Number(el.set2Player1?.value || 0) > Number(el.set2Player2?.value || 0));
+      
+        if (splitSets) {
+          const super1 = Number(el.tbSuperPlayer1?.value || 0);
+          const super2 = Number(el.tbSuperPlayer2?.value || 0);
+      
+          if (super1 > 0 || super2 > 0) {
+            history.push({
+              games1: 0,
+              games2: 0,
+              tieBreakMode: "super10",
+              tieBreakPoints1: super1,
+              tieBreakPoints2: super2
+            });
+          }
+        }
       }
-
+    
       if (setCount >= 3) {
         const set3 = getFormattedSetFromInput(el.set3Player1?.value, el.set3Player2?.value, 3);
         if (set3.error) return { error: set3.error };
-
+    
         history.push({
           games1: Number(set3.games1 || 0),
           games2: Number(set3.games2 || 0),
@@ -1116,7 +1124,7 @@
           tieBreakPoints2: Number(set3.tieBreakPoints2 || 0)
         });
       }
-
+    
       return { history };
     }
 
@@ -1197,11 +1205,14 @@
       if (el.tbSet3Player2) el.tbSet3Player2.value = history[2]?.tieBreakPoints2 ?? "";
 
       const superSet =
-        history.find((s) => s?.tieBreakMode === "super10") ||
-        history.find((s) => s?.tieBreakMode === "tb7" && ((Number(s?.tieBreakPoints1 || 0) > 0) || (Number(s?.tieBreakPoints2 || 0) > 0)));
+  [...history].reverse().find((s) => s?.tieBreakMode === "super10") ||
+  [...history].reverse().find((s) =>
+    s?.tieBreakMode === "tb7" &&
+    ((Number(s?.tieBreakPoints1 || 0) > 0) || (Number(s?.tieBreakPoints2 || 0) > 0))
+  );
 
-      if (el.tbSuperPlayer1) el.tbSuperPlayer1.value = superSet?.tieBreakPoints1 ?? "";
-      if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? "";
+if (el.tbSuperPlayer1) el.tbSuperPlayer1.value = superSet?.tieBreakPoints1 ?? "";
+if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? "";
 
       if (el.formTitle) el.formTitle.textContent = id ? "Editando partida" : "Nova partida";
 
@@ -1295,25 +1306,24 @@
       const totalPages = Math.max(1, Math.ceil(state.filteredMatches.length / PAGE_SIZE));
       if (state.currentPage > totalPages) state.currentPage = totalPages;
       if (state.currentPage < 1) state.currentPage = 1;
-    
+
       const start = (state.currentPage - 1) * PAGE_SIZE;
       const end = Math.min(start + PAGE_SIZE, state.filteredMatches.length);
-    
+
       if (el.pageInfo) el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
       if (el.totalPagesEl) el.totalPagesEl.textContent = String(totalPages);
       if (el.prevPageBtn) el.prevPageBtn.disabled = state.currentPage <= 1;
       if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
       if (el.itemsTotal) el.itemsTotal.textContent = String(state.filteredMatches.length);
       if (el.itemsShown) el.itemsShown.textContent = String(state.filteredMatches.length ? end : 0);
-    
-      // Atualiza os ícones para estilo Ionic
+
       if (el.prevPageBtn) {
         const icon = el.prevPageBtn.querySelector(".admin-page-btn-icon ion-icon");
         const label = el.prevPageBtn.querySelector(".admin-page-btn-label");
         if (icon) icon.setAttribute("name", "chevron-back-outline");
         if (label) label.textContent = "Anterior";
       }
-    
+
       if (el.nextPageBtn) {
         const icon = el.nextPageBtn.querySelector(".admin-page-btn-icon ion-icon");
         const label = el.nextPageBtn.querySelector(".admin-page-btn-label");
@@ -1337,38 +1347,38 @@
 
     function getSetDisplayFromHistory(setObj) {
       if (!setObj) return { text: "--" };
-
+    
       const g1 = Number(setObj.games1 ?? 0);
       const g2 = Number(setObj.games2 ?? 0);
       const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
       const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
       const mode = String(setObj.tieBreakMode || "").trim();
       const finalLabel = String(setObj.finalLabel || "").trim();
-
+    
       if (finalLabel) {
         return { text: finalLabel };
       }
-
+    
+      // Super tie-break deve aparecer apenas como o placar do super, sem 7x6
       if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
-        const winnerIs1 = tb1 > tb2;
-        return { text: `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})` };
+        return { text: `${tb1}-${tb2}` };
       }
-
+    
+      // Tie-break normal do set continua como 7x6 (7-6)
       if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
         const winnerIs1 = tb1 > tb2;
         return { text: `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})` };
       }
-
+    
       if (g1 > 0 || g2 > 0) {
         return { text: `${g1}x${g2}` };
       }
-
+    
       return { text: "--" };
     }
 
     function cleanSetHistory(setHistory) {
       const history = Array.isArray(setHistory) ? setHistory : [];
-
       const normalizeText = (text) =>
         String(text || "")
           .replace(/\((\d+)-(\d+)\)/g, "$1-$2")
@@ -1396,42 +1406,35 @@
     function renderGeneralBlock(d) {
       const teamHTML = U.getMatchDisplayHTML(d);
       const statusText = String(d?.status || "").trim().toLowerCase();
+      const stageText = String(d?.tournamentStage || "").trim().toLowerCase();
       const situationLabel = statusText === "wo" ? "Finalizada por WO" : U.getStatusLabel(statusText);
       const woWinner = U.getWONumberOrName(d);
-
-      return `<section class="detail-section detail-section-general"> <div class="detail-section-header"> <h4>Dados gerais</h4> <span class="detail-section-subtitle">Informações da partida</span> </div> <div class="detail-info-grid"> <div class="detail-info-item"><span>Modalidade</span><strong>${U.escapeHtml(d.modality || "-")}</strong></div> <div class="detail-info-item"><span>Formato do jogo</span><strong>${U.escapeHtml(d.gameFormat || "-")}</strong></div> <div class="detail-info-item"><span>Categoria</span><strong>${U.escapeHtml(d.categoryName || "-")}</strong></div> <div class="detail-info-item"><span>Torneio</span><strong>${U.escapeHtml(d.tournamentName || "-")}</strong></div> <div class="detail-info-item"><span>Tipo de piso</span><strong>${U.escapeHtml(d.surfaceType || "-")}</strong></div> <div class="detail-info-item"><span>Formato</span><strong>${U.escapeHtml(U.formatMatchFormat(d.matchFormat || "-"))}</strong></div> <div class="detail-info-item"><span>Data e hora</span><strong>${U.escapeHtml(d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-")}</strong></div> <div class="detail-info-item"><span>Quadra</span><strong>${U.escapeHtml(d.court || "-")}</strong></div> <div class="detail-info-item"><span>Fase</span><strong>${U.escapeHtml(d.tournamentStage || "-")}</strong></div> <div class="detail-info-item"><span>Situação</span><strong>${U.escapeHtml(situationLabel)}</strong></div> <div class="detail-info-item"><span>Jogadores</span><strong style="white-space:pre-line;">${teamHTML}</strong></div> <div class="detail-info-item"><span>Vencedor por WO</span><strong>${U.escapeHtml(woWinner)}</strong></div> </div> </section>`;
+    
+      const showCategory = stageText !== "treino";
+      const showTournament = stageText !== "treino" && stageText !== "ranking";
+    
+      return `<section class="detail-section detail-section-general"> <div class="detail-section-header"> <h4>Dados gerais</h4> <span class="detail-section-subtitle">Informações da partida</span> </div> <div class="detail-info-grid"> <div class="detail-info-item"><span>Modalidade</span><strong>${U.escapeHtml(d.modality || "-")}</strong></div> <div class="detail-info-item"><span>Formato do jogo</span><strong>${U.escapeHtml(d.gameFormat || "-")}</strong></div> ${showCategory ? `<div class="detail-info-item"><span>Categoria</span><strong>${U.escapeHtml(d.categoryName || "-")}</strong></div>` : ""} ${showTournament ? `<div class="detail-info-item"><span>Torneio</span><strong>${U.escapeHtml(d.tournamentName || "-")}</strong></div>` : ""} <div class="detail-info-item"><span>Tipo de piso</span><strong>${U.escapeHtml(d.surfaceType || "-")}</strong></div> <div class="detail-info-item"><span>Formato</span><strong>${U.escapeHtml(U.formatMatchFormat(d.matchFormat || "-"))}</strong></div> <div class="detail-info-item"><span>Data e hora</span><strong>${U.escapeHtml(d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-")}</strong></div> <div class="detail-info-item"><span>Quadra</span><strong>${U.escapeHtml(d.court || "-")}</strong></div> <div class="detail-info-item"><span>Fase</span><strong>${U.escapeHtml(d.tournamentStage || "-")}</strong></div> <div class="detail-info-item"><span>Situação</span><strong>${U.escapeHtml(situationLabel)}</strong></div> <div class="detail-info-item"><span>Jogadores</span><strong style="white-space:pre-line;">${teamHTML}</strong></div> <div class="detail-info-item"><span>Vencedor por WO</span><strong>${U.escapeHtml(woWinner)}</strong></div> </div> </section>`;
     }
 
     function renderScoreBlock(d) {
       const score = U.normalizeScore(d.score || {});
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
     
-      const normalizeText = (text) =>
-        String(text || "")
-          .replace(/\((\d+)-(\d+)\)/g, "$1-$2")
-          .replace(/\s+/g, " ")
-          .trim();
-    
-      const parts = [];
-      const seen = new Set();
-    
-      for (const setObj of history) {
-        const item = getSetDisplayFromHistory(setObj);
-        const text = String(item?.text || "--").trim();
-        if (!text || text === "--") continue;
-    
-        const norm = normalizeText(text);
-        if (seen.has(norm)) continue;
-    
-        seen.add(norm);
-        parts.push(text);
-      }
+      const parts = history
+        .slice(0, 3)
+        .map((setObj) => {
+          const item = getSetDisplayFromHistory(setObj);
+          return item?.text && item.text !== "--" ? item.text : null;
+        })
+        .filter(Boolean);
     
       const placar = parts.join(" • ");
     
       const duration = getMatchDuration(d);
       const status = String(d?.status || "").trim().toLowerCase();
       const isWO = status === "wo";
+      const isRET = status === "ret";
+    
       const winnerPos = U.getWinnerPosition(score, d);
       const teamHTML = U.getMatchDisplayHTML(d);
     
@@ -1449,47 +1452,33 @@
         cardClass += " score-loser";
       }
     
-      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="${cardClass}"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> ${ isWO ? ` <div class="detail-score-line"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : ` <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> ` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
+      return ` <section class="detail-section detail-section-score"> <div class="detail-section-header"> <h4>Placar</h4> <span class="detail-section-subtitle">Situação atual da partida</span> </div> <div class="${cardClass}"> <div class="detail-score-row ${rowClass}"> <div class="detail-player-title"> <span style="white-space:pre-line;">${teamHTML}</span> ${resultBadge} </div> <div class="detail-pill" style="margin-top:10px;"> <span>Placar da partida</span> <strong>${U.escapeHtml(placar || "--")}</strong> </div> ${ isWO ? ` <div class="detail-score-line" style="margin-top:10px;"> <span>Situação</span> <strong>FINALIZADA POR WO</strong> </div> ` : isRET ? ` <div class="detail-score-line" style="margin-top:10px;"> <span>Situação</span> <strong>FINALIZADA POR ABANDONO</strong> </div> ` : `` } </div> <div class="detail-pill" style="margin-top:12px;"> <span>Duração da partida</span> <strong>${U.escapeHtml(duration)}</strong> </div> </div> </section> `;
     }
-
-    function renderSummaryBlock(d) {
-      const score = U.normalizeScore(d.score || {});
-      const totalPoints1 = Number(score.totalPoints1 || 0);
-      const totalPoints2 = Number(score.totalPoints2 || 0);
-      const breakPointsWon1 = Number(score.breakPointsWon1 || 0);
-      const breakPointsChances1 = Number(score.breakPointsChances1 || 0);
-      const breakPointsWon2 = Number(score.breakPointsWon2 || 0);
-      const breakPointsChances2 = Number(score.breakPointsChances2 || 0);
-      const team1HTML = U.escapeHtml(U.getTeam1NameFromData(d));
-      const team2HTML = U.escapeHtml(U.getTeam2NameFromData(d));
-
-      return `<section class="detail-section detail-section-summary"> <div class="detail-section-header"> <h4>Resumo da partida</h4> <span class="detail-section-subtitle">Estatísticas gerais</span> </div> <div class="detail-summary-grid"> <div class="detail-summary-card"> <div class="detail-player-title">${team1HTML}</div> <div class="detail-summary-line"><span>Pontos totais</span><strong>${totalPoints1}</strong></div> <div class="detail-summary-line"><span>Break points</span><strong>${breakPointsWon1}/${breakPointsChances1}</strong></div> </div> <div class="detail-summary-card"> <div class="detail-player-title">${team2HTML}</div> <div class="detail-summary-line"><span>Pontos totais</span><strong>${totalPoints2}</strong></div> <div class="detail-summary-line"><span>Break points</span><strong>${breakPointsWon2}/${breakPointsChances2}</strong></div> </div> </div> </section>`;
-    }
-
+    
     function renderFinalStatsBlock(d) {
       const stats = d?.stats || {};
       const p1 = stats.player1 || {};
       const p2 = stats.player2 || {};
       const score = U.normalizeScore(d?.score || {});
-    
+     
       const team1HTML = U.escapeHtml(U.getTeam1NameFromData(d));
       const team2HTML = U.escapeHtml(U.getTeam2NameFromData(d));
-    
+
       const pct = (won, attempts) => {
         const a = Number(attempts || 0);
         const w = Number(won || 0);
         if (a <= 0) return "0.0%";
         return `${((w / a) * 100).toFixed(1)}%`;
       };
-    
+
       const totalPoints1 = Number(score.totalPoints1 || p1.totalPointsWon || 0);
       const totalPoints2 = Number(score.totalPoints2 || p2.totalPointsWon || 0);
-    
+
       const serve1Won1 = Number(p1.serve1Won || 0);
       const serve1Won2 = Number(p2.serve1Won || 0);
       const serve2Won1 = Number(p1.serve2Won || 0);
       const serve2Won2 = Number(p2.serve2Won || 0);
-    
+
       const winner1 =
         Number(p1.winner || 0) +
         Number(p1.forehandWinner || 0) +
@@ -1497,7 +1486,7 @@
         Number(p1.dropshotWinner || 0) +
         serve1Won1 +
         serve2Won1;
-    
+
       const winner2 =
         Number(p2.winner || 0) +
         Number(p2.forehandWinner || 0) +
@@ -1505,29 +1494,29 @@
         Number(p2.dropshotWinner || 0) +
         serve1Won2 +
         serve2Won2;
-    
+
       const erro1 =
         Number(p1.erros || 0) +
         Number(p1.unforcedError || 0) +
         Number(p1.forcedError || 0) +
         Number(p1.dropshotError || 0) +
         Number(p1.pointsLost || 0);
-    
+
       const erro2 =
         Number(p2.erros || 0) +
         Number(p2.unforcedError || 0) +
         Number(p2.forcedError || 0) +
         Number(p2.dropshotError || 0) +
         Number(p2.pointsLost || 0);
-    
+
       const breakText1 = `${Number(score.breakPointsWon1 || p1.breakPointsWon || 0)}/${Number(score.breakPointsChances1 || p1.breakPointsChances || 0)}`;
       const breakText2 = `${Number(score.breakPointsWon2 || p2.breakPointsWon || 0)}/${Number(score.breakPointsChances2 || p2.breakPointsChances || 0)}`;
-    
+
       const performanceText1 = Number(p1.serveSuccessPct || 0).toFixed(1) + "%";
       const performanceText2 = Number(p2.serveSuccessPct || 0).toFixed(1) + "%";
-    
+
       const playerBlock = ( name, totalPoints, winnerTotal, erroTotal, s1Pct, s2Pct, performanceText, breakText ) => ` <div class="detail-summary-card detail-summary-card-vertical"> <div class="detail-player-title">${name}</div> <div class="detail-summary-line"> <span>Pontos totais</span> <strong>${totalPoints}</strong> </div> <div class="detail-summary-line"> <span>Winners</span> <strong>${winnerTotal}</strong> </div> <div class="detail-summary-line"> <span>Erros</span> <strong>${erroTotal}</strong> </div> <div class="detail-summary-line"> <span>Taxa do 1º serviço</span> <strong>${s1Pct}</strong> </div> <div class="detail-summary-line"> <span>Taxa do 2º serviço</span> <strong>${s2Pct}</strong> </div> <div class="detail-summary-line"> <span>Performance</span> <strong>${performanceText}</strong> </div> <div class="detail-summary-line"> <span>Break points</span> <strong>${breakText}</strong> </div> </div> `;
-    
+
       return ` <section class="detail-section detail-section-final-stats"> <div class="detail-section-header"> <h4>Resumo da Partida</h4> <span class="detail-section-subtitle">Desempenho consolidado dos jogadores</span> </div> <div class="detail-summary-stack"> ${playerBlock( team1HTML, totalPoints1, winner1, erro1, pct(p1.serve1Won, p1.serve1Attempts), pct(p1.serve2Won, p1.serve2Attempts), performanceText1, breakText1 )} ${playerBlock( team2HTML, totalPoints2, winner2, erro2, pct(p2.serve1Won, p2.serve1Attempts), pct(p2.serve2Won, p2.serve2Attempts), performanceText2, breakText2 )} </div> </section> `;
     }
 
@@ -1547,53 +1536,43 @@
 
     function toggleFiltersBar() {
       state.filtersVisible = !state.filtersVisible;
-    
+
       if (el.filtersBar) {
         el.filtersBar.style.display = state.filtersVisible ? "" : "none";
-    
+
         if (state.filtersVisible) {
           setTimeout(() => {
             scrollToFiltersBar();
           }, 50);
         }
       }
-    
-      // Botão inferior
+
       if (el.toggleMatchesBtnBottom) {
         const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon ion-icon");
         const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
-    
+
         if (icon) {
-          icon.setAttribute(
-            "name",
-            state.filtersVisible ? "list-outline" : "search-outline"
-          );
+          icon.setAttribute("name", state.filtersVisible ? "list-outline" : "search-outline");
         }
-    
+
         if (label) {
           label.textContent = state.filtersVisible ? "Lista" : "Filtros";
         }
       }
-    
-      // Botão superior, se existir
+
       if (el.toggleMatchesBtn) {
         const icon = el.toggleMatchesBtn.querySelector(".admin-bottom-icon ion-icon");
         const label = el.toggleMatchesBtn.querySelector(".admin-bottom-label");
-    
+
         if (icon) {
-          icon.setAttribute(
-            "name",
-            state.filtersVisible ? "list-outline" : "search-outline"
-          );
+          icon.setAttribute("name", state.filtersVisible ? "list-outline" : "search-outline");
         }
-    
+
         if (label) {
           label.textContent = state.filtersVisible ? "Lista" : "Filtros";
         }
       }
     }
-
-    // PARTE 4 virá em seguida
 
     function listenMatches() {
       if (!state.currentUser) return;
@@ -1689,8 +1668,8 @@
       const d = docSnap.data();
       const statusText = String(d.status || "scheduled").trim().toLowerCase();
       const label = U.getStatusLabel(statusText);
-    
-      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> </td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
+
+      return ` <tr> <td> <div class="players-cell"> <strong style="display:block;line-height:1.15;"> ${U.getMatchDisplayHTML(d)} </strong> </div> </td> <td>${U.escapeHtml(d.gameFormat || "-")}</td> <td title="${U.escapeHtml(d.tournamentName || "-")}">${U.escapeHtml(d.tournamentName || "-")}</td> <td><span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span></td> <td class="col-actions-center"> <div class="admin-actions action-cell"> <div class="action-top-row"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"><ion-icon name="play-outline"></ion-icon></span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"><ion-icon name="reader-outline"></ion-icon></span> <span class="admin-action-label">Detalhar</span> </button> </div> <div class="action-bottom-row"> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"><ion-icon name="pencil-outline"></ion-icon></span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"><ion-icon name="flash-outline"></ion-icon></span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"><ion-icon name="trash-outline"></ion-icon></span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr> `;
     }
 
     function mobileCardHTML(docSnap) {
@@ -1698,8 +1677,10 @@
       const statusText = String(d.status || "scheduled").trim().toLowerCase();
       const label = U.getStatusLabel(statusText);
       const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
+      const stageText = String(d.tournamentStage || "").trim().toLowerCase();
+      const showTournament = stageText !== "treino" && stageText !== "ranking";
     
-      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> <div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div> <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Fase-Treino-Ranking:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div><div><strong>Resultado da partida:</strong> ${U.escapeHtml(getResultadoPartida(d))}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr>`;
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> ${showTournament ? `<div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div>` : ""} <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Fase-Treino-Ranking:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> <div><strong>Placar:</strong> ${U.escapeHtml(getResultadoPartida(d))}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"><ion-icon name="play-outline"></ion-icon></span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"><ion-icon name="reader-outline"></ion-icon></span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"><ion-icon name="pencil-outline"></ion-icon></span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"><ion-icon name="flash-outline"></ion-icon></span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"><ion-icon name="trash-outline"></ion-icon></span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr> `;
     }
 
     function renderCurrentPage() {
@@ -1736,26 +1717,30 @@
         document.querySelector("#matchesTable") ||
         document.querySelector(".desktop-table") ||
         document.querySelector(".admin-table");
-    
+
       if (!target) return;
-    
+
       target.scrollIntoView({
         behavior: "smooth",
         block: "start"
       });
     }
 
+    
+
     function getResultadoPartida(d) {
       const score = U.normalizeScore(d?.score || {});
       const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-    
+
       if (!history.length) return "-";
-    
-      const parts = history.map((setObj) => {
-        const item = getSetDisplayFromHistory(setObj);
-        return item?.text && item.text !== "--" ? item.text : null;
-      }).filter(Boolean);
-    
+
+      const parts = history
+        .map((setObj) => {
+          const item = getSetDisplayFromHistory(setObj);
+          return item?.text && item.text !== "--" ? item.text : null;
+        })
+        .filter(Boolean);
+
       return parts.length ? parts.join(" • ") : "-";
     }
 
@@ -1826,25 +1811,39 @@
       el.tbSuperPlayer1?.addEventListener("input", updateScoreFieldsVisibility);
       el.tbSuperPlayer2?.addEventListener("input", updateScoreFieldsVisibility);
 
+      function onlyDigitsInput(e) {
+        e.target.value = String(e.target.value || "").replace(/\D/g, "");
+      }
+
+      [
+        el.set1Player1, el.set1Player2,
+        el.set2Player1, el.set2Player2,
+        el.set3Player1, el.set3Player2,
+        el.tbSet1Player1, el.tbSet1Player2,
+        el.tbSet2Player1, el.tbSet2Player2,
+        el.tbSet3Player1, el.tbSet3Player2,
+        el.tbSuperPlayer1, el.tbSuperPlayer2
+      ].forEach(input => {
+        if (input) input.addEventListener("input", onlyDigitsInput);
+      });
+
       el.prevPageBtn?.addEventListener("click", () => {
         if (state.currentPage > 1) {
           state.currentPage--;
           renderPagination();
           renderCurrentPage();
-      
           setTimeout(() => {
             scrollToFirstCard();
           }, 50);
         }
       });
-      
+
       el.nextPageBtn?.addEventListener("click", () => {
         const totalPages = Math.max(1, Math.ceil(state.filteredMatches.length / PAGE_SIZE));
         if (state.currentPage < totalPages) {
           state.currentPage++;
           renderPagination();
           renderCurrentPage();
-      
           setTimeout(() => {
             scrollToFirstCard();
           }, 50);
@@ -1852,111 +1851,112 @@
       });
 
       function openAppModal(modalEl) {
-  if (!modalEl) return;
-  modalEl.classList.remove("hidden");
-  modalEl.setAttribute("aria-hidden", "false");
-}
+        if (!modalEl) return;
+        modalEl.classList.remove("hidden");
+        modalEl.setAttribute("aria-hidden", "false");
+      }
 
-function closeAppModal(modalEl) {
-  if (!modalEl) return;
-  modalEl.classList.add("hidden");
-  modalEl.setAttribute("aria-hidden", "true");
-}
+      function closeAppModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.classList.add("hidden");
+        modalEl.setAttribute("aria-hidden", "true");
+      }
 
-function showConfirmModal(message) {
-  return new Promise((resolve) => {
-    const confirmModal = document.getElementById("confirmModal");
-    const confirmModalMessage = document.getElementById("confirmModalMessage");
-    const confirmModalYesBtn = document.getElementById("confirmModalYesBtn");
-    const confirmModalNoBtn = document.getElementById("confirmModalNoBtn");
+      function showConfirmModal(message) {
+        return new Promise((resolve) => {
+          const confirmModal = document.getElementById("confirmModal");
+          const confirmModalMessage = document.getElementById("confirmModalMessage");
+          const confirmModalYesBtn = document.getElementById("confirmModalYesBtn");
+          const confirmModalNoBtn = document.getElementById("confirmModalNoBtn");
 
-    if (!confirmModal || !confirmModalMessage || !confirmModalYesBtn || !confirmModalNoBtn) {
-      resolve(window.confirm(message));
-      return;
-    }
+          if (!confirmModal || !confirmModalMessage || !confirmModalYesBtn || !confirmModalNoBtn) {
+            resolve(window.confirm(message));
+            return;
+          }
 
-    confirmModalMessage.textContent = message;
-    openAppModal(confirmModal);
+          confirmModalMessage.textContent = message;
+          openAppModal(confirmModal);
 
-    const cleanup = () => {
-      confirmModalYesBtn.removeEventListener("click", onYes);
-      confirmModalNoBtn.removeEventListener("click", onNo);
-      confirmModal.removeEventListener("click", onBackdrop);
-      document.removeEventListener("keydown", onEscape);
-    };
+          const cleanup = () => {
+            confirmModalYesBtn.removeEventListener("click", onYes);
+            confirmModalNoBtn.removeEventListener("click", onNo);
+            confirmModal.removeEventListener("click", onBackdrop);
+            document.removeEventListener("keydown", onEscape);
+          };
 
-    const finish = (value) => {
-      cleanup();
-      closeAppModal(confirmModal);
-      resolve(value);
-    };
+          const finish = (value) => {
+            cleanup();
+            closeAppModal(confirmModal);
+            resolve(value);
+          };
 
-    const onYes = () => finish(true);
-    const onNo = () => finish(false);
-    const onBackdrop = (e) => {
-      if (e.target === confirmModal) finish(false);
-    };
-    const onEscape = (e) => {
-      if (e.key === "Escape") finish(false);
-    };
+          const onYes = () => finish(true);
+          const onNo = () => finish(false);
+          const onBackdrop = (e) => {
+            if (e.target === confirmModal) finish(false);
+          };
+          const onEscape = (e) => {
+            if (e.key === "Escape") finish(false);
+          };
 
-    confirmModalYesBtn.addEventListener("click", onYes);
-    confirmModalNoBtn.addEventListener("click", onNo);
-    confirmModal.addEventListener("click", onBackdrop);
-    document.addEventListener("keydown", onEscape);
-  });
-}
+          confirmModalYesBtn.addEventListener("click", onYes);
+          confirmModalNoBtn.addEventListener("click", onNo);
+          confirmModal.addEventListener("click", onBackdrop);
+          document.addEventListener("keydown", onEscape);
+        });
+      }
 
-function showSuccessModal(message) {
-  return new Promise((resolve) => {
-    const successModal = document.getElementById("successModal");
-    const successModalMessage = document.getElementById("successModalMessage");
-    const successModalOkBtn = document.getElementById("successModalOkBtn");
+      function showSuccessModal(message) {
+        return new Promise((resolve) => {
+          const successModal = document.getElementById("successModal");
+          const successModalMessage = document.getElementById("successModalMessage");
+          const successModalOkBtn = document.getElementById("successModalOkBtn");
 
-    if (!successModal || !successModalMessage || !successModalOkBtn) {
-      window.alert(message);
-      resolve();
-      return;
-    }
+          if (!successModal || !successModalMessage || !successModalOkBtn) {
+            window.alert(message);
+            resolve();
+            return;
+          }
 
-    successModalMessage.textContent = message;
-    openAppModal(successModal);
+          successModalMessage.textContent = message;
+          openAppModal(successModal);
 
-    const cleanup = () => {
-      successModalOkBtn.removeEventListener("click", onOk);
-      successModal.removeEventListener("click", onBackdrop);
-      document.removeEventListener("keydown", onEscape);
-    };
+          const cleanup = () => {
+            successModalOkBtn.removeEventListener("click", onOk);
+            successModal.removeEventListener("click", onBackdrop);
+            document.removeEventListener("keydown", onEscape);
+          };
 
-    const finish = () => {
-      cleanup();
-      closeAppModal(successModal);
-      resolve();
-    };
+          const finish = () => {
+            cleanup();
+            closeAppModal(successModal);
+            resolve();
+          };
 
-    const onOk = () => finish();
-    const onBackdrop = (e) => {
-      if (e.target === successModal) finish();
-    };
-    const onEscape = (e) => {
-      if (e.key === "Escape") finish();
-    };
+          const onOk = () => finish();
+          const onBackdrop = (e) => {
+            if (e.target === successModal) finish();
+          };
+          const onEscape = (e) => {
+            if (e.key === "Escape") finish();
+          };
 
-    successModalOkBtn.addEventListener("click", onOk);
-    successModal.addEventListener("click", onBackdrop);
-    document.addEventListener("keydown", onEscape);
-  });
-}
-      
+          successModalOkBtn.addEventListener("click", onOk);
+          successModal.addEventListener("click", onBackdrop);
+          document.addEventListener("keydown", onEscape);
+        });
+      }
+
       el.form?.addEventListener("submit", async (e) => {
         e.preventDefault();
-      
-        const confirmar = confirm("Deseja cadastrar a partida?");
+
+        const isEditing = Boolean(el.docId?.value);
+        const confirmar = confirm(isEditing ? "Deseja alterar a partida?" : "Deseja cadastrar a partida?");
         if (!confirmar) {
           setMsg("Cadastro cancelado.");
           return;
         }
-      
+
         setMsg("Salvando...");
 
         const selectedModality = "Tênis";
@@ -1981,7 +1981,6 @@ function showSuccessModal(message) {
         if (isDoubles && !player4Name) return setMsg("Informe o nome do jogador 4.");
 
         try {
-          const isEditing = Boolean(el.docId?.value);
           const ref = isEditing ? __db.collection("matches").doc(el.docId.value) : null;
           let previousData = null;
 
@@ -2147,11 +2146,9 @@ function showSuccessModal(message) {
             const snap = await ref.get();
             if (snap.exists) {
               const d = snap.data();
-
               const player1 = encodeURIComponent(d.player1 || "");
               const player2 = encodeURIComponent(d.player2 || "");
               const ownerId = encodeURIComponent(d.ownerId || "");
-
               window.location.href = `confronto.html?ownerId=${ownerId}&player1=${player1}&player2=${player2}`;
             }
             return;
@@ -2195,15 +2192,13 @@ function showSuccessModal(message) {
       if (el.toggleMatchesBtnBottom) {
         const icon = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-icon ion-icon");
         const label = el.toggleMatchesBtnBottom.querySelector(".admin-bottom-label");
-      
         if (icon) icon.setAttribute("name", "search-outline");
         if (label) label.textContent = "Filtros";
       }
-      
+
       if (el.toggleMatchesBtn) {
         const icon = el.toggleMatchesBtn.querySelector(".admin-bottom-icon ion-icon");
         const label = el.toggleMatchesBtn.querySelector(".admin-bottom-label");
-      
         if (icon) icon.setAttribute("name", "search-outline");
         if (label) label.textContent = "Filtros";
       }
@@ -2231,7 +2226,7 @@ function showSuccessModal(message) {
       handleGameFormatChange();
       updateTournamentStageVisibility();
       updateScoreFieldsVisibility();
-      placeScoreBlockAfterStage();
+      placeScoreBlockAfterStatus();
 
       initPlayerSearchModule();
       refreshList();
@@ -2242,3 +2237,4 @@ function showSuccessModal(message) {
 
   document.addEventListener("DOMContentLoaded", () => AdminApp.init());
 })();
+      
