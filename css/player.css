@@ -6,6 +6,7 @@ body.player-page {
     linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
   color: #e8eefc;
   overflow-x: hidden;
+  padding-top: 72px; /* ADICIONAR */
   padding-bottom: calc(72px + env(safe-area-inset-bottom) + 8px);
 }
 
@@ -391,6 +392,7 @@ body.player-page .score-box strong {
 }
 
 /* ========================= BOTTOM NAV ========================= */
+/* ========================= BOTÕES DO RODAPÉ ========================= */
 body.player-page .player-bottom-nav {
   position: fixed;
   left: 0;
@@ -399,44 +401,60 @@ body.player-page .player-bottom-nav {
   z-index: 1000;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 4px;
-  padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+  gap: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   background: rgba(10, 16, 28, 0.92);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
 }
 
 body.player-page .player-bottom-btn {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+  border: none;
+  background: transparent;
   color: #eef4ff;
   text-decoration: none;
-  border-radius: 14px;
-  min-height: 58px;
+  border-radius: 0;
+  min-height: 62px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   font-weight: 800;
+  box-shadow: none;
   cursor: pointer;
   width: 100%;
-  padding: 4px;
-  transition: transform 0.16s, border-color 0.16s, background 0.16s;
+  padding: 8px 4px;
+  transition: transform 0.16s ease, opacity 0.16s ease, color 0.16s ease;
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+  opacity: 0.92;
 }
 
 body.player-page .player-bottom-btn:hover {
   transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
-  border-color: rgba(216, 255, 99, 0.22);
+  opacity: 1;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+body.player-page .player-bottom-btn.primary-action:hover,
+body.player-page .player-bottom-btn.pause-action:hover,
+body.player-page .player-bottom-btn.danger:hover,
+body.player-page .player-bottom-btn.disabled-link:hover {
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 body.player-page .player-bottom-icon {
-  font-size: 1.1rem;
+  font-size: 1.22rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -444,15 +462,15 @@ body.player-page .player-bottom-icon {
 }
 
 body.player-page .player-bottom-icon ion-icon {
-  font-size: 1.1rem;
-  line-height: 1;
+  font-size: 1.22rem;
 }
 
 body.player-page .player-bottom-label {
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+  width: 100%;
 }
 
 body.player-page .player-bottom-btn.danger .player-bottom-icon {
@@ -460,19 +478,14 @@ body.player-page .player-bottom-btn.danger .player-bottom-icon {
 }
 
 body.player-page .player-bottom-btn.primary-action {
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.03));
-  border-color: rgba(216, 255, 99, 0.18);
+  background: transparent;
+  border: none;
 }
 
 body.player-page .player-bottom-btn.pause-action {
-  background: linear-gradient(180deg, rgba(255, 193, 7, 0.18), rgba(255, 255, 255, 0.03));
-  border-color: rgba(255, 193, 7, 0.28);
+  background: transparent;
+  border: none;
 }
-
-body.player-page .player-bottom-btn.pause-action .player-bottom-icon {
-  color: #ffc107;
-}
-
 /* ========================= ESTADOS DESABILITADOS ========================= */
 body.player-page .input-mode-toggle label[style*="not-allowed"] {
   opacity: 0.35;
@@ -834,8 +847,8 @@ body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
 
 /* ========================= BOTÃO COMPARTILHAR ========================= */
 body.player-page .share-match-btn {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.03));
@@ -850,13 +863,13 @@ body.player-page .share-match-btn {
 }
 
 body.player-page .share-match-btn:hover {
-  border-color: rgba(216, 255, 99, 0.22);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.16), rgba(255, 255, 255, 0.04));
+  border-color: rgba(255, 255, 255, 0.10);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
   transform: translateY(-1px);
 }
 
 body.player-page .share-match-icon {
-  font-size: 1rem;
+  font-size: 1.15rem;
   line-height: 1;
 }
 
@@ -963,6 +976,36 @@ body.player-page #statsControlPanel .play-btn:disabled {
     padding-bottom: calc(64px + env(safe-area-inset-bottom) + 8px);
   }
 
+  body.player-page {
+    padding-top: 72px;
+  }
+
+  body.player-page .menu-fixed-top {
+    background: rgba(10, 16, 28, 0.96) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    min-height: 52px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  body.player-page .menu-navbar-top {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  body.player-page .menu-back-btn {
+    color: #d8ff63;
+  }
+  
+  body.player-page .menu-back-btn ion-icon {
+    color: #d8ff63;
+  }
+
   body.player-page .stats-controller-grid {
     gap: 10px;
   }
@@ -1057,4 +1100,45 @@ body.player-page .player-back-link:hover {
 
 body.player-page .player-back-link ion-icon {
   font-size: 1.3rem;
+}
+
+body.player-page .menu-fixed-top {
+  background: rgba(10, 16, 28, 0.96) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  min-height: 52px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.player-page .menu-navbar-top {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+body.player-page .menu-back-btn {
+  color: #d8ff63;
+}
+
+body.player-page .menu-back-btn ion-icon {
+  color: #d8ff63;
+}
+
+body.player-page .player-navbar-brand {
+  margin: 0;
+  padding-left: 0;
+  color: #f4f8ff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+body.player-page .player-navbar-brand span {
+  color: #f4f8ff;
 }
