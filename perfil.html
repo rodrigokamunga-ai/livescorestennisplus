@@ -14,10 +14,34 @@
   <link rel="apple-touch-icon" href="img/icon-192.png" />
 
   <title>Perfil | TennisPro</title>
+
   <link rel="stylesheet" href="css/perfil.css" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
 </head>
 
 <body class="profile-page">
+
+  <!-- NAVBAR FIXA NO TOPO -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal">
+    <div class="container-xl menu-navbar-top">
+      <a href="menu.html" class="menu-back-btn" aria-label="Voltar">
+        <ion-icon name="arrow-undo-outline"></ion-icon>
+      </a>
+
+      <a class="navbar-brand fw-bold d-flex align-items-center gap-2 profile-navbar-brand">
+        <ion-icon name="person-circle-outline" style="font-size: 1.2rem;"></ion-icon>
+       
+        <span>Perfil</span>
+      </a>
+    </div>
+  </nav>
+
   <main class="profile-shell">
     <section class="profile-card">
 
@@ -31,170 +55,221 @@
       </div>
 
       <!-- Foto de perfil -->
-<div class="profile-avatar-wrap">
-  <img id="avatarPreview" class="profile-avatar-img" src="img/perfil-padrao.png" alt="Foto de perfil" />
+      <div class="profile-avatar-wrap">
+        <img id="avatarPreview" class="profile-avatar-img" src="img/perfil-padrao.png" alt="Foto de perfil" />
 
-  <div class="profile-avatar-info">
-    <span>Foto de perfil (máx. 2MB)</span>
+        <div class="profile-avatar-info">
+          <span>Foto de perfil (máx. 2MB)</span>
 
-    <div class="photo-actions">
-      <label class="btn-upload" for="photoFileGallery">🖼️ Escolher da galeria</label>
-      <label class="btn-upload" for="photoFileCamera">📷 Tirar foto</label>
-    </div>
+          <div class="photo-actions">
+            <label class="btn-upload ionic-upload-btn" for="photoFileGallery">
+              <ion-icon name="image-outline"></ion-icon>
+              <span>Escolher da galeria</span>
+            </label>
 
-    <input type="file" id="photoFileGallery" accept="image/*" style="display:none" />
-    <input type="file" id="photoFileCamera" accept="image/*" capture="environment" style="display:none" />
+            <label class="btn-upload ionic-upload-btn" for="photoFileCamera">
+              <ion-icon name="camera-outline"></ion-icon>
+              <span>Tirar foto</span>
+            </label>
+          </div>
 
-    <span id="photoFileName">Nenhum arquivo selecionado</span>
+          <input type="file" id="photoFileGallery" accept="image/*" style="display:none" />
+          <input type="file" id="photoFileCamera" accept="image/*" capture="environment" style="display:none" />
 
-    <button type="button" id="removePhotoBtn" class="btn" style="margin-top:8px;">
-      🗑️ Excluir foto
-    </button>
-  </div>
-</div>
+          <span id="photoFileName">Nenhum arquivo selecionado</span>
 
-      <form id="profileForm" class="profile-form">
+          <button type="button" id="removePhotoBtn" class="btn ionic-secondary-btn" style="margin-top:8px;">
+            <ion-icon name="trash-outline"></ion-icon>
+            <span>Excluir foto</span>
+          </button>
+        </div>
+      </div>
+
+      <form id="profileForm" class="profile-form ionic-form">
 
         <!-- Informações pessoais -->
         <div class="profile-section-title">Informações pessoais</div>
 
-        <div class="form-group">
-          <label for="playerId">ID do Jogador</label>
-          <input type="text" id="playerId" readonly />
+        <div class="ionic-form-card">
+          <label for="playerId" class="ionic-field">
+            <span class="ionic-label">ID do Jogador</span>
+            <input type="text" id="playerId" class="ionic-input" readonly />
+          </label>
         </div>
 
-        <label>Nome do jogador
-          <input type="text" id="displayName" readonly />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Nome do jogador</span>
+            <input type="text" id="displayName" class="ionic-input" readonly />
+          </label>
+        </div>
 
-        <label>E-mail
-          <input type="email" id="email" readonly />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">E-mail</span>
+            <input type="email" id="email" class="ionic-input" readonly />
+          </label>
+        </div>
 
-        <label>Sexo
-          <select id="gender">
-            <option value="">Selecione</option>
-            <option value="masculino">Masculino</option>
-            <option value="feminino">Feminino</option>
-            <option value="outro">Outro</option>
-            <option value="nao_informar">Prefiro não informar</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Sexo</span>
+            <select id="gender" class="ionic-select">
+              <option value="">Selecione</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+              <option value="outro">Outro</option>
+              <option value="nao_informar">Prefiro não informar</option>
+            </select>
+          </label>
+        </div>
 
-        <label>Data de nascimento
-          <input type="date" id="birthDate" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Data de nascimento</span>
+            <input type="date" id="birthDate" class="ionic-input" />
+          </label>
+        </div>
 
-        <label>Altura (cm)
-          <input type="number" id="height" min="100" max="250" placeholder="Ex.: 180" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Altura (cm)</span>
+            <input type="number" id="height" class="ionic-input" min="100" max="250" placeholder="Ex.: 180" />
+          </label>
+        </div>
 
-        <label>Peso (kg)
-          <input type="number" id="weight" min="30" max="200" placeholder="Ex.: 75" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Peso (kg)</span>
+            <input type="number" id="weight" class="ionic-input" min="30" max="200" placeholder="Ex.: 75" />
+          </label>
+        </div>
 
         <!-- Contato -->
         <div class="profile-section-title">Contato</div>
 
-        <label>Celular
-          <input type="tel" id="phone" placeholder="(11) 99999-9999" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Celular</span>
+            <input type="tel" id="phone" class="ionic-input" placeholder="(11) 99999-9999" />
+          </label>
+        </div>
 
         <!-- Localização -->
         <div class="profile-section-title">Localização</div>
 
-        <label>País
-          <select id="country">
-            <option value="">Selecione o país</option>
-            <option value="BR">🇧🇷 Brasil</option>
-            <option value="AR">🇦🇷 Argentina</option>
-            <option value="US">🇺🇸 Estados Unidos</option>
-            <option value="PT">🇵🇹 Portugal</option>
-            <option value="ES">🇪🇸 Espanha</option>
-            <option value="FR">🇫🇷 França</option>
-            <option value="DE">🇩🇪 Alemanha</option>
-            <option value="IT">🇮🇹 Itália</option>
-            <option value="GB">🇬🇧 Reino Unido</option>
-            <option value="AU">🇦🇺 Austrália</option>
-            <option value="CA">🇨🇦 Canadá</option>
-            <option value="MX">🇲🇽 México</option>
-            <option value="CL">🇨🇱 Chile</option>
-            <option value="CO">🇨🇴 Colômbia</option>
-            <option value="UY">🇺🇾 Uruguai</option>
-            <option value="PY">🇵🇾 Paraguai</option>
-            <option value="PE">🇵🇪 Peru</option>
-            <option value="BO">🇧🇴 Bolívia</option>
-            <option value="VE">🇻🇪 Venezuela</option>
-            <option value="outros">Outro</option>
-          </select>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">País</span>
+            <select id="country" class="ionic-select">
+              <option value="">Selecione o país</option>
+              <option value="BR">🇧🇷 Brasil</option>
+              <option value="AR">🇦🇷 Argentina</option>
+              <option value="US">🇺🇸 Estados Unidos</option>
+              <option value="PT">🇵🇹 Portugal</option>
+              <option value="ES">🇪🇸 Espanha</option>
+              <option value="FR">🇫🇷 França</option>
+              <option value="DE">🇩🇪 Alemanha</option>
+              <option value="IT">🇮🇹 Itália</option>
+              <option value="GB">🇬🇧 Reino Unido</option>
+              <option value="AU">🇦🇺 Austrália</option>
+              <option value="CA">🇨🇦 Canadá</option>
+              <option value="MX">🇲🇽 México</option>
+              <option value="CL">🇨🇱 Chile</option>
+              <option value="CO">🇨🇴 Colômbia</option>
+              <option value="UY">🇺🇾 Uruguai</option>
+              <option value="PY">🇵🇾 Paraguai</option>
+              <option value="PE">🇵🇪 Peru</option>
+              <option value="BO">🇧🇴 Bolívia</option>
+              <option value="VE">🇻🇪 Venezuela</option>
+              <option value="outros">Outro</option>
+            </select>
+          </label>
+        </div>
 
-        <label id="stateLabel">Estado (UF)
-          <select id="state">
-            <option value="">Selecione o estado</option>
-          </select>
-        </label>
+        <div class="ionic-form-card" id="stateLabel">
+          <label class="ionic-field">
+            <span class="ionic-label">Estado (UF)</span>
+            <select id="state" class="ionic-select">
+              <option value="">Selecione o estado</option>
+            </select>
+          </label>
+        </div>
 
         <!-- Estilo de jogo -->
         <div class="profile-section-title">Estilo de jogo</div>
 
-        <label class="full">Forehand (mão dominante)
-          <div class="toggle-group">
-            <input type="radio" name="forehand" id="fh_destro" value="destro" />
-            <label for="fh_destro">🎾 Destro</label>
-            <input type="radio" name="forehand" id="fh_canhoto" value="canhoto" />
-            <label for="fh_canhoto">🎾 Canhoto</label>
-          </div>
-        </label>
-
-        <label class="full">Backhand
-          <div class="toggle-group">
-            <input type="radio" name="backhand" id="bh_uma" value="uma_mao" />
-            <label for="bh_uma">Uma mão</label>
-            <input type="radio" name="backhand" id="bh_duas" value="duas_maos" />
-            <label for="bh_duas">Duas mãos</label>
-          </div>
-        </label>
-
-        <label class="full">Equipamento
-          <input type="text" id="equipment" placeholder="Ex.: Wilson Blade, Babolat Pure Aero..." />
-        </label>
-
-        <!-- Salvar -->
-        <div class="full profile-actions">
-          <button type="submit" class="btn primary">💾 Salvar perfil</button>
-          <button type="button" id="clearProfileBtn" class="btn">🧹 Limpar</button>
+        <label class="full ionic-toggle-label">Forehand (mão dominante)</label>
+        <div class="full toggle-group ionic-toggle-group">
+          <input type="radio" name="forehand" id="fh_destro" value="destro" />
+          <label for="fh_destro">🎾 Destro</label>
+          <input type="radio" name="forehand" id="fh_canhoto" value="canhoto" />
+          <label for="fh_canhoto">🎾 Canhoto</label>
         </div>
 
+        <label class="full ionic-toggle-label">Backhand</label>
+        <div class="full toggle-group ionic-toggle-group">
+          <input type="radio" name="backhand" id="bh_uma" value="uma_mao" />
+          <label for="bh_uma">Uma mão</label>
+          <input type="radio" name="backhand" id="bh_duas" value="duas_maos" />
+          <label for="bh_duas">Duas mãos</label>
+        </div>
+
+        <div class="ionic-form-card full">
+          <label class="ionic-field">
+            <span class="ionic-label">Equipamento</span>
+            <input type="text" id="equipment" class="ionic-input" placeholder="Ex.: Wilson Blade, Babolat Pure Aero..." />
+          </label>
+        </div>
+
+        <!-- Salvar -->
+        <div class="full profile-actions ionic-actions">
+          <button type="submit" class="btn primary ionic-primary-btn">
+            <ion-icon name="save-outline"></ion-icon>
+            <span>Salvar perfil</span>
+          </button>
+
+          
+        </div>
       </form>
 
       <div id="profileMsg" class="profile-msg"></div>
 
       <!-- Segurança -->
-      <div class="profile-form" style="margin-top:24px;">
-
+      <div class="profile-form ionic-form" style="margin-top:24px;">
         <div class="profile-section-title">Segurança</div>
 
-        <label>Senha atual
-          <input type="password" id="currentPassword" placeholder="Digite sua senha atual" autocomplete="current-password" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Senha atual</span>
+            <input type="password" id="currentPassword" class="ionic-input" placeholder="Digite sua senha atual" autocomplete="current-password" />
+          </label>
+        </div>
 
-        <label>Nova senha
-          <div style="position:relative;">
-            <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="padding-right:90px;" />
-            <button type="button" id="generatePasswordBtn" title="Gerar senha forte" style="position:absolute;right:8px;top:50%; transform:translateY(-50%); background:rgba(216,255,99,0.12); border:1px solid rgba(216,255,99,0.22); color:#d8ff63;border-radius:8px; padding:5px 10px;cursor:pointer; font-size:0.76rem;font-weight:900; white-space:nowrap;line-height:1;">
-              🔑 Gerar
-            </button>
-          </div>
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Nova senha</span>
+            <div class="password-inline">
+              <input type="password" id="newPassword" class="ionic-input password-input" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+              <button type="button" id="generatePasswordBtn" class="ionic-inline-btn" title="Gerar senha forte">
+                <ion-icon name="key-outline"></ion-icon>
+                <span>Gerar</span>
+              </button>
+            </div>
+          </label>
+        </div>
 
-        <label>Confirmar nova senha
-          <input type="password" id="confirmPassword" placeholder="Repita a nova senha" autocomplete="new-password" />
-        </label>
+        <div class="ionic-form-card">
+          <label class="ionic-field">
+            <span class="ionic-label">Confirmar nova senha</span>
+            <input type="password" id="confirmPassword" class="ionic-input" placeholder="Repita a nova senha" autocomplete="new-password" />
+          </label>
+        </div>
 
-        <div class="full profile-actions">
-          <button type="button" id="changePasswordBtn" class="btn primary">
-            🔒 Alterar senha
+        <div class="full profile-actions ionic-actions">
+          <button type="button" id="changePasswordBtn" class="btn primary ionic-primary-btn">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <span>Alterar senha</span>
           </button>
         </div>
 
@@ -213,13 +288,13 @@
               permanentemente excluídos, incluindo partidas, perfil e histórico.
             </p>
           </div>
-          <button type="button" id="deleteAccountBtn" class="btn profile-btn-delete">
-            🗑️ Deletar minha conta
+
+          <button type="button" id="deleteAccountBtn" class="btn profile-btn-delete ionic-danger-btn">
+            <ion-icon name="trash-outline"></ion-icon>
+            <span>Deletar minha conta</span>
           </button>
         </div>
-
       </div>
-
     </section>
   </main>
 
@@ -254,30 +329,44 @@
   <!-- Navegação fixa inferior -->
   <nav class="profile-bottom-nav">
     <a href="menu.html" class="profile-bottom-btn">
-      <span class="profile-bottom-icon">🏠</span>
+      <span class="profile-bottom-icon">
+        <ion-icon name="home-outline"></ion-icon>
+      </span>
       <span class="profile-bottom-label">Início</span>
     </a>
 
     <a href="dashboard.html" class="profile-bottom-btn">
-      <span class="profile-bottom-icon">📊</span>
+      <span class="profile-bottom-icon">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+      </span>
       <span class="profile-bottom-label">Dashboard</span>
     </a>
 
     <a href="carreira.html" class="profile-bottom-btn">
-      <span class="profile-bottom-icon">🏆</span>
+      <span class="profile-bottom-icon">
+        <ion-icon name="trophy-outline"></ion-icon>
+      </span>
       <span class="profile-bottom-label">Carreira</span>
     </a>
 
     <a href="admin.html" class="profile-bottom-btn">
-      <span class="profile-bottom-icon">🎾</span>
+      <span class="profile-bottom-icon">
+        <ion-icon name="tennisball-outline"></ion-icon>
+      </span>
       <span class="profile-bottom-label">Partida</span>
     </a>
 
-    <button type="button" id="logoutBtnBottom" class="profile-bottom-btn logout">
-      <span class="profile-bottom-icon">🚪</span>
-      <span class="profile-bottom-label">Sair</span>
-    </button>
+    <a href="relatorio.html" class="profile-bottom-btn">
+      <span class="profile-bottom-icon">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </span>
+      <span class="profile-bottom-label">Relatórios</span>
+    </a>
   </nav>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
