@@ -43,9 +43,6 @@
         <ion-icon name="tennisball-outline" style="font-size: 1.2rem;"></ion-icon>
         <span>Partidas</span>
       </a>
-
-      
-
     </div>
   </nav>
 
@@ -177,7 +174,8 @@
             <option value="scheduled">Informe o status da partida</option>
             <option value="scheduled">Jogos do dia</option>
             <option value="finished">Finalizada</option>
-            <option value="wo">Finalizada por WO</option>
+            <option value="wo">WO</option>
+            <option value="ret">Abandono</option>
           </select>
         </label>
 
@@ -188,10 +186,10 @@
             <strong>1º set</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="set1Player1" min="0" step="1" placeholder="0" />
+                <input type="text" id="set1Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="set1Player2" min="0" step="1" placeholder="0" />
+                <input type="text" id="set1Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -200,10 +198,10 @@
             <strong>Tie-break 1º set</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="tbSet1Player1" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSet1Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="tbSet1Player2" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSet1Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -212,10 +210,10 @@
             <strong>2º set</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="set2Player1" min="0" step="1" placeholder="0" />
+                <input type="text" id="set2Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="set2Player2" min="0" step="1" placeholder="0" />
+                <input type="text" id="set2Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -224,10 +222,10 @@
             <strong>Tie-break 2º set</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="tbSet2Player1" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSet2Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="tbSet2Player2" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSet2Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -236,10 +234,10 @@
             <strong>3º set</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="set3Player1" min="0" step="1" placeholder="0" />
+                <input type="text" id="set3Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="set3Player2" min="0" step="1" placeholder="0" />
+                <input type="text" id="set3Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -248,10 +246,10 @@
             <strong>Tie-break 3º set</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="tbSet3Player1" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSet3Player1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="tbSet3Player2" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSet3Player2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -260,10 +258,10 @@
             <strong>Super tie-break</strong>
             <div class="score-grid-2">
               <label>Jogador 1
-                <input type="number" id="tbSuperPlayer1" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSuperPlayer1" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
               <label>Jogador 2
-                <input type="number" id="tbSuperPlayer2" min="0" step="1" placeholder="0" />
+                <input type="text" id="tbSuperPlayer2" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
               </label>
             </div>
           </div>
@@ -286,8 +284,6 @@
     <section id="matchesSection" class="panel panel-glass">
       <div class="section-head section-head-space">
         <div>
-          
-
           <span class="section-kicker">Lista de partidas</span>
           <h3>Partidas cadastradas</h3>
           <p class="muted section-subtitle">Filtre e gerencie as partidas</p>
@@ -313,7 +309,7 @@
             <option value="finished">Finalizada</option>
             <option value="suspended">Suspensa</option>
             <option value="wo">WO</option>
-            <option value="ret">RET</option>
+            <option value="ret">Abandono</option>
           </select>
 
           <select id="filterYear">
