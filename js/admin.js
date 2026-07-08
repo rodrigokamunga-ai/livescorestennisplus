@@ -1359,8 +1359,18 @@ if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? ""
         return { text: finalLabel };
       }
     
-      // Super tie-break deve aparecer apenas como o placar do super, sem 7x6
+      // Super tie-break:
+      // - Se houver games salvos no set, mostrar como 7x6 (10-5) / 6x7 (10-5)
+      // - Se não houver games, mostrar apenas o super tie-break
       if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
+        const winnerIs1 = tb1 > tb2;
+    
+        if (g1 > 0 || g2 > 0) {
+          return {
+            text: `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`
+          };
+        }
+    
         return { text: `${tb1}-${tb2}` };
       }
     
