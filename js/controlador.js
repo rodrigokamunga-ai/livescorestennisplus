@@ -65,7 +65,7 @@
       ponto_devolucao: { stat: "returnPoint",     winner: "self" },
 
       returnError:     { stat: "returnError",     winner: "opponent" },
-      erro_devolucao:  { stat: "returnError",     winner: "opponent" },
+      erro_devolucao:  { stat: "returnError",     winner: "self" },
 
       baselineError:   { stat: "baselineError",   winner: "opponent" },
       erro_linha_base: { stat: "baselineError",   winner: "opponent" },
@@ -180,18 +180,36 @@
       return String(data?.gameFormat || "Simples").trim();
     }
 
+    function resolvePlayerName(data, playerNumber, fallback) {
+      return (
+        data?.[`player${playerNumber}`] ||
+        data?.[`player${playerNumber}Name`] ||
+        data?.[`jogador${playerNumber}`] ||
+        data?.[`namePlayer${playerNumber}`] ||
+        data?.players?.[`player${playerNumber}`] ||
+        fallback
+      );
+    }
+
     function getTeam1Name(data) {
-      const p1 = data?.player1 || "Jogador 1";
-      const p2 = data?.player2 || "Jogador 2";
       const gf = getGameFormat(data);
-      return (gf === "Duplas" || gf === "Duplas Mistas") ? `${p1}/${p2}` : p1;
+      const p1 = resolvePlayerName(data, 1, "Jogador 1");
+      const p2 = resolvePlayerName(data, 2, "Jogador 2");
+    
+      return (gf === "Duplas" || gf === "Duplas Mistas")
+        ? `${p1}/${p2}`
+        : p1;
     }
 
     function getTeam2Name(data) {
-      const p3 = data?.player3 || "Jogador 3";
-      const p4 = data?.player4 || "Jogador 4";
       const gf = getGameFormat(data);
-      return (gf === "Duplas" || gf === "Duplas Mistas") ? `${p3}/${p4}` : (data?.player2 || "Jogador 2");
+      const p3 = resolvePlayerName(data, 3, "Jogador 3");
+      const p4 = resolvePlayerName(data, 4, "Jogador 4");
+      const p2 = resolvePlayerName(data, 2, "Jogador 2");
+    
+      return (gf === "Duplas" || gf === "Duplas Mistas")
+        ? `${p3}/${p4}`
+        : p2;
     }
 
     function scrollToServingPlayer(server) {
