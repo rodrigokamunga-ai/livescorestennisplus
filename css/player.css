@@ -833,15 +833,12 @@ body.player-page .manual-actions-grid .play-serve::after {
   background: #38bdf8;
 }
 
-@media (max-width: 480px) {
-  body.player-page .manual-actions-grid {
-    grid-template-columns: 1fr;
-  }
+
 
   body.player-page .manual-actions-grid .play-btn {
     min-height: 96px;
   }
-}
+
 
 /* ========================================================= FLASH NO BOTÃO CLICADO ========================================================= */
 body.player-page .stats-controller-card .play-btn.btn-flash-p1 {
@@ -1298,7 +1295,7 @@ body.player-page .manual-actions-grid .play-serve::after {
 
 @media (max-width: 480px) {
   body.player-page .manual-actions-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   body.player-page .manual-actions-grid .play-btn {
