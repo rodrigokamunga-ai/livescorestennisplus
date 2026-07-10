@@ -1322,3 +1322,160 @@ body.player-page .manual-actions-grid .play-serve::after {
 .stats-mode-toggle ion-icon {
   font-size: 1rem;
 }
+
+body.player-page .hero-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body.player-page .share-match-btn.voice-recording {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.22), rgba(255, 255, 255, 0.03));
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ff7b7b;
+}
+
+body.player-page .voice-btn {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.12), rgba(255, 255, 255, 0.03));
+  color: #eef4ff;
+}
+
+body.player-page .voice-btn.voice-active {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(255, 255, 255, 0.03));
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.16), 0 8px 16px rgba(0, 0, 0, 0.14);
+  color: #d8ff63;
+}
+
+body.player-page .voice-btn.voice-paused {
+  background: linear-gradient(180deg, rgba(107, 114, 128, 0.18), rgba(255, 255, 255, 0.03));
+  border-color: rgba(107, 114, 128, 0.35);
+  color: #cbd5e1;
+  opacity: 0.9;
+}
+
+/* ========================================================= BOTÃO DE VOZ — OFF / ON LIMPO ========================================================= */
+
+body.player-page .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+body.player-page .voice-match-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  color: #e8eefc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+body.player-page .voice-match-btn:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.05);
+}
+
+body.player-page .voice-match-btn:active {
+  transform: scale(0.97);
+}
+
+body.player-page .voice-match-btn.voice-idle {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  border-color: rgba(255, 255, 255, 0.10);
+  color: #e8eefc;
+}
+
+body.player-page .voice-match-btn.voice-active {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(255, 255, 255, 0.03));
+  border-color: rgba(34, 197, 94, 0.40);
+  color: #dcfce7;
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.18),
+    0 0 18px rgba(34, 197, 94, 0.22),
+    0 8px 16px rgba(0, 0, 0, 0.14);
+  animation: voicePulse 1.2s infinite;
+}
+
+body.player-page .voice-match-icon {
+  font-size: 1.22rem;
+  line-height: 1;
+}
+
+body.player-page .voice-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0f1726;
+  box-sizing: border-box;
+}
+
+body.player-page .voice-match-btn.voice-active .voice-badge {
+  background: #22c55e !important;
+  color: #fff !important;
+  border-color: #0f1726 !important;
+}
+
+@keyframes voicePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+  }
+  70% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 12px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+/* ========================================================= MOBILE ========================================================= */
+@media (max-width: 480px) {
+  body.player-page .hero-actions .voice-match-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  body.player-page .hero-actions .voice-match-icon {
+    font-size: 1.22rem;
+  }
+
+  body.player-page .hero-actions .voice-badge {
+    min-width: 22px;
+    height: 22px;
+    font-size: 10px;
+    top: -6px;
+    right: -6px;
+  }
+}
