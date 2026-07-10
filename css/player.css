@@ -6,7 +6,7 @@ body.player-page {
     linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
   color: #e8eefc;
   overflow-x: hidden;
-  padding-top: 72px; /* ADICIONAR */
+  padding-top: 72px;
   padding-bottom: calc(72px + env(safe-area-inset-bottom) + 8px);
 }
 
@@ -26,7 +26,7 @@ body.player-page * {
   box-sizing: border-box;
 }
 
-/* ========================= HERO ========================= */
+/* ========================================================= HERO ========================================================= */
 body.player-page .player-hero {
   padding: 16px;
 }
@@ -61,48 +61,135 @@ body.player-page .player-hero-top h2,
 body.player-page .section-kicker {
   text-align: left;
 }
-/* ========================= INFO GRID ========================= */
-body.player-page .player-info-grid {
+
+/* ========================================================= BLOCO DE INFORMAÇÕES ESTILO IONIC ========================================================= */
+body.player-page .match-info-card {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.98));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 20px;
+  padding: 14px;
+  margin-top: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body.player-page .match-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 12px 0 14px;
-  padding: 0;
+  gap: 12px;
 }
 
-body.player-page .timer-line {
+body.player-page .match-info-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 12px 14px;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+body.player-page .match-info-icon {
+  color: #fff;
+  font-size: 1.35rem;
+  flex: 0 0 auto;
+  opacity: 0.92;
+}
+
+body.player-page .match-info-text {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 3px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  text-align: left;
-  min-height: 64px;
-  box-sizing: border-box;
+  min-width: 0;
+  flex: 1;
 }
 
-body.player-page .timer-line span {
+body.player-page .match-info-text span {
   font-size: 11px;
   color: #aab5c7;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  text-align: left;
+  margin-bottom: 4px;
 }
 
-body.player-page .timer-line strong {
-  font-size: 15px;
+body.player-page .match-info-text strong {
   color: #fff;
   font-weight: 900;
-  line-height: 1;
-  text-align: left;
+  line-height: 1.15;
+  font-size: 1.02rem;
+  word-break: break-word;
 }
 
-/* ========================= TOGGLE GAMES / PONTOS / ESTATÍSTICAS ========================= */
+/* Situação */
+body.player-page .status-badge {
+  color: #ffffff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.player-page .status-badge span {
+  color: #ffffff !important;
+}
+
+body.player-page .status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 10px;
+}
+
+body.player-page .status-nao-iniciada .status-dot {
+  background: #94a3b8;
+}
+
+body.player-page .status-andamento .status-dot {
+  background: #22c55e;
+  animation: statusPulse 1s infinite;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+}
+
+body.player-page .status-interrompida .status-dot,
+body.player-page .status-suspensa .status-dot {
+  background: #f59e0b;
+}
+
+body.player-page .status-finalizada .status-dot {
+  background: #ef4444;
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+  }
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+@media (max-width: 576px) {
+  .match-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .match-info-item {
+    width: 100%;
+  }
+}
+
+/* ========================================================= TOGGLE GAMES / PONTOS / ESTATÍSTICAS ========================================================= */
 body.player-page .input-mode-toggle {
   display: flex;
   gap: 8px;
@@ -177,38 +264,40 @@ body.player-page .stats-mode-toggle label.active {
   border-color: rgba(216, 255, 99, 0.22);
 }
 
-/* ========================= PLACAR UNIFICADO ========================= */
+/* ========================================================= PLACAR UNIFICADO ========================================================= */
 body.player-page .score-unified {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
 }
 
 body.player-page .player-col {
   background: linear-gradient(180deg, rgba(44, 54, 74, 0.92), rgba(30, 39, 58, 0.95));
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
-  padding: 12px 14px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* Nome + saque integrados */
-body.player-page .player-col-name-row {
+body.player-page .player-col-name-row,
+body.player-page .manual-player-name-row {
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   user-select: none;
-  padding: 8px 10px;
+  padding: 10px 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
-body.player-page .player-col-name-row input[type="radio"] {
+body.player-page .player-col-name-row input[type="radio"],
+body.player-page .manual-player-name-row input[type="radio"] {
   display: none;
 }
 
@@ -222,18 +311,6 @@ body.player-page .serve-ball-indicator {
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
-body.player-page .player-col-name-row:has(input[type="radio"]:checked) {
-  background: rgba(77, 163, 255, 0.14);
-  border-color: rgba(77, 163, 255, 0.45);
-}
-
-body.player-page .player-col-name-row:has(input[type="radio"]:checked) .serve-ball-indicator,
-body.player-page .manual-player-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
-  background: #d8ff63;
-  border-color: #d8ff63;
-  box-shadow: 0 0 8px rgba(216, 255, 99, 0.75);
-}
-
 body.player-page .player-col-name {
   font-size: clamp(14px, 3.5vw, 18px);
   font-weight: 900;
@@ -244,73 +321,23 @@ body.player-page .player-col-name {
   flex: 1;
 }
 
-/* ========================= CONTROLO DE PONTO ========================= */
-body.player-page .point-control {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(181, 255, 97, 0.18);
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: inset 0 0 0 1px rgba(181, 255, 97, 0.06);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-body.player-page .point-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  border: 1px solid rgba(181, 255, 97, 0.22);
-  background: rgba(93, 108, 81, 0.45);
-  color: #c8ff62;
-  font-size: 28px;
-  font-weight: 900;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.12s, background 0.12s;
-  flex-shrink: 0;
-}
-
-body.player-page .point-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(93, 108, 81, 0.65);
-}
-
-body.player-page .point-btn:active {
-  transform: scale(0.95);
-}
-
-body.player-page .point-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-body.player-page .point-value {
-  font-size: clamp(38px, 10vw, 56px);
-  font-weight: 900;
-  color: #c8ff62;
-  min-width: 60px;
-  text-align: center;
-  line-height: 1;
-}
-
-/* ========================= CONTROLO DE GAMES ========================= */
+/* ========================================================= GAMES / PONTOS — MESMO VISUAL "IONIC" DOS PLAYERS ========================================================= */
+body.player-page .point-control,
 body.player-page .games-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(181, 255, 97, 0.18);
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: inset 0 0 0 1px rgba(181, 255, 97, 0.06);
+  gap: 12px;
   width: 100%;
-  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 18px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 body.player-page .games-control-btns {
@@ -321,46 +348,139 @@ body.player-page .games-control-btns {
   width: 100%;
 }
 
+body.player-page .point-btn,
 body.player-page .games-mini-btn {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  border: 1px solid rgba(181, 255, 97, 0.22);
-  background: rgba(93, 108, 81, 0.45);
-  color: #c8ff62;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef4ff;
   font-size: 28px;
   font-weight: 900;
   line-height: 1;
   cursor: pointer;
-  transition: transform 0.12s, background 0.12s;
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
   flex-shrink: 0;
 }
 
+body.player-page .point-btn:hover,
 body.player-page .games-mini-btn:hover {
   transform: translateY(-1px);
-  background: rgba(93, 108, 81, 0.65);
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
+body.player-page .point-btn:active,
 body.player-page .games-mini-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
+body.player-page .point-btn:disabled,
 body.player-page .games-mini-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
   transform: none !important;
 }
 
+body.player-page .point-value,
 body.player-page .games-mini-val {
   font-size: clamp(38px, 10vw, 56px);
   font-weight: 900;
-  color: #c8ff62;
+  color: #d8ff63;
   min-width: 60px;
   text-align: center;
   line-height: 1;
 }
 
-/* ========================= PLACAR GAMES / SETS ========================= */
+/* Destaque do card de pontos/games quando o jogador 1 estiver servindo */
+body.player-page #scoreModesArea .player-col:first-child .point-control.is-serving,
+body.player-page #scoreModesArea .player-col:first-child .games-control.is-serving {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.08),
+    0 0 14px rgba(34, 197, 94, 0.10);
+}
+
+/* Destaque do card de pontos/games quando o jogador 2 estiver servindo */
+body.player-page #scoreModesArea .player-col:nth-child(2) .point-control.is-serving,
+body.player-page #scoreModesArea .player-col:nth-child(2) .games-control.is-serving {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.08),
+    0 0 14px rgba(59, 130, 246, 0.10);
+}
+
+/* Jogador 1 = VERDE */
+body.player-page #scoreModesArea .player-col:first-child .player-col-name-row:has(input[type="radio"]:checked) {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.10), 0 0 14px rgba(34, 197, 94, 0.12);
+}
+
+body.player-page #scoreModesArea .player-col:first-child .player-col-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
+  background: #22c55e;
+  border-color: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.85);
+}
+
+body.player-page #scoreModesArea .player-col:first-child .player-col-name-row:has(input[type="radio"]:checked) .player-col-name {
+  color: #dcfce7;
+}
+
+/* Jogador 2 = AZUL */
+body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row:has(input[type="radio"]:checked) {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.10), 0 0 14px rgba(59, 130, 246, 0.12);
+}
+
+body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.85);
+}
+
+body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row:has(input[type="radio"]:checked) .player-col-name {
+  color: #dbeafe;
+}
+
+/* Fallback se o JS usar classe .is-serving */
+body.player-page #scoreModesArea .player-col:first-child .player-col-name-row.is-serving {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.10), 0 0 14px rgba(34, 197, 94, 0.12);
+}
+
+body.player-page #scoreModesArea .player-col:first-child .player-col-name-row.is-serving .serve-ball-indicator {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.85) !important;
+}
+
+body.player-page #scoreModesArea .player-col:first-child .player-col-name-row.is-serving .player-col-name {
+  color: #dcfce7 !important;
+}
+
+body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row.is-serving {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.10), 0 0 14px rgba(59, 130, 246, 0.12);
+}
+
+body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row.is-serving .serve-ball-indicator {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.85) !important;
+}
+
+body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row.is-serving .player-col-name {
+  color: #dbeafe !important;
+}
+
+/* ========================================================= PLACAR GAMES / SETS ========================================================= */
 body.player-page .score-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -391,120 +511,7 @@ body.player-page .score-box strong {
   line-height: 1;
 }
 
-/* ========================= BOTTOM NAV ========================= */
-/* ========================= BOTÕES DO RODAPÉ ========================= */
-body.player-page .player-bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  background: rgba(10, 16, 28, 0.92);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
-  box-sizing: border-box;
-}
-
-body.player-page .player-bottom-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  color: #eef4ff;
-  text-decoration: none;
-  border-radius: 0;
-  min-height: 62px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-weight: 800;
-  box-shadow: none;
-  cursor: pointer;
-  width: 100%;
-  padding: 8px 4px;
-  transition: transform 0.16s ease, opacity 0.16s ease, color 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
-  box-sizing: border-box;
-  white-space: nowrap;
-  opacity: 0.92;
-}
-
-body.player-page .player-bottom-btn:hover {
-  transform: translateY(-1px);
-  opacity: 1;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-body.player-page .player-bottom-btn.primary-action:hover,
-body.player-page .player-bottom-btn.pause-action:hover,
-body.player-page .player-bottom-btn.danger:hover,
-body.player-page .player-bottom-btn.disabled-link:hover {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-body.player-page .player-bottom-icon {
-  font-size: 1.22rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-body.player-page .player-bottom-icon ion-icon {
-  font-size: 1.22rem;
-}
-
-body.player-page .player-bottom-label {
-  font-size: 0.74rem;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  width: 100%;
-}
-
-body.player-page .player-bottom-btn.danger .player-bottom-icon {
-  color: #ff7b7b;
-}
-
-body.player-page .player-bottom-btn.primary-action {
-  background: transparent;
-  border: none;
-}
-
-body.player-page .player-bottom-btn.pause-action {
-  background: transparent;
-  border: none;
-}
-/* ========================= ESTADOS DESABILITADOS ========================= */
-body.player-page .input-mode-toggle label[style*="not-allowed"] {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-body.player-page .point-btn:disabled,
-body.player-page .games-mini-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-body.player-page .score-grid,
-body.player-page .score-card {
-  display: none;
-}
-
-/* ========================= ÁREA DE ESTATÍSTICAS / CONTROLADOR ========================= */
+/* ========================================================= ÁREA DE ESTATÍSTICAS / CONTROLADOR ========================================================= */
 body.player-page .stats-control-panel {
   width: 100%;
   margin-top: 2px;
@@ -765,7 +772,7 @@ body.player-page .stats-controller-card .serve-status.serve-second {
   border-color: rgba(245, 158, 11, 0.28);
 }
 
-/* ========================= BLOCO MANUAL DO JOGADOR 2 ========================= */
+/* ========================================================= BLOCO MANUAL DO JOGADOR 2 ========================================================= */
 body.player-page .stats-manual-card {
   min-height: 220px;
 }
@@ -773,23 +780,6 @@ body.player-page .stats-manual-card {
 body.player-page .manual-title-wrap {
   position: relative;
   margin-bottom: 10px;
-}
-
-body.player-page .manual-player-name-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-  padding: 10px 10px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: background 0.15s, border-color 0.15s;
-}
-
-body.player-page .manual-player-name-row input[type="radio"] {
-  display: none;
 }
 
 body.player-page .manual-player-name-row:has(input[type="radio"]:checked) {
@@ -824,7 +814,36 @@ body.player-page .manual-point-control {
   width: 100%;
 }
 
-/* ========================= FLASH NO BOTÃO CLICADO ========================= */
+/* NOVO: AÇÕES DO JOGADOR 2 NO MODO STATS 1 JOGADOR */
+body.player-page .manual-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+body.player-page .manual-actions-grid .play-btn {
+  min-height: 112px;
+}
+
+body.player-page .manual-actions-grid .play-error::after {
+  background: #ef4444;
+}
+
+body.player-page .manual-actions-grid .play-serve::after {
+  background: #38bdf8;
+}
+
+@media (max-width: 480px) {
+  body.player-page .manual-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.player-page .manual-actions-grid .play-btn {
+    min-height: 96px;
+  }
+}
+
+/* ========================================================= FLASH NO BOTÃO CLICADO ========================================================= */
 body.player-page .stats-controller-card .play-btn.btn-flash-p1 {
   background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(255, 255, 255, 0.03)), #0f1828 !important;
   border-color: rgba(34, 197, 94, 0.55) !important;
@@ -845,7 +864,7 @@ body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
   transform: scale(0.985);
 }
 
-/* ========================= BOTÃO COMPARTILHAR ========================= */
+/* ========================================================= BOTÃO COMPARTILHAR ========================================================= */
 body.player-page .share-match-btn {
   width: 48px;
   height: 48px;
@@ -873,17 +892,8 @@ body.player-page .share-match-icon {
   line-height: 1;
 }
 
-/* ========================= TEXTOS AUXILIARES ========================= */
-body.player-page .shared-match-badge {
-  margin-top: 4px;
-  margin-bottom: 6px;
-  font-size: 0.78rem;
-  font-weight: 900;
-  color: #d8ff63;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
+/* ========================================================= TEXTOS AUXILIARES ========================================================= */
+body.player-page .shared-match-badge,
 body.player-page .shared-match-label {
   margin-top: 2px;
   margin-bottom: 6px;
@@ -894,7 +904,12 @@ body.player-page .shared-match-label {
   text-transform: uppercase;
 }
 
-/* ========================= BOTÕES DESABILITADOS ========================= */
+body.player-page .shared-match-badge {
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+/* ========================================================= BOTÕES DESABILITADOS ========================================================= */
 body.player-page .player-bottom-btn.disabled-link,
 body.player-page .player-bottom-btn-disabled {
   opacity: 0.45;
@@ -905,19 +920,119 @@ body.player-page .player-bottom-btn-disabled {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* ========================= BLOQUEIO DOS BOTÕES DA ABA ESTATÍSTICAS ========================= */
-body.player-page #statsControlPanel button:disabled,
-body.player-page #statsControlPanel .play-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: grayscale(0.15);
+/* ========================================================= BOTTOM NAV ========================================================= */
+body.player-page .player-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(10, 16, 28, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
 }
 
-/* ========================= RESPONSIVO ========================= */
+body.player-page .player-bottom-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #eef4ff;
+  text-decoration: none;
+  border-radius: 0;
+  min-height: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 800;
+  box-shadow: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 8px 4px;
+  transition: transform 0.16s ease, opacity 0.16s ease, color 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+  opacity: 0.92;
+}
+
+body.player-page .player-bottom-btn:hover {
+  transform: translateY(-1px);
+  opacity: 1;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+body.player-page .player-bottom-btn.primary-action:hover,
+body.player-page .player-bottom-btn.pause-action:hover,
+body.player-page .player-bottom-btn.danger:hover,
+body.player-page .player-bottom-btn.disabled-link:hover {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+body.player-page .player-bottom-icon {
+  font-size: 1.22rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.player-page .player-bottom-icon ion-icon {
+  font-size: 1.22rem;
+}
+
+body.player-page .player-bottom-label {
+  font-size: 0.74rem;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  width: 100%;
+}
+
+body.player-page .player-bottom-btn.danger .player-bottom-icon {
+  color: #ff7b7b;
+}
+
+body.player-page .player-bottom-btn.primary-action,
+body.player-page .player-bottom-btn.pause-action {
+  background: transparent;
+  border: none;
+}
+
+/* ========================================================= ESTADOS DESABILITADOS ========================================================= */
+body.player-page .input-mode-toggle label[style*="not-allowed"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+body.player-page .point-btn:disabled,
+body.player-page .games-mini-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+body.player-page .score-grid,
+body.player-page .score-card {
+  display: none;
+}
+
+/* ========================================================= RESPONSIVO ========================================================= */
 @media (max-width: 480px) {
   body.player-page .score-unified {
-    gap: 6px;
+    gap: 10px;
   }
 
   body.player-page .player-col {
@@ -928,15 +1043,6 @@ body.player-page #statsControlPanel .play-btn:disabled {
   body.player-page .player-col-name {
     font-size: 13px;
     padding: 8px 6px;
-  }
-
-  body.player-page .player-info-grid {
-    gap: 6px;
-  }
-
-  body.player-page .timer-line {
-    min-height: 58px;
-    padding: 9px 10px;
   }
 
   body.player-page .point-btn,
@@ -976,10 +1082,6 @@ body.player-page #statsControlPanel .play-btn:disabled {
     padding-bottom: calc(64px + env(safe-area-inset-bottom) + 8px);
   }
 
-  body.player-page {
-    padding-top: 72px;
-  }
-
   body.player-page .menu-fixed-top {
     background: rgba(10, 16, 28, 0.96) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -989,19 +1091,19 @@ body.player-page #statsControlPanel .play-btn:disabled {
     padding-top: 0;
     padding-bottom: 0;
   }
-  
+
   body.player-page .menu-navbar-top {
     min-height: 52px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     gap: 10px;
   }
 
   body.player-page .menu-back-btn {
     color: #d8ff63;
   }
-  
+
   body.player-page .menu-back-btn ion-icon {
     color: #d8ff63;
   }
@@ -1050,6 +1152,10 @@ body.player-page #statsControlPanel .play-btn:disabled {
     font-size: 12px;
     padding: 8px 10px;
   }
+
+  body.player-page .match-info-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1059,7 +1165,7 @@ body.player-page #statsControlPanel .play-btn:disabled {
   }
 }
 
-/* ========================= FIX VISUAL SEM ALTERAR LAYOUT ========================= */
+/* ========================================================= FIX VISUAL SEM ALTERAR LAYOUT ========================================================= */
 body.player-page .player-col-name-row.is-serving .serve-ball-indicator,
 body.player-page .manual-player-name-row.is-serving .serve-ball-indicator {
   background: #d8ff63 !important;
@@ -1072,13 +1178,13 @@ body.player-page .manual-player-name-row.is-serving .player-col-name {
   color: #ffffff !important;
 }
 
-/* ========================= TÍTULOS DAS SEÇÕES EM BRANCO ========================= */
+/* ========================================================= TÍTULOS DAS SEÇÕES EM BRANCO ========================================================= */
 body.player-page .stats-controller-card .section-title,
 body.player-page .stats-controller-card .group-title {
   color: #ffffff !important;
 }
 
-/* ========================= BOTÃO VOLTAR ========================= */
+/* ========================================================= BOTÃO VOLTAR ========================================================= */
 body.player-page .player-back-link {
   display: inline-flex;
   align-items: center;
@@ -1141,4 +1247,81 @@ body.player-page .player-navbar-brand {
 
 body.player-page .player-navbar-brand span {
   color: #f4f8ff;
+}
+
+/* ========================= STATS — SOMENTE PARTE DO SACADOR ========================= */
+
+/* Jogador 1 sacando = verde */
+body.player-page #statsControlPanel #stats1Card .serve-status.serve-first {
+  background: rgba(34, 197, 94, 0.16);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+body.player-page #statsControlPanel #stats1Card .serve-status.serve-second {
+  background: rgba(34, 197, 94, 0.16);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+/* Jogador 2 sacando = azul */
+body.player-page #statsControlPanel #stats2Card .serve-status.serve-first {
+  background: rgba(59, 130, 246, 0.16);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.28);
+}
+
+body.player-page #statsControlPanel #stats2Card .serve-status.serve-second {
+  background: rgba(59, 130, 246, 0.16);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.28);
+}
+
+/* ========================================================= NOVO: AÇÕES DO JOGADOR 2 NO STATS 1 JOGADOR ========================================================= */
+body.player-page .manual-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+body.player-page .manual-actions-grid .play-btn {
+  min-height: 112px;
+}
+
+body.player-page .manual-actions-grid .play-error::after {
+  background: #ef4444;
+}
+
+body.player-page .manual-actions-grid .play-serve::after {
+  background: #38bdf8;
+}
+
+@media (max-width: 480px) {
+  body.player-page .manual-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.player-page .manual-actions-grid .play-btn {
+    min-height: 96px;
+  }
+}
+
+.input-mode-toggle label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-mode-toggle ion-icon {
+  font-size: 1rem;
+}
+
+.stats-mode-toggle label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stats-mode-toggle ion-icon {
+  font-size: 1rem;
 }
