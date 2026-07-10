@@ -78,14 +78,16 @@
       statsResumoCard:   document.getElementById("statsResumoCard"),
       statsTitle1:       document.getElementById("statsTitle1"),
       statsTitle2:       document.getElementById("statsTitle2"),
-      statsTitleResumo:  document.getElementById("statsTitleResumo"),
+      statsTitleResumo:   document.getElementById("statsTitleResumo"),
       serveStatusP1:     document.getElementById("serve-status-p1"),
       serveStatusP2:     document.getElementById("serve-status-p2"),
-      serveStatusResumo: document.getElementById("serve-status-resumo"),
-      player1NameResumo: document.getElementById("player1NameResumo"),
-      player2NameResumo: document.getElementById("player2NameResumo"),
+      serveStatusResumo:  document.getElementById("serve-status-resumo"),
+      player1NameResumo:  document.getElementById("player1NameResumo"),
+      player2NameResumo:  document.getElementById("player2NameResumo"),
       shareBtn:          document.getElementById("shareBtn"),
       shareBtnIcon:      document.getElementById("shareBtnIcon"),
+      voiceBtn:          document.getElementById("voiceBtn"),
+      voiceBtnIcon:      document.querySelector("#voiceBtn ion-icon"),
       shareBtnLabel:     document.getElementById("shareBtnLabel")
     };
 
@@ -94,10 +96,11 @@
     const manualServeOption1 = document.querySelector("label[for='servePlayer1Stats']");
     const manualServeOption2 = document.querySelector("label[for='servePlayer2Manual']");
     const doubleServeOption1 = document.querySelector("label[for='servePlayer1StatsDouble']");
-const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsDouble']");
+    const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsDouble']");
 
     let lastServerShown = null;
     let currentServer = "player1";
+    let voiceController = null;
     let timer = null;
     let liveStartedAtMs = null;
     let msgTimer = null;
@@ -755,28 +758,28 @@ const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsD
       const isP2 = currentServer === "player2";
       const isSingleMode = statsViewMode === "single";
       const isDoubleMode = statsViewMode === "double";
-    
+
       if (el.servePlayer1) el.servePlayer1.checked = isP1;
       if (el.servePlayer2) el.servePlayer2.checked = isP2;
-    
+
       if (el.servePlayer1Stats) el.servePlayer1Stats.checked = isP1;
       if (el.servePlayer1StatsDouble) el.servePlayer1StatsDouble.checked = isP1;
       if (el.servePlayer2StatsDouble) el.servePlayer2StatsDouble.checked = isP2;
-    
+
       if (el.servePlayer2Manual) el.servePlayer2Manual.checked = isP2 && isSingleMode;
-    
+
       if (el.servePlayer1Resumo) el.servePlayer1Resumo.checked = isP1;
       if (el.servePlayer2Resumo) el.servePlayer2Resumo.checked = isP2;
-    
+
       if (serveOption1) setServingClass(serveOption1, isP1);
       if (serveOption2) setServingClass(serveOption2, isP2);
-    
+
       if (manualServeOption1) setServingClass(manualServeOption1, isP1);
       if (manualServeOption2) setServingClass(manualServeOption2, isP2 && isSingleMode);
-    
+
       if (doubleServeOption1) setServingClass(doubleServeOption1, isP1 && isDoubleMode);
       if (doubleServeOption2) setServingClass(doubleServeOption2, isP2 && isDoubleMode);
-    
+
       lastServerShown = currentServer;
       updateResumoServeVisibility();
     }
@@ -1386,40 +1389,250 @@ const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsD
       return new Promise((resolve) => {
         const overlay = document.createElement("div");
         overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.72); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px;";
-    
+
         const box = document.createElement("div");
         box.style.cssText = "width:min(420px, 100%); background:#1f2937; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,0.45); font-family:inherit;";
-    
+
         box.innerHTML = ` <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;"> Deseja abandonar a partida? </div> <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;"> Selecione quem abandonou a partida. </div> <div style="display:flex;flex-direction:column;gap:10px;"> <button id="retPlayer1" style="padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer;"> ${player1Name} </button> <button id="retPlayer2" style="padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer;"> ${player2Name} </button> <button id="retCancel" style="padding:12px 14px; border:none; border-radius:12px; background:#6b7280; color:#fff; font-weight:800; cursor:pointer;"> Cancelar </button> </div> `;
-    
+
         overlay.appendChild(box);
         document.body.appendChild(overlay);
-    
+
         const cleanup = () => {
           if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
         };
-    
+
         box.querySelector("#retPlayer1").addEventListener("click", () => {
           cleanup();
           resolve("player1");
         });
-    
+
         box.querySelector("#retPlayer2").addEventListener("click", () => {
           cleanup();
           resolve("player2");
         });
-    
+
         box.querySelector("#retCancel").addEventListener("click", () => {
           cleanup();
           resolve(null);
         });
-    
+
         overlay.addEventListener("click", (e) => {
           if (e.target === overlay) {
             e.stopPropagation();
           }
         });
       });
+    }
+
+    function initVoiceCommands() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        console.warn("Reconhecimento de voz não suportado neste navegador.");
+        return null;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = "pt-BR";
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      let isRunning = false;
+      let isManuallyStopped = false;
+      let startLocked = false;
+
+      const voiceBtn = el.voiceBtn;
+      const voiceBtnIcon = el.voiceBtnIcon;
+
+      function updateVoiceUI(active) {
+        if (voiceBtn) {
+          voiceBtn.classList.toggle("voice-active", active);
+          voiceBtn.classList.toggle("voice-off", !active);
+          voiceBtn.setAttribute("aria-label", active ? "Voz ON" : "Voz OFF");
+          voiceBtn.title = active ? "Voz ON" : "Voz OFF";
+        }
+      
+        if (voiceBtnIcon) {
+          voiceBtnIcon.setAttribute("name", active ? "mic-circle-outline" : "mic-outline");
+        }
+      
+        const badge = voiceBtn?.querySelector(".voice-badge");
+        if (badge) badge.textContent = active ? "ON" : "OFF";
+      }
+
+      function normalizeText(text) {
+        return String(text || "")
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, " ");
+      }
+
+      function hasAny(text, phrases) {
+        return phrases.some((phrase) => text.includes(phrase));
+      }
+
+      async function handleTranscript(transcript) {
+        console.log("Comando de voz:", transcript);
+      
+        const isGameMode = inputMode === "games";
+        const isPointsMode = inputMode === "points";
+        const isStatsMode = inputMode === "stats";
+      
+        // SAQUE
+        if (hasAny(transcript, ["saque jogador 1", "saque do jogador 1", "saque j1", "saque um"])) {
+          await setServe("player1");
+          return;
+        }
+      
+        if (hasAny(transcript, ["saque jogador 2", "saque do jogador 2", "saque j2", "saque dois"])) {
+          await setServe("player2");
+          return;
+        }
+      
+        // JOGADOR 1 PONTO
+        if (hasAny(transcript, ["jogador 1 ponto", "jogador um ponto", "j1 ponto"])) {
+          if (isPointsMode || isStatsMode) await registerPoint(1);
+          return;
+        }
+      
+        // VOLTAR PONTO J1
+        if (hasAny(transcript, ["jogador 1 voltar ponto", "jogador um voltar ponto", "j1 voltar ponto"])) {
+          if (isPointsMode || isStatsMode) await decrementPoint(1);
+          return;
+        }
+      
+        // JOGADOR 1 GAME
+        if (hasAny(transcript, ["jogador 1 game", "jogador um game", "j1 game"])) {
+          if (isGameMode || isStatsMode) {
+            await saveGames("player1", Number(el.gamesVal1?.textContent || 0) + 1);
+          }
+          return;
+        }
+      
+        // VOLTAR GAME J1
+        if (hasAny(transcript, ["jogador 1 voltar game", "jogador um voltar game", "j1 voltar game"])) {
+          if (isGameMode || isStatsMode) {
+            await saveGames("player1", Math.max(0, Number(el.gamesVal1?.textContent || 0) - 1));
+          }
+          return;
+        }
+      
+        // JOGADOR 2 PONTO
+        if (hasAny(transcript, ["jogador 2 ponto", "jogador dois ponto", "j2 ponto"])) {
+          if (isPointsMode || isStatsMode) await registerPoint(2);
+          return;
+        }
+      
+        // VOLTAR PONTO J2
+        if (hasAny(transcript, ["jogador 2 voltar ponto", "jogador dois voltar ponto", "j2 voltar ponto"])) {
+          if (isPointsMode || isStatsMode) await decrementPoint(2);
+          return;
+        }
+      
+        // JOGADOR 2 GAME
+        if (hasAny(transcript, ["jogador 2 game", "jogador dois game", "j2 game"])) {
+          if (isGameMode || isStatsMode) {
+            await saveGames("player2", Number(el.gamesVal2?.textContent || 0) + 1);
+          }
+          return;
+        }
+      
+        // VOLTAR GAME J2
+        if (hasAny(transcript, ["jogador 2 voltar game", "jogador dois voltar game", "j2 voltar game"])) {
+          if (isGameMode || isStatsMode) {
+            await saveGames("player2", Math.max(0, Number(el.gamesVal2?.textContent || 0) - 1));
+          }
+          return;
+        }
+      }
+      recognition.onresult = async (event) => {
+        const last = event.results[event.results.length - 1];
+        if (!last || !last[0]) return;
+
+        const transcript = normalizeText(last[0].transcript);
+        await handleTranscript(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error === "aborted") return;
+
+        console.error("Erro no reconhecimento de voz:", event.error);
+        isRunning = false;
+        isManuallyStopped = true;
+        startLocked = false;
+        updateVoiceUI(false);
+      };
+
+      recognition.onend = () => {
+        startLocked = false;
+
+        if (isManuallyStopped) {
+          isRunning = false;
+          updateVoiceUI(false);
+          return;
+        }
+
+        if (isRunning) {
+          try {
+            recognition.start();
+            return;
+          } catch (err) {
+            console.error("Falha ao reiniciar voz:", err);
+          }
+        }
+
+        isRunning = false;
+        updateVoiceUI(false);
+      };
+
+      return {
+        start() {
+          if (isRunning || startLocked) return;
+
+          isManuallyStopped = false;
+          startLocked = true;
+
+          try {
+            recognition.start();
+            isRunning = true;
+            updateVoiceUI(true);
+          } catch (err) {
+            console.error("Falha ao iniciar voz:", err);
+            isRunning = false;
+            startLocked = false;
+            updateVoiceUI(false);
+          }
+        },
+
+        stop() {
+          if (!isRunning) {
+            updateVoiceUI(false);
+            return;
+          }
+
+          isManuallyStopped = true;
+
+          try {
+            recognition.stop();
+          } catch (err) {
+            console.error("Falha ao parar voz:", err);
+          }
+
+          isRunning = false;
+          updateVoiceUI(false);
+        },
+
+        toggle() {
+          if (isRunning) this.stop();
+          else this.start();
+        },
+
+        isActive() {
+          return isRunning;
+        }
+      };
     }
 
     function applyUrlState() {
@@ -1440,6 +1653,17 @@ const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsD
       bindStatsViewToggle();
 
       el.shareBtn?.addEventListener("click", handleShare);
+
+      voiceController = initVoiceCommands();
+
+      el.voiceBtn?.addEventListener("click", () => {
+        if (!voiceController) {
+          setMsg("Seu navegador não suporta reconhecimento de voz.", "error");
+          return;
+        }
+
+        voiceController.toggle();
+      });
 
       el.startBtn?.addEventListener("click", async () => {
         if (!id) return;
@@ -1755,7 +1979,7 @@ const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsD
       ["servePlayer1", "servePlayer1Stats", "servePlayer1StatsDouble", "servePlayer1Resumo"].forEach((idEl) => {
         document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player1"));
       });
-      
+
       ["servePlayer2", "servePlayer2StatsDouble", "servePlayer2Manual", "servePlayer2Resumo"].forEach((idEl) => {
         document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player2"));
       });
