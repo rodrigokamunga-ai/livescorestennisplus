@@ -7,7 +7,7 @@
     const shareTokenFromUrl = params.get("shareToken");
 
     let inputMode = "games";
-    let statsViewMode = "single"; // "single" | "double"
+    let statsViewMode = "single"; // "single" | "double" | "resumo"
 
     const el = {
       matchTitle:        document.getElementById("matchTitle"),
@@ -36,6 +36,7 @@
       servePlayer2Label: document.getElementById("servePlayer2Label"),
       player2NameManual: document.getElementById("player2NameManual"),
       player1NameStats:  document.getElementById("player1NameStats"),
+      player2NameStats: document.getElementById("player2NameStats"),
       startBtn:          document.getElementById("startBtn"),
       startBtnIcon:      document.getElementById("startBtnIcon"),
       startBtnLabel:     document.getElementById("startBtnLabel"),
@@ -47,7 +48,11 @@
       servePlayer1:      document.getElementById("servePlayer1"),
       servePlayer2:      document.getElementById("servePlayer2"),
       servePlayer1Stats: document.getElementById("servePlayer1Stats"),
+      servePlayer2StatsDouble: document.getElementById("servePlayer2StatsDouble"),
+      servePlayer1StatsDouble: document.getElementById("servePlayer1StatsDouble"),
       servePlayer2Manual: document.getElementById("servePlayer2Manual"),
+      servePlayer1Resumo: document.getElementById("servePlayer1Resumo"),
+      servePlayer2Resumo: document.getElementById("servePlayer2Resumo"),
       gamesControl1:     document.getElementById("gamesControl1"),
       gamesControl2:     document.getElementById("gamesControl2"),
       pointControl1:     document.getElementById("pointControl1"),
@@ -63,11 +68,22 @@
       statsModeToggle:   document.getElementById("statsModeToggle"),
       statsModeSingle:   document.getElementById("statsModeSingle"),
       statsModeDouble:   document.getElementById("statsModeDouble"),
+      statsModeResumo:   document.getElementById("statsModeResumo"),
       statsModeSingleLabel: document.getElementById("statsModeSingleLabel"),
       statsModeDoubleLabel: document.getElementById("statsModeDoubleLabel"),
+      statsModeResumoLabel: document.getElementById("statsModeResumoLabel"),
       stats2ManualCard:  document.getElementById("stats2ManualCard"),
       stats2Card:        document.getElementById("stats2Card"),
       stats1Card:        document.getElementById("stats1Card"),
+      statsResumoCard:   document.getElementById("statsResumoCard"),
+      statsTitle1:       document.getElementById("statsTitle1"),
+      statsTitle2:       document.getElementById("statsTitle2"),
+      statsTitleResumo:  document.getElementById("statsTitleResumo"),
+      serveStatusP1:     document.getElementById("serve-status-p1"),
+      serveStatusP2:     document.getElementById("serve-status-p2"),
+      serveStatusResumo: document.getElementById("serve-status-resumo"),
+      player1NameResumo: document.getElementById("player1NameResumo"),
+      player2NameResumo: document.getElementById("player2NameResumo"),
       shareBtn:          document.getElementById("shareBtn"),
       shareBtnIcon:      document.getElementById("shareBtnIcon"),
       shareBtnLabel:     document.getElementById("shareBtnLabel")
@@ -77,6 +93,8 @@
     const serveOption2 = document.getElementById("serveOption2");
     const manualServeOption1 = document.querySelector("label[for='servePlayer1Stats']");
     const manualServeOption2 = document.querySelector("label[for='servePlayer2Manual']");
+    const doubleServeOption1 = document.querySelector("label[for='servePlayer1StatsDouble']");
+const doubleServeOption2 = document.querySelector("label[for='servePlayer2StatsDouble']");
 
     let lastServerShown = null;
     let currentServer = "player1";
@@ -99,7 +117,7 @@
       document.querySelectorAll("#statsControlPanel .play-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           const btnId = btn.id || "";
-          const playerPos = btnId.startsWith("j1_") ? 1 : 2;
+          const playerPos = btnId.startsWith("j1_") || btnId.startsWith("rj1_") ? 1 : 2;
           flashStatsButton(btn, playerPos);
         });
       });
@@ -109,7 +127,7 @@
       const addPointFn = window.addPoint || (typeof addPoint === "function" ? addPoint : null);
       const marcarServicoFn = window.marcarServico || (typeof marcarServico === "function" ? marcarServico : null);
       const marcarServicoFalhaFn = window.marcarServicoFalha || (typeof marcarServicoFalha === "function" ? marcarServicoFalha : null);
-    
+
       return {
         j1_servico_1: () => marcarServicoFn?.(1, 1),
         j1_servico_2: () => marcarServicoFn?.(1, 2),
@@ -131,7 +149,7 @@
         j1_erro_devolucao: () => addPointFn?.(1, "erro_devolucao"),
         j1_erro_linha_base: () => addPointFn?.(1, "erro_linha_base"),
         j1_ponto_linha_base: () => addPointFn?.(1, "ponto_linha_base"),
-    
+
         j2_servico_1: () => marcarServicoFn?.(2, 1),
         j2_servico_2: () => marcarServicoFn?.(2, 2),
         j2_df: () => marcarServicoFalhaFn?.(2, "df"),
@@ -151,24 +169,39 @@
         j2_ponto_devolucao: () => addPointFn?.(2, "ponto_devolucao"),
         j2_erro_devolucao: () => addPointFn?.(2, "erro_devolucao"),
         j2_erro_linha_base: () => addPointFn?.(2, "erro_linha_base"),
-        j2_ponto_linha_base: () => addPointFn?.(2, "ponto_linha_base")
+        j2_ponto_linha_base: () => addPointFn?.(2, "ponto_linha_base"),
+
+        rj1_servico_1: () => marcarServicoFn?.(1, 1),
+        rj1_servico_2: () => marcarServicoFn?.(1, 2),
+        rj1_df: () => marcarServicoFalhaFn?.(1, "df"),
+        rj1_ace: () => addPointFn?.(1, "ace"),
+        rj1_winner: () => addPointFn?.(1, "fw"),
+        rj1_erro: () => addPointFn?.(1, "ef"),
+        rj1_erro_adv: () => addPointFn?.(1, "erro_devolucao"),
+        rj1_ponto_normal: () => addPointFn?.(1, "normal"),
+
+        rj2_servico_1: () => marcarServicoFn?.(2, 1),
+        rj2_servico_2: () => marcarServicoFn?.(2, 2),
+        rj2_df: () => marcarServicoFalhaFn?.(2, "df"),
+        rj2_ace: () => addPointFn?.(2, "ace"),
+        rj2_erro: () => addPointFn?.(2, "ef"),
+        rj2_ponto_normal: () => addPointFn?.(2, "normal")
       };
     }
 
     function bindStatsActions() {
       const actionHandlers = getStatsActionHandlers();
-    
+
       Object.entries(actionHandlers).forEach(([btnId, handler]) => {
         const btn = document.getElementById(btnId);
         if (!btn) return;
-    
-        // Remove o onclick inline para evitar duplicidade
+
         btn.removeAttribute("onclick");
-    
+
         btn.addEventListener("click", async (e) => {
           e.preventDefault();
           if (btn.disabled) return;
-    
+
           try {
             const result = handler?.();
             if (result && typeof result.then === "function") {
@@ -179,26 +212,31 @@
           }
         });
       });
-      
     }
 
     bindStatsActions();
 
-
-
     function applyStatsView(mode) {
       statsViewMode = mode;
+
       const isSingle = mode === "single";
       const isDouble = mode === "double";
+      const isResumo = mode === "resumo";
 
       if (el.statsModeSingleLabel) el.statsModeSingleLabel.classList.toggle("active", isSingle);
       if (el.statsModeDoubleLabel) el.statsModeDoubleLabel.classList.toggle("active", isDouble);
+      if (el.statsModeResumoLabel) el.statsModeResumoLabel.classList.toggle("active", isResumo);
 
-      if (el.stats1Card) el.stats1Card.style.display = "";
-      if (el.stats2Card) el.stats2Card.style.display = isDouble ? "" : "none";
+      if (el.stats1Card) el.stats1Card.style.display = isSingle ? "" : (isDouble ? "" : "none");
       if (el.stats2ManualCard) el.stats2ManualCard.style.display = isSingle ? "" : "none";
+      if (el.stats2Card) el.stats2Card.style.display = isDouble ? "" : "none";
+      if (el.statsResumoCard) el.statsResumoCard.style.display = isResumo ? "" : "none";
 
-      if (el.statsModeToggle) el.statsModeToggle.style.display = inputMode === "stats" ? "flex" : "none";
+      if (el.statsModeToggle) {
+        el.statsModeToggle.style.display = inputMode === "stats" ? "flex" : "none";
+      }
+
+      updateResumoServeVisibility();
     }
 
     function applyInputMode(mode) {
@@ -244,12 +282,16 @@
     function bindStatsViewToggle() {
       el.statsModeSingle?.addEventListener("change", () => applyStatsView("single"));
       el.statsModeDouble?.addEventListener("change", () => applyStatsView("double"));
+      el.statsModeResumo?.addEventListener("change", () => applyStatsView("resumo"));
 
       el.statsModeSingleLabel?.addEventListener("click", () => {
         if (!el.statsModeSingle?.disabled) applyStatsView("single");
       });
       el.statsModeDoubleLabel?.addEventListener("click", () => {
         if (!el.statsModeDouble?.disabled) applyStatsView("double");
+      });
+      el.statsModeResumoLabel?.addEventListener("click", () => {
+        if (!el.statsModeResumo?.disabled) applyStatsView("resumo");
       });
 
       applyStatsView("single");
@@ -373,9 +415,13 @@
       if (el.servePlayer1) el.servePlayer1.disabled = serveDisabled;
       if (el.servePlayer2) el.servePlayer2.disabled = serveDisabled;
       if (el.servePlayer1Stats) el.servePlayer1Stats.disabled = serveDisabled;
+      if (el.servePlayer1StatsDouble) el.servePlayer1StatsDouble.disabled = serveDisabled;
+      if (el.servePlayer2StatsDouble) el.servePlayer2StatsDouble.disabled = serveDisabled;
       if (el.servePlayer2Manual) el.servePlayer2Manual.disabled = serveDisabled;
+      if (el.servePlayer1Resumo) el.servePlayer1Resumo.disabled = serveDisabled;
+      if (el.servePlayer2Resumo) el.servePlayer2Resumo.disabled = serveDisabled;
 
-      [serveOption1, serveOption2, manualServeOption1, manualServeOption2].forEach((opt) => {
+      [serveOption1, serveOption2, manualServeOption1, manualServeOption2, doubleServeOption1, doubleServeOption2].forEach((opt) => {
         if (!opt) return;
         opt.style.opacity = serveDisabled ? "0.4" : "";
         opt.style.cursor = serveDisabled ? "not-allowed" : "";
@@ -388,26 +434,28 @@
           if (el.modePoints) el.modePoints.checked = true;
         }
       }
+
+      updateResumoServeVisibility();
     }
 
     function updateStartBtn(status) {
       if (!el.startBtn) return;
-    
+
       const setBtnState = (iconName, label, isPause = false, disabled = false) => {
         el.startBtn.disabled = disabled;
-    
+
         if (el.startBtnIcon) {
           el.startBtnIcon.innerHTML = `<ion-icon name="${iconName}"></ion-icon>`;
         }
-    
+
         if (el.startBtnLabel) {
           el.startBtnLabel.textContent = label;
         }
-    
+
         el.startBtn.classList.toggle("pause-action", isPause);
         el.startBtn.classList.toggle("primary-action", !isPause);
       };
-    
+
       if (status === "live") {
         setBtnState("pause-outline", "Interromper", true, false);
       } else if (status === "suspended") {
@@ -481,11 +529,18 @@
 
     function mapStatus(status) {
       if (status === "live") return "EM ANDAMENTO";
-      if (status === "suspended") return "SUSPENSA";
+      if (status === "suspended") return "PARTIDA SUSPENSA";
       if (status === "finished") return "FINALIZADA";
       if (status === "wo") return "FINALIZADA POR WO";
-      if (status === "ret") return "FINALIZADA POR RET";
+      if (status === "ret") return "FINALIZADA POR ABANDONO";
       return "NÃO INICIADA";
+    }
+
+    function getStatusClass(status) {
+      if (status === "live") return "status-andamento";
+      if (status === "suspended") return "status-suspensa";
+      if (status === "finished" || status === "wo" || status === "ret") return "status-finalizada";
+      return "status-nao-iniciada";
     }
 
     function isMatchLocked(data) {
@@ -543,70 +598,46 @@
 
     function buildMatchScoreText(data) {
       const score = normalizeScore(data.score);
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+      const isFinished =
+        data.status === "finished" ||
+        data.status === "wo" ||
+        data.status === "ret";
 
-      const formatSetText = (setItem) => {
-        const g1 = Number(setItem?.games1 ?? 0);
-        const g2 = Number(setItem?.games2 ?? 0);
-        const tb1 = Number(setItem?.tieBreakPoints1 ?? 0);
-        const tb2 = Number(setItem?.tieBreakPoints2 ?? 0);
-        const mode = String(setItem?.tieBreakMode || "").trim();
-        const finalLabel = String(setItem?.finalLabel || "").trim();
+      if (isFinished) {
+        const finalHistory = Array.isArray(score.setHistory) ? score.setHistory : [];
 
-        if (finalLabel) return finalLabel;
-        if (mode === "super10") {
-          if (tb1 > 0 || tb2 > 0) {
-            const winnerIs1 = tb1 > tb2;
-            return `${winnerIs1 ? "7x6" : "6x7"} ${tb1}-${tb2}`;
+        if (finalHistory.length > 0) {
+          const lastSet = finalHistory[finalHistory.length - 1];
+          const g1 = Number(lastSet?.games1 || 0);
+          const g2 = Number(lastSet?.games2 || 0);
+          const tb1 = Number(lastSet?.tieBreakPoints1 || 0);
+          const tb2 = Number(lastSet?.tieBreakPoints2 || 0);
+          const tbMode = lastSet?.tieBreakMode || null;
+
+          if (tbMode === "tb7" || tbMode === "super10") {
+            return `${g1}x${g2} . ${tb1}-${tb2}`;
           }
-          return "";
+
+          return `${g1}x${g2}`;
         }
 
-        if (mode === "tb7") {
-          if (tb1 > 0 || tb2 > 0) {
-            const setScore = tb1 > tb2 ? "7x6" : "6x7";
-            return `${setScore} (${tb1}-${tb2})`;
-          }
-          if (g1 === 7 && g2 === 6) return "7x6";
-          if (g1 === 6 && g2 === 7) return "6x7";
-          return "";
+        if (score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10") {
+          return `${Number(score.games1 || 0)}x${Number(score.games2 || 0)} . ${Number(score.lastTieBreakPoints1 || 0)}-${Number(score.lastTieBreakPoints2 || 0)}`;
         }
 
-        if (g1 > 0 || g2 > 0) return `${g1}x${g2}`;
-        return "";
-      };
-
-      const parts = [];
-      for (const setItem of history) {
-        const text = formatSetText(setItem);
-        if (!text) continue;
-        if (parts.length && parts[parts.length - 1] === text) continue;
-        parts.push(text);
+        return `${Number(score.sets1 || 0)}x${Number(score.sets2 || 0)}`;
       }
 
-      const isLive = data.status === "live" || data.status === "suspended";
-      const isTBActive = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
-
-      if (isLive) {
-        if (isTBActive) {
-          const tb1 = Number(score.tieBreakPoints1 || 0);
-          const tb2 = Number(score.tieBreakPoints2 || 0);
-
-          if (tb1 > 0 || tb2 > 0) {
-            if (score.tieBreakMode === "super10") {
-              parts.push(`${tb1}-${tb2}`);
-            } else {
-              parts.push(tb1 > tb2 ? `7x6 (${tb1}-${tb2})` : `6x7 (${tb1}-${tb2})`);
-            }
-          }
-        } else {
-          const g1 = Number(score.games1 || 0);
-          const g2 = Number(score.games2 || 0);
-          if (g1 > 0 || g2 > 0) parts.push(`${g1}x${g2}`);
-        }
+      if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+        return `${Number(score.tieBreakPoints1 || 0)}x${Number(score.tieBreakPoints2 || 0)}`;
       }
 
-      return parts.length ? parts.join(" • ") : "0x0";
+      const pointsText = typeof getPointDisplay === "function"
+        ? getPointDisplay(score.points1, score.points2, data.matchFormat, score)
+        : `${score.points1}x${score.points2}`;
+
+      const gamesText = `${Number(score.games1 || 0)}x${Number(score.games2 || 0)}`;
+      return `${gamesText} - ${pointsText}`;
     }
 
     function buildLastActionSnapshot(data) {
@@ -627,18 +658,30 @@
       return String(data?.gameFormat || "Simples").trim();
     }
 
+    function resolvePlayerName(data, playerNumber, fallback) {
+      return (
+        data?.[`player${playerNumber}`] ||
+        data?.[`player${playerNumber}Name`] ||
+        data?.[`jogador${playerNumber}`] ||
+        data?.[`namePlayer${playerNumber}`] ||
+        data?.players?.[`player${playerNumber}`] ||
+        fallback
+      );
+    }
+
     function getTeam1Name(data) {
-      const p1 = data?.player1 || "Jogador 1";
-      const p2 = data?.player2 || "Jogador 2";
       const gf = getGameFormat(data);
+      const p1 = resolvePlayerName(data, 1, "Jogador 1");
+      const p2 = resolvePlayerName(data, 2, "Jogador 2");
       return (gf === "Duplas" || gf === "Duplas Mistas") ? `${p1}/${p2}` : p1;
     }
 
     function getTeam2Name(data) {
-      const p3 = data?.player3 || "Jogador 3";
-      const p4 = data?.player4 || "Jogador 4";
       const gf = getGameFormat(data);
-      return (gf === "Duplas" || gf === "Duplas Mistas") ? `${p3}/${p4}` : (data?.player2 || "Jogador 2");
+      const p3 = resolvePlayerName(data, 3, "Jogador 3");
+      const p4 = resolvePlayerName(data, 4, "Jogador 4");
+      const p2 = resolvePlayerName(data, 2, "Jogador 2");
+      return (gf === "Duplas" || gf === "Duplas Mistas") ? `${p3}/${p4}` : p2;
     }
 
     function setServingClass(elm, active) {
@@ -646,22 +689,96 @@
       elm.classList.toggle("is-serving", !!active);
     }
 
+    function updateResumoServeVisibility() {
+      const isP2Serving = currentServer === "player2";
+
+      if (el.stats2Card) {
+        const p1Selection = el.stats2Card.querySelector("label[for='servePlayer1StatsDouble']")?.closest(".group.saque-selecao");
+        const p2Selection = el.stats2Card.querySelector("label[for='servePlayer2StatsDouble']")?.closest(".group.saque-selecao");
+        const saqueActions = el.stats2Card.querySelector(".group.saque");
+
+        if (p1Selection) {
+          p1Selection.style.display = "";
+          p1Selection.setAttribute("aria-hidden", "false");
+        }
+
+        if (p2Selection) {
+          p2Selection.style.display = "";
+          p2Selection.setAttribute("aria-hidden", "false");
+        }
+
+        if (saqueActions) {
+          saqueActions.style.display = "";
+          saqueActions.setAttribute("aria-hidden", "false");
+
+          saqueActions.querySelectorAll("button").forEach((btn) => {
+            btn.disabled = false;
+            btn.style.opacity = "";
+            btn.style.cursor = "";
+            btn.style.pointerEvents = "";
+          });
+        }
+      }
+
+      if (el.statsResumoCard) {
+        const resumoP1Selection = el.statsResumoCard.querySelector("label[for='servePlayer1Resumo']")?.closest(".group.saque-selecao");
+        const resumoP2Selection = el.statsResumoCard.querySelector("label[for='servePlayer2Resumo']")?.closest(".group.saque-selecao");
+        const resumoActions = el.statsResumoCard.querySelector(".group.saque");
+
+        if (resumoP1Selection) {
+          resumoP1Selection.style.display = "";
+          resumoP1Selection.setAttribute("aria-hidden", "false");
+        }
+
+        if (resumoP2Selection) {
+          resumoP2Selection.style.display = "";
+          resumoP2Selection.setAttribute("aria-hidden", "false");
+        }
+
+        if (resumoActions) {
+          resumoActions.style.display = isP2Serving ? "none" : "";
+          resumoActions.setAttribute("aria-hidden", isP2Serving ? "true" : "false");
+
+          resumoActions.querySelectorAll("button").forEach((btn) => {
+            btn.disabled = isP2Serving;
+            btn.style.opacity = isP2Serving ? "0.35" : "";
+            btn.style.cursor = isP2Serving ? "not-allowed" : "";
+            btn.style.pointerEvents = isP2Serving ? "none" : "";
+          });
+        }
+      }
+    }
+
     function syncServeUI(server) {
       currentServer = server || "player1";
       const isP1 = currentServer === "player1";
       const isP2 = currentServer === "player2";
-
+      const isSingleMode = statsViewMode === "single";
+      const isDoubleMode = statsViewMode === "double";
+    
       if (el.servePlayer1) el.servePlayer1.checked = isP1;
-      if (el.servePlayer1Stats) el.servePlayer1Stats.checked = isP1;
       if (el.servePlayer2) el.servePlayer2.checked = isP2;
-      if (el.servePlayer2Manual) el.servePlayer2Manual.checked = isP2;
-
+    
+      if (el.servePlayer1Stats) el.servePlayer1Stats.checked = isP1;
+      if (el.servePlayer1StatsDouble) el.servePlayer1StatsDouble.checked = isP1;
+      if (el.servePlayer2StatsDouble) el.servePlayer2StatsDouble.checked = isP2;
+    
+      if (el.servePlayer2Manual) el.servePlayer2Manual.checked = isP2 && isSingleMode;
+    
+      if (el.servePlayer1Resumo) el.servePlayer1Resumo.checked = isP1;
+      if (el.servePlayer2Resumo) el.servePlayer2Resumo.checked = isP2;
+    
       if (serveOption1) setServingClass(serveOption1, isP1);
       if (serveOption2) setServingClass(serveOption2, isP2);
+    
       if (manualServeOption1) setServingClass(manualServeOption1, isP1);
-      if (manualServeOption2) setServingClass(manualServeOption2, isP2);
-
+      if (manualServeOption2) setServingClass(manualServeOption2, isP2 && isSingleMode);
+    
+      if (doubleServeOption1) setServingClass(doubleServeOption1, isP1 && isDoubleMode);
+      if (doubleServeOption2) setServingClass(doubleServeOption2, isP2 && isDoubleMode);
+    
       lastServerShown = currentServer;
+      updateResumoServeVisibility();
     }
 
     function updateServeUI(data) {
@@ -679,14 +796,26 @@
       if (el.matchFormat) el.matchFormat.textContent = fmt || "-";
       if (el.matchSubTitle) el.matchSubTitle.textContent = "Acompanhe e atualize o placar em tempo real";
 
-      if (el.statusLabel) {
-        const score = data.score || {};
-        if (score.tieBreakMode === "super10" && data.status === "live") el.statusLabel.textContent = "EM ANDAMENTO • SUPER TIE-BREAK";
-        else if (score.tieBreakMode === "tb7" && data.status === "live") el.statusLabel.textContent = "EM ANDAMENTO • TIE-BREAK";
-        else el.statusLabel.textContent = mapStatus(data.status);
+      if (el.matchScore) {
+        el.matchScore.textContent = buildMatchScoreText(data);
       }
 
-      if (el.matchScore) el.matchScore.textContent = buildMatchScoreText(data);
+      if (el.statusLabel) {
+        const score = data.score || {};
+        let statusText = "";
+
+        if (score.tieBreakMode === "super10" && data.status === "live") {
+          statusText = "EM ANDAMENTO • SUPER TIE-BREAK";
+        } else if (score.tieBreakMode === "tb7" && data.status === "live") {
+          statusText = "EM ANDAMENTO • TIE-BREAK";
+        } else {
+          statusText = mapStatus(data.status);
+        }
+
+        const statusClass = getStatusClass(data.status);
+        el.statusLabel.className = `status-badge ${statusClass}`;
+        el.statusLabel.innerHTML = `<span class="status-dot"></span><span>${statusText}</span>`;
+      }
     }
 
     function renderMatch(data) {
@@ -697,10 +826,16 @@
       if (el.player2Name) el.player2Name.textContent = getTeam2Name(data);
       if (el.player2NameManual) el.player2NameManual.textContent = getTeam2Name(data);
       if (el.player1NameStats) el.player1NameStats.textContent = getTeam1Name(data);
+      if (el.player2NameStats) el.player2NameStats.textContent = getTeam2Name(data);
+      if (el.player1NameResumo) el.player1NameResumo.textContent = getTeam1Name(data);
+      if (el.player2NameResumo) el.player2NameResumo.textContent = getTeam2Name(data);
       if (el.servePlayer1Label) el.servePlayer1Label.textContent = getTeam1Name(data);
       if (el.servePlayer2Label) el.servePlayer2Label.textContent = getTeam2Name(data);
       if (el.games1Label) el.games1Label.textContent = `Games - ${getTeam1Name(data)}`;
       if (el.games2Label) el.games2Label.textContent = `Games - ${getTeam2Name(data)}`;
+      if (el.statsTitle1) el.statsTitle1.textContent = `Stats ${getTeam1Name(data)}`;
+      if (el.statsTitle2) el.statsTitle2.textContent = `Stats ${getTeam2Name(data)}`;
+      if (el.statsTitleResumo) el.statsTitleResumo.textContent = "Resumo";
 
       const isTBActive = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
       const isTBFinished = data.status === "finished" && !score.tieBreakMode && !!score.lastTieBreakMode;
@@ -828,44 +963,42 @@
       }
       return score.breakPointsBySet;
     }
-    
+
     function getCurrentSetNumber(score) {
       const sets1 = Number(score.sets1 || 0);
       const sets2 = Number(score.sets2 || 0);
       const history = Array.isArray(score.setHistory) ? score.setHistory.length : 0;
       return Math.max(1, sets1 + sets2 + 1, history + 1);
     }
-    
+
     function getCurrentGameNumberInSet(scoreBefore) {
       const g1 = Number(scoreBefore.games1 || 0);
       const g2 = Number(scoreBefore.games2 || 0);
-    
-      // O break deve ser salvo no game que acabou de ser disputado
       return Math.max(1, g1 + g2);
     }
-    
+
     function registerBreakPointGame(score, scoreBefore, serverPos) {
       const brokenPlayer = serverPos === 1 ? "player1" : "player2";
       const setNumber = getCurrentSetNumber(scoreBefore);
       const gameNumber = getCurrentGameNumberInSet(scoreBefore);
-    
+
       ensureBreakPointsBySet(score);
-    
+
       const setKey = `set${setNumber}`;
-    
+
       if (!score.breakPointsBySet[setKey]) {
         score.breakPointsBySet[setKey] = {
           player1: [],
           player2: []
         };
       }
-    
+
       const arr = score.breakPointsBySet[setKey][brokenPlayer] || [];
       if (!arr.includes(gameNumber)) {
         arr.push(gameNumber);
         arr.sort((a, b) => a - b);
       }
-    
+
       score.breakPointsBySet[setKey][brokenPlayer] = arr;
       return score;
     }
@@ -874,54 +1007,41 @@
       const server = String(scoreBefore.server || data.server || "player1");
       const serverPos = server === "player2" ? 2 : 1;
       const receiverPos = serverPos === 1 ? 2 : 1;
-    
-      const isTBBefore =
-        scoreBefore.tieBreakMode === "tb7" ||
-        scoreBefore.tieBreakMode === "super10";
+
+      const isTBBefore = scoreBefore.tieBreakMode === "tb7" || scoreBefore.tieBreakMode === "super10";
       if (isTBBefore) return;
-    
-      const sp = serverPos === 1
-        ? Number(scoreBefore.points1 || 0)
-        : Number(scoreBefore.points2 || 0);
-    
-      const rp = serverPos === 1
-        ? Number(scoreBefore.points2 || 0)
-        : Number(scoreBefore.points1 || 0);
-    
+
+      const sp = serverPos === 1 ? Number(scoreBefore.points1 || 0) : Number(scoreBefore.points2 || 0);
+      const rp = serverPos === 1 ? Number(scoreBefore.points2 || 0) : Number(scoreBefore.points1 || 0);
+
       const fmt = String(data.matchFormat || "").toLowerCase();
-      const noAd =
-        fmt.includes("sem vantagem") ||
-        fmt.includes("no ad") ||
-        fmt.includes("no-ad");
-    
+      const noAd = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
+
       const isAdvantageForReceiver =
         scoreBefore.advantage !== null &&
         ((receiverPos === 1 && scoreBefore.advantage === "player1") ||
          (receiverPos === 2 && scoreBefore.advantage === "player2"));
-    
+
       const isDecisiveNoAd = noAd && sp === 3 && rp === 3;
-    
+
       const isBreakPoint =
         (rp === 3 && sp < 3) ||
         isAdvantageForReceiver ||
         isDecisiveNoAd;
-    
+
       if (!isBreakPoint) return;
-    
-      // conta a chance
+
       if (receiverPos === 1) scoreAfter.breakPointsChances1++;
       if (receiverPos === 2) scoreAfter.breakPointsChances2++;
-    
-      // só conta a quebra quando o game realmente foi ganho pelo recebedor
-      const gameEndedWithBreak =
-        result?.gameWon === true &&
-        winnerPos === receiverPos;
-    
+
+      const gameEndedWithBreak = result?.gameWon === true && winnerPos === receiverPos;
+
       if (gameEndedWithBreak) {
         if (receiverPos === 1) scoreAfter.breakPointsWon1++;
         if (receiverPos === 2) scoreAfter.breakPointsWon2++;
       }
     }
+
     function buildFinalSetHistory(score) {
       const s = normalizeScore(score);
       const history = Array.isArray(s.setHistory) ? [...s.setHistory] : [];
@@ -1019,15 +1139,15 @@
 
         pushLastPoint(score, winnerPos);
         winnerPos === 1 ? score.totalPoints1++ : score.totalPoints2++;
-        applyBreakPointStats(scoreBefore, score, data, winnerPos);
+        applyBreakPointStats(scoreBefore, score, data, winnerPos, result);
 
         if (result.gameWon) {
           const serverPos = String(scoreBefore.server || data.server || "player1") === "player2" ? 2 : 1;
-        
+
           if (winnerPos !== serverPos) {
             registerBreakPointGame(score, scoreBefore, serverPos);
           }
-        
+
           score.server = score.server === "player1" ? "player2" : "player1";
         }
 
@@ -1169,12 +1289,6 @@
       }
     }
 
-    async function getCurrentMatchData() {
-      if (!id) return null;
-      const snap = await __db.collection("matches").doc(id).get();
-      return snap.exists ? snap.data() : null;
-    }
-
     async function setServe(server) {
       if (!id) return;
       try {
@@ -1208,7 +1322,16 @@
     function getShareUrl() {
       const url = new URL(window.location.href);
       url.searchParams.set("id", id);
-      if (shareTokenFromUrl) url.searchParams.set("shareToken", shareTokenFromUrl);
+
+      if (shareTokenFromUrl) {
+        url.searchParams.set("shareToken", shareTokenFromUrl);
+      }
+
+      url.searchParams.set("mode", inputMode);
+      if (inputMode === "stats") {
+        url.searchParams.set("statsView", statsViewMode || "single");
+      }
+
       return url.toString();
     }
 
@@ -1267,7 +1390,7 @@
         const box = document.createElement("div");
         box.style.cssText = "width:min(420px, 100%); background:#1f2937; border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,0.45); font-family:inherit;";
     
-        box.innerHTML = ` <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;">Deseja abandonar a partida?</div> <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;">Selecione quem abandonou a partida.</div> <div style="display:flex;flex-direction:column;gap:10px;"> <button id="retPlayer1" style="padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer;">${player1Name}</button> <button id="retPlayer2" style="padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer;">${player2Name}</button> </div> `;
+        box.innerHTML = ` <div style="font-size:18px;font-weight:900;text-align:center;margin-bottom:10px;"> Deseja abandonar a partida? </div> <div style="font-size:14px;opacity:.9;text-align:center;margin-bottom:16px;line-height:1.35;"> Selecione quem abandonou a partida. </div> <div style="display:flex;flex-direction:column;gap:10px;"> <button id="retPlayer1" style="padding:12px 14px; border:none; border-radius:12px; background:#22c55e; color:#fff; font-weight:800; cursor:pointer;"> ${player1Name} </button> <button id="retPlayer2" style="padding:12px 14px; border:none; border-radius:12px; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer;"> ${player2Name} </button> <button id="retCancel" style="padding:12px 14px; border:none; border-radius:12px; background:#6b7280; color:#fff; font-weight:800; cursor:pointer;"> Cancelar </button> </div> `;
     
         overlay.appendChild(box);
         document.body.appendChild(overlay);
@@ -1286,13 +1409,30 @@
           resolve("player2");
         });
     
-        // Não permite cancelar clicando fora
+        box.querySelector("#retCancel").addEventListener("click", () => {
+          cleanup();
+          resolve(null);
+        });
+    
         overlay.addEventListener("click", (e) => {
           if (e.target === overlay) {
             e.stopPropagation();
           }
         });
       });
+    }
+
+    function applyUrlState() {
+      const modeFromUrl = params.get("mode");
+      const statsViewFromUrl = params.get("statsView");
+
+      if (modeFromUrl === "games" || modeFromUrl === "points" || modeFromUrl === "stats") {
+        applyInputMode(modeFromUrl);
+      }
+
+      if (statsViewFromUrl === "single" || statsViewFromUrl === "double" || statsViewFromUrl === "resumo") {
+        applyStatsView(statsViewFromUrl);
+      }
     }
 
     function bindButtons() {
@@ -1460,6 +1600,7 @@
           });
 
           if (el.durationEl) el.durationEl.textContent = durationText(durationSeconds * 1000);
+
           if (wasRetirement) {
             const winnerName = action === "player1" ? team2Name : team1Name;
             setMsg(`Partida finalizada por abandono. Vencedor: ${winnerName}`, "success");
@@ -1549,7 +1690,7 @@
           const data = snap.data();
           if (!data.lastAction) return setMsg("Não há ação anterior para desfazer.", "error");
 
-          const isFinished = data.status === "finished" || data.status === "wo";
+          const isFinished = data.status === "finished" || data.status === "wo" || data.status === "ret";
           if (isFinished && data.finishedAt?.toDate) {
             const finishedAt = data.finishedAt.toDate();
             const elapsedMs = Date.now() - finishedAt.getTime();
@@ -1611,10 +1752,11 @@
         await setServe(server);
       };
 
-      ["servePlayer1", "servePlayer1Stats"].forEach((idEl) => {
+      ["servePlayer1", "servePlayer1Stats", "servePlayer1StatsDouble", "servePlayer1Resumo"].forEach((idEl) => {
         document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player1"));
       });
-      ["servePlayer2", "servePlayer2Manual"].forEach((idEl) => {
+      
+      ["servePlayer2", "servePlayer2StatsDouble", "servePlayer2Manual", "servePlayer2Resumo"].forEach((idEl) => {
         document.getElementById(idEl)?.addEventListener("change", () => handleServeChange("player2"));
       });
 
@@ -1641,6 +1783,7 @@
     function init() {
       bindButtons();
       bindStatsButtonFlash();
+      applyUrlState();
       loadMatch();
     }
 
