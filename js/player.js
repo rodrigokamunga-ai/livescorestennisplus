@@ -1449,7 +1449,7 @@
       function updateVoiceUI(active) {
         if (voiceBtn) {
           voiceBtn.classList.toggle("voice-active", active);
-          voiceBtn.classList.toggle("voice-off", !active);
+          voiceBtn.classList.toggle("voice-idle", !active);
           voiceBtn.setAttribute("aria-label", active ? "Voz ON" : "Voz OFF");
           voiceBtn.title = active ? "Voz ON" : "Voz OFF";
         }
@@ -1461,6 +1461,7 @@
         const badge = voiceBtn?.querySelector(".voice-badge");
         if (badge) badge.textContent = active ? "ON" : "OFF";
       }
+
 
       function normalizeText(text) {
         return String(text || "")
@@ -1476,35 +1477,52 @@
       async function handleTranscript(transcript) {
         console.log("Comando de voz:", transcript);
       
+        const text = normalizeText(transcript);
+      
         const isGameMode = inputMode === "games";
         const isPointsMode = inputMode === "points";
         const isStatsMode = inputMode === "stats";
       
+        const isJ1Serve = /saque\s+(jogador\s*1|jogador\s*um|j1|um)/i.test(text);
+        const isJ2Serve = /saque\s+(jogador\s*2|jogador\s*dois|j2|dois)/i.test(text);
+      
+        const isJ1Point = /jogador\s*1\s*ponto?s?|jogador\s*um\s*ponto?s?|j1\s*ponto?s?/i.test(text);
+        const isJ2Point = /jogador\s*2\s*ponto?s?|jogador\s*dois\s*ponto?s?|j2\s*ponto?s?/i.test(text);
+      
+        const isJ1BackPoint = /jogador\s*1\s*voltar\s*ponto?s?|jogador\s*um\s*voltar\s*ponto?s?|j1\s*voltar\s*ponto?s?/i.test(text);
+        const isJ2BackPoint = /jogador\s*2\s*voltar\s*ponto?s?|jogador\s*dois\s*voltar\s*ponto?s?|j2\s*voltar\s*ponto?s?/i.test(text);
+      
+        const isJ1Game = /jogador\s*1\s*game|jogador\s*um\s*game|j1\s*game/i.test(text);
+        const isJ2Game = /jogador\s*2\s*game|jogador\s*dois\s*game|j2\s*game/i.test(text);
+      
+        const isJ1BackGame = /jogador\s*1\s*voltar\s*game|jogador\s*um\s*voltar\s*game|j1\s*voltar\s*game/i.test(text);
+        const isJ2BackGame = /jogador\s*2\s*voltar\s*game|jogador\s*dois\s*voltar\s*game|j2\s*voltar\s*game/i.test(text);
+      
         // SAQUE
-        if (hasAny(transcript, ["saque jogador 1", "saque do jogador 1", "saque j1", "saque um"])) {
+        if (isJ1Serve) {
           await setServe("player1");
           return;
         }
       
-        if (hasAny(transcript, ["saque jogador 2", "saque do jogador 2", "saque j2", "saque dois"])) {
+        if (isJ2Serve) {
           await setServe("player2");
           return;
         }
       
         // JOGADOR 1 PONTO
-        if (hasAny(transcript, ["jogador 1 ponto", "jogador um ponto", "j1 ponto"])) {
+        if (isJ1Point) {
           if (isPointsMode || isStatsMode) await registerPoint(1);
           return;
         }
       
         // VOLTAR PONTO J1
-        if (hasAny(transcript, ["jogador 1 voltar ponto", "jogador um voltar ponto", "j1 voltar ponto"])) {
+        if (isJ1BackPoint) {
           if (isPointsMode || isStatsMode) await decrementPoint(1);
           return;
         }
       
         // JOGADOR 1 GAME
-        if (hasAny(transcript, ["jogador 1 game", "jogador um game", "j1 game"])) {
+        if (isJ1Game) {
           if (isGameMode || isStatsMode) {
             await saveGames("player1", Number(el.gamesVal1?.textContent || 0) + 1);
           }
@@ -1512,7 +1530,7 @@
         }
       
         // VOLTAR GAME J1
-        if (hasAny(transcript, ["jogador 1 voltar game", "jogador um voltar game", "j1 voltar game"])) {
+        if (isJ1BackGame) {
           if (isGameMode || isStatsMode) {
             await saveGames("player1", Math.max(0, Number(el.gamesVal1?.textContent || 0) - 1));
           }
@@ -1520,19 +1538,19 @@
         }
       
         // JOGADOR 2 PONTO
-        if (hasAny(transcript, ["jogador 2 ponto", "jogador dois ponto", "j2 ponto"])) {
+        if (isJ2Point) {
           if (isPointsMode || isStatsMode) await registerPoint(2);
           return;
         }
       
         // VOLTAR PONTO J2
-        if (hasAny(transcript, ["jogador 2 voltar ponto", "jogador dois voltar ponto", "j2 voltar ponto"])) {
+        if (isJ2BackPoint) {
           if (isPointsMode || isStatsMode) await decrementPoint(2);
           return;
         }
       
         // JOGADOR 2 GAME
-        if (hasAny(transcript, ["jogador 2 game", "jogador dois game", "j2 game"])) {
+        if (isJ2Game) {
           if (isGameMode || isStatsMode) {
             await saveGames("player2", Number(el.gamesVal2?.textContent || 0) + 1);
           }
@@ -1540,7 +1558,7 @@
         }
       
         // VOLTAR GAME J2
-        if (hasAny(transcript, ["jogador 2 voltar game", "jogador dois voltar game", "j2 voltar game"])) {
+        if (isJ2BackGame) {
           if (isGameMode || isStatsMode) {
             await saveGames("player2", Math.max(0, Number(el.gamesVal2?.textContent || 0) - 1));
           }
