@@ -58,10 +58,19 @@
           </div>
         </div>
 
-        <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida" aria-label="Compartilhar partida">
-          <ion-icon name="share-social-outline" class="share-match-icon"></ion-icon>
-        </button>
+        <div class="hero-actions">
+          <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida" aria-label="Compartilhar partida">
+            <ion-icon name="share-social-outline" class="share-match-icon"></ion-icon>
+          </button>
+
+          <button id="voiceBtn" class="share-match-btn voice-btn voice-idle" type="button" title="Gravar voz" aria-label="Gravar voz">
+            <ion-icon name="mic-outline" class="share-match-icon"></ion-icon>
+            <span class="voice-badge">OFF</span>
+          </button>
+        </div>
       </div>
+
+      
 
       <!-- BLOCO DE INFORMAÇÕES -->
       <div class="match-info-card">
@@ -127,15 +136,15 @@
           <input type="radio" name="statsMode" id="statsModeSingle" value="single" checked />
           <span><ion-icon name="person-outline"></ion-icon> Normal</span>
         </label>
-      
+
         <label id="statsModeDoubleLabel" for="statsModeDouble">
           <input type="radio" name="statsMode" id="statsModeDouble" value="double" />
           <span><ion-icon name="people-outline"></ion-icon> Completa</span>
         </label>
-      
+
         <label id="statsModeResumoLabel" for="statsModeResumo">
           <input type="radio" name="statsMode" id="statsModeResumo" value="resumo" />
-          <span><ion-icon name="document-text-outline"></ion-icon>Simples</span>
+          <span><ion-icon name="document-text-outline"></ion-icon> Simples</span>
         </label>
       </div>
 
@@ -416,16 +425,15 @@
               <div class="serve-status" id="serve-status-p2">1º SERVIÇO</div>
               <span class="section-title" id="statsTitle2">Stats Jogador 2</span>
 
-              <!-- Seleção de saque do Jogador 2 no modo 2 Players -->
-<div class="group saque-selecao">
-  <div class="group-title">Saque</div>
+              <div class="group saque-selecao">
+                <div class="group-title">Saque</div>
 
-  <label class="manual-player-name-row" for="servePlayer2StatsDouble">
-    <input type="radio" name="server_double" value="player2" id="servePlayer2StatsDouble" />
-    <span class="serve-ball-indicator" title="Sacador"></span>
-    <span class="player-col-name" id="player2NameStats">Jogador 2</span>
-  </label>
-</div>
+                <label class="manual-player-name-row" for="servePlayer2StatsDouble">
+                  <input type="radio" name="server_double" value="player2" id="servePlayer2StatsDouble" />
+                  <span class="serve-ball-indicator" title="Sacador"></span>
+                  <span class="player-col-name" id="player2NameStats">Jogador 2</span>
+                </label>
+              </div>
 
               <div class="group saque">
                 <div class="group-title">Saque</div>
