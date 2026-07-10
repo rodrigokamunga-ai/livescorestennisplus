@@ -26,84 +26,80 @@
   <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
 </head>
 
-
 <body class="player-page">
 
   <!-- NAVBAR FIXA NO TOPO -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal">
-  <div class="container-xl menu-navbar-top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal">
+    <div class="container-xl menu-navbar-top">
 
-    <!-- Seta de voltar -->
-    <a href="menu.html" class="player-back-link" aria-label="Voltar para o menu">
-      <ion-icon name="arrow-undo-outline"></ion-icon>
-    </a>
+      <!-- Seta de voltar -->
+      <a href="menu.html" class="player-back-link" aria-label="Voltar para o menu">
+        <ion-icon name="arrow-undo-outline"></ion-icon>
+      </a>
 
-    <!-- Título -->
-    <a class="navbar-brand fw-bold d-flex align-items-center gap-2 player-navbar-brand">
-      <ion-icon name="tennisball-outline" style="font-size: 1.2rem;"></ion-icon>
-      <span>Controle das Partidas</span>
-    </a>
+      <!-- Título -->
+      <a class="navbar-brand fw-bold d-flex align-items-center gap-2 player-navbar-brand" href="javascript:void(0)">
+        <ion-icon name="tennisball-outline" style="font-size: 1.2rem;"></ion-icon>
+        <span>Controle das Partidas</span>
+      </a>
 
-   
-</nav>
+    </div>
+  </nav>
 
-  
   <main class="container stack">
     <section class="player-hero panel panel-glass">
-      
 
       <!-- Cabeçalho -->
       <div class="player-hero-top">
-        
-        
-
         <div class="brand-wrap">
           <div>
-
-           
             <span class="section-kicker">Controle da Partida</span>
             <h2 id="matchTitle">Partida</h2>
-            <div class="match-meta-top">
-              <p id="matchSubTitle" class="muted">Acompanhe e atualize o placar em tempo real</p>
-            </div>
           </div>
         </div>
 
-        <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida" aria-label="Compartilhar partida" >
+        <button id="shareBtn" class="share-match-btn" type="button" title="Compartilhar partida" aria-label="Compartilhar partida">
           <ion-icon name="share-social-outline" class="share-match-icon"></ion-icon>
         </button>
       </div>
 
-      <!-- Cards de informações -->
-      <div class="player-info-grid">
-        <div class="timer-line">
-          <span>Data e hora</span>
-          <strong id="matchDateTimeTop">-</strong>
-        </div>
+      <!-- BLOCO DE INFORMAÇÕES -->
+      <div class="match-info-card">
+        <div class="match-info-grid">
+          <div class="match-info-item">
+            <ion-icon name="layers-outline" class="match-info-icon"></ion-icon>
+            <div class="match-info-text">
+              <span>Formato</span>
+              <strong id="matchFormat">-</strong>
+            </div>
+          </div>
 
-        <div class="timer-line">
-          <span>Modalidade</span>
-          <strong id="matchMode">-</strong>
-        </div>
+          <div class="match-info-item">
+            <ion-icon name="pulse-outline" class="match-info-icon"></ion-icon>
+            <div class="match-info-text">
+              <span>Situação</span>
+              <strong id="statusLabel" class="status-badge status-nao-iniciada">
+                <span class="status-dot"></span>
+                <span>Não Iniciada</span>
+              </strong>
+            </div>
+          </div>
 
-        <div class="timer-line">
-          <span>Formato</span>
-          <strong id="matchFormat">-</strong>
-        </div>
+          <div class="match-info-item">
+            <ion-icon name="time-outline" class="match-info-icon"></ion-icon>
+            <div class="match-info-text">
+              <span>Duração</span>
+              <strong id="duration">00:00:00</strong>
+            </div>
+          </div>
 
-        <div class="timer-line">
-          <span>Duração</span>
-          <strong id="duration">00:00:00</strong>
-        </div>
-
-        <div class="timer-line">
-          <span>Situação</span>
-          <strong id="statusLabel">Não Iniciada</strong>
-        </div>
-
-        <div class="timer-line">
-          <span>Placar da partida</span>
-          <strong id="matchScore">0x0 0x0</strong>
+          <div class="match-info-item">
+            <ion-icon name="stats-chart-outline" class="match-info-icon"></ion-icon>
+            <div class="match-info-text">
+              <span>Placar</span>
+              <strong id="matchScore">0x0</strong>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -111,30 +107,35 @@
       <div class="input-mode-toggle" id="inputModeToggle">
         <label id="modeGamesLabel" class="active" for="modeGames">
           <input type="radio" name="inputMode" id="modeGames" value="games" checked />
-          <span>🎮 Games</span>
+          <span><ion-icon name="game-controller-outline"></ion-icon> Games</span>
         </label>
 
         <label id="modePointsLabel" for="modePoints">
           <input type="radio" name="inputMode" id="modePoints" value="points" />
-          <span>🎯 Pontos</span>
+          <span><ion-icon name="analytics-outline"></ion-icon> Pontos</span>
         </label>
 
         <label id="modeStatsLabel" for="modeStats">
           <input type="radio" name="inputMode" id="modeStats" value="stats" />
-          <span>📊 Stats</span>
+          <span><ion-icon name="stats-chart-outline"></ion-icon> Stats</span>
         </label>
       </div>
 
-      <!-- Toggle Stats 1 Jogador / 2 Jogadores -->
+      <!-- Toggle Stats 1 Jogador / 2 Jogadores / Resumo -->
       <div id="statsModeToggle" class="stats-mode-toggle" style="display:none;">
         <label id="statsModeSingleLabel" class="active" for="statsModeSingle">
           <input type="radio" name="statsMode" id="statsModeSingle" value="single" checked />
-          <span>Stats 1 Jogador</span>
+          <span><ion-icon name="person-outline"></ion-icon> Normal</span>
         </label>
-
+      
         <label id="statsModeDoubleLabel" for="statsModeDouble">
           <input type="radio" name="statsMode" id="statsModeDouble" value="double" />
-          <span>Stats 2 Jogadores</span>
+          <span><ion-icon name="people-outline"></ion-icon> Completa</span>
+        </label>
+      
+        <label id="statsModeResumoLabel" for="statsModeResumo">
+          <input type="radio" name="statsMode" id="statsModeResumo" value="resumo" />
+          <span><ion-icon name="document-text-outline"></ion-icon>Simples</span>
         </label>
       </div>
 
@@ -392,10 +393,18 @@
               </label>
 
               <div class="manual-point-box">
-                <div class="point-control manual-point-control" id="manualPointControl2">
-                  <button class="point-btn" data-delta="-1" data-target="player2">−</button>
-                  <strong class="point-value" id="points2Manual">0</strong>
-                  <button class="point-btn" data-delta="1" data-target="player2">+</button>
+                <div class="manual-actions-grid">
+                  <button type="button" class="play-btn play-error" id="j2_erro_manual" onclick="addPoint(2,'ef')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    <span class="play-label">ERROS</span>
+                    <span class="play-sub">Detalhe do erro</span>
+                  </button>
+
+                  <button type="button" class="play-btn play-serve" id="j2_ponto_normal_manual" onclick="addPoint(2,'normal')">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                    <span class="play-label">+ PONTO NORMAL</span>
+                    <span class="play-sub">Pontuação padrão</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -406,6 +415,17 @@
 
               <div class="serve-status" id="serve-status-p2">1º SERVIÇO</div>
               <span class="section-title" id="statsTitle2">Stats Jogador 2</span>
+
+              <!-- Seleção de saque do Jogador 2 no modo 2 Players -->
+<div class="group saque-selecao">
+  <div class="group-title">Saque</div>
+
+  <label class="manual-player-name-row" for="servePlayer2StatsDouble">
+    <input type="radio" name="server_double" value="player2" id="servePlayer2StatsDouble" />
+    <span class="serve-ball-indicator" title="Sacador"></span>
+    <span class="player-col-name" id="player2NameStats">Jogador 2</span>
+  </label>
+</div>
 
               <div class="group saque">
                 <div class="group-title">Saque</div>
@@ -552,6 +572,110 @@
                 </div>
               </div>
             </div>
+
+            <!-- RESUMO -->
+            <div class="stats-controller-card" id="statsResumoCard" style="display:none;">
+              <br><br>
+
+              <div class="serve-status" id="serve-status-resumo">1º SERVIÇO</div>
+              <span class="section-title" id="statsTitleResumo">Resumo</span>
+
+              <!-- Jogador 1 -->
+              <div class="group saque-selecao">
+                <div class="group-title">Saque / Jogador 1</div>
+                <label class="manual-player-name-row" for="servePlayer1Resumo">
+                  <input type="radio" name="server" value="player1" id="servePlayer1Resumo" />
+                  <span class="serve-ball-indicator" title="Sacador"></span>
+                  <span class="player-col-name" id="player1NameResumo">Jogador 1</span>
+                </label>
+              </div>
+
+              <div class="group saque">
+                <div class="group-title">Saque</div>
+                <div class="stats-grid">
+                  <button class="play-btn play-serve" id="rj1_servico_1" onclick="marcarServico(1,1)">
+                    <ion-icon name="flash-outline"></ion-icon>
+                    <span class="play-label">1º SERVIÇO</span>
+                    <span class="play-sub">Saque inicial</span>
+                  </button>
+
+                  <button class="play-btn play-serve-second" id="rj1_servico_2" onclick="marcarServico(1,2)">
+                    <ion-icon name="flash-outline"></ion-icon>
+                    <span class="play-label">2º SERVIÇO</span>
+                    <span class="play-sub">Saque de segurança</span>
+                  </button>
+
+                  <button class="play-btn play-doublefault" id="rj1_df" onclick="marcarServicoFalha(1,'df')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    <span class="play-label">DUPLA FALTA</span>
+                    <span class="play-sub">Erro no saque</span>
+                  </button>
+
+                  <button class="play-btn play-ace" id="rj1_ace" onclick="addPoint(1,'ace')">
+                    <ion-icon name="sparkles-outline"></ion-icon>
+                    <span class="play-label">ACE</span>
+                    <span class="play-sub">Ponto direto</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="group resumo-j1">
+                <div class="group-title">Resumo Jogador 1</div>
+                <div class="stats-grid">
+                  <button class="play-btn play-winner" id="rj1_winner" onclick="addPoint(1,'fw')">
+                    <ion-icon name="trophy-outline"></ion-icon>
+                    <span class="play-label">WINNERS</span>
+                    <span class="play-sub">Detalhe em azul</span>
+                  </button>
+
+                  <button class="play-btn play-error" id="rj1_erro" onclick="addPoint(1,'ef')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    <span class="play-label">ERROS</span>
+                    <span class="play-sub">Detalhe em vermelho</span>
+                  </button>
+
+                  <button class="play-btn play-error" id="rj1_erro_adv" onclick="addPoint(1,'erro_devolucao')">
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                    <span class="play-label">ERRO ADVERSÁRIO</span>
+                    <span class="play-sub">Detalhe em vermelho</span>
+                  </button>
+
+                  <button class="play-btn play-serve" id="rj1_ponto_normal" onclick="addPoint(1,'normal')">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                    <span class="play-label">+ PONTO NORMAL</span>
+                    <span class="play-sub">Detalhe em amarelo</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Jogador 2 -->
+              <div class="group saque-selecao">
+                <div class="group-title">Saque / Jogador 2</div>
+                <label class="manual-player-name-row" for="servePlayer2Resumo">
+                  <input type="radio" name="server" value="player2" id="servePlayer2Resumo" />
+                  <span class="serve-ball-indicator" title="Sacador"></span>
+                  <span class="player-col-name" id="player2NameResumo">Jogador 2</span>
+                </label>
+              </div>
+
+              <div class="group resumo-j2">
+                <div class="group-title">Resumo Jogador 2</div>
+                <div class="stats-grid">
+                  <button class="play-btn play-error" id="rj2_erro" onclick="addPoint(2,'ef')">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    <span class="play-label">ERROS</span>
+                    <span class="play-sub">Detalhe do erro</span>
+                  </button>
+
+                  <button class="play-btn play-serve" id="rj2_ponto_normal" onclick="addPoint(2,'normal')">
+                    <ion-icon name="add-circle-outline"></ion-icon>
+                    <span class="play-label">+ PONTO NORMAL</span>
+                    <span class="play-sub">Pontuação padrão</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -608,8 +732,8 @@
     </button>
   </nav>
 
- <!-- Bootstrap JS -->
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
