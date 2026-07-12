@@ -13,7 +13,10 @@
       cachedMatches: [],
       timer: null,
       unsubscribe: null,
-      unsubscribeSingle: null
+      unsubscribeSingle: null,
+      photoCache: {},
+      photoPromises: {},
+      opponentProfileCache: {}
     };
 
     const FILTER_KEY = "lsts_live_status_filter";
@@ -52,8 +55,6 @@
         return `${h}:${m}:${sec}`;
       },
 
-      
-
       statusLabel(status) {
         switch (status) {
           case "live": return "EM ANDAMENTO";
@@ -73,7 +74,8 @@
           case "wo":
           case "ret":
             return "status-finished";
-          default: return "status-scheduled";
+          default:
+            return "status-scheduled";
         }
       },
 
@@ -250,21 +252,21 @@
         const stats = match.stats || {};
         const p1Stats = stats.player1 || {};
         const p2Stats = stats.player2 || {};
-      
+
         const total1 = Number(
           summary.totalPoints1 ??
           score.totalPoints1 ??
           p1Stats.totalPointsWon ??
           0
         );
-      
+
         const total2 = Number(
           summary.totalPoints2 ??
           score.totalPoints2 ??
           p2Stats.totalPointsWon ??
           0
         );
-      
+
         return {
           totalPoints1: total1,
           totalPoints2: total2,
@@ -275,34 +277,9 @@
         };
       },
 
-    countBreakPointsWonFromMap(match, playerKey = "player1") {
-      const score = U.normalizeScore(match.score || {});
-      const raw = score.breakPointsBySet || match.breakPointsBySet || {};
-    
-      let total = 0;
-    
-      Object.keys(raw || {}).forEach((setKey) => {
-        const setData = raw[setKey] || {};
-    
-        // Se o mapa guarda QUEM FOI QUEBRADO:
-        // jogador que QUEBROU é o oposto.
-        const breakerKey = playerKey === "player1" ? "player2" : "player1";
-        const list = Array.isArray(setData[breakerKey]) ? setData[breakerKey] : [];
-    
-        total += list.length;
-      });
-    
-      return total;
-    },
-
-    
-
       formatBreakPoints(won, chances) {
         return `${Number(won || 0)} / ${Number(chances || 0)}`;
       },
-
-
-      
 
       getWinnerPosition(match, score) {
         const status = String(match?.status || "").trim().toLowerCase();
@@ -346,7 +323,7 @@
         const hasThreeSets = fmt.includes("3 sets");
 
         function formatSet(setObj, isCurrent = false, matchStatus = "") {
-          if (!setObj) return { p1: "--", p2: "--" };
+          if (!setObj) return null;
 
           const g1 = Number(setObj.games1 ?? 0);
           const g2 = Number(setObj.games2 ?? 0);
@@ -391,40 +368,32 @@
           return { p1: String(g1), p2: String(g2) };
         }
 
-        const currentSetNum = history.length + 1;
-        const currentSetData = {
-          p1: String(score.games1 ?? 0),
-          p2: String(score.games2 ?? 0)
+        const currentSetNum = Math.max(1, history.length + 1);
+
+        const currentIsSuperTB = score.tieBreakMode === "super10";
+        const currentData =
+          currentIsSuperTB &&
+          String(match.status || "").toLowerCase() !== "finished" &&
+          String(match.status || "").toLowerCase() !== "wo" &&
+          String(match.status || "").toLowerCase() !== "ret"
+            ? { p1: "6", p2: "6" }
+            : {
+                p1: String(score.games1 ?? 0),
+                p2: String(score.games2 ?? 0)
+              };
+
+        const set1 = history[0] ? formatSet(history[0], false, match.status) : currentSetNum === 1 ? currentData : null;
+        const set2 = history[1] ? formatSet(history[1], false, match.status) : currentSetNum === 2 ? currentData : null;
+        const set3 = history[2] ? formatSet(history[2], false, match.status) : currentSetNum === 3 ? currentData : null;
+
+        return {
+          hasTwoSets,
+          hasThreeSets,
+          currentSetNum,
+          set1,
+          set2,
+          set3
         };
-
-        function getSet(index) {
-          if (history[index]) {
-            return formatSet(history[index], false, match.status);
-          }
-
-          if (currentSetNum === index + 1) {
-            const currentIsSuperTB = score.tieBreakMode === "super10";
-
-            if (
-              currentIsSuperTB &&
-              String(match.status || "").toLowerCase() !== "finished" &&
-              String(match.status || "").toLowerCase() !== "wo" &&
-              String(match.status || "").toLowerCase() !== "ret"
-            ) {
-              return { p1: "6", p2: "6" };
-            }
-
-            return currentSetData;
-          }
-
-          return { p1: "--", p2: "--" };
-        }
-
-        const set1 = getSet(0);
-        const set2 = (hasTwoSets || hasThreeSets) ? getSet(1) : null;
-        const set3 = hasThreeSets ? getSet(2) : null;
-
-        return { hasTwoSets, hasThreeSets, set1, set2, set3 };
       },
 
       isBreakPoint(score, matchFormat) {
@@ -450,7 +419,7 @@
       if (document.getElementById("publicAppInlineStyles")) return;
       const style = document.createElement("style");
       style.id = "publicAppInlineStyles";
-      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .stats-block { margin-top: 14px; } .stats-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin-top:10px; } .stat-card { background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 18px; padding: 14px 16px 16px; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(0,0,0,0.15); } .stat-title { text-align:center; color:#a9c6e6; font-size:0.88rem; line-height:1.15; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; } .stat-values { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 10px; } .stat-values span { font-size:1.1rem; font-weight:800; color:#b9ff5f; min-width:44px; text-align:center; } .values-multi span { min-width:64px; } .last-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .last-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .last-points-balls { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; } .last-point-ball { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .last-point-ball.empty { background: transparent; } .last-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .last-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } .break-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .break-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .break-points-balls { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 8px; } .break-point-ball-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; } .break-point-number { font-size: 11px; font-weight: 800; color: #cbd5e1; line-height: 1; } .break-point-ball { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .break-point-ball.empty { background: transparent; } .break-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .break-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board .set-tb { font-size: 0.55em !important; top: -0.5em !important; margin-left: 1px !important; } .stats-grid { grid-template-columns: 1fr; } .stat-card { min-height: 80px; } .break-points-balls { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; } .break-point-ball { width: 12px; height: 12px; } .break-point-number { font-size: 10px; } } `;
+      style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .stats-block { margin-top: 14px; } .stats-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin-top:10px; } .stat-card { background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 18px; padding: 14px 16px 16px; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(0,0,0,0.15); } .stat-title { text-align:center; color:#a9c6e6; font-size:0.88rem; line-height:1.15; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; } .stat-values { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 10px; } .stat-values span { font-size:1.1rem; font-weight:800; color:#b9ff5f; min-width:44px; text-align:center; } .values-multi span { min-width:64px; } .last-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .last-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .last-points-balls { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; } .last-point-ball { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .last-point-ball.empty { background: transparent; } .last-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .last-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } .break-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .break-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .break-points-balls { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 8px; } .break-point-ball-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; } .break-point-number { font-size: 11px; font-weight: 800; color: #cbd5e1; line-height: 1; } .break-point-ball { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .break-point-ball.empty { background: transparent; } .break-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .break-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } .player-with-avatar { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .player-avatar { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; border: 1px solid rgba(255,255,255,0.18); background: #1f2937; } .player-avatar-placeholder { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.10); } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board .set-tb { font-size: 0.55em !important; top: -0.5em !important; margin-left: 1px !important; } .stats-grid { grid-template-columns: 1fr; } .stat-card { min-height: 80px; } .break-points-balls { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; } .break-point-ball { width: 12px; height: 12px; } .break-point-number { font-size: 10px; } .player-avatar, .player-avatar-placeholder { width: 16px; height: 16px; } } `;
       document.head.appendChild(style);
     }
 
@@ -480,24 +449,210 @@
       return gf === "Duplas" || gf === "Duplas Mistas";
     }
 
-    function renderPlayerName(match, which) {
-      const doubles = isDoublesFormat(match);
+    function normalizePhotoSrc(photo = "") {
+      const value = String(photo || "").trim();
+      if (!value) return "";
 
-      if (!doubles) {
-        const single = which === 1
-          ? String(match.player1 || "Jogador 1").trim()
-          : String(match.player2 || "Jogador 2").trim();
-        return `<span class="name-line">${U.escapeHtml(single)}</span>`;
+      if (
+        value.startsWith("http://") ||
+        value.startsWith("https://") ||
+        value.startsWith("data:image/")
+      ) {
+        return value;
       }
 
-      const p1 = which === 1
-        ? String(match.player1 || "Jogador 1").trim()
-        : String(match.player3 || "Jogador 3").trim();
-      const p2 = which === 1
-        ? String(match.player2 || "Jogador 2").trim()
-        : String(match.player4 || "Jogador 4").trim();
+      if (value.length > 100) {
+        return `data:image/jpeg;base64,${value}`;
+      }
 
-      return `<span class="name-line">${U.escapeHtml(p1)}/</span> <span class="name-line">${U.escapeHtml(p2)}</span>`;
+      return value;
+    }
+
+    function normalizeTextForSearch(text = "") {
+      return String(text)
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function getPlayerProfileId(match, which) {
+      if (which === 1) {
+        return String(match?.ownerId || "").trim();
+      }
+      return "";
+    }
+
+    async function loadProfileData(profileId) {
+      if (!profileId) return { name: "", photoSrc: "" };
+
+      if (state.photoCache[profileId] !== undefined) {
+        return state.photoCache[profileId];
+      }
+
+      if (state.photoPromises[profileId]) {
+        return state.photoPromises[profileId];
+      }
+
+      state.photoPromises[profileId] = db.collection("profiles")
+        .doc(profileId)
+        .get()
+        .then((doc) => {
+          const data = doc.exists ? (doc.data() || {}) : {};
+          const photoBase64 = String(data.photoBase64 || "").trim();
+          const name = String(data.name || data.displayName || data.fullName || data.ownerName || "").trim();
+
+          const result = {
+            name,
+            photoSrc: normalizePhotoSrc(photoBase64)
+          };
+
+          state.photoCache[profileId] = result;
+          return result;
+        })
+        .catch((err) => {
+          console.error("Erro ao carregar profile:", profileId, err);
+          const result = { name: "", photoSrc: "" };
+          state.photoCache[profileId] = result;
+          return result;
+        })
+        .finally(() => {
+          delete state.photoPromises[profileId];
+        });
+
+      return state.photoPromises[profileId];
+    }
+
+    async function findProfileByName(name) {
+      if (!name) return null;
+
+      const query = normalizeTextForSearch(name);
+      const collections = ["profiles", "users"];
+
+      try {
+        for (const col of collections) {
+          const snap = await db.collection(col).get();
+
+          let exact = null;
+          let partial = null;
+
+          snap.forEach((doc) => {
+            const d = doc.data() || {};
+
+            const displayName =
+              d.displayName ||
+              d.name ||
+              d.fullName ||
+              d.nome ||
+              d.ownerName ||
+              d.playerName ||
+              "";
+
+            const norm = normalizeTextForSearch(displayName);
+            if (!norm) return;
+
+            if (norm === query) {
+              exact = { id: doc.id, collection: col, ...d };
+            } else if (!partial && norm.includes(query)) {
+              partial = { id: doc.id, collection: col, ...d };
+            }
+          });
+
+          if (exact) return exact;
+          if (partial) return partial;
+        }
+      } catch (err) {
+        console.error("Erro ao buscar perfil por nome:", err);
+      }
+
+      return null;
+    }
+
+    function getPlayerPhotoFromMatch(match, which) {
+      if (which === 1) {
+        const profileId = String(match?.ownerId || "").trim();
+        const data = profileId ? state.photoCache[profileId] : null;
+        return data?.photoSrc || "";
+      }
+
+      const player2Name = String(match?.player2 || "").trim();
+      const data = player2Name ? state.opponentProfileCache[player2Name] : null;
+      return data?.photoSrc || "";
+    }
+
+    function getPlayerNameFromMatch(match, which) {
+      if (which === 1) {
+        const profileId = String(match?.ownerId || "").trim();
+        const data = profileId ? state.photoCache[profileId] : null;
+        return data?.name || "";
+      }
+
+      const player2Name = String(match?.player2 || "").trim();
+      const data = player2Name ? state.opponentProfileCache[player2Name] : null;
+      return data?.name || "";
+    }
+
+    function renderPlayerAvatar(photoSrc, playerName = "") {
+      const safeName = U.escapeHtml(playerName || "Jogador");
+      if (!photoSrc) {
+        return `<span class="player-avatar-placeholder" title="${safeName}"></span>`;
+      }
+
+      return `<img class="player-avatar" src="${photoSrc}" alt="${safeName}" title="${safeName}" />`;
+    }
+
+    function abbreviateName(name = "") {
+      const parts = String(name).trim().split(/\s+/).filter(Boolean);
+      if (parts.length <= 1) return String(name).trim();
+      return `${parts[0].charAt(0).toUpperCase()}. ${parts[parts.length - 1]}`;
+    }
+
+    function renderPlayerName(match, which, abbrev = false) {
+      const doubles = isDoublesFormat(match);
+    
+      const ownerNameFallback = String(match?.ownerName || match?.player1 || "Jogador 1").trim();
+      const p1Name = String(match?.player1 || ownerNameFallback || "Jogador 1").trim();
+      const p2Name = String(match?.player2 || "Jogador 2").trim();
+      const p3Name = String(match?.player3 || "Jogador 3").trim();
+      const p4Name = String(match?.player4 || "Jogador 4").trim();
+    
+      const nameFromProfile = (name) => {
+        const data = name ? state.opponentProfileCache[name] : null;
+        return data?.name || name || "";
+      };
+    
+      const photoFromProfile = (name) => {
+        const data = name ? state.opponentProfileCache[name] : null;
+        return data?.photoSrc || "";
+      };
+    
+      if (!doubles) {
+        const singleName = which === 1
+          ? (getPlayerNameFromMatch(match, 1) || p1Name)
+          : (getPlayerNameFromMatch(match, 2) || p2Name);
+    
+        const displayName = abbrev ? abbreviateName(singleName) : singleName;
+        const photoSrc = which === 1
+          ? getPlayerPhotoFromMatch(match, 1)
+          : photoFromProfile(p2Name);
+    
+        return ` <span class="player-with-avatar"> ${renderPlayerAvatar(photoSrc, displayName)} <span class="name-line">${U.escapeHtml(displayName)}</span> </span> `;
+      }
+    
+      const names = which === 1
+        ? [p1Name, p2Name]
+        : [p3Name, p4Name];
+    
+      const display1 = abbrev ? abbreviateName(nameFromProfile(names[0])) : nameFromProfile(names[0]);
+      const display2 = abbrev ? abbreviateName(nameFromProfile(names[1])) : nameFromProfile(names[1]);
+    
+      const photo1 = which === 1
+        ? getPlayerPhotoFromMatch(match, 1)
+        : photoFromProfile(names[0]);
+    
+      const photo2 = photoFromProfile(names[1]);
+    
+      return ` <span class="player-with-avatar doubles-wrapper"> <span class="doubles-avatar-group"> ${renderPlayerAvatar(photo1, display1)} ${renderPlayerAvatar(photo2, display2)} </span> <span class="doubles-name-group"> <span class="name-line">${U.escapeHtml(display1)}/</span> <span class="name-line">${U.escapeHtml(display2)}</span> </span> </span> `;
     }
 
     function getTeam1Name(match) {
@@ -826,13 +981,24 @@
       return serving ? `<span class="serve-ball" title="Sacador"></span>` : "";
     }
 
-    function buildSetHead(setColumns) {
-      const cls = setColumns.hasThreeSets ? "three-set-head"
-        : setColumns.hasTwoSets ? "two-set-head"
-          : "one-set-head";
+    function buildSetHead(match, setColumns) {
+  const cls = setColumns.hasThreeSets ? "three-set-head"
+    : setColumns.hasTwoSets ? "two-set-head"
+    : "one-set-head";
 
-      return ` <div class="match-table-head compact-head ${cls}"> <div class="team-label team-col">JOGADOR</div> <div class="set-col">1º SET</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="set-col">2º SET</div>` : ""} ${setColumns.hasThreeSets ? `<div class="set-col">3º SET</div>` : ""} <div class="points-col">PONTOS</div> </div> `;
-    }
+  const rawStatus = String(match?.status || "").trim().toLowerCase();
+  const isFinished = rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret";
+  const hideLabels = rawStatus === "live" || rawStatus === "suspended" || isFinished;
+
+  const score = U.normalizeScore(match?.score || {});
+  const historyCount = Array.isArray(score.setHistory) ? score.setHistory.length : 0;
+  const playedCount = Math.max(historyCount, Number(score.sets1 || 0) + Number(score.sets2 || 0));
+
+  const showSet2 = isFinished ? playedCount >= 2 : setColumns.currentSetNum >= 2;
+  const showSet3 = isFinished ? playedCount >= 3 : setColumns.currentSetNum >= 3;
+
+  return ` <div class="match-table-head compact-head ${cls} ${hideLabels ? "head-no-labels" : ""}"> <div class="team-label team-col">${hideLabels ? "" : "JOGADOR"}</div> <div class="set-col">${hideLabels ? "" : "1º SET"}</div> ${showSet2 ? `<div class="set-col">${hideLabels ? "" : "2º SET"}</div>` : ""} ${showSet3 ? `<div class="set-col">${hideLabels ? "" : "3º SET"}</div>` : ""} ${!isFinished ? `<div class="points-col">${hideLabels ? "" : "PONTOS"}</div>` : ""} </div> `;
+}
 
     function buildPlayerRow(teamNameHtml, setColumns, pts, playerPos, score, isWinner, isWO, isFinished = false, winnerPos = null) {
       const rowCls = setColumns.hasThreeSets ? "three-set-row"
@@ -840,54 +1006,98 @@
           : "one-set-row";
 
       const ptsDisplay = (isWO && isWinner) ? "WO" : pts;
-      const serveBall = getServeBall(score, playerPos, isFinished, winnerPos);
+      const serveBall = getServeBall(score, playerPos, isFinished, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`;
       const setP = playerPos === 1 ? "p1" : "p2";
 
-      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}"> ${serveBall} <span class="team-name-compact-content ${isDoublesFormat(score) ? "doubles-name" : ""}"> ${teamNameHtml} </span> </div> <div class="score green set-col">${setColumns.set1[setP]}</div> ${setColumns.hasTwoSets || setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set2?.[setP] ?? "--"}</div>` : ""} ${setColumns.hasThreeSets ? `<div class="score green set-col">${setColumns.set3?.[setP] ?? "--"}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div> `;
+      const set1 = setColumns.set1 ? setColumns.set1[setP] : "";
+      const set2 = setColumns.set2 ? setColumns.set2[setP] : "";
+      const set3 = setColumns.set3 ? setColumns.set3[setP] : "";
+
+      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}"> ${serveBall} <span class="team-name-compact-content ${isDoublesFormat(score) ? "doubles-name" : ""}"> ${teamNameHtml} </span> </div> <div class="score green set-col">${set1 || ""}</div> ${setColumns.currentSetNum >= 2 ? `<div class="score green set-col">${set2 || ""}</div>` : ""} ${setColumns.currentSetNum >= 3 ? `<div class="score green set-col">${set3 || ""}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div> `;
     }
 
+    
+
     function renderFinalizedCard(match) {
-      const score = U.normalizeScore(match.score);
-      const team1Html = renderPlayerName(match, 1);
-      const team2Html = renderPlayerName(match, 2);
-      const category = U.escapeHtml(U.normalizeText(match.categoryName, ""));
+      const score = U.normalizeScore(match.score || {});
+      const team1Html = renderPlayerName(match, 1, true);
+      const team2Html = renderPlayerName(match, 2, true);
+    
       const tournament = U.escapeHtml(U.normalizeText(match.tournamentName || match.tournament || "", ""));
       const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
       const rawStatus = String(match.status || "").trim().toLowerCase();
       const status = U.normalizeStatus(rawStatus);
-      const statusText = rawStatus === "ret"
-        ? "RET"
-        : U.statusLabel(rawStatus);
-      const setColumns = U.getSetColumns(match, score);
-      const duration = U.buildDuration(match);
+      const statusText = rawStatus === "ret" ? "Abandono" : U.statusLabel(rawStatus);
+    
+      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+    
+      const set1 = history[0] || null;
+      const set2 = history[1] || null;
+      const set3 = history[2] || null;
+    
+      const showSet2 = history.length >= 2;
+      const showSet3 = history.length >= 3;
+    
+      function formatFinishedSet(setObj) {
+        if (!setObj) return { p1: "", p2: "" };
+    
+        const g1 = Number(setObj.games1 || 0);
+        const g2 = Number(setObj.games2 || 0);
+        const tb1 = Number(setObj.tieBreakPoints1 || 0);
+        const tb2 = Number(setObj.tieBreakPoints2 || 0);
+        const mode = String(setObj.tieBreakMode || "").trim().toLowerCase();
+    
+        if ((mode === "tb7" || mode === "super10") && (tb1 > 0 || tb2 > 0)) {
+          const p1Won = tb1 > tb2;
+          return {
+            p1: `${p1Won ? 7 : 6}<span class="set-tb">${tb1}</span>`,
+            p2: `${p1Won ? 6 : 7}<span class="set-tb">${tb2}</span>`
+          };
+        }
+    
+        return {
+          p1: String(g1),
+          p2: String(g2)
+        };
+      }
+    
+      const s1 = formatFinishedSet(set1);
+      const s2 = formatFinishedSet(set2);
+      const s3 = formatFinishedSet(set3);
+    
       const winnerPos = U.getWinnerPosition(match, score);
-      const isWO = rawStatus === "wo";
-
-      const isThreeSetsFinished = setColumns.hasThreeSets;
-      const ptDisp = isThreeSetsFinished
-        ? { p1: "", p2: "" }
-        : U.getPointDisplay(score, match.matchFormat, true);
-
-      const footerParts = [];
-      if (tournament) footerParts.push(`<span class="footer-item">Torneio: <strong>${tournament}</strong></span>`);
-      if (stage) footerParts.push(`<span class="footer-item">Fase: <strong>${stage}</strong></span>`);
-      if (duration) footerParts.push(`<span class="footer-item">Duração: <strong>${duration}</strong></span>`);
-
-      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${statusText}</div> </div> ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, winnerPos === 1, isWO, true, winnerPos)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, winnerPos === 2, isWO, true, winnerPos)} <div class="match-footer compact-footer match-footer-finalized"> ${footerParts.join('<span class="footer-sep">-</span>')} </div> </article> `;
+    
+      return ` <article class="public-card match-board compact-match-board" data-status="${status}"> <div class="match-board-top compact-top"> <div class="match-top-left"> ${tournament ? `<div class="live-meta-left"><span><strong>${tournament}</strong></span></div>` : ""} ${stage ? `<div class="live-meta-left"><span><strong>${stage}</strong></span></div>` : ""} </div> <div class="match-top-right"> <div class="match-status ${U.statusClass(rawStatus)}">${statusText}</div> </div> </div> <div class="match-table-head compact-head ${history.length >= 3 ? "three-set-head" : history.length >= 2 ? "two-set-head" : "one-set-head"} head-no-labels"> <div class="team-label team-col"></div> <div class="set-col"></div> ${showSet2 ? `<div class="set-col"></div>` : ""} ${showSet3 ? `<div class="set-col"></div>` : ""} </div> <div class="match-player-row compact-row ${history.length >= 3 ? "three-set-row" : history.length >= 2 ? "two-set-row" : "one-set-row"} ${winnerPos === 1 ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${winnerPos === 1 ? "winner" : ""}"> ${getServeBall(score, 1, true, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`} <span class="team-name-compact-content ${isDoublesFormat(match) ? "doubles-name" : ""}"> ${team1Html} </span> </div> <div class="score green set-col">${s1.p1 || ""}</div> ${showSet2 ? `<div class="score green set-col">${s2.p1 || ""}</div>` : ""} ${showSet3 ? `<div class="score green set-col">${s3.p1 || ""}</div>` : ""} </div> <div class="match-player-row compact-row ${history.length >= 3 ? "three-set-row" : history.length >= 2 ? "two-set-row" : "one-set-row"} ${winnerPos === 2 ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${winnerPos === 2 ? "winner" : ""}"> ${getServeBall(score, 2, true, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`} <span class="team-name-compact-content ${isDoublesFormat(match) ? "doubles-name" : ""}"> ${team2Html} </span> </div> <div class="score green set-col">${s1.p2 || ""}</div> ${showSet2 ? `<div class="score green set-col">${s2.p2 || ""}</div>` : ""} ${showSet3 ? `<div class="score green set-col">${s3.p2 || ""}</div>` : ""} </div> <div class="match-footer compact-footer match-footer-finalized"></div> </article> `;
     }
 
+    
+    function getStatusDot(status) {
+      const s = String(status || "").trim().toLowerCase();
+
+      if (s === "live") {
+        return `<span class="status-dot status-dot-live" title="Em andamento"></span>`;
+      }
+
+      if (s === "suspended") {
+        return `<span class="status-dot status-dot-suspended" title="Suspensa"></span>`;
+      }
+
+      return "";
+    }
+
+    
+
     function renderLiveCard(match) {
-      const team1Html = renderPlayerName(match, 1);
-      const team2Html = renderPlayerName(match, 2);
+      const team1Html = renderPlayerName(match, 1, true);
+      const team2Html = renderPlayerName(match, 2, true);
+
       const category = U.escapeHtml(U.normalizeText(match.categoryName, ""));
-      const court = U.escapeHtml(U.normalizeText(match.court, ""));
       const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const rawStatus = match.status || "live";
+      const rawStatus = String(match.status || "live").trim().toLowerCase();
       const status = U.normalizeStatus(rawStatus);
-      const score = U.normalizeScore(match.score);
+      const score = U.normalizeScore(match.score || {});
       const setColumns = U.getSetColumns(match, score);
       const duration = U.buildDuration(match);
-      const matchDate = match.matchDateTime ? formatDateTime(match.matchDateTime) : "";
       const liveFeedMsg = getLiveFeedMessage(match);
 
       const isSuspended = rawStatus === "suspended";
@@ -900,8 +1110,8 @@
         ? `<div class="suspended-badge">⏸ SUSPENSA</div>`
         : "";
 
-      const suspendedDuration = isSuspended
-        ? `<div class="suspended-duration">⏱ Duração pausada: ${duration}</div>`
+        const suspendedDuration = isSuspended
+        ? ` <div class="suspended-duration"> <span class="duration-with-icon"> <ion-icon name="time-outline" class="duration-icon"></ion-icon> <strong>${duration}</strong> </span> </div> `
         : "";
 
       const tbLabel = !isSuspended && isSuperTBActive
@@ -910,15 +1120,7 @@
           ? `<div class="tb-active-label">🎾 Tie-break</div>`
           : "";
 
-      const row1Parts = [];
-      if (stage) row1Parts.push(`<span>Fase: <strong>${stage}</strong></span>`);
-      if (!isSuspended && duration) row1Parts.push(`<span>Duração: <strong>${duration}</strong></span>`);
-
-      const row2Parts = [];
-      if (court) row2Parts.push(`<span>Quadra: <strong>${court}</strong></span>`);
-      if (matchDate) row2Parts.push(`<span>Data: <strong>${matchDate}</strong></span>`);
-
-      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> ${category ? `<div class="match-chip">${category}</div>` : ""} <div class="match-status ${U.statusClass(rawStatus)}">${U.statusLabel(rawStatus)}</div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderLastPointsLine(match) : ""} ${!isSuspended ? renderBreakPointBalls(match) : ""} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} ${!isSuspended ? renderStatistics(match) : ""} <div class="match-footer compact-footer match-footer-live"> ${row1Parts.length ? `<div class="match-footer-live-row">${row1Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} ${row2Parts.length ? `<div class="match-footer-live-row">${row2Parts.join('<span class="footer-sep">-</span>')}</div>` : ""} </div> </article> `;
+      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> <div class="match-top-left"> ${category ? `<div class="match-chip">${category}</div>` : ""} ${!isSuspended && stage ? `<div class="live-meta-left"><span><strong>${stage}</strong></span></div>` : ""} </div> <div class="match-top-right"> <div class="match-status ${U.statusClass(rawStatus)}"> ${getStatusDot(rawStatus)} <span>${U.statusLabel(rawStatus)}</span> </div> ${!isSuspended && duration ? ` <div class="live-meta-right"> <span class="duration-with-icon"> <ion-icon name="time-outline" class="duration-icon"></ion-icon> <strong>${duration}</strong> </span> </div> ` : ""} </div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(match, setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderLastPointsLine(match) : ""} ${!isSuspended ? renderBreakPointBalls(match) : ""} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} ${!isSuspended ? renderStatistics(match) : ""} <div class="match-footer compact-footer match-footer-live"></div> </article> `;
     }
 
     function createScheduledCard(match) {
@@ -946,7 +1148,40 @@
       return ["scheduled", "live", "finished", "all"].includes(saved) ? saved : "all";
     }
 
-    function applyFilterAndRender(matches) {
+    async function enrichMatchesWithPhotos(matches) {
+      const ownerIds = new Set();
+      const opponentNames = new Set();
+
+      matches.forEach((match) => {
+        const ownerProfileId = String(match?.ownerId || "").trim();
+        if (ownerProfileId) ownerIds.add(ownerProfileId);
+
+        const player2Name = String(match?.player2 || "").trim();
+        if (player2Name) opponentNames.add(player2Name);
+      });
+
+      await Promise.all([...ownerIds].map((profileId) => loadProfileData(profileId)));
+
+      await Promise.all([...opponentNames].map(async (name) => {
+        if (state.opponentProfileCache[name]) return;
+
+        const profile = await findProfileByName(name);
+        if (profile) {
+          state.opponentProfileCache[name] = {
+            name: String(profile.displayName || profile.name || profile.fullName || profile.ownerName || "").trim(),
+            photoSrc: normalizePhotoSrc(profile.photoBase64 || "")
+          };
+        } else {
+          state.opponentProfileCache[name] = { name: "", photoSrc: "" };
+        }
+      }));
+
+      return matches;
+    }
+
+    async function applyFilterAndRender(matches) {
+      const filteredMatches = await enrichMatchesWithPhotos(matches);
+
       const filter = getActiveFilter();
       const isMobile = U.isMobile();
 
@@ -954,12 +1189,16 @@
       const live = [];
       const finished = [];
 
-      matches.forEach((m) => {
+      filteredMatches.forEach((m) => {
         const rawStatus = String(m.status || "scheduled").trim().toLowerCase();
 
-        if (rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret") finished.push(m);
-        else if (rawStatus === "live" || rawStatus === "suspended") live.push(m);
-        else scheduled.push(m);
+        if (rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret") {
+          finished.push(m);
+        } else if (rawStatus === "live" || rawStatus === "suspended") {
+          live.push(m);
+        } else {
+          scheduled.push(m);
+        }
       });
 
       scheduled.sort((a, b) => (U.toDate(a.matchDateTime)?.getTime() || 0) - (U.toDate(b.matchDateTime)?.getTime() || 0));
@@ -1005,8 +1244,8 @@
       }
     }
 
-    function renderLists(matches) {
-      applyFilterAndRender(matches);
+    async function renderLists(matches) {
+      await applyFilterAndRender(matches);
     }
 
     if (window.tvAbaRef && !window.tvAbaRef.closed && Array.isArray(state.cachedMatches)) {
