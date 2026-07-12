@@ -1332,3 +1332,310 @@
   line-height: 1.1 !important;
 }
 
+/* ========================================================= MOBILE: AJUSTE FINO PARA LIVE / FINISHED ========================================================= */
+
+@media (max-width: 768px) {
+  /* Nome dos jogadores */
+  .match-board[data-status="live"] .player-name.team-name-compact,
+  .match-board[data-status="suspended"] .player-name.team-name-compact,
+  .match-board[data-status="finished"] .player-name.team-name-compact {
+    font-size: 0.82rem !important;
+    line-height: 1.08 !important;
+    font-weight: 800 !important;
+  }
+
+  /* Nome interno do atleta */
+  .match-board[data-status="live"] .team-name-compact-content,
+  .match-board[data-status="suspended"] .team-name-compact-content,
+  .match-board[data-status="finished"] .team-name-compact-content {
+    font-size: 0.82rem !important;
+    line-height: 1.08 !important;
+  }
+
+  /* Números dos sets e pontos */
+  .match-board[data-status="live"] .score,
+  .match-board[data-status="suspended"] .score,
+  .match-board[data-status="finished"] .score {
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    min-width: 0 !important;
+  }
+
+  /* Colunas de set e pontos mais compactas */
+  .match-board[data-status="live"] .set-col,
+  .match-board[data-status="suspended"] .set-col,
+  .match-board[data-status="finished"] .set-col,
+  .match-board[data-status="live"] .points-col,
+  .match-board[data-status="suspended"] .points-col,
+  .match-board[data-status="finished"] .points-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Linha do jogador */
+  .match-board[data-status="live"] .match-player-row,
+  .match-board[data-status="suspended"] .match-player-row,
+  .match-board[data-status="finished"] .match-player-row {
+    min-height: 34px !important;
+  }
+
+  /* Avatar menor no mobile para não apertar a linha */
+  .match-board[data-status="live"] .player-avatar,
+  .match-board[data-status="suspended"] .player-avatar,
+  .match-board[data-status="finished"] .player-avatar,
+  .match-board[data-status="live"] .player-avatar-placeholder,
+  .match-board[data-status="suspended"] .player-avatar-placeholder,
+  .match-board[data-status="finished"] .player-avatar-placeholder {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* Espaço entre avatar e nome */
+  .match-board[data-status="live"] .player-with-avatar,
+  .match-board[data-status="suspended"] .player-with-avatar,
+  .match-board[data-status="finished"] .player-with-avatar {
+    gap: 6px !important;
+  }
+
+  /* Saque centralizado e discreto */
+  .serve-ball {
+    width: 8px !important;
+    height: 8px !important;
+    margin-right: 4px !important;
+    top: 0 !important;
+  }
+
+  /* Cabeçalho do card */
+  .match-board[data-status="live"] .match-board-top,
+  .match-board[data-status="suspended"] .match-board-top,
+  .match-board[data-status="finished"] .match-board-top {
+    gap: 8px !important;
+  }
+
+  /* Torneio e Fase menores no finalizado */
+  .match-board[data-status="finished"] .match-top-left .live-meta-left,
+  .match-board[data-status="finished"] .match-top-left .live-meta-left strong {
+    font-size: 0.64rem !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Duração menor no mobile */
+  .match-board[data-status="live"] .live-meta-right,
+  .match-board[data-status="suspended"] .live-meta-right {
+    font-size: 0.72rem !important;
+  }
+
+  .match-board[data-status="live"] .duration-with-icon,
+  .match-board[data-status="suspended"] .duration-with-icon {
+    gap: 4px !important;
+  }
+
+  .match-board[data-status="live"] .duration-icon,
+  .match-board[data-status="suspended"] .duration-icon {
+    font-size: 12px !important;
+  }
+
+  /* Texto dos blocos de estatísticas menor no mobile */
+  .stats-block .stat-title,
+  .match-summary-title,
+  .last-points-title,
+  .break-points-title {
+    font-size: 0.72rem !important;
+  }
+
+  .stats-block .stat-values span,
+  .stats-block .stat-values-textpair span,
+  .stats-block .stat-compare-labels {
+    font-size: 0.78rem !important;
+  }
+}
+
+/* ========================================================= AJUSTE FINAL MOBILE: TEXTO / NÚMEROS MAIS COMPACTOS ========================================================= */
+
+@media (max-width: 768px) {
+  /* Cards ao vivo e finalizados mais compactos */
+  body.public-page #liveList .public-card[data-status="live"],
+  body.public-dashboard-page #liveList .public-card[data-status="live"],
+  body.public-page #liveList .public-card[data-status="suspended"],
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"],
+  body.public-page #finishedList .public-card[data-status="finished"],
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] {
+    padding: 10px !important;
+    min-height: auto !important;
+  }
+
+  /* Cabeçalho do card mais enxuto */
+  body.public-page #liveList .public-card[data-status="live"] .match-board-top,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-board-top,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-board-top,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-board-top,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-board-top,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-board-top {
+    margin-bottom: 6px !important;
+    gap: 6px !important;
+  }
+
+  /* Nome do jogador mais compacto */
+  body.public-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
+    font-size: 13px !important;
+    line-height: 1.08 !important;
+    font-weight: 800 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .team-name-compact,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .team-name-compact,
+  body.public-page #liveList .public-card[data-status="suspended"] .team-name-compact,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .team-name-compact,
+  body.public-page #finishedList .public-card[data-status="finished"] .team-name-compact,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .team-name-compact {
+    font-size: 13px !important;
+    line-height: 1.08 !important;
+    font-weight: 800 !important;
+  }
+
+  /* Números do placar menores */
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 17px !important;
+    line-height: 1 !important;
+    min-width: 22px !important;
+    font-weight: 900 !important;
+  }
+
+  /* Set / pontos mais compactos */
+  body.public-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-page #liveList .public-card[data-status="live"] .points-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .points-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .points-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Linha do jogador mais baixa */
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    min-height: 36px !important;
+    margin-top: 4px !important;
+  }
+
+  /* Avatar menor para liberar espaço */
+  body.public-page #liveList .public-card[data-status="live"] .player-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar,
+  body.public-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-avatar,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-avatar-placeholder,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-avatar-placeholder,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .player-with-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-with-avatar,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-with-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-with-avatar,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-with-avatar,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-with-avatar {
+    gap: 6px !important;
+  }
+
+  /* Texto do topo menor: torneio / fase / status */
+  body.public-page #finishedList .public-card[data-status="finished"] .match-top-left,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-top-left {
+    gap: 2px !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .live-meta-left,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .live-meta-left,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-chip,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-chip,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-status,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-status {
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Duração menor */
+  body.public-page #liveList .public-card[data-status="live"] .live-meta-right,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .live-meta-right,
+  body.public-page #liveList .public-card[data-status="suspended"] .live-meta-right,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .live-meta-right {
+    font-size: 11px !important;
+  }
+
+  /* Título geral do card mais compacto */
+  body.public-page #liveList .public-card[data-status="live"] .match-format strong,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format strong,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-format strong,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-format strong {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.public-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
+    font-size: 12px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 15px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .player-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar,
+  body.public-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    min-height: 32px !important;
+  }
+}
