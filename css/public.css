@@ -2174,3 +2174,72 @@ body.public-dashboard-page .win-probability-title {
   letter-spacing: normal !important;
 }
 
+/* ========================================================= PATCH MOBILE: ESTATÍSTICAS MENOR ========================================================= */
+@media (max-width: 768px) {
+  body.public-page .stats-block .stat-title,
+  body.public-dashboard-page .stats-block .stat-title {
+    font-size: 0.68rem !important;
+    line-height: 1.08 !important;
+  }
+
+  body.public-page .stats-block .stat-values span,
+  body.public-dashboard-page .stats-block .stat-values span {
+    font-size: 0.88rem !important;
+    line-height: 1 !important;
+    min-width: 0 !important;
+  }
+
+  body.public-page .stats-block .stat-pct-row span,
+  body.public-dashboard-page .stats-block .stat-pct-row span {
+    font-size: 0.68rem !important;
+    line-height: 1 !important;
+    min-width: 0 !important;
+  }
+
+  body.public-page .stats-block .stat-values-textpair span,
+  body.public-dashboard-page .stats-block .stat-values-textpair span {
+    font-size: 0.82rem !important;
+    line-height: 1.05 !important;
+  }
+
+  body.public-page .stats-block .stat-compare-labels,
+  body.public-dashboard-page .stats-block .stat-compare-labels {
+    font-size: 0.66rem !important;
+    line-height: 1.05 !important;
+  }
+
+  body.public-page .match-summary-title,
+  body.public-dashboard-page .match-summary-title {
+    font-size: 0.82rem !important;
+    line-height: 1.1 !important;
+  }
+
+  body.public-page .summary-label,
+  body.public-dashboard-page .summary-label {
+    font-size: 0.82rem !important;
+    line-height: 1.08 !important;
+  }
+
+  body.public-page .summary-value,
+  body.public-dashboard-page .summary-value {
+    font-size: 0.73rem !important;
+    line-height: 1.15 !important;
+  }
+
+  body.public-page .last-points-title,
+  body.public-dashboard-page .last-points-title,
+  body.public-page .break-points-title,
+  body.public-dashboard-page .break-points-title {
+    font-size: 0.70rem !important;
+    line-height: 1.1 !important;
+    text-transform: none !important;
+  }
+
+  body.public-page .match-board[data-status="live"] .live-feed,
+  body.public-page .match-board[data-status="suspended"] .live-feed,
+  body.public-dashboard-page .match-board[data-status="live"] .live-feed,
+  body.public-dashboard-page .match-board[data-status="suspended"] .live-feed {
+    font-size: 0.72rem !important;
+    line-height: 1.15 !important;
+  }
+}
