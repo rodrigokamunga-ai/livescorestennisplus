@@ -1,13 +1,15 @@
 /* ========================================================= HEADER MOBILE / FILTROS ========================================================= */
 
-.mobile-filters-header {
+body.public-page .mobile-filters-header,
+body.public-dashboard-page .mobile-filters-header {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
 }
 
-.back-btn {
+body.public-page .back-btn,
+body.public-dashboard-page .back-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -23,18 +25,21 @@
   flex: 0 0 auto;
 }
 
-.back-btn:hover {
+body.public-page .back-btn:hover,
+body.public-dashboard-page .back-btn:hover {
   background: rgba(255, 255, 255, 0.16);
   transform: translateY(-1px);
 }
 
-.mobile-filters-label {
+body.public-page .mobile-filters-label,
+body.public-dashboard-page .mobile-filters-label {
   flex: 1;
 }
 
 /* ========================================================= JOGOS DO DIA / AGENDADOS ========================================================= */
 
-.match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+body.public-page .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact,
+body.public-dashboard-page .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
   font-size: 1.22rem !important;
   line-height: 1.2 !important;
   font-weight: 700 !important;
@@ -43,25 +48,46 @@
   text-overflow: ellipsis;
 }
 
-.match-board.scheduled-match .scheduled-footer {
+body.public-page .match-board.scheduled-match .scheduled-footer,
+body.public-dashboard-page .match-board.scheduled-match .scheduled-footer {
   font-size: 0.88rem;
   line-height: 1.15;
 }
 
-.match-board.scheduled-match .scheduled-footer strong {
+body.public-page .match-board.scheduled-match .scheduled-footer strong,
+body.public-dashboard-page .match-board.scheduled-match .scheduled-footer strong {
   font-size: 0.88rem;
   font-weight: 800;
 }
 
+/* ========================================================= JOGOS DO DIA: AVATAR MAIOR ========================================================= */
+
+body.public-page .match-board.scheduled-match .player-avatar,
+body.public-page .match-board.scheduled-match .player-avatar-placeholder,
+body.public-dashboard-page .match-board.scheduled-match .player-avatar,
+body.public-dashboard-page .match-board.scheduled-match .player-avatar-placeholder {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+body.public-page .match-board.scheduled-match .player-with-avatar,
+body.public-dashboard-page .match-board.scheduled-match .player-with-avatar {
+  gap: 10px !important;
+}
+
 /* ========================================================= JOGOS EM ANDAMENTO / SUSPENSOS ========================================================= */
 
-.match-board[data-status="live"],
-.match-board[data-status="suspended"] {
+body.public-page .match-board[data-status="live"],
+body.public-page .match-board[data-status="suspended"],
+body.public-dashboard-page .match-board[data-status="live"],
+body.public-dashboard-page .match-board[data-status="suspended"] {
   align-items: stretch;
 }
 
-.match-board[data-status="live"] .team-name-compact,
-.match-board[data-status="suspended"] .team-name-compact {
+body.public-page .match-board[data-status="live"] .team-name-compact,
+body.public-page .match-board[data-status="suspended"] .team-name-compact,
+body.public-dashboard-page .match-board[data-status="live"] .team-name-compact,
+body.public-dashboard-page .match-board[data-status="suspended"] .team-name-compact {
   font-size: 1.05rem;
   line-height: 1.2;
   white-space: pre-line;
@@ -70,22 +96,29 @@
   font-weight: 700;
 }
 
-.match-board[data-status="live"] .score,
-.match-board[data-status="suspended"] .score {
+body.public-page .match-board[data-status="live"] .score,
+body.public-page .match-board[data-status="suspended"] .score,
+body.public-dashboard-page .match-board[data-status="live"] .score,
+body.public-dashboard-page .match-board[data-status="suspended"] .score {
   font-size: 1.9rem;
   line-height: 1;
   font-weight: 900;
 }
 
-.match-board[data-status="live"] .match-player-row,
-.match-board[data-status="suspended"] .match-player-row {
+body.public-page .match-board[data-status="live"] .match-player-row,
+body.public-page .match-board[data-status="suspended"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="live"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-player-row {
   min-height: 44px;
 }
 
 /* Nome completo sem corte */
-.match-board[data-status="live"] .player-name,
-.match-board[data-status="suspended"] .player-name,
-.match-board[data-status="finished"] .player-name {
+body.public-page .match-board[data-status="live"] .player-name,
+body.public-page .match-board[data-status="suspended"] .player-name,
+body.public-page .match-board[data-status="finished"] .player-name,
+body.public-dashboard-page .match-board[data-status="live"] .player-name,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-name,
+body.public-dashboard-page .match-board[data-status="finished"] .player-name {
   white-space: normal !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
@@ -98,24 +131,29 @@
 
 /* ========================================================= JOGOS FINALIZADOS ========================================================= */
 
-.match-board[data-status="finished"] {
+body.public-page .match-board[data-status="finished"],
+body.public-dashboard-page .match-board[data-status="finished"] {
   transform: scale(1.03);
   transform-origin: top center;
 }
 
-.match-board[data-status="finished"] .match-table-head {
+body.public-page .match-board[data-status="finished"] .match-table-head,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head {
   align-items: center;
 }
 
-.match-board[data-status="finished"] .match-table-head > div,
-.match-board[data-status="finished"] .match-player-row > div {
+body.public-page .match-board[data-status="finished"] .match-table-head > div,
+body.public-page .match-board[data-status="finished"] .match-player-row > div,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head > div,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row > div {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
 }
 
-.match-board[data-status="finished"] .match-table-head .team-label {
+body.public-page .match-board[data-status="finished"] .match-table-head .team-label,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head .team-label {
   display: flex !important;
   justify-content: flex-start !important;
   align-items: center;
@@ -123,11 +161,13 @@
   padding-left: 8px;
 }
 
-.match-board[data-status="finished"] .match-player-row {
+body.public-page .match-board[data-status="finished"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row {
   align-items: center;
 }
 
-.match-board[data-status="finished"] .player-name {
+body.public-page .match-board[data-status="finished"] .player-name,
+body.public-dashboard-page .match-board[data-status="finished"] .player-name {
   justify-content: flex-start !important;
   text-align: left !important;
   font-size: 0.98rem;
@@ -140,35 +180,44 @@
   overflow-wrap: anywhere !important;
 }
 
-.match-board[data-status="finished"] .score {
+body.public-page .match-board[data-status="finished"] .score,
+body.public-dashboard-page .match-board[data-status="finished"] .score {
   font-size: 1.05rem;
   font-weight: 900;
 }
 
-.match-board .match-board-top {
+body.public-page .match-board .match-board-top.compact-top,
+body.public-dashboard-page .match-board .match-board-top.compact-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 14px;
 }
 
-.match-board .match-status {
+body.public-page .match-board .match-status,
+body.public-dashboard-page .match-board .match-status {
   margin-left: auto;
 }
 
-.match-board[data-status="finished"] .match-board-top,
-.match-board[data-status="wo"] .match-board-top {
+body.public-page .match-board[data-status="finished"] .match-board-top,
+body.public-page .match-board[data-status="wo"] .match-board-top,
+body.public-dashboard-page .match-board[data-status="finished"] .match-board-top,
+body.public-dashboard-page .match-board[data-status="wo"] .match-board-top {
   justify-content: space-between !important;
 }
 
-.match-board[data-status="finished"] .match-status,
-.match-board[data-status="wo"] .match-status {
+body.public-page .match-board[data-status="finished"] .match-status,
+body.public-page .match-board[data-status="wo"] .match-status,
+body.public-dashboard-page .match-board[data-status="finished"] .match-status,
+body.public-dashboard-page .match-board[data-status="wo"] .match-status {
   margin-left: auto !important;
   text-align: right !important;
 }
 
 /* ========================================================= RESUMO DA PARTIDA ========================================================= */
 
-.match-summary {
+body.public-page .match-summary,
+body.public-dashboard-page .match-summary {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
@@ -176,7 +225,8 @@
   min-width: 0;
 }
 
-.match-summary-title {
+body.public-page .match-summary-title,
+body.public-dashboard-page .match-summary-title {
   font-size: 0.95rem;
   font-weight: 900;
   color: #ffffff !important;
@@ -185,14 +235,16 @@
   text-align: center;
 }
 
-.match-summary-grid {
+body.public-page .match-summary-grid,
+body.public-dashboard-page .match-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   min-width: 0;
 }
 
-.match-summary-item {
+body.public-page .match-summary-item,
+body.public-dashboard-page .match-summary-item {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
@@ -200,7 +252,8 @@
   min-width: 0;
 }
 
-.summary-label {
+body.public-page .summary-label,
+body.public-dashboard-page .summary-label {
   display: block;
   font-weight: 800;
   font-size: 0.92rem;
@@ -213,7 +266,8 @@
   text-align: center;
 }
 
-.summary-value {
+body.public-page .summary-value,
+body.public-dashboard-page .summary-value {
   display: block;
   font-size: 0.84rem;
   line-height: 1.35;
@@ -222,18 +276,21 @@
   text-align: center;
 }
 
-.summary-value strong {
+body.public-page .summary-value strong,
+body.public-dashboard-page .summary-value strong {
   font-weight: 900;
   color: #ffffff;
 }
 
 /* ========================================================= ESTATÍSTICAS ========================================================= */
 
-.stats-block {
+body.public-page .stats-block,
+body.public-dashboard-page .stats-block {
   margin-top: 14px;
 }
 
-.stats-block .stat-card {
+body.public-page .stats-block .stat-card,
+body.public-dashboard-page .stats-block .stat-card {
   background: rgba(25, 34, 54, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 18px;
@@ -247,14 +304,16 @@
   overflow: hidden;
 }
 
-.stats-grid {
+body.public-page .stats-grid,
+body.public-dashboard-page .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-top: 10px;
 }
 
-.stats-block .stat-title {
+body.public-page .stats-block .stat-title,
+body.public-dashboard-page .stats-block .stat-title {
   text-align: center;
   color: #ffffff !important;
   font-size: 0.88rem;
@@ -270,7 +329,8 @@
 }
 
 /* linha principal dos valores */
-.stats-block .stat-values {
+body.public-page .stats-block .stat-values,
+body.public-dashboard-page .stats-block .stat-values {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -278,7 +338,8 @@
   padding: 0 10px;
 }
 
-.stats-block .stat-values span {
+body.public-page .stats-block .stat-values span,
+body.public-dashboard-page .stats-block .stat-values span {
   font-size: 1.1rem;
   font-weight: 800;
   color: #ffffff !important;
@@ -287,7 +348,8 @@
 }
 
 /* linha das porcentagens */
-.stats-block .stat-pct-row {
+body.public-page .stats-block .stat-pct-row,
+body.public-dashboard-page .stats-block .stat-pct-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -296,7 +358,8 @@
   margin-top: -2px;
 }
 
-.stats-block .stat-pct-row span {
+body.public-page .stats-block .stat-pct-row span,
+body.public-dashboard-page .stats-block .stat-pct-row span {
   font-size: 0.82rem;
   font-weight: 700;
   color: #ffffff !important;
@@ -305,7 +368,8 @@
 }
 
 /* Barra comparativa */
-.stats-block .stat-compare-bar {
+body.public-page .stats-block .stat-compare-bar,
+body.public-dashboard-page .stats-block .stat-compare-bar {
   display: flex;
   width: 100%;
   height: 8px;
@@ -315,19 +379,22 @@
   margin-top: 8px;
 }
 
-.stats-block .stat-compare-p1 {
+body.public-page .stats-block .stat-compare-p1,
+body.public-dashboard-page .stats-block .stat-compare-p1 {
   background: linear-gradient(90deg, #22c55e, #16a34a);
   height: 100%;
   transition: width 0.3s ease;
 }
 
-.stats-block .stat-compare-p2 {
+body.public-page .stats-block .stat-compare-p2,
+body.public-dashboard-page .stats-block .stat-compare-p2 {
   background: linear-gradient(90deg, #3b82f6, #2563eb);
   height: 100%;
   transition: width 0.3s ease;
 }
 
-.stats-block .stat-compare-labels {
+body.public-page .stats-block .stat-compare-labels,
+body.public-dashboard-page .stats-block .stat-compare-labels {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -337,13 +404,15 @@
   color: #ffffff !important;
 }
 
-.stats-block .stat-compare-labels span {
+body.public-page .stats-block .stat-compare-labels span,
+body.public-dashboard-page .stats-block .stat-compare-labels span {
   color: #ffffff !important;
 }
 
 /* ========================================================= SERVIÇOS EM UMA ÚNICA LINHA ========================================================= */
 
-.stats-block .stat-values-textpair {
+body.public-page .stats-block .stat-values-textpair,
+body.public-dashboard-page .stats-block .stat-values-textpair {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -353,7 +422,8 @@
   flex-wrap: nowrap;
 }
 
-.stats-block .stat-values-textpair span {
+body.public-page .stats-block .stat-values-textpair span,
+body.public-dashboard-page .stats-block .stat-values-textpair span {
   font-size: 1rem;
   font-weight: 800;
   color: #ffffff !important;
@@ -362,18 +432,21 @@
   white-space: nowrap;
 }
 
-.stats-block .stat-values-textpair span:first-child {
+body.public-page .stats-block .stat-values-textpair span:first-child,
+body.public-dashboard-page .stats-block .stat-values-textpair span:first-child {
   flex: 0 0 auto;
 }
 
-.stats-block .stat-values-textpair span:last-child {
+body.public-page .stats-block .stat-values-textpair span:last-child,
+body.public-dashboard-page .stats-block .stat-values-textpair span:last-child {
   flex: 0 0 auto;
   margin-left: 8px;
 }
 
 /* ========================================================= BREAK POINT ========================================================= */
 
-.break-points-block {
+body.public-page .break-points-block,
+body.public-dashboard-page .break-points-block {
   margin-top: 12px;
   padding: 12px 12px 10px;
   border-radius: 14px;
@@ -381,7 +454,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.break-points-title {
+body.public-page .break-points-title,
+body.public-dashboard-page .break-points-title {
   text-align: center;
   font-size: 0.88rem;
   font-weight: 900;
@@ -391,7 +465,8 @@
   text-transform: uppercase;
 }
 
-.break-points-balls {
+body.public-page .break-points-balls,
+body.public-dashboard-page .break-points-balls {
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: center !important;
@@ -403,7 +478,8 @@
   padding-bottom: 2px !important;
 }
 
-.break-point-ball-wrap {
+body.public-page .break-point-ball-wrap,
+body.public-dashboard-page .break-point-ball-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -412,7 +488,8 @@
   flex: 0 0 auto;
 }
 
-.break-point-number {
+body.public-page .break-point-number,
+body.public-dashboard-page .break-point-number {
   font-size: 11px;
   font-weight: 800;
   color: #cbd5e1;
@@ -420,7 +497,8 @@
   white-space: nowrap;
 }
 
-.break-point-ball {
+body.public-page .break-point-ball,
+body.public-dashboard-page .break-point-ball {
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -430,51 +508,80 @@
   box-shadow: none;
 }
 
-.break-point-ball.empty {
+body.public-page .break-point-ball.empty,
+body.public-dashboard-page .break-point-ball.empty {
   background: transparent;
 }
 
-.break-point-ball.p1 {
+body.public-page .break-point-ball.p1,
+body.public-dashboard-page .break-point-ball.p1 {
   background: #22c55e;
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
 }
 
-.break-point-ball.p2 {
+body.public-page .break-point-ball.p2,
+body.public-dashboard-page .break-point-ball.p2 {
   background: #3b82f6;
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
 }
 
 /* ========================================================= COLUNAS / ESPAÇAMENTO GERAL ========================================================= */
 
-.match-table-head,
-.match-player-row {
+body.public-page .match-table-head,
+body.public-page .match-player-row,
+body.public-dashboard-page .match-table-head,
+body.public-dashboard-page .match-player-row {
   column-gap: 12px;
 }
 
-.match-table-head > div,
-.match-player-row > div {
+body.public-page .match-table-head > div,
+body.public-page .match-player-row > div,
+body.public-dashboard-page .match-table-head > div,
+body.public-dashboard-page .match-player-row > div {
   min-width: 0;
 }
 
-.set-col,
-.points-col,
-.score {
+body.public-page .set-col,
+body.public-page .points-col,
+body.public-page .score,
+body.public-dashboard-page .set-col,
+body.public-dashboard-page .points-col,
+body.public-dashboard-page .score {
   padding-left: 2px;
   padding-right: 2px;
 }
 
-/* ========================================================= TIE-BREAK ========================================================= */
-
-.match-board .set-col {
+/* Alinhamento à esquerda para sets e pontos */
+body.public-page .match-board .set-col,
+body.public-page .match-board .points-col,
+body.public-dashboard-page .match-board .set-col,
+body.public-dashboard-page .match-board .points-col {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start !important;
+  text-align: left !important;
   white-space: nowrap;
   gap: 1px;
   overflow: visible !important;
+  padding-left: 4px;
 }
 
-.match-board .set-score {
+body.public-page .match-table-head .set-col,
+body.public-page .match-player-row .set-col,
+body.public-page .match-table-head .points-col,
+body.public-page .match-player-row .points-col,
+body.public-dashboard-page .match-table-head .set-col,
+body.public-dashboard-page .match-player-row .set-col,
+body.public-dashboard-page .match-table-head .points-col,
+body.public-dashboard-page .match-player-row .points-col {
+  justify-content: flex-start !important;
+  text-align: right !important;
+}
+
+/* ========================================================= TIE-BREAK ========================================================= */
+
+body.public-page .match-board .set-score,
+body.public-dashboard-page .match-board .set-score {
   display: inline-flex;
   align-items: flex-start;
   justify-content: center;
@@ -483,12 +590,14 @@
   overflow: visible !important;
 }
 
-.match-board .set-main {
+body.public-page .match-board .set-main,
+body.public-dashboard-page .match-board .set-main {
   display: inline-block;
   line-height: 1;
 }
 
-.match-board .set-tb {
+body.public-page .match-board .set-tb,
+body.public-dashboard-page .match-board .set-tb {
   font-size: 0.58em !important;
   line-height: 1 !important;
   position: relative;
@@ -503,28 +612,37 @@
 
 /* ========================================================= FOOTER LIVE / SUSPENSO ========================================================= */
 
-.match-board[data-status="live"] .match-footer-live,
-.match-board[data-status="suspended"] .match-footer-live {
+body.public-page .match-board[data-status="live"] .match-footer-live,
+body.public-page .match-board[data-status="suspended"] .match-footer-live,
+body.public-dashboard-page .match-board[data-status="live"] .match-footer-live,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live {
   align-items: center !important;
 }
 
-.match-board[data-status="live"] .match-footer-live-row,
-.match-board[data-status="suspended"] .match-footer-live-row {
+body.public-page .match-board[data-status="live"] .match-footer-live-row,
+body.public-page .match-board[data-status="suspended"] .match-footer-live-row,
+body.public-dashboard-page .match-board[data-status="live"] .match-footer-live-row,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live-row {
   justify-content: center !important;
   text-align: center !important;
   width: 100%;
 }
 
-.match-board[data-status="live"] .match-footer-live-row span,
-.match-board[data-status="suspended"] .match-footer-live-row span,
-.match-board[data-status="live"] .match-footer-live-row strong,
-.match-board[data-status="suspended"] .match-footer-live-row strong {
+body.public-page .match-board[data-status="live"] .match-footer-live-row span,
+body.public-page .match-board[data-status="suspended"] .match-footer-live-row span,
+body.public-page .match-board[data-status="live"] .match-footer-live-row strong,
+body.public-page .match-board[data-status="suspended"] .match-footer-live-row strong,
+body.public-dashboard-page .match-board[data-status="live"] .match-footer-live-row span,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live-row span,
+body.public-dashboard-page .match-board[data-status="live"] .match-footer-live-row strong,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live-row strong {
   justify-content: center !important;
   text-align: center !important;
 }
 
 /* PARTIDAS FINALIZADAS COM DURAÇÃO EM LINHA ABAIXO */
-.match-board[data-status="finished"] .match-footer-finalized {
+body.public-page .match-board[data-status="finished"] .match-footer-finalized,
+body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -535,7 +653,8 @@
   overflow: hidden !important;
 }
 
-.match-footer-finalized-row {
+body.public-page .match-footer-finalized-row,
+body.public-dashboard-page .match-footer-finalized-row {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -545,14 +664,16 @@
   width: 100%;
 }
 
-.match-footer-finalized .footer-item {
+body.public-page .match-footer-finalized .footer-item,
+body.public-dashboard-page .match-footer-finalized .footer-item {
   display: inline-flex !important;
   flex: 0 0 auto !important;
   white-space: nowrap !important;
   align-items: center !important;
 }
 
-.match-footer-finalized .footer-sep {
+body.public-page .match-footer-finalized .footer-sep,
+body.public-dashboard-page .match-footer-finalized .footer-sep {
   display: inline-flex !important;
   opacity: 0.45 !important;
   flex: 0 0 auto !important;
@@ -560,7 +681,8 @@
 
 /* ========================================================= ÚLTIMOS 10 PONTOS JOGADOS ========================================================= */
 
-.last-points-block {
+body.public-page .last-points-block,
+body.public-dashboard-page .last-points-block {
   margin-top: 12px;
   padding: 12px 12px 10px;
   border-radius: 14px;
@@ -568,7 +690,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.last-points-title {
+body.public-page .last-points-title,
+body.public-dashboard-page .last-points-title {
   text-align: center;
   font-size: 0.88rem;
   font-weight: 900;
@@ -578,7 +701,8 @@
   text-transform: uppercase;
 }
 
-.last-points-balls {
+body.public-page .last-points-balls,
+body.public-dashboard-page .last-points-balls {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -588,7 +712,8 @@
   min-height: 20px;
 }
 
-.last-point-ball {
+body.public-page .last-point-ball,
+body.public-dashboard-page .last-point-ball {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -598,106 +723,323 @@
   box-shadow: none;
 }
 
-.last-point-ball.empty {
+body.public-page .last-point-ball.empty,
+body.public-dashboard-page .last-point-ball.empty {
   background: transparent;
 }
 
-.last-point-ball.p1 {
+body.public-page .last-point-ball.p1,
+body.public-dashboard-page .last-point-ball.p1 {
   background: #22c55e;
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
 }
 
-.last-point-ball.p2 {
+body.public-page .last-point-ball.p2,
+body.public-dashboard-page .last-point-ball.p2 {
   background: #3b82f6;
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
+}
+
+/* ========================================================= AVATAR / FOTO DOS JOGADORES ========================================================= */
+
+body.public-page .player-with-avatar,
+body.public-dashboard-page .player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+body.public-page .player-avatar,
+body.public-dashboard-page .player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
+}
+
+body.public-page .player-avatar-placeholder,
+body.public-dashboard-page .player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+body.public-page .serve-ball-placeholder,
+body.public-dashboard-page .serve-ball-placeholder {
+  visibility: hidden;
+}
+
+/* ========================================================= STATUS DOT ========================================================= */
+
+body.public-page .status-dot,
+body.public-dashboard-page .status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+  animation: statusBlink 1s infinite ease-in-out;
+  vertical-align: middle;
+}
+
+body.public-page .status-dot-live,
+body.public-dashboard-page .status-dot-live {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+
+body.public-page .status-dot-suspended,
+body.public-dashboard-page .status-dot-suspended {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+/* ========================================================= CABEÇALHO SEM LABELS ========================================================= */
+
+body.public-page .match-board[data-status="live"] .match-table-head.head-no-labels,
+body.public-page .match-board[data-status="suspended"] .match-table-head.head-no-labels,
+body.public-dashboard-page .match-board[data-status="live"] .match-table-head.head-no-labels,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-table-head.head-no-labels {
+  min-height: 10px;
+}
+
+body.public-page .match-board[data-status="live"] .match-table-head.head-no-labels > div,
+body.public-page .match-board[data-status="suspended"] .match-table-head.head-no-labels > div,
+body.public-dashboard-page .match-board[data-status="live"] .match-table-head.head-no-labels > div,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-table-head.head-no-labels > div {
+  font-size: 0;
+  line-height: 0;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* ========================================================= META DO AO VIVO ========================================================= */
+
+body.public-page .match-board[data-status="live"] .live-meta-left,
+body.public-page .match-board[data-status="live"] .live-meta-right,
+body.public-page .match-board[data-status="suspended"] .live-meta-left,
+body.public-page .match-board[data-status="suspended"] .live-meta-right,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-left,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-right,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-left,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-right {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+body.public-page .match-board[data-status="live"] .live-meta-left strong,
+body.public-page .match-board[data-status="live"] .live-meta-right strong,
+body.public-page .match-board[data-status="suspended"] .live-meta-left strong,
+body.public-page .match-board[data-status="suspended"] .live-meta-right strong,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-left strong,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-right strong,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-left strong,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-right strong {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 800;
+}
+
+body.public-page .live-meta-row,
+body.public-dashboard-page .live-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+body.public-page .live-meta-left,
+body.public-page .live-meta-right,
+body.public-dashboard-page .live-meta-left,
+body.public-dashboard-page .live-meta-right {
+  min-width: 0;
+  flex: 1;
+}
+
+body.public-page .match-top-left,
+body.public-page .match-top-right,
+body.public-dashboard-page .match-top-left,
+body.public-dashboard-page .match-top-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+body.public-page .live-meta-left,
+body.public-dashboard-page .live-meta-left {
+  text-align: left;
+}
+
+body.public-page .live-meta-right,
+body.public-dashboard-page .live-meta-right {
+  text-align: right;
+}
+
+body.public-page .live-meta-row span,
+body.public-dashboard-page .live-meta-row span {
+  white-space: nowrap;
+}
+
+/* Categoria igual à Fase: texto branco, sem fundo amarelo */
+body.public-page .match-board .match-chip,
+body.public-dashboard-page .match-board .match-chip {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
 }
 
 /* ========================================================= RESPONSIVO ========================================================= */
 
 @media (max-width: 768px) {
-  .break-point-ball {
+  body.public-page .break-point-ball,
+  body.public-dashboard-page .break-point-ball {
     width: 13px;
     height: 13px;
   }
 
+  body.public-page .player-avatar,
+  body.public-page .player-avatar-placeholder,
+  body.public-dashboard-page .player-avatar,
+  body.public-dashboard-page .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
 
-  .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+  body.public-page .player-with-avatar,
+  body.public-dashboard-page .player-with-avatar {
+    gap: 6px;
+  }
+
+  body.public-page .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact,
+  body.public-dashboard-page .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
     font-size: 1.05rem !important;
   }
 
-  .match-board[data-status="finished"] .score {
+  body.public-page .match-board[data-status="finished"] .score,
+  body.public-dashboard-page .match-board[data-status="finished"] .score {
     font-size: 19px !important;
     line-height: 1 !important;
     font-weight: 900 !important;
   }
 
-  .match-board[data-status="finished"] .match-footer-finalized,
-  .match-board[data-status="finished"] .match-footer-finalized .footer-item,
-  .match-board[data-status="finished"] .match-footer-finalized strong {
+  body.public-page .match-board[data-status="finished"] .match-footer-finalized,
+  body.public-page .match-board[data-status="finished"] .match-footer-finalized .footer-item,
+  body.public-page .match-board[data-status="finished"] .match-footer-finalized strong,
+  body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized,
+  body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized .footer-item,
+  body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized strong {
     font-size: 11px !important;
     line-height: 1.15 !important;
   }
 
-  .match-board[data-status="live"] .match-footer-live,
-  .match-board[data-status="suspended"] .match-footer-live,
-  .match-board[data-status="live"] .match-footer-live strong,
-  .match-board[data-status="suspended"] .match-footer-live strong {
+  body.public-page .match-board[data-status="live"] .match-footer-live,
+  body.public-page .match-board[data-status="suspended"] .match-footer-live,
+  body.public-page .match-board[data-status="live"] .match-footer-live strong,
+  body.public-page .match-board[data-status="suspended"] .match-footer-live strong,
+  body.public-dashboard-page .match-board[data-status="live"] .match-footer-live,
+  body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live,
+  body.public-dashboard-page .match-board[data-status="live"] .match-footer-live strong,
+  body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live strong {
     font-size: 10px !important;
     line-height: 1.15 !important;
   }
 
-  .stats-block .stat-card,
-  .match-summary-item {
+  body.public-page .stats-block .stat-card,
+  body.public-page .match-summary-item,
+  body.public-dashboard-page .stats-block .stat-card,
+  body.public-dashboard-page .match-summary-item {
     padding: 10px;
   }
 
-  .stats-block .stat-title {
+  body.public-page .stats-block .stat-title,
+  body.public-dashboard-page .stats-block .stat-title {
     font-size: 0.75rem;
   }
 
-  .stats-block .stat-values span {
+  body.public-page .stats-block .stat-values span,
+  body.public-dashboard-page .stats-block .stat-values span {
     font-size: 1rem;
   }
 
-  .stats-block .stat-pct-row span {
+  body.public-page .stats-block .stat-pct-row span,
+  body.public-dashboard-page .stats-block .stat-pct-row span {
     font-size: 0.78rem;
   }
 
-  .stats-block .stat-compare-bar {
+  body.public-page .stats-block .stat-compare-bar,
+  body.public-dashboard-page .stats-block .stat-compare-bar {
     height: 7px;
   }
 
-  .stats-block .stat-compare-labels {
+  body.public-page .stats-block .stat-compare-labels,
+  body.public-dashboard-page .stats-block .stat-compare-labels {
     font-size: 0.72rem;
   }
 
-  .stats-block .stat-values-textpair {
+  body.public-page .stats-block .stat-values-textpair,
+  body.public-dashboard-page .stats-block .stat-values-textpair {
     gap: 8px;
     padding: 0 8px;
   }
 
-  .stats-block .stat-values-textpair span {
+  body.public-page .stats-block .stat-values-textpair span,
+  body.public-dashboard-page .stats-block .stat-values-textpair span {
     font-size: 0.95rem;
   }
 
-  .last-points-block {
+  body.public-page .last-points-block,
+  body.public-dashboard-page .last-points-block {
     padding: 10px;
   }
 
-  .last-points-title {
+  body.public-page .last-points-title,
+  body.public-dashboard-page .last-points-title {
     font-size: 0.78rem;
   }
 
-  .last-points-balls {
+  body.public-page .last-points-balls,
+  body.public-dashboard-page .last-points-balls {
     gap: 8px;
   }
 
-  .last-point-ball {
+  body.public-page .last-point-ball,
+  body.public-dashboard-page .last-point-ball {
     width: 10px;
     height: 10px;
   }
 
-  .break-points-balls {
+  body.public-page .break-points-balls,
+  body.public-dashboard-page .break-points-balls {
     display: flex !important;
     flex-wrap: nowrap !important;
     gap: 6px !important;
@@ -705,17 +1047,20 @@
     white-space: nowrap !important;
     align-items: center !important;
   }
-  
-  .break-point-ball-wrap {
+
+  body.public-page .break-point-ball-wrap,
+  body.public-dashboard-page .break-point-ball-wrap {
     flex: 0 0 auto !important;
   }
 
-  .break-point-ball {
+  body.public-page .break-point-ball,
+  body.public-dashboard-page .break-point-ball {
     width: 10px;
     height: 10px;
   }
 
-  .break-point-number {
+  body.public-page .break-point-number,
+  body.public-dashboard-page .break-point-number {
     font-size: 10px;
   }
 
@@ -784,10 +1129,12 @@
   body.public-page #finishedList .public-card[data-status="finished"] .set-col,
   body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
     min-width: 0 !important;
-    text-align: center !important;
-    justify-content: center !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
     white-space: nowrap !important;
     overflow: visible !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   body.public-page #liveList .public-card[data-status="live"] .set-score,
@@ -798,7 +1145,7 @@
   body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-score {
     display: inline-flex !important;
     align-items: flex-start !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     white-space: nowrap !important;
     overflow: visible !important;
     line-height: 1 !important;
@@ -842,24 +1189,30 @@
     overflow: visible !important;
   }
 
-  .match-board[data-status="live"] .match-footer-live,
-  .match-board[data-status="suspended"] .match-footer-live {
+  body.public-page .match-board[data-status="live"] .match-footer-live,
+  body.public-page .match-board[data-status="suspended"] .match-footer-live,
+  body.public-dashboard-page .match-board[data-status="live"] .match-footer-live,
+  body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live {
     align-items: center !important;
   }
 
-  .match-board[data-status="live"] .match-footer-live-row,
-  .match-board[data-status="suspended"] .match-footer-live-row {
+  body.public-page .match-board[data-status="live"] .match-footer-live-row,
+  body.public-page .match-board[data-status="suspended"] .match-footer-live-row,
+  body.public-dashboard-page .match-board[data-status="live"] .match-footer-live-row,
+  body.public-dashboard-page .match-board[data-status="suspended"] .match-footer-live-row {
     justify-content: center !important;
     text-align: center !important;
   }
 
-  .match-footer-finalized-row {
+  body.public-page .match-footer-finalized-row,
+  body.public-dashboard-page .match-footer-finalized-row {
     font-size: 10px;
     line-height: 1.15;
     gap: 4px;
   }
 
-  .match-board[data-status="finished"] .match-footer-finalized {
+  body.public-page .match-board[data-status="finished"] .match-footer-finalized,
+  body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized {
     gap: 3px !important;
   }
 }
@@ -917,11 +1270,13 @@
     top: -0.52em !important;
   }
 
-  .stats-block .stat-values-textpair span {
+  body.public-page .stats-block .stat-values-textpair span,
+  body.public-dashboard-page .stats-block .stat-values-textpair span {
     font-size: 0.92rem;
   }
 
-  .break-points-balls {
+  body.public-page .break-points-balls,
+  body.public-dashboard-page .break-points-balls {
     display: flex !important;
     flex-wrap: nowrap !important;
     justify-content: center !important;
@@ -932,7 +1287,430 @@
     padding-bottom: 2px !important;
   }
 
-  .break-point-ball-wrap {
+  body.public-page .break-point-ball-wrap,
+  body.public-dashboard-page .break-point-ball-wrap {
     flex: 0 0 auto !important;
+  }
+}
+
+/* ========================================================= AVATAR + SAQUE CENTRALIZADO ========================================================= */
+
+body.public-page .player-with-avatar,
+body.public-dashboard-page .player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+body.public-page .player-name.team-name-compact,
+body.public-dashboard-page .player-name.team-name-compact {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+body.public-page .serve-ball,
+body.public-dashboard-page .serve-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8ff63;
+  box-shadow: 0 0 6px rgba(216, 255, 99, 0.75);
+  margin-right: 6px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+body.public-page .serve-ball-placeholder,
+body.public-dashboard-page .serve-ball-placeholder {
+  visibility: hidden;
+}
+
+body.public-page .player-avatar,
+body.public-dashboard-page .player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
+}
+
+body.public-page .player-avatar-placeholder,
+body.public-dashboard-page .player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+/* Avatar maior em jogos em andamento, suspensos e finalizados */
+body.public-page .match-board[data-status="live"] .player-avatar,
+body.public-page .match-board[data-status="suspended"] .player-avatar,
+body.public-page .match-board[data-status="finished"] .player-avatar,
+body.public-dashboard-page .match-board[data-status="live"] .player-avatar,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-avatar,
+body.public-dashboard-page .match-board[data-status="finished"] .player-avatar {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+body.public-page .match-board[data-status="live"] .player-avatar-placeholder,
+body.public-page .match-board[data-status="suspended"] .player-avatar-placeholder,
+body.public-page .match-board[data-status="finished"] .player-avatar-placeholder,
+body.public-dashboard-page .match-board[data-status="live"] .player-avatar-placeholder,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-avatar-placeholder,
+body.public-dashboard-page .match-board[data-status="finished"] .player-avatar-placeholder {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+body.public-page .match-board[data-status="live"] .player-with-avatar,
+body.public-page .match-board[data-status="suspended"] .player-with-avatar,
+body.public-page .match-board[data-status="finished"] .player-with-avatar,
+body.public-dashboard-page .match-board[data-status="live"] .player-with-avatar,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-with-avatar,
+body.public-dashboard-page .match-board[data-status="finished"] .player-with-avatar {
+  gap: 10px !important;
+}
+
+/* Ajuste fino para mobile */
+@media (max-width: 768px) {
+  body.public-page .player-avatar,
+  body.public-page .player-avatar-placeholder,
+  body.public-dashboard-page .player-avatar,
+  body.public-dashboard-page .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+
+  body.public-page .match-board[data-status="live"] .player-avatar,
+  body.public-page .match-board[data-status="suspended"] .player-avatar,
+  body.public-page .match-board[data-status="finished"] .player-avatar,
+  body.public-page .match-board[data-status="live"] .player-avatar-placeholder,
+  body.public-page .match-board[data-status="suspended"] .player-avatar-placeholder,
+  body.public-page .match-board[data-status="finished"] .player-avatar-placeholder,
+  body.public-dashboard-page .match-board[data-status="live"] .player-avatar,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-avatar,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-avatar,
+  body.public-dashboard-page .match-board[data-status="live"] .player-avatar-placeholder,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-avatar-placeholder,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-avatar-placeholder {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  body.public-page .match-board[data-status="live"] .player-with-avatar,
+  body.public-page .match-board[data-status="suspended"] .player-with-avatar,
+  body.public-page .match-board[data-status="finished"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="live"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-with-avatar {
+    gap: 8px !important;
+  }
+
+  body.public-page .serve-ball,
+  body.public-dashboard-page .serve-ball {
+    width: 9px;
+    height: 9px;
+    top: -1px;
+  }
+}
+
+/* ========================================================= FINALIZADOS SEM CABEÇALHO / PONTOS / DURAÇÃO ========================================================= */
+
+body.public-page .match-board[data-status="finished"] .match-table-head,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+}
+
+body.public-page .match-board[data-status="finished"] .match-table-head .team-label,
+body.public-page .match-board[data-status="finished"] .match-table-head .points-col,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head .team-label,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head .points-col {
+  display: none !important;
+}
+
+body.public-page .match-board[data-status="finished"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+body.public-page .match-board[data-status="finished"] .match-player-row .points-col,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row .points-col {
+  display: none !important;
+}
+
+body.public-page .match-board[data-status="finished"] .match-player-row .team-col,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row .team-col {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+body.public-page .match-board[data-status="finished"] .match-footer-finalized,
+body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+/* ========================================================= FINALIZADOS: AJUSTE DE COLUNAS ========================================================= */
+
+body.public-page .match-board[data-status="finished"] .match-table-head,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+body.public-page .match-board[data-status="finished"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+body.public-page .match-board[data-status="finished"] .match-table-head .points-col,
+body.public-page .match-board[data-status="finished"] .match-player-row .points-col,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head .points-col,
+body.public-dashboard-page .match-board[data-status="finished"] .match-player-row .points-col {
+  display: none !important;
+}
+
+body.public-page .match-board[data-status="finished"] .points-col,
+body.public-dashboard-page .match-board[data-status="finished"] .points-col {
+  display: none !important;
+}
+
+body.public-page .match-board[data-status="finished"] .match-table-head,
+body.public-dashboard-page .match-board[data-status="finished"] .match-table-head {
+  justify-content: flex-start !important;
+}
+
+body.public-page .match-board[data-status="finished"] .match-top-left,
+body.public-dashboard-page .match-board[data-status="finished"] .match-top-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+body.public-page .match-board[data-status="finished"] .match-footer-finalized,
+body.public-dashboard-page .match-board[data-status="finished"] .match-footer-finalized {
+  display: none !important;
+}
+
+body.public-page .match-board[data-status="finished"] .player-with-avatar.doubles-wrapper,
+body.public-dashboard-page .match-board[data-status="finished"] .player-with-avatar.doubles-wrapper {
+  gap: 10px;
+}
+
+body.public-page .match-board[data-status="finished"] .doubles-avatar-group,
+body.public-dashboard-page .match-board[data-status="finished"] .doubles-avatar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+body.public-page .match-board[data-status="finished"] .doubles-name-group,
+body.public-dashboard-page .match-board[data-status="finished"] .doubles-name-group {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+/* ========================================================= FINALIZADOS: TORNEIO E FASE MENOR ========================================================= */
+
+body.public-page .match-board[data-status="finished"] .match-top-left .live-meta-left,
+body.public-dashboard-page .match-board[data-status="finished"] .match-top-left .live-meta-left {
+  font-size: 0.72rem !important;
+  line-height: 1.1 !important;
+}
+
+body.public-page .match-board[data-status="finished"] .match-top-left .live-meta-left strong,
+body.public-dashboard-page .match-board[data-status="finished"] .match-top-left .live-meta-left strong {
+  font-size: 0.72rem !important;
+  line-height: 1.1 !important;
+}
+
+/* ========================================================= AJUSTE MOBILE: LIVE / FINISHED ========================================================= */
+@media (max-width: 768px) {
+  /* Mantém os nomes na mesma linha nos cards ao vivo/finalizados */
+  body.public-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+  }
+
+  /* Menor espaçamento entre colunas */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row {
+    column-gap: 6px !important;
+  }
+
+  /* Números menores e colunas mais compactas no AO VIVO / SUSPENSO */
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score {
+    font-size: 1.35rem !important;
+    line-height: 1 !important;
+    min-width: 0 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-page #liveList .public-card[data-status="live"] .points-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .points-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .points-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    justify-content: center !important;
+  }
+
+  /* Ajusta a largura das colunas do AO VIVO */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.55fr)
+      minmax(30px, 0.34fr)
+      minmax(30px, 0.34fr)
+      minmax(36px, 0.42fr)
+      minmax(40px, 0.48fr) !important;
+  }
+
+  /* FINALIZADOS: mantém números no mesmo tamanho do ao vivo */
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 1.35rem !important;
+    line-height: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* FINALIZADOS: sets alinhados à direita */
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    column-gap: 6px !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.55fr)
+      minmax(30px, 0.34fr)
+      minmax(30px, 0.34fr)
+      minmax(36px, 0.42fr)
+      minmax(40px, 0.48fr) !important;
+  }
+
+  /* No finalizado: sets e pontos alinhados à direita */
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+    justify-content: flex-end !important;
+    text-align: right !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Cabeçalho finalizado alinhado à direita nas colunas de set */
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div {
+    text-align: right !important;
+    justify-content: flex-end !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head .team-label,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head .team-label {
+    justify-content: flex-start !important;
+    text-align: left !important;
+  }
+
+  /* Ajuste fino do nome para não quebrar em telas pequenas */
+  body.public-page #liveList .public-card[data-status="live"] .player-with-avatar,
+  body.public-page #liveList .public-card[data-status="suspended"] .player-with-avatar,
+  body.public-page #finishedList .public-card[data-status="finished"] .player-with-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-with-avatar,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-with-avatar,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-with-avatar {
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Um pouco mais compacto no celular */
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 1.2rem !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    column-gap: 4px !important;
+    grid-template-columns:
+      minmax(0, 3.6fr)
+      minmax(28px, 0.32fr)
+      minmax(28px, 0.32fr)
+      minmax(34px, 0.40fr)
+      minmax(38px, 0.46fr) !important;
   }
 }
