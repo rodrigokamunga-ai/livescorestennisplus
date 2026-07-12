@@ -53,6 +53,18 @@
   font-weight: 800;
 }
 
+/* ========================================================= JOGOS DO DIA: AVATAR MAIOR ========================================================= */
+
+.match-board.scheduled-match .player-avatar,
+.match-board.scheduled-match .player-avatar-placeholder {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.match-board.scheduled-match .player-with-avatar {
+  gap: 10px !important;
+}
+
 /* ========================================================= JOGOS EM ANDAMENTO / SUSPENSOS ========================================================= */
 
 .match-board[data-status="live"],
@@ -145,10 +157,11 @@
   font-weight: 900;
 }
 
-.match-board .match-board-top {
+.match-board .match-board-top.compact-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 14px;
 }
 
 .match-board .match-status {
@@ -463,16 +476,28 @@
   padding-right: 2px;
 }
 
-/* ========================================================= TIE-BREAK ========================================================= */
-
-.match-board .set-col {
+/* Alinhamento à esquerda para sets e pontos */
+.match-board .set-col,
+.match-board .points-col {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start !important;
+  text-align: left !important;
   white-space: nowrap;
   gap: 1px;
   overflow: visible !important;
+  padding-left: 4px;
 }
+
+.match-table-head .set-col,
+.match-player-row .set-col,
+.match-table-head .points-col,
+.match-player-row .points-col {
+  justify-content: flex-start !important;
+  text-align: right !important;
+}
+
+/* ========================================================= TIE-BREAK ========================================================= */
 
 .match-board .set-score {
   display: inline-flex;
@@ -612,6 +637,156 @@
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
 }
 
+/* ========================================================= AVATAR / FOTO DOS JOGADORES ========================================================= */
+
+.player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
+}
+
+.player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.serve-ball-placeholder {
+  visibility: hidden;
+}
+
+/* ========================================================= STATUS DOT ========================================================= */
+
+.status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+  animation: statusBlink 1s infinite ease-in-out;
+  vertical-align: middle;
+}
+
+.status-dot-live {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+
+.status-dot-suspended {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+/* ========================================================= CABEÇALHO SEM LABELS ========================================================= */
+
+.match-board[data-status="live"] .match-table-head.head-no-labels,
+.match-board[data-status="suspended"] .match-table-head.head-no-labels {
+  min-height: 10px;
+}
+
+.match-board[data-status="live"] .match-table-head.head-no-labels > div,
+.match-board[data-status="suspended"] .match-table-head.head-no-labels > div {
+  font-size: 0;
+  line-height: 0;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* ========================================================= META DO AO VIVO ========================================================= */
+
+.match-board[data-status="live"] .live-meta-left,
+.match-board[data-status="live"] .live-meta-right,
+.match-board[data-status="suspended"] .live-meta-left,
+.match-board[data-status="suspended"] .live-meta-right {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.match-board[data-status="live"] .live-meta-left strong,
+.match-board[data-status="live"] .live-meta-right strong,
+.match-board[data-status="suspended"] .live-meta-left strong,
+.match-board[data-status="suspended"] .live-meta-right strong {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 800;
+}
+
+.live-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.live-meta-left,
+.live-meta-right {
+  min-width: 0;
+  flex: 1;
+}
+
+.match-top-left,
+.match-top-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.live-meta-left {
+  text-align: left;
+}
+
+.live-meta-right {
+  text-align: right;
+}
+
+.live-meta-row span {
+  white-space: nowrap;
+}
+
+/* Categoria igual à Fase: texto branco, sem fundo amarelo */
+.match-board .match-chip {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
 /* ========================================================= RESPONSIVO ========================================================= */
 
 @media (max-width: 768px) {
@@ -620,6 +795,15 @@
     height: 13px;
   }
 
+  .player-avatar,
+  .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+
+  .player-with-avatar {
+    gap: 6px;
+  }
 
   .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
     font-size: 1.05rem !important;
@@ -705,7 +889,7 @@
     white-space: nowrap !important;
     align-items: center !important;
   }
-  
+
   .break-point-ball-wrap {
     flex: 0 0 auto !important;
   }
@@ -784,10 +968,12 @@
   body.public-page #finishedList .public-card[data-status="finished"] .set-col,
   body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
     min-width: 0 !important;
-    text-align: center !important;
-    justify-content: center !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
     white-space: nowrap !important;
     overflow: visible !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   body.public-page #liveList .public-card[data-status="live"] .set-score,
@@ -798,7 +984,7 @@
   body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-score {
     display: inline-flex !important;
     align-items: flex-start !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     white-space: nowrap !important;
     overflow: visible !important;
     line-height: 1 !important;
@@ -936,3 +1122,213 @@
     flex: 0 0 auto !important;
   }
 }
+
+/* ========================================================= AVATAR + SAQUE CENTRALIZADO ========================================================= */
+
+.player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.player-name.team-name-compact {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.serve-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8ff63;
+  box-shadow: 0 0 6px rgba(216, 255, 99, 0.75);
+  margin-right: 6px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.serve-ball-placeholder {
+  visibility: hidden;
+}
+
+.player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
+}
+
+.player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+/* Avatar maior em jogos em andamento, suspensos e finalizados */
+.match-board[data-status="live"] .player-avatar,
+.match-board[data-status="suspended"] .player-avatar,
+.match-board[data-status="finished"] .player-avatar {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.match-board[data-status="live"] .player-avatar-placeholder,
+.match-board[data-status="suspended"] .player-avatar-placeholder,
+.match-board[data-status="finished"] .player-avatar-placeholder {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.match-board[data-status="live"] .player-with-avatar,
+.match-board[data-status="suspended"] .player-with-avatar,
+.match-board[data-status="finished"] .player-with-avatar {
+  gap: 10px !important;
+}
+
+/* Ajuste fino para mobile */
+@media (max-width: 768px) {
+  .player-avatar,
+  .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+
+  .match-board[data-status="live"] .player-avatar,
+  .match-board[data-status="suspended"] .player-avatar,
+  .match-board[data-status="finished"] .player-avatar,
+  .match-board[data-status="live"] .player-avatar-placeholder,
+  .match-board[data-status="suspended"] .player-avatar-placeholder,
+  .match-board[data-status="finished"] .player-avatar-placeholder {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .match-board[data-status="live"] .player-with-avatar,
+  .match-board[data-status="suspended"] .player-with-avatar,
+  .match-board[data-status="finished"] .player-with-avatar {
+    gap: 8px !important;
+  }
+
+  .serve-ball {
+    width: 9px;
+    height: 9px;
+    top: -1px;
+  }
+}
+
+/* ========================================================= FINALIZADOS SEM CABEÇALHO / PONTOS / DURAÇÃO ========================================================= */
+
+.match-board[data-status="finished"] .match-table-head {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-table-head .team-label,
+.match-board[data-status="finished"] .match-table-head .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .match-player-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-player-row .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .match-player-row .team-col {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+.match-board[data-status="finished"] .match-footer-finalized {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+/* ========================================================= FINALIZADOS: AJUSTE DE COLUNAS ========================================================= */
+
+.match-board[data-status="finished"] .match-table-head {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-player-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-table-head .points-col,
+.match-board[data-status="finished"] .match-player-row .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .match-table-head {
+  justify-content: flex-start !important;
+}
+
+.match-board[data-status="finished"] .match-top-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.match-board[data-status="finished"] .match-footer-finalized {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .player-with-avatar.doubles-wrapper {
+  gap: 10px;
+}
+
+.match-board[data-status="finished"] .doubles-avatar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.match-board[data-status="finished"] .doubles-name-group {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+/* ========================================================= FINALIZADOS: TORNEIO E FASE MENOR ========================================================= */
+
+.match-board[data-status="finished"] .match-top-left .live-meta-left {
+  font-size: 0.72rem !important;
+  line-height: 1.1 !important;
+}
+
+.match-board[data-status="finished"] .match-top-left .live-meta-left strong {
+  font-size: 0.72rem !important;
+  line-height: 1.1 !important;
+}
+
