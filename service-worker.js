@@ -1,4 +1,4 @@
-const CACHE_NAME = "tennispro-v7";
+const CACHE_NAME = "tennispro-v8";
 
 const ASSETS_TO_CACHE = [
   "./",
@@ -92,7 +92,7 @@ self.addEventListener("fetch", (event) => {
 
   const requestUrl = new URL(event.request.url);
 
-  // Não intercepta terceiros nem bibliotecas externas
+  // Ignora terceiros
   if (
     requestUrl.origin !== self.location.origin ||
     requestUrl.pathname.includes("/firebase") ||
@@ -107,9 +107,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       (async () => {
         try {
-          const networkResponse = await fetch(event.request, {
-            cache: "no-store"
-          });
+          const networkResponse = await fetch(event.request, { cache: "no-store" });
 
           if (networkResponse && networkResponse.ok) {
             const cache = await caches.open(CACHE_NAME);
@@ -134,7 +132,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // CSS / JS / imagens: cache com atualização em segundo plano
+  // CSS / JS / imagens: cache first, update in background
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
@@ -149,13 +147,11 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(() => null);
 
-      // Se já existe cache, entrega rápido e atualiza em segundo plano
       if (cachedResponse) {
         event.waitUntil(networkFetch);
         return cachedResponse;
       }
 
-      // Se não existe cache, tenta rede
       const networkResponse = await networkFetch;
       if (networkResponse) return networkResponse;
 
