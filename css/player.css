@@ -1,1481 +1,1453 @@
-/* ========================================================= PLAYER.CSS — TELA DO JOGADOR / CONTROLE DA PARTIDA ========================================================= */
+/* ========================================================= HEADER MOBILE / FILTROS ========================================================= */
 
-body.player-page {
-  background:
-    radial-gradient(circle at top, rgba(72, 96, 136, 0.20), transparent 28%),
-    linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
-  color: #e8eefc;
-  overflow-x: hidden;
-  padding-top: 72px;
-  padding-bottom: calc(72px + env(safe-area-inset-bottom) + 8px);
+.mobile-filters-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-body.player-page a {
-  color: inherit;
-  text-decoration: none;
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s ease;
+  flex: 0 0 auto;
 }
 
-body.player-page button,
-body.player-page input,
-body.player-page select,
-body.player-page textarea {
-  font: inherit;
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
 }
 
-body.player-page * {
-  box-sizing: border-box;
+.mobile-filters-label {
+  flex: 1;
 }
 
-/* ========================================================= HERO ========================================================= */
-body.player-page .player-hero {
-  padding: 16px;
+/* ========================================================= JOGOS DO DIA / AGENDADOS ========================================================= */
+
+.match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+  font-size: 1.22rem !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
 }
 
-body.player-page .player-hero-top {
+.match-board.scheduled-match .scheduled-footer {
+  font-size: 0.88rem;
+  line-height: 1.15;
+}
+
+.match-board.scheduled-match .scheduled-footer strong {
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+/* ========================================================= JOGOS DO DIA: AVATAR MAIOR ========================================================= */
+
+.match-board.scheduled-match .player-avatar,
+.match-board.scheduled-match .player-avatar-placeholder {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.match-board.scheduled-match .player-with-avatar {
+  gap: 10px !important;
+}
+
+/* ========================================================= JOGOS EM ANDAMENTO / SUSPENSOS ========================================================= */
+
+.match-board[data-status="live"],
+.match-board[data-status="suspended"] {
+  align-items: stretch;
+}
+
+.match-board[data-status="live"] .team-name-compact,
+.match-board[data-status="suspended"] .team-name-compact {
+  font-size: 1.05rem;
+  line-height: 1.2;
+  white-space: pre-line;
+  word-break: normal;
+  overflow-wrap: normal;
+  font-weight: 700;
+}
+
+.match-board[data-status="live"] .score,
+.match-board[data-status="suspended"] .score {
+  font-size: 1.9rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.match-board[data-status="live"] .match-player-row,
+.match-board[data-status="suspended"] .match-player-row {
+  min-height: 44px;
+}
+
+/* Nome completo sem corte */
+.match-board[data-status="live"] .player-name,
+.match-board[data-status="suspended"] .player-name,
+.match-board[data-status="finished"] .player-name {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  height: auto !important;
+  min-height: 0 !important;
+  line-height: 1.15 !important;
+}
+
+/* ========================================================= JOGOS FINALIZADOS ========================================================= */
+
+.match-board[data-status="finished"] {
+  transform: scale(1.03);
+  transform-origin: top center;
+}
+
+.match-board[data-status="finished"] .match-table-head {
+  align-items: center;
+}
+
+.match-board[data-status="finished"] .match-table-head > div,
+.match-board[data-status="finished"] .match-player-row > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.match-board[data-status="finished"] .match-table-head .team-label {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center;
+  text-align: left !important;
+  padding-left: 8px;
+}
+
+.match-board[data-status="finished"] .match-player-row {
+  align-items: center;
+}
+
+.match-board[data-status="finished"] .player-name {
+  justify-content: flex-start !important;
+  text-align: left !important;
+  font-size: 0.98rem;
+  line-height: 1.2;
+  font-weight: 700;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.match-board[data-status="finished"] .score {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.match-board .match-board-top.compact-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 18px;
 }
 
-body.player-page .brand-wrap {
-  flex: 1;
-  text-align: left;
+.match-board .match-status {
+  margin-left: auto;
 }
 
-body.player-page .brand-wrap > div {
-  text-align: left;
+.match-board[data-status="finished"] .match-board-top,
+.match-board[data-status="wo"] .match-board-top {
+  justify-content: space-between !important;
 }
 
-body.player-page .match-meta-top {
-  margin-top: 8px;
+.match-board[data-status="finished"] .match-status,
+.match-board[data-status="wo"] .match-status {
+  margin-left: auto !important;
+  text-align: right !important;
+}
+
+/* ========================================================= RESUMO DA PARTIDA ========================================================= */
+
+.match-summary {
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
 }
 
-body.player-page .match-meta-top p,
-body.player-page .player-hero-top h2,
-body.player-page .section-kicker {
-  text-align: left;
+.match-summary-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #ffffff !important;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
-/* ========================================================= BLOCO DE INFORMAÇÕES ESTILO IONIC ========================================================= */
-body.player-page .match-info-card {
-  background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.98));
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 20px;
-  padding: 14px;
-  margin-top: 14px;
-  margin-bottom: 12px;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-body.player-page .match-info-grid {
+.match-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-body.player-page .match-info-item {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 12px 14px;
-  min-height: 76px;
-  display: flex;
-  align-items: center;
   gap: 10px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  min-width: 0;
 }
 
-body.player-page .match-info-icon {
-  color: #fff;
-  font-size: 1.35rem;
-  flex: 0 0 auto;
-  opacity: 0.92;
+.match-summary-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
 }
 
-body.player-page .match-info-text {
+.summary-label {
+  display: block;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #ffffff !important;
+  margin-bottom: 6px;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.summary-value {
+  display: block;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.86);
+  margin-top: 3px;
+  text-align: center;
+}
+
+.summary-value strong {
+  font-weight: 900;
+  color: #ffffff;
+}
+
+/* ========================================================= ESTATÍSTICAS ========================================================= */
+
+.stats-block {
+  margin-top: 14px;
+}
+
+.stats-block .stat-card {
+  background: rgba(25, 34, 54, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 14px 16px 16px;
+  min-height: 86px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  flex: 1;
+  justify-content: space-between;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
 }
 
-body.player-page .match-info-text span {
-  font-size: 11px;
-  color: #aab5c7;
-  font-weight: 800;
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.stats-block .stat-title {
+  text-align: center;
+  color: #ffffff !important;
+  font-size: 0.88rem;
+  line-height: 1.15;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
-
-body.player-page .match-info-text strong {
-  color: #fff;
-  font-weight: 900;
-  line-height: 1.15;
-  font-size: 1.02rem;
+  margin-bottom: 10px;
+  display: block;
+  font-weight: 800;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-/* Situação */
-body.player-page .status-badge {
-  color: #ffffff !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-body.player-page .status-badge span {
-  color: #ffffff !important;
-}
-
-body.player-page .status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex: 0 0 10px;
-}
-
-body.player-page .status-nao-iniciada .status-dot {
-  background: #94a3b8;
-}
-
-body.player-page .status-andamento .status-dot {
-  background: #22c55e;
-  animation: statusPulse 1s infinite;
-  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
-}
-
-body.player-page .status-interrompida .status-dot,
-body.player-page .status-suspensa .status-dot {
-  background: #f59e0b;
-}
-
-body.player-page .status-finalizada .status-dot {
-  background: #ef4444;
-}
-
-@keyframes statusPulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
-  }
-  70% {
-    transform: scale(1.15);
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
-}
-
-@media (max-width: 576px) {
-  .match-info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .match-info-item {
-    width: 100%;
-  }
-}
-
-/* ========================================================= TOGGLE GAMES / PONTOS / ESTATÍSTICAS ========================================================= */
-body.player-page .input-mode-toggle {
+/* linha principal dos valores */
+.stats-block .stat-values {
   display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  padding: 4px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
 }
 
-body.player-page .input-mode-toggle label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 12px;
-  border-radius: 11px;
-  font-size: 13px;
+.stats-block .stat-values span {
+  font-size: 1.1rem;
   font-weight: 800;
-  color: rgba(232, 238, 252, 0.65);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border 0.15s;
-  user-select: none;
-  border: 1px solid transparent;
-}
-
-body.player-page .input-mode-toggle input[type="radio"] {
-  display: none;
-}
-
-body.player-page .input-mode-toggle label.active {
-  background: rgba(216, 255, 99, 0.16);
-  color: #d8ff63;
-  border-color: rgba(216, 255, 99, 0.22);
-}
-
-/* ========================= NOVO TOGGLE STATS 1 / 2 JOGADORES ========================= */
-body.player-page .stats-mode-toggle {
-  display: flex;
-  gap: 8px;
-  margin: 0 0 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  padding: 4px;
-}
-
-body.player-page .stats-mode-toggle label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 9px 12px;
-  border-radius: 11px;
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(232, 238, 252, 0.65);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border 0.15s;
-  user-select: none;
-  border: 1px solid transparent;
-}
-
-body.player-page .stats-mode-toggle input[type="radio"] {
-  display: none;
-}
-
-body.player-page .stats-mode-toggle label.active {
-  background: rgba(216, 255, 99, 0.16);
-  color: #d8ff63;
-  border-color: rgba(216, 255, 99, 0.22);
-}
-
-/* ========================================================= PLACAR UNIFICADO ========================================================= */
-body.player-page .score-unified {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-body.player-page .player-col {
-  background: linear-gradient(180deg, rgba(44, 54, 74, 0.92), rgba(30, 39, 58, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Nome + saque integrados */
-body.player-page .player-col-name-row,
-body.player-page .manual-player-name-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-  padding: 10px 10px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-}
-
-body.player-page .player-col-name-row input[type="radio"],
-body.player-page .manual-player-name-row input[type="radio"] {
-  display: none;
-}
-
-body.player-page .serve-ball-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-}
-
-body.player-page .player-col-name {
-  font-size: clamp(14px, 3.5vw, 18px);
-  font-weight: 900;
-  color: #eaf1ff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-}
-
-/* ========================================================= GAMES / PONTOS — MESMO VISUAL "IONIC" DOS PLAYERS ========================================================= */
-body.player-page .point-control,
-body.player-page .games-control {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 8px 18px rgba(0, 0, 0, 0.14);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-body.player-page .games-control-btns {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-}
-
-body.player-page .point-btn,
-body.player-page .games-mini-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.06);
-  color: #eef4ff;
-  font-size: 28px;
-  font-weight: 900;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
-  flex-shrink: 0;
-}
-
-body.player-page .point-btn:hover,
-body.player-page .games-mini-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-body.player-page .point-btn:active,
-body.player-page .games-mini-btn:active {
-  transform: scale(0.96);
-}
-
-body.player-page .point-btn:disabled,
-body.player-page .games-mini-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-body.player-page .point-value,
-body.player-page .games-mini-val {
-  font-size: clamp(38px, 10vw, 56px);
-  font-weight: 900;
-  color: #d8ff63;
-  min-width: 60px;
-  text-align: center;
-  line-height: 1;
-}
-
-/* Destaque do card de pontos/games quando o jogador 1 estiver servindo */
-body.player-page #scoreModesArea .player-col:first-child .point-control.is-serving,
-body.player-page #scoreModesArea .player-col:first-child .games-control.is-serving {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.35);
-  box-shadow:
-    0 0 0 1px rgba(34, 197, 94, 0.08),
-    0 0 14px rgba(34, 197, 94, 0.10);
-}
-
-/* Destaque do card de pontos/games quando o jogador 2 estiver servindo */
-body.player-page #scoreModesArea .player-col:nth-child(2) .point-control.is-serving,
-body.player-page #scoreModesArea .player-col:nth-child(2) .games-control.is-serving {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.35);
-  box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.08),
-    0 0 14px rgba(59, 130, 246, 0.10);
-}
-
-/* Jogador 1 = VERDE */
-body.player-page #scoreModesArea .player-col:first-child .player-col-name-row:has(input[type="radio"]:checked) {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.45);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.10), 0 0 14px rgba(34, 197, 94, 0.12);
-}
-
-body.player-page #scoreModesArea .player-col:first-child .player-col-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
-  background: #22c55e;
-  border-color: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.85);
-}
-
-body.player-page #scoreModesArea .player-col:first-child .player-col-name-row:has(input[type="radio"]:checked) .player-col-name {
-  color: #dcfce7;
-}
-
-/* Jogador 2 = AZUL */
-body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row:has(input[type="radio"]:checked) {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.45);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.10), 0 0 14px rgba(59, 130, 246, 0.12);
-}
-
-body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.85);
-}
-
-body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row:has(input[type="radio"]:checked) .player-col-name {
-  color: #dbeafe;
-}
-
-/* Fallback se o JS usar classe .is-serving */
-body.player-page #scoreModesArea .player-col:first-child .player-col-name-row.is-serving {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.45);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.10), 0 0 14px rgba(34, 197, 94, 0.12);
-}
-
-body.player-page #scoreModesArea .player-col:first-child .player-col-name-row.is-serving .serve-ball-indicator {
-  background: #22c55e !important;
-  border-color: #22c55e !important;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.85) !important;
-}
-
-body.player-page #scoreModesArea .player-col:first-child .player-col-name-row.is-serving .player-col-name {
-  color: #dcfce7 !important;
-}
-
-body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row.is-serving {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.45);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.10), 0 0 14px rgba(59, 130, 246, 0.12);
-}
-
-body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row.is-serving .serve-ball-indicator {
-  background: #3b82f6 !important;
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.85) !important;
-}
-
-body.player-page #scoreModesArea .player-col:nth-child(2) .player-col-name-row.is-serving .player-col-name {
-  color: #dbeafe !important;
-}
-
-/* ========================================================= PLACAR GAMES / SETS ========================================================= */
-body.player-page .score-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-body.player-page .score-box {
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(20, 28, 45, 0.55);
-  padding: 8px 6px;
+  color: #ffffff !important;
+  min-width: 44px;
   text-align: center;
 }
 
-body.player-page .score-box span {
-  display: block;
-  font-size: 10px;
-  color: #aab5c7;
-  font-weight: 700;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-}
-
-body.player-page .score-box strong {
-  font-size: 22px;
-  color: #fff;
-  font-weight: 900;
-  line-height: 1;
-}
-
-/* ========================================================= ÁREA DE ESTATÍSTICAS / CONTROLADOR ========================================================= */
-body.player-page .stats-control-panel {
-  width: 100%;
-  margin-top: 2px;
-}
-
-body.player-page .stats-controller-grid {
-  display: grid;
+/* linha das porcentagens */
+.stats-block .stat-pct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  grid-template-columns: 1fr;
-}
-
-body.player-page .stats-controller-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 22px;
-  padding: 14px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  position: relative;
-  overflow: hidden;
-}
-
-body.player-page .stats-controller-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 35%),
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 30%);
-  pointer-events: none;
-}
-
-body.player-page .stats-controller-card .section-title {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #ffffff !important;
-  margin: 0 0 10px;
-  display: block;
-  font-weight: 800;
-  position: relative;
-  z-index: 1;
-}
-
-body.player-page .stats-controller-card .group {
-  border-radius: 18px;
-  padding: 10px;
-  margin-top: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  position: relative;
-  overflow: hidden;
-  background: rgba(8, 14, 26, 0.35);
-}
-
-body.player-page .stats-controller-card .group-title {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #ffffff !important;
-  margin-bottom: 10px;
-  font-weight: 900;
-  position: relative;
-  z-index: 1;
-}
-
-body.player-page .stats-controller-card .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Botões da estatística */
-body.player-page .stats-controller-card .play-btn {
-  position: relative;
-  min-height: 122px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
-    #0f1828;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 14px 12px;
-  color: #eaf2ff;
-  cursor: pointer;
-  overflow: hidden;
-  text-align: center;
-  width: 100%;
-  appearance: none;
-  -webkit-appearance: none;
-  touch-action: manipulation;
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-
-body.player-page .stats-controller-card .play-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.12), transparent 34%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06), transparent 26%);
-  pointer-events: none;
-}
-
-body.player-page .stats-controller-card .play-btn::after {
-  content: "";
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: 0;
-  height: 3px;
-  border-radius: 999px;
-  background: #38bdf8;
-  opacity: 0.95;
-  pointer-events: none;
-}
-
-body.player-page .stats-controller-card .play-btn.play-serve::after,
-body.player-page .stats-controller-card .play-btn.play-serve-first::after {
-  background: #eeff00;
-}
-
-body.player-page .stats-controller-card .play-btn.play-serve-second::after {
-  background: #fc9f00;
-}
-
-body.player-page .stats-controller-card .play-btn.play-doublefault::after {
-  background: #ef4444;
-}
-
-body.player-page .stats-controller-card .play-btn.play-ace::after,
-body.player-page .stats-controller-card .play-btn.play-winner::after,
-body.player-page .stats-controller-card .play-btn.play-net::after,
-body.player-page .stats-controller-card .play-btn.play-return::after,
-body.player-page .stats-controller-card .play-btn.play-baseline::after {
-  background: #38bdf8;
-}
-
-body.player-page .stats-controller-card .play-btn.play-error::after {
-  background: #ef4444;
-}
-
-body.player-page .stats-controller-card .play-btn:hover {
-  transform: translateY(-2px);
-  filter: saturate(1.08);
-  box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-body.player-page .stats-controller-card .play-btn:active {
-  transform: translateY(0) scale(0.985);
-}
-
-body.player-page .stats-controller-card .play-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18), 0 14px 30px rgba(0, 0, 0, 0.28);
-}
-
-body.player-page .stats-controller-card .play-btn.tap {
-  animation: tapPulse 220ms ease;
-}
-
-@keyframes tapPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.985); }
-  100% { transform: scale(1); }
-}
-
-body.player-page .stats-controller-card .play-icon {
-  width: 54px;
-  height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.98;
-}
-
-body.player-page .stats-controller-card .play-icon svg {
-  width: 40px;
-  height: 40px;
-  stroke: currentColor;
-  stroke-width: 1.9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-  display: block;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.06));
-}
-
-body.player-page .stats-controller-card .play-label {
-  font-size: 0.88rem;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-}
-
-body.player-page .stats-controller-card .play-sub {
-  font-size: 0.63rem;
-  color: rgba(234, 242, 255, 0.72);
-  font-weight: 700;
-  line-height: 1.1;
+  padding: 4px 10px 0;
   margin-top: -2px;
 }
 
-/* Cartões do controlador */
-body.player-page .stats-controller-card .server-badge {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 900;
-  background: rgba(190, 242, 100, 0.12);
-  border: 1px solid rgba(190, 242, 100, 0.22);
-  color: #bef264;
-  display: inline-flex;
-  z-index: 2;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-body.player-page .stats-controller-card .serve-status {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 900;
-  display: inline-flex;
-  border: 1px solid transparent;
-  white-space: nowrap;
-  z-index: 2;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-body.player-page .stats-controller-card .serve-status.serve-first {
-  background: rgba(34, 197, 94, 0.16);
-  color: #22c55e;
-  border-color: rgba(34, 197, 94, 0.28);
-}
-
-body.player-page .stats-controller-card .serve-status.serve-second {
-  background: rgba(245, 158, 11, 0.16);
-  color: #f59e0b;
-  border-color: rgba(245, 158, 11, 0.28);
-}
-
-/* ========================================================= BLOCO MANUAL DO JOGADOR 2 ========================================================= */
-body.player-page .stats-manual-card {
-  min-height: 220px;
-}
-
-body.player-page .manual-title-wrap {
-  position: relative;
-  margin-bottom: 10px;
-}
-
-body.player-page .manual-player-name-row:has(input[type="radio"]:checked) {
-  background: rgba(77, 163, 255, 0.14);
-  border-color: rgba(77, 163, 255, 0.45);
-}
-
-body.player-page .manual-player-name-row:has(input[type="radio"]:checked) .serve-ball-indicator {
-  background: #d8ff63;
-  border-color: #d8ff63;
-  box-shadow: 0 0 8px rgba(216, 255, 99, 0.75);
-}
-
-body.player-page .manual-point-box {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-body.player-page .manual-point-header {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #8fa4be;
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-
-body.player-page .manual-point-control {
-  width: 100%;
-}
-
-/* NOVO: AÇÕES DO JOGADOR 2 NO MODO STATS 1 JOGADOR */
-body.player-page .manual-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-body.player-page .manual-actions-grid .play-btn {
-  min-height: 112px;
-}
-
-body.player-page .manual-actions-grid .play-error::after {
-  background: #ef4444;
-}
-
-body.player-page .manual-actions-grid .play-serve::after {
-  background: #38bdf8;
-}
-
-
-
-  body.player-page .manual-actions-grid .play-btn {
-    min-height: 96px;
-  }
-
-
-/* ========================================================= FLASH NO BOTÃO CLICADO ========================================================= */
-body.player-page .stats-controller-card .play-btn.btn-flash-p1 {
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(255, 255, 255, 0.03)), #0f1828 !important;
-  border-color: rgba(34, 197, 94, 0.55) !important;
-  box-shadow:
-    0 0 0 1px rgba(34, 197, 94, 0.35),
-    0 0 18px rgba(34, 197, 94, 0.28),
-    0 12px 28px rgba(0, 0, 0, 0.22) !important;
-  transform: scale(0.985);
-}
-
-body.player-page .stats-controller-card .play-btn.btn-flash-p2 {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.28), rgba(255, 255, 255, 0.03)), #0f1828 !important;
-  border-color: rgba(59, 130, 246, 0.55) !important;
-  box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.35),
-    0 0 18px rgba(59, 130, 246, 0.28),
-    0 12px 28px rgba(0, 0, 0, 0.22) !important;
-  transform: scale(0.985);
-}
-
-/* ========================================================= BOTÃO COMPARTILHAR ========================================================= */
-body.player-page .share-match-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.03));
-  color: #eef4ff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
-}
-
-body.player-page .share-match-btn:hover {
-  border-color: rgba(255, 255, 255, 0.10);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-  transform: translateY(-1px);
-}
-
-body.player-page .share-match-icon {
-  font-size: 1.15rem;
-  line-height: 1;
-}
-
-/* ========================================================= TEXTOS AUXILIARES ========================================================= */
-body.player-page .shared-match-badge,
-body.player-page .shared-match-label {
-  margin-top: 2px;
-  margin-bottom: 6px;
+.stats-block .stat-pct-row span {
   font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Barra comparativa */
+.stats-block .stat-compare-bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  margin-top: 8px;
+}
+
+.stats-block .stat-compare-p1 {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.stats-block .stat-compare-p2 {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.stats-block .stat-compare-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ffffff !important;
+}
+
+.stats-block .stat-compare-labels span {
+  color: #ffffff !important;
+}
+
+/* ========================================================= SERVIÇOS EM UMA ÚNICA LINHA ========================================================= */
+
+.stats-block .stat-values-textpair {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+.stats-block .stat-values-textpair span {
+  font-size: 1rem;
   font-weight: 800;
-  color: #d8ff63;
+  color: #ffffff !important;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stats-block .stat-values-textpair span:first-child {
+  flex: 0 0 auto;
+}
+
+.stats-block .stat-values-textpair span:last-child {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
+/* ========================================================= BREAK POINT ========================================================= */
+
+.break-points-block {
+  margin-top: 12px;
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.break-points-title {
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #ffffff !important;
   letter-spacing: 0.03em;
+  margin-bottom: 10px;
   text-transform: uppercase;
 }
 
-body.player-page .shared-match-badge {
-  font-size: 0.78rem;
-  font-weight: 900;
+.break-points-balls {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px !important;
 }
 
-/* ========================================================= BOTÕES DESABILITADOS ========================================================= */
-body.player-page .player-bottom-btn.disabled-link,
-body.player-page .player-bottom-btn-disabled {
-  opacity: 0.45;
-  pointer-events: none;
-  cursor: not-allowed;
-  filter: grayscale(0.25);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-/* ========================================================= BOTTOM NAV ========================================================= */
-body.player-page .player-bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  background: rgba(10, 16, 28, 0.92);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
-  box-sizing: border-box;
-}
-
-body.player-page .player-bottom-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  color: #eef4ff;
-  text-decoration: none;
-  border-radius: 0;
-  min-height: 62px;
+.break-point-ball-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 4px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.break-point-number {
+  font-size: 11px;
   font-weight: 800;
-  box-shadow: none;
-  cursor: pointer;
-  width: 100%;
-  padding: 8px 4px;
-  transition: transform 0.16s ease, opacity 0.16s ease, color 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
-  box-sizing: border-box;
-  white-space: nowrap;
-  opacity: 0.92;
-}
-
-body.player-page .player-bottom-btn:hover {
-  transform: translateY(-1px);
-  opacity: 1;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-body.player-page .player-bottom-btn.primary-action:hover,
-body.player-page .player-bottom-btn.pause-action:hover,
-body.player-page .player-bottom-btn.danger:hover,
-body.player-page .player-bottom-btn.disabled-link:hover {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-body.player-page .player-bottom-icon {
-  font-size: 1.22rem;
+  color: #cbd5e1;
   line-height: 1;
+  white-space: nowrap;
+}
+
+.break-point-ball {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: transparent;
+  box-shadow: none;
+}
+
+.break-point-ball.empty {
+  background: transparent;
+}
+
+.break-point-ball.p1 {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+}
+
+.break-point-ball.p2 {
+  background: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
+}
+
+/* ========================================================= COLUNAS / ESPAÇAMENTO GERAL ========================================================= */
+
+.match-table-head,
+.match-player-row {
+  column-gap: 12px;
+}
+
+.match-table-head > div,
+.match-player-row > div {
+  min-width: 0;
+}
+
+.set-col,
+.points-col,
+.score {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* Alinhamento à esquerda para sets e pontos */
+.match-board .set-col,
+.match-board .points-col {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  white-space: nowrap;
+  gap: 1px;
+  overflow: visible !important;
+  padding-left: 4px;
+}
+
+.match-table-head .set-col,
+.match-player-row .set-col,
+.match-table-head .points-col,
+.match-player-row .points-col {
+  justify-content: flex-start !important;
+  text-align: right !important;
+}
+
+/* ========================================================= TIE-BREAK ========================================================= */
+
+.match-board .set-score {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1;
+  overflow: visible !important;
+}
+
+.match-board .set-main {
+  display: inline-block;
+  line-height: 1;
+}
+
+.match-board .set-tb {
+  font-size: 0.58em !important;
+  line-height: 1 !important;
+  position: relative;
+  top: -0.45em;
+  margin-left: 1px;
+  display: inline-block;
+  vertical-align: top;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  min-width: 0;
+}
+
+/* ========================================================= FOOTER LIVE / SUSPENSO ========================================================= */
+
+.match-board[data-status="live"] .match-footer-live,
+.match-board[data-status="suspended"] .match-footer-live {
+  align-items: center !important;
+}
+
+.match-board[data-status="live"] .match-footer-live-row,
+.match-board[data-status="suspended"] .match-footer-live-row {
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100%;
+}
+
+.match-board[data-status="live"] .match-footer-live-row span,
+.match-board[data-status="suspended"] .match-footer-live-row span,
+.match-board[data-status="live"] .match-footer-live-row strong,
+.match-board[data-status="suspended"] .match-footer-live-row strong {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* PARTIDAS FINALIZADAS COM DURAÇÃO EM LINHA ABAIXO */
+.match-board[data-status="finished"] .match-footer-finalized {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  width: 100% !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+}
+
+.match-footer-finalized-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
+}
+
+.match-footer-finalized .footer-item {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  align-items: center !important;
+}
+
+.match-footer-finalized .footer-sep {
+  display: inline-flex !important;
+  opacity: 0.45 !important;
+  flex: 0 0 auto !important;
+}
+
+/* ========================================================= ÚLTIMOS 10 PONTOS JOGADOS ========================================================= */
+
+.last-points-block {
+  margin-top: 12px;
+  padding: 12px 12px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.last-points-title {
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #ffffff !important;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.last-points-balls {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  min-height: 20px;
 }
 
-body.player-page .player-bottom-icon ion-icon {
-  font-size: 1.22rem;
-}
-
-body.player-page .player-bottom-label {
-  font-size: 0.74rem;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  width: 100%;
-}
-
-body.player-page .player-bottom-btn.danger .player-bottom-icon {
-  color: #ff7b7b;
-}
-
-body.player-page .player-bottom-btn.primary-action,
-body.player-page .player-bottom-btn.pause-action {
+.last-point-ball {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   background: transparent;
-  border: none;
+  box-shadow: none;
 }
 
-/* ========================================================= ESTADOS DESABILITADOS ========================================================= */
-body.player-page .input-mode-toggle label[style*="not-allowed"] {
-  opacity: 0.35;
-  cursor: not-allowed;
+.last-point-ball.empty {
+  background: transparent;
 }
 
-body.player-page .point-btn:disabled,
-body.player-page .games-mini-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none !important;
+.last-point-ball.p1 {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
 }
 
-body.player-page .score-grid,
-body.player-page .score-card {
-  display: none;
+.last-point-ball.p2 {
+  background: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
 }
 
-/* ========================================================= RESPONSIVO ========================================================= */
-@media (max-width: 480px) {
-  body.player-page .score-unified {
-    gap: 10px;
-  }
+/* ========================================================= AVATAR / FOTO DOS JOGADORES ========================================================= */
 
-  body.player-page .player-col {
-    padding: 10px 10px;
-    gap: 8px;
-  }
-
-  body.player-page .player-col-name {
-    font-size: 13px;
-    padding: 8px 6px;
-  }
-
-  body.player-page .point-btn,
-  body.player-page .games-mini-btn {
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
-    border-radius: 14px;
-  }
-
-  body.player-page .point-value,
-  body.player-page .games-mini-val {
-    font-size: 42px;
-    min-width: 54px;
-  }
-
-  body.player-page .point-control,
-  body.player-page .games-control {
-    padding: 10px 12px;
-    border-radius: 16px;
-  }
-
-  body.player-page .score-box strong {
-    font-size: 18px;
-  }
-
-  body.player-page .player-bottom-btn {
-    min-height: 52px;
-    border-radius: 12px;
-  }
-
-  body.player-page .player-bottom-label {
-    font-size: 0.58rem;
-  }
-
-  body.player-page {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom) + 8px);
-  }
-
-  body.player-page .menu-fixed-top {
-    background: rgba(10, 16, 28, 0.96) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    min-height: 52px;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  body.player-page .menu-navbar-top {
-    min-height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  body.player-page .menu-back-btn {
-    color: #d8ff63;
-  }
-
-  body.player-page .menu-back-btn ion-icon {
-    color: #d8ff63;
-  }
-
-  body.player-page .stats-controller-grid {
-    gap: 10px;
-  }
-
-  body.player-page .stats-controller-card {
-    padding: 12px;
-    border-radius: 18px;
-  }
-
-  body.player-page .stats-controller-card .stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  body.player-page .stats-controller-card .play-btn {
-    min-height: 112px;
-    border-radius: 16px;
-  }
-
-  body.player-page .stats-controller-card .play-icon {
-    width: 48px;
-    height: 48px;
-  }
-
-  body.player-page .stats-controller-card .play-icon svg {
-    width: 38px;
-    height: 38px;
-  }
-
-  body.player-page .stats-controller-card .play-label {
-    font-size: 0.83rem;
-  }
-
-  body.player-page .stats-controller-card .play-sub {
-    font-size: 0.61rem;
-  }
-
-  body.player-page .stats-mode-toggle {
-    gap: 6px;
-  }
-
-  body.player-page .stats-mode-toggle label {
-    font-size: 12px;
-    padding: 8px 10px;
-  }
-
-  body.player-page .match-info-grid {
-    grid-template-columns: 1fr;
-  }
+.player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-@media (max-width: 768px) {
-  body.player-page .player-hero-top {
-    flex-direction: row;
-    align-items: flex-start;
-  }
+.player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
 }
 
-/* ========================================================= FIX VISUAL SEM ALTERAR LAYOUT ========================================================= */
-body.player-page .player-col-name-row.is-serving .serve-ball-indicator,
-body.player-page .manual-player-name-row.is-serving .serve-ball-indicator {
-  background: #d8ff63 !important;
-  border-color: #d8ff63 !important;
-  box-shadow: 0 0 8px rgba(216, 255, 99, 0.75) !important;
-}
-
-body.player-page .player-col-name-row.is-serving .player-col-name,
-body.player-page .manual-player-name-row.is-serving .player-col-name {
-  color: #ffffff !important;
-}
-
-/* ========================================================= TÍTULOS DAS SEÇÕES EM BRANCO ========================================================= */
-body.player-page .stats-controller-card .section-title,
-body.player-page .stats-controller-card .group-title {
-  color: #ffffff !important;
-}
-
-/* ========================================================= BOTÃO VOLTAR ========================================================= */
-body.player-page .player-back-link {
+.player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin-top: 2px;
-  text-decoration: none;
-  color: #d8ff63;
-  border-radius: 10px;
-  transition: transform 0.16s ease, background 0.16s ease;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.serve-ball-placeholder {
+  visibility: hidden;
+}
+
+/* ========================================================= STATUS DOT ========================================================= */
+
+.status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
   flex-shrink: 0;
+  animation: statusBlink 1s infinite ease-in-out;
+  vertical-align: middle;
 }
 
-body.player-page .player-back-link:hover {
-  transform: translateY(-1px);
-  background: rgba(216, 255, 99, 0.10);
+.status-dot-live {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
 }
 
-body.player-page .player-back-link ion-icon {
-  font-size: 1.3rem;
+.status-dot-suspended {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
 }
 
-body.player-page .menu-fixed-top {
-  background: rgba(10, 16, 28, 0.96) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  min-height: 52px;
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+/* ========================================================= CABEÇALHO SEM LABELS ========================================================= */
+
+.match-board[data-status="live"] .match-table-head.head-no-labels,
+.match-board[data-status="suspended"] .match-table-head.head-no-labels {
+  min-height: 10px;
+}
+
+.match-board[data-status="live"] .match-table-head.head-no-labels > div,
+.match-board[data-status="suspended"] .match-table-head.head-no-labels > div {
+  font-size: 0;
+  line-height: 0;
+  min-height: 0;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-body.player-page .menu-navbar-top {
-  min-height: 52px;
+/* ========================================================= META DO AO VIVO ========================================================= */
+
+.match-board[data-status="live"] .live-meta-left,
+.match-board[data-status="live"] .live-meta-right,
+.match-board[data-status="suspended"] .live-meta-left,
+.match-board[data-status="suspended"] .live-meta-right {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.match-board[data-status="live"] .live-meta-left strong,
+.match-board[data-status="live"] .live-meta-right strong,
+.match-board[data-status="suspended"] .live-meta-left strong,
+.match-board[data-status="suspended"] .live-meta-right strong {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 800;
+}
+
+.live-meta-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
-body.player-page .menu-back-btn {
-  color: #d8ff63;
+.live-meta-left,
+.live-meta-right {
+  min-width: 0;
+  flex: 1;
 }
 
-body.player-page .menu-back-btn ion-icon {
-  color: #d8ff63;
+.match-top-left,
+.match-top-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
-body.player-page .player-navbar-brand {
-  margin: 0;
-  padding-left: 0;
-  color: #f4f8ff !important;
+.live-meta-left {
+  text-align: left;
+}
+
+.live-meta-right {
+  text-align: right;
+}
+
+.live-meta-row span {
+  white-space: nowrap;
+}
+
+/* Categoria igual à Fase: texto branco, sem fundo amarelo */
+.match-board .match-chip {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+/* ========================================================= RESPONSIVO ========================================================= */
+
+@media (max-width: 768px) {
+  .break-point-ball {
+    width: 13px;
+    height: 13px;
+  }
+
+  .player-avatar,
+  .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+
+  .player-with-avatar {
+    gap: 6px;
+  }
+
+  .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
+    font-size: 1.05rem !important;
+  }
+
+  .match-board[data-status="finished"] .score {
+    font-size: 19px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+  }
+
+  .match-board[data-status="finished"] .match-footer-finalized,
+  .match-board[data-status="finished"] .match-footer-finalized .footer-item,
+  .match-board[data-status="finished"] .match-footer-finalized strong {
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+  }
+
+  .match-board[data-status="live"] .match-footer-live,
+  .match-board[data-status="suspended"] .match-footer-live,
+  .match-board[data-status="live"] .match-footer-live strong,
+  .match-board[data-status="suspended"] .match-footer-live strong {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  .stats-block .stat-card,
+  .match-summary-item {
+    padding: 10px;
+  }
+
+  .stats-block .stat-title {
+    font-size: 0.75rem;
+  }
+
+  .stats-block .stat-values span {
+    font-size: 1rem;
+  }
+
+  .stats-block .stat-pct-row span {
+    font-size: 0.78rem;
+  }
+
+  .stats-block .stat-compare-bar {
+    height: 7px;
+  }
+
+  .stats-block .stat-compare-labels {
+    font-size: 0.72rem;
+  }
+
+  .stats-block .stat-values-textpair {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .stats-block .stat-values-textpair span {
+    font-size: 0.95rem;
+  }
+
+  .last-points-block {
+    padding: 10px;
+  }
+
+  .last-points-title {
+    font-size: 0.78rem;
+  }
+
+  .last-points-balls {
+    gap: 8px;
+  }
+
+  .last-point-ball {
+    width: 10px;
+    height: 10px;
+  }
+
+  .break-points-balls {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    align-items: center !important;
+  }
+
+  .break-point-ball-wrap {
+    flex: 0 0 auto !important;
+  }
+
+  .break-point-ball {
+    width: 10px;
+    height: 10px;
+  }
+
+  .break-point-number {
+    font-size: 10px;
+  }
+
+  /* Melhor ajuste para cards live/suspended/finished no mobile */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    display: grid !important;
+    grid-template-columns:
+      minmax(0, 3.45fr)
+      minmax(38px, 0.45fr)
+      minmax(38px, 0.45fr)
+      minmax(44px, 0.55fr)
+      minmax(52px, 0.70fr) !important;
+    column-gap: 8px !important;
+    align-items: center !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
+    min-width: 0 !important;
+    overflow: visible !important;
+    text-align: center !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    padding-right: 6px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
+    min-width: 0 !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-score,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-score,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-score {
+    display: inline-flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    line-height: 1 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-main,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-main {
+    font-size: 1.02em;
+    line-height: 1;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-tb,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-tb {
+    font-size: 0.62em !important;
+    line-height: 1 !important;
+    top: -0.55em !important;
+    margin-left: 1px !important;
+    position: relative !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 17px !important;
+    line-height: 1 !important;
+    min-width: 22px !important;
+    overflow: visible !important;
+  }
+
+  .match-board[data-status="live"] .match-footer-live,
+  .match-board[data-status="suspended"] .match-footer-live {
+    align-items: center !important;
+  }
+
+  .match-board[data-status="live"] .match-footer-live-row,
+  .match-board[data-status="suspended"] .match-footer-live-row {
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .match-footer-finalized-row {
+    font-size: 10px;
+    line-height: 1.15;
+    gap: 4px;
+  }
+
+  .match-board[data-status="finished"] .match-footer-finalized {
+    gap: 3px !important;
+  }
+}
+
+/* ========================================================= EXTRA: AJUSTE FINO PARA TIE-BREAK E FINALIZADOS ========================================================= */
+
+@media (max-width: 480px) {
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.35fr)
+      minmax(38px, 0.44fr)
+      minmax(38px, 0.44fr)
+      minmax(46px, 0.58fr)
+      minmax(56px, 0.78fr) !important;
+    column-gap: 6px !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-main,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-main,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-main,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-main {
+    font-size: 0.98em;
+  }
+
+  body.public-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-tb,
+  body.public-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-tb,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-tb,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-tb {
+    font-size: 0.58em !important;
+    top: -0.52em !important;
+  }
+
+  .stats-block .stat-values-textpair span {
+    font-size: 0.92rem;
+  }
+
+  .break-points-balls {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 2px !important;
+  }
+
+  .break-point-ball-wrap {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* ========================================================= AVATAR + SAQUE CENTRALIZADO ========================================================= */
+
+.player-with-avatar {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
-  justify-content: flex-start;
+  min-width: 0;
 }
 
-body.player-page .player-navbar-brand span {
-  color: #f4f8ff;
-}
-
-/* ========================= STATS — SOMENTE PARTE DO SACADOR ========================= */
-
-/* Jogador 1 sacando = verde */
-body.player-page #statsControlPanel #stats1Card .serve-status.serve-first {
-  background: rgba(34, 197, 94, 0.16);
-  color: #22c55e;
-  border-color: rgba(34, 197, 94, 0.28);
-}
-
-body.player-page #statsControlPanel #stats1Card .serve-status.serve-second {
-  background: rgba(34, 197, 94, 0.16);
-  color: #22c55e;
-  border-color: rgba(34, 197, 94, 0.28);
-}
-
-/* Jogador 2 sacando = azul */
-body.player-page #statsControlPanel #stats2Card .serve-status.serve-first {
-  background: rgba(59, 130, 246, 0.16);
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.28);
-}
-
-body.player-page #statsControlPanel #stats2Card .serve-status.serve-second {
-  background: rgba(59, 130, 246, 0.16);
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.28);
-}
-
-/* ========================================================= NOVO: AÇÕES DO JOGADOR 2 NO STATS 1 JOGADOR ========================================================= */
-body.player-page .manual-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-body.player-page .manual-actions-grid .play-btn {
-  min-height: 112px;
-}
-
-body.player-page .manual-actions-grid .play-error::after {
-  background: #ef4444;
-}
-
-body.player-page .manual-actions-grid .play-serve::after {
-  background: #38bdf8;
-}
-
-@media (max-width: 480px) {
-  body.player-page .manual-actions-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  body.player-page .manual-actions-grid .play-btn {
-    min-height: 96px;
-  }
-}
-
-.input-mode-toggle label span {
+.player-name.team-name-compact {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  min-width: 0;
 }
 
-.input-mode-toggle ion-icon {
-  font-size: 1rem;
-}
-
-.stats-mode-toggle label span {
+.serve-ball {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-}
-
-.stats-mode-toggle ion-icon {
-  font-size: 1rem;
-}
-
-body.player-page .hero-action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-body.player-page .share-match-btn.voice-recording {
-  background: linear-gradient(180deg, rgba(239, 68, 68, 0.22), rgba(255, 255, 255, 0.03));
-  border-color: rgba(239, 68, 68, 0.35);
-  color: #ff7b7b;
-}
-
-body.player-page .voice-btn {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.12), rgba(255, 255, 255, 0.03));
-  color: #eef4ff;
-}
-
-body.player-page .voice-btn.voice-active {
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(255, 255, 255, 0.03));
-  border-color: rgba(34, 197, 94, 0.45);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.16), 0 8px 16px rgba(0, 0, 0, 0.14);
-  color: #d8ff63;
-}
-
-body.player-page .voice-btn.voice-paused {
-  background: linear-gradient(180deg, rgba(107, 114, 128, 0.18), rgba(255, 255, 255, 0.03));
-  border-color: rgba(107, 114, 128, 0.35);
-  color: #cbd5e1;
-  opacity: 0.9;
-}
-
-/* ========================================================= BOTÃO DE VOZ — OFF / ON LIMPO ========================================================= */
-
-body.player-page .hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8ff63;
+  box-shadow: 0 0 6px rgba(216, 255, 99, 0.75);
+  margin-right: 6px;
   flex-shrink: 0;
-}
-
-body.player-page .voice-match-btn {
+  vertical-align: middle;
   position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  top: -1px;
+}
+
+.serve-ball-placeholder {
+  visibility: hidden;
+}
+
+.player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
+}
+
+.player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.10);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-  color: #e8eefc;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    background 0.16s ease,
-    box-shadow 0.16s ease,
-    filter 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-body.player-page .voice-match-btn:hover {
-  transform: translateY(-1px);
-  filter: saturate(1.05);
-}
-
-body.player-page .voice-match-btn:active {
-  transform: scale(0.97);
-}
-
-body.player-page .voice-match-btn.voice-idle {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-  border-color: rgba(255, 255, 255, 0.10);
-  color: #e8eefc;
-}
-
-body.player-page .voice-match-btn.voice-active {
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(255, 255, 255, 0.03));
-  border-color: rgba(34, 197, 94, 0.40);
-  color: #dcfce7;
-  box-shadow:
-    0 0 0 1px rgba(34, 197, 94, 0.18),
-    0 0 18px rgba(34, 197, 94, 0.22),
-    0 8px 16px rgba(0, 0, 0, 0.14);
-  animation: voicePulse 1.2s infinite;
-}
-
-body.player-page .voice-match-icon {
-  font-size: 1.22rem;
-  line-height: 1;
-}
-
-body.player-page .voice-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
+  color: #fff;
+}
+
+/* Avatar maior em jogos em andamento, suspensos e finalizados */
+.match-board[data-status="live"] .player-avatar,
+.match-board[data-status="suspended"] .player-avatar,
+.match-board[data-status="finished"] .player-avatar {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.match-board[data-status="live"] .player-avatar-placeholder,
+.match-board[data-status="suspended"] .player-avatar-placeholder,
+.match-board[data-status="finished"] .player-avatar-placeholder {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.match-board[data-status="live"] .player-with-avatar,
+.match-board[data-status="suspended"] .player-with-avatar,
+.match-board[data-status="finished"] .player-with-avatar {
+  gap: 10px !important;
+}
+
+/* Ajuste fino para mobile */
+@media (max-width: 768px) {
+  .player-avatar,
+  .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+
+  .match-board[data-status="live"] .player-avatar,
+  .match-board[data-status="suspended"] .player-avatar,
+  .match-board[data-status="finished"] .player-avatar,
+  .match-board[data-status="live"] .player-avatar-placeholder,
+  .match-board[data-status="suspended"] .player-avatar-placeholder,
+  .match-board[data-status="finished"] .player-avatar-placeholder {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .match-board[data-status="live"] .player-with-avatar,
+  .match-board[data-status="suspended"] .player-with-avatar,
+  .match-board[data-status="finished"] .player-with-avatar {
+    gap: 8px !important;
+  }
+
+  .serve-ball {
+    width: 9px;
+    height: 9px;
+    top: -1px;
+  }
+}
+
+/* ========================================================= FINALIZADOS SEM CABEÇALHO / PONTOS / DURAÇÃO ========================================================= */
+
+.match-board[data-status="finished"] .match-table-head {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-table-head .team-label,
+.match-board[data-status="finished"] .match-table-head .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .match-player-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-player-row .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .match-player-row .team-col {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+.match-board[data-status="finished"] .match-footer-finalized {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+/* ========================================================= FINALIZADOS: AJUSTE DE COLUNAS ========================================================= */
+
+.match-board[data-status="finished"] .match-table-head {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-player-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.match-board[data-status="finished"] .match-table-head .points-col,
+.match-board[data-status="finished"] .match-player-row .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .points-col {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .match-table-head {
+  justify-content: flex-start !important;
+}
+
+.match-board[data-status="finished"] .match-top-left {
   display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.match-board[data-status="finished"] .match-footer-finalized {
+  display: none !important;
+}
+
+.match-board[data-status="finished"] .player-with-avatar.doubles-wrapper {
+  gap: 10px;
+}
+
+.match-board[data-status="finished"] .doubles-avatar-group {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border: 2px solid #0f1726;
-  box-sizing: border-box;
+  gap: 6px;
 }
 
-body.player-page .voice-match-btn.voice-active .voice-badge {
-  background: #22c55e !important;
-  color: #fff !important;
-  border-color: #0f1726 !important;
+.match-board[data-status="finished"] .doubles-name-group {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.05;
 }
 
-@keyframes voicePulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
-  }
-  70% {
-    transform: scale(1.03);
-    box-shadow: 0 0 0 12px rgba(34, 197, 94, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
+/* ========================================================= FINALIZADOS: TORNEIO E FASE MENOR ========================================================= */
+
+.match-board[data-status="finished"] .match-top-left .live-meta-left {
+  font-size: 0.72rem !important;
+  line-height: 1.1 !important;
 }
 
-/* ========================================================= MOBILE ========================================================= */
-@media (max-width: 480px) {
-  body.player-page .hero-actions .voice-match-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+.match-board[data-status="finished"] .match-top-left .live-meta-left strong {
+  font-size: 0.72rem !important;
+  line-height: 1.1 !important;
+}
+
+/* ========================================================= MOBILE: AJUSTE FINO PARA LIVE / FINISHED ========================================================= */
+
+@media (max-width: 768px) {
+  /* Nome dos jogadores */
+  .match-board[data-status="live"] .player-name.team-name-compact,
+  .match-board[data-status="suspended"] .player-name.team-name-compact,
+  .match-board[data-status="finished"] .player-name.team-name-compact {
+    font-size: 0.82rem !important;
+    line-height: 1.08 !important;
+    font-weight: 800 !important;
   }
 
-  body.player-page .hero-actions .voice-match-icon {
-    font-size: 1.22rem;
+  /* Nome interno do atleta */
+  .match-board[data-status="live"] .team-name-compact-content,
+  .match-board[data-status="suspended"] .team-name-compact-content,
+  .match-board[data-status="finished"] .team-name-compact-content {
+    font-size: 0.82rem !important;
+    line-height: 1.08 !important;
   }
 
-  body.player-page .hero-actions .voice-badge {
-    min-width: 22px;
-    height: 22px;
-    font-size: 10px;
-    top: -6px;
-    right: -6px;
+  /* Números dos sets e pontos */
+  .match-board[data-status="live"] .score,
+  .match-board[data-status="suspended"] .score,
+  .match-board[data-status="finished"] .score {
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    min-width: 0 !important;
+  }
+
+  /* Colunas de set e pontos mais compactas */
+  .match-board[data-status="live"] .set-col,
+  .match-board[data-status="suspended"] .set-col,
+  .match-board[data-status="finished"] .set-col,
+  .match-board[data-status="live"] .points-col,
+  .match-board[data-status="suspended"] .points-col,
+  .match-board[data-status="finished"] .points-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Linha do jogador */
+  .match-board[data-status="live"] .match-player-row,
+  .match-board[data-status="suspended"] .match-player-row,
+  .match-board[data-status="finished"] .match-player-row {
+    min-height: 34px !important;
+  }
+
+  /* Avatar menor no mobile para não apertar a linha */
+  .match-board[data-status="live"] .player-avatar,
+  .match-board[data-status="suspended"] .player-avatar,
+  .match-board[data-status="finished"] .player-avatar,
+  .match-board[data-status="live"] .player-avatar-placeholder,
+  .match-board[data-status="suspended"] .player-avatar-placeholder,
+  .match-board[data-status="finished"] .player-avatar-placeholder {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* Espaço entre avatar e nome */
+  .match-board[data-status="live"] .player-with-avatar,
+  .match-board[data-status="suspended"] .player-with-avatar,
+  .match-board[data-status="finished"] .player-with-avatar {
+    gap: 6px !important;
+  }
+
+  /* Saque centralizado e discreto */
+  .serve-ball {
+    width: 8px !important;
+    height: 8px !important;
+    margin-right: 4px !important;
+    top: 0 !important;
+  }
+
+  /* Cabeçalho do card */
+  .match-board[data-status="live"] .match-board-top,
+  .match-board[data-status="suspended"] .match-board-top,
+  .match-board[data-status="finished"] .match-board-top {
+    gap: 8px !important;
+  }
+
+  /* Torneio e Fase menores no finalizado */
+  .match-board[data-status="finished"] .match-top-left .live-meta-left,
+  .match-board[data-status="finished"] .match-top-left .live-meta-left strong {
+    font-size: 0.64rem !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Duração menor no mobile */
+  .match-board[data-status="live"] .live-meta-right,
+  .match-board[data-status="suspended"] .live-meta-right {
+    font-size: 0.72rem !important;
+  }
+
+  .match-board[data-status="live"] .duration-with-icon,
+  .match-board[data-status="suspended"] .duration-with-icon {
+    gap: 4px !important;
+  }
+
+  .match-board[data-status="live"] .duration-icon,
+  .match-board[data-status="suspended"] .duration-icon {
+    font-size: 12px !important;
+  }
+
+  /* Texto dos blocos de estatísticas menor no mobile */
+  .stats-block .stat-title,
+  .match-summary-title,
+  .last-points-title,
+  .break-points-title {
+    font-size: 0.72rem !important;
+  }
+
+  .stats-block .stat-values span,
+  .stats-block .stat-values-textpair span,
+  .stats-block .stat-compare-labels {
+    font-size: 0.78rem !important;
   }
 }
