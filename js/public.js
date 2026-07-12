@@ -702,16 +702,16 @@
       const { p1, p2 } = getWinProbabilitiesByScore(match);
       if (p1 <= 0 && p2 <= 0) return "";
 
-      const p1Name = U.escapeHtml(
-        isDoublesFormat(match)
-          ? getTeam1Name(match).replace(/\n/g, " ")
-          : String(match.player1 || "Jogador 1").trim()
-      );
-      const p2Name = U.escapeHtml(
-        isDoublesFormat(match)
-          ? getTeam2Name(match).replace(/\n/g, " ")
-          : String(match.player2 || "Jogador 2").trim()
-      );
+      const p1Raw = isDoublesFormat(match)
+  ? getTeam1Name(match).replace(/\n/g, " ")
+  : String(match.player1 || "Jogador 1").trim();
+
+const p2Raw = isDoublesFormat(match)
+  ? getTeam2Name(match).replace(/\n/g, " ")
+  : String(match.player2 || "Jogador 2").trim();
+
+const p1Name = U.escapeHtml(abbreviateName(p1Raw));
+const p2Name = U.escapeHtml(abbreviateName(p2Raw));
 
       return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%">${p1 > 12 ? `${p1}%` : ""}</div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%">${p2 > 12 ? `${p2}%` : ""}</div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div> `;
     }
@@ -814,13 +814,16 @@
     }
 
     function renderMatchSummary(match) {
-      const team1 = isDoublesFormat(match)
-        ? getTeam1Name(match).replace(/\n/g, " ").trim()
-        : String(match.player1 || "Jogador 1").trim();
+      const team1Raw = isDoublesFormat(match)
+  ? getTeam1Name(match).replace(/\n/g, " ").trim()
+  : String(match.player1 || "Jogador 1").trim();
 
-      const team2 = isDoublesFormat(match)
-        ? getTeam2Name(match).replace(/\n/g, " ").trim()
-        : String(match.player2 || "Jogador 2").trim();
+const team2Raw = isDoublesFormat(match)
+  ? getTeam2Name(match).replace(/\n/g, " ").trim()
+  : String(match.player2 || "Jogador 2").trim();
+
+const team1 = U.escapeHtml(abbreviateName(team1Raw));
+const team2 = U.escapeHtml(abbreviateName(team2Raw));
 
       const s = U.getMatchSummary(match);
       const bp1 = U.formatBreakPoints(s.breakPointsWon1, s.breakPointsChances1);
