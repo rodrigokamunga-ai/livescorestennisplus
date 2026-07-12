@@ -2032,3 +2032,235 @@ body.public-dashboard-page .player-avatar-placeholder {
   justify-content: center;
 }
 
+
+/* ========================================================= PATCH FINAL MOBILE — LIVE / FINISHED / DUPLAS / SEM CAIXAS ========================================================= */
+
+@media (max-width: 768px) {
+  /* Evita quebra dos nomes */
+  body.public-page .match-board[data-status="live"] .player-name,
+  body.public-page .match-board[data-status="suspended"] .player-name,
+  body.public-page .match-board[data-status="finished"] .player-name,
+  body.public-dashboard-page .match-board[data-status="live"] .player-name,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-name,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-name {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  /* Remove qualquer aparência de caixa dos nomes / placares */
+  body.public-page .match-board[data-status="live"] .player-name,
+  body.public-page .match-board[data-status="suspended"] .player-name,
+  body.public-page .match-board[data-status="finished"] .player-name,
+  body.public-dashboard-page .match-board[data-status="live"] .player-name,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-name,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-name,
+  body.public-page .match-board[data-status="live"] .score,
+  body.public-page .match-board[data-status="suspended"] .score,
+  body.public-page .match-board[data-status="finished"] .score,
+  body.public-dashboard-page .match-board[data-status="live"] .score,
+  body.public-dashboard-page .match-board[data-status="suspended"] .score,
+  body.public-dashboard-page .match-board[data-status="finished"] .score,
+  body.public-page .match-board[data-status="live"] .team-name-compact-content,
+  body.public-page .match-board[data-status="suspended"] .team-name-compact-content,
+  body.public-page .match-board[data-status="finished"] .team-name-compact-content,
+  body.public-dashboard-page .match-board[data-status="live"] .team-name-compact-content,
+  body.public-dashboard-page .match-board[data-status="suspended"] .team-name-compact-content,
+  body.public-dashboard-page .match-board[data-status="finished"] .team-name-compact-content,
+  body.public-page .match-board[data-status="live"] .player-with-avatar,
+  body.public-page .match-board[data-status="suspended"] .player-with-avatar,
+  body.public-page .match-board[data-status="finished"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="live"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-with-avatar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Layout geral: mesma lógica para live/suspended/finished */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    display: grid !important;
+    align-items: center !important;
+    column-gap: 5px !important;
+    grid-template-columns:
+      minmax(0, 3.45fr)
+      minmax(28px, 0.32fr)
+      minmax(28px, 0.32fr)
+      minmax(28px, 0.32fr)
+      minmax(36px, 0.42fr) !important;
+  }
+
+  /* Primeira coluna com mais espaço para o nome */
+  body.public-page #liveList .public-card[data-status="live"] .team-col,
+  body.public-page #liveList .public-card[data-status="suspended"] .team-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .team-col,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .team-col,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .team-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .team-col {
+    min-width: 0 !important;
+    padding-right: 4px !important;
+  }
+
+  /* Sets e pontos com mesmo espaçamento */
+  body.public-page .match-board[data-status="live"] .set-col,
+  body.public-page .match-board[data-status="suspended"] .set-col,
+  body.public-page .match-board[data-status="finished"] .set-col,
+  body.public-page .match-board[data-status="live"] .points-col,
+  body.public-page .match-board[data-status="suspended"] .points-col,
+  body.public-page .match-board[data-status="finished"] .points-col,
+  body.public-dashboard-page .match-board[data-status="live"] .set-col,
+  body.public-dashboard-page .match-board[data-status="suspended"] .set-col,
+  body.public-dashboard-page .match-board[data-status="finished"] .set-col,
+  body.public-dashboard-page .match-board[data-status="live"] .points-col,
+  body.public-dashboard-page .match-board[data-status="suspended"] .points-col,
+  body.public-dashboard-page .match-board[data-status="finished"] .points-col {
+    min-width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Corrige o 1º set, 2º set e 3º set para não ficarem “pulando” espaço */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Números menores */
+  body.public-page .match-board[data-status="live"] .score,
+  body.public-page .match-board[data-status="suspended"] .score,
+  body.public-page .match-board[data-status="finished"] .score,
+  body.public-dashboard-page .match-board[data-status="live"] .score,
+  body.public-dashboard-page .match-board[data-status="suspended"] .score,
+  body.public-dashboard-page .match-board[data-status="finished"] .score {
+    font-size: 15px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    min-width: 0 !important;
+    color: #ffffff !important;
+  }
+
+  /* Tie-break sem quebrar linha */
+  body.public-page .match-board .set-score,
+  body.public-dashboard-page .match-board .set-score {
+    display: inline-flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    overflow: visible !important;
+  }
+
+  body.public-page .match-board .set-tb,
+  body.public-dashboard-page .match-board .set-tb {
+    font-size: 0.58em !important;
+    top: -0.52em !important;
+    margin-left: 1px !important;
+  }
+
+  /* Nome não desce por causa dos sets */
+  body.public-page .match-board[data-status="live"] .player-with-avatar,
+  body.public-page .match-board[data-status="suspended"] .player-with-avatar,
+  body.public-page .match-board[data-status="finished"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="live"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-with-avatar,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-with-avatar {
+    min-width: 0 !important;
+    gap: 6px !important;
+  }
+
+  /* Finalizados: seta o bloco de sets mais à direita */
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.45fr)
+      minmax(28px, 0.32fr)
+      minmax(28px, 0.32fr)
+      minmax(28px, 0.32fr)
+      minmax(42px, 0.50fr) !important;
+  }
+
+  /* Finalizados: mantém os números à direita e brancos */
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+    justify-content: center !important;
+    text-align: center !important;
+    color: #ffffff !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .team-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .team-col {
+    padding-right: 6px !important;
+  }
+}
+
+/* Mobile bem pequeno */
+@media (max-width: 480px) {
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    column-gap: 4px !important;
+    grid-template-columns:
+      minmax(0, 3.3fr)
+      minmax(26px, 0.30fr)
+      minmax(26px, 0.30fr)
+      minmax(26px, 0.30fr)
+      minmax(40px, 0.46fr) !important;
+  }
+
+  body.public-page .match-board[data-status="live"] .score,
+  body.public-page .match-board[data-status="suspended"] .score,
+  body.public-page .match-board[data-status="finished"] .score,
+  body.public-dashboard-page .match-board[data-status="live"] .score,
+  body.public-dashboard-page .match-board[data-status="suspended"] .score,
+  body.public-dashboard-page .match-board[data-status="finished"] .score {
+    font-size: 14px !important;
+  }
+}
+
+
