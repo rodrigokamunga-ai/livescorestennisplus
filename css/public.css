@@ -1714,3 +1714,78 @@ body.public-dashboard-page .match-board[data-status="finished"] .match-top-left 
       minmax(38px, 0.46fr) !important;
   }
 }
+
+/* ========================================================= AJUSTE FINO: TAMANHO DOS NÚMEROS E ALINHAMENTO ========================================================= */
+@media (max-width: 768px) {
+  /* Números dos jogos em andamento / suspensos */
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score {
+    font-size: 1.18rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+  }
+
+  /* Números das partidas finalizadas no mesmo tamanho */
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 1.18rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+  }
+
+  /* Compacta um pouco as colunas */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row {
+    column-gap: 5px !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    column-gap: 5px !important;
+  }
+
+  /* Finalizados: placares alinhados à direita */
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    justify-items: end !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
+    justify-content: flex-end !important;
+    text-align: right !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row .team-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row .team-col {
+    justify-self: start !important;
+  }
+
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row .score {
+    justify-self: end !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.public-page #liveList .public-card[data-status="live"] .score,
+  body.public-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    font-size: 1.08rem !important;
+  }
+}
