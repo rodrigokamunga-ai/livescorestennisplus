@@ -1,200 +1,685 @@
-/* ========================================================= HEADER MOBILE / FILTROS ========================================================= */
+/* ========================================================= PUBLIC.CSS CONSOLIDADO Tela pública / dashboard ========================================================= */
 
-.mobile-filters-header {
+/* ========================= BASE PUBLIC ========================= */
+
+body.public-page,
+body.public-dashboard-page {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f1624 0%, #0b1320 100%);
+  color: #fff;
+}
+
+body.public-page .container,
+body.public-dashboard-page .container {
+  padding: 20px 0 28px;
+}
+
+body.public-page .public-grid.board-grid,
+body.public-dashboard-page .dashboard-grid {
+  display: grid;
+  grid-template-columns: 0.75fr 1.5fr 0.75fr;
+  gap: 18px;
+  align-items: start;
+}
+
+body.public-page .column-panel,
+body.public-dashboard-page .dashboard-column {
+  padding: 18px;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: visible;
+}
+
+body.public-page .dashboard-title,
+body.public-dashboard-page .dashboard-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+body.public-page .title-with-icon,
+body.public-dashboard-page .title-with-icon {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  min-width: 0;
 }
 
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
+body.public-page .section-icon,
+body.public-dashboard-page .section-icon {
+  width: 28px;
+  height: 28px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: 0.2s ease;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.95rem;
   flex: 0 0 auto;
 }
 
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  transform: translateY(-1px);
+body.public-page .section-icon.live,
+body.public-dashboard-page .section-icon.live {
+  background: rgba(93, 255, 149, 0.12);
 }
 
-.mobile-filters-label {
-  flex: 1;
+body.public-page .section-icon.finished,
+body.public-dashboard-page .section-icon.finished {
+  background: rgba(255, 215, 93, 0.12);
 }
 
-/* ========================================================= JOGOS DO DIA / AGENDADOS ========================================================= */
-
-.match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
-  font-size: 1.22rem !important;
-  line-height: 1.2 !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis;
+body.public-page .dashboard-title h3,
+body.public-dashboard-page .dashboard-title h3 {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #f0f4ff;
 }
 
-.match-board.scheduled-match .scheduled-footer {
-  font-size: 0.88rem;
-  line-height: 1.15;
-}
-
-.match-board.scheduled-match .scheduled-footer strong {
-  font-size: 0.88rem;
+body.public-page .badge,
+body.public-dashboard-page .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
   font-weight: 800;
+  color: #f4f8ff;
 }
 
-/* ========================================================= JOGOS DO DIA: AVATAR MAIOR ========================================================= */
+body.public-page .mobile-filters,
+body.public-dashboard-page .mobile-filters {
+  display: none;
+  margin: 0 0 14px 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
 
-.match-board.scheduled-match .player-avatar,
-.match-board.scheduled-match .player-avatar-placeholder {
+.filter-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #dbe6ff;
+}
+
+.filter-select {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 28, 45, 0.65);
+  color: #fff;
+  padding: 0 12px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.filter-select:focus {
+  border-color: rgba(77, 163, 255, 0.7);
+  box-shadow: 0 0 0 2px rgba(77, 163, 255, 0.15);
+}
+
+/* ========================= LISTAS ========================= */
+
+body.public-page .cards.compact-cards.column-scroll,
+body.public-dashboard-page .dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+  max-height: none;
+  padding-right: 0;
+  flex: initial;
+}
+
+/* ========================= CARD BASE ========================= */
+
+.public-card.match-board,
+.public-card.match-card,
+.public-card.game-card {
+  background: linear-gradient(180deg, rgba(26, 34, 52, 0.96), rgba(15, 22, 36, 0.98));
+  border: 1px solid rgba(200, 255, 92, 0.10);
+  border-radius: 12px;
+  padding: 8px;
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
+}
+
+.public-card.match-board.compact-match-board {
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+}
+
+.match-board-top,
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.match-chip,
+.status-pill {
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.match-chip {
+  background: linear-gradient(180deg, #d8ff63 0%, #b7f148 100%);
+  color: #0b1320;
+  letter-spacing: 0.4px;
+}
+
+.match-status {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.status-scheduled,
+.status-live {
+  color: #d8ff63;
+}
+
+.status-finished {
+  color: #d7e2f0;
+}
+
+/* ========================= JOGOS DO DIA ========================= */
+
+.public-card.scheduled-match {
+  padding: 4px 6px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.public-card.scheduled-match .match-board-top {
+  margin-bottom: 3px;
+  gap: 6px;
+}
+
+.public-card.scheduled-match .match-chip,
+.public-card.scheduled-match .match-status {
+  font-size: 8px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.public-card.scheduled-match .match-format,
+.public-card.scheduled-match .match-table-head,
+.public-card.scheduled-match .match-player-row {
+  display: none;
+}
+
+.public-card.scheduled-match .scheduled-player-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 4px 10px;
+  text-align: center;
+  font-weight: 800;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.public-card.scheduled-match .scheduled-player-line .player-name {
+  font-size: 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.public-card.scheduled-match .scheduled-player-line .vs-separator {
+  font-size: 14px;
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+.public-card.scheduled-match .scheduled-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  text-align: center;
+  margin-top: 4px;
+  padding: 0 2px;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.public-card.scheduled-match .scheduled-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.public-card.scheduled-match .scheduled-footer strong {
+  font-size: 10px;
+}
+
+/* avatar maior nos jogos do dia */
+.public-card.scheduled-match .player-avatar,
+.public-card.scheduled-match .player-avatar-placeholder {
   width: 36px !important;
   height: 36px !important;
 }
 
-.match-board.scheduled-match .player-with-avatar {
+.public-card.scheduled-match .player-with-avatar {
   gap: 10px !important;
 }
 
-/* ========================================================= JOGOS EM ANDAMENTO / SUSPENSOS ========================================================= */
+/* ========================= JOGOS EM ANDAMENTO / SUSPENSOS ========================= */
 
-.match-board[data-status="live"],
-.match-board[data-status="suspended"] {
-  align-items: stretch;
+.public-card[data-status="live"],
+.public-card[data-status="suspended"] {
+  background:
+    radial-gradient(circle at top, rgba(200, 255, 92, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(30, 40, 60, 0.99), rgba(12, 18, 30, 0.99));
+  border: 1px solid rgba(200, 255, 92, 0.24);
+  border-radius: 18px;
+  padding: 14px;
+  min-height: 240px;
+  box-shadow:
+    0 0 0 1px rgba(200, 255, 92, 0.10),
+    0 18px 34px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.match-board[data-status="live"] .team-name-compact,
-.match-board[data-status="suspended"] .team-name-compact {
-  font-size: 1.05rem;
-  line-height: 1.2;
-  white-space: pre-line;
-  word-break: normal;
-  overflow-wrap: normal;
-  font-weight: 700;
+.public-card[data-status="live"] .match-board-top,
+.public-card[data-status="suspended"] .match-board-top {
+  margin-bottom: 10px;
 }
 
-.match-board[data-status="live"] .score,
-.match-board[data-status="suspended"] .score {
-  font-size: 1.9rem;
-  line-height: 1;
-  font-weight: 900;
+.public-card[data-status="live"] .match-chip,
+.public-card[data-status="suspended"] .match-chip {
+  background: linear-gradient(180deg, #d8ff63 0%, #b7f148 100%);
+  color: #0b1320;
+  font-size: 11px;
+  box-shadow: 0 0 14px rgba(200, 255, 92, 0.18);
 }
 
-.match-board[data-status="live"] .match-player-row,
-.match-board[data-status="suspended"] .match-player-row {
-  min-height: 44px;
+.public-card[data-status="live"] .match-status,
+.public-card[data-status="suspended"] .match-status {
+  font-size: 11px;
+  color: #d8ff63;
 }
 
-/* Nome completo sem corte */
-.match-board[data-status="live"] .player-name,
-.match-board[data-status="suspended"] .player-name,
-.match-board[data-status="finished"] .player-name {
-  white-space: normal !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  height: auto !important;
-  min-height: 0 !important;
-  line-height: 1.15 !important;
+.public-card[data-status="live"] .match-format,
+.public-card[data-status="suspended"] .match-format {
+  margin-bottom: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
 }
 
-/* ========================================================= JOGOS FINALIZADOS ========================================================= */
-
-.match-board[data-status="finished"] {
-  transform: scale(1.03);
-  transform-origin: top center;
+.public-card[data-status="live"] .match-format span,
+.public-card[data-status="suspended"] .match-format span {
+  font-size: 11px;
 }
 
-.match-board[data-status="finished"] .match-table-head {
+.public-card[data-status="live"] .match-format strong,
+.public-card[data-status="suspended"] .match-format strong {
+  font-size: 13px;
+  margin-top: 2px;
+  line-height: 1.1;
+}
+
+.public-card[data-status="live"] .match-table-head,
+.public-card[data-status="suspended"] .match-table-head,
+.public-card[data-status="live"] .match-player-row,
+.public-card[data-status="suspended"] .match-player-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) repeat(4, minmax(56px, 0.45fr));
   align-items: center;
+  gap: 0;
 }
 
-.match-board[data-status="finished"] .match-table-head > div,
-.match-board[data-status="finished"] .match-player-row > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.public-card[data-status="live"] .match-table-head,
+.public-card[data-status="suspended"] .match-table-head {
+  padding: 0 4px 6px;
+  font-size: 10px;
+  color: #9fb1ce;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.public-card[data-status="live"] .match-table-head > div,
+.public-card[data-status="suspended"] .match-table-head > div,
+.public-card[data-status="live"] .match-player-row > div,
+.public-card[data-status="suspended"] .match-player-row > div {
   text-align: center;
-}
-
-.match-board[data-status="finished"] .match-table-head .team-label {
-  display: flex !important;
-  justify-content: flex-start !important;
-  align-items: center;
-  text-align: left !important;
-  padding-left: 8px;
-}
-
-.match-board[data-status="finished"] .match-player-row {
-  align-items: center;
-}
-
-.match-board[data-status="finished"] .player-name {
-  justify-content: flex-start !important;
-  text-align: left !important;
-  font-size: 0.98rem;
-  line-height: 1.2;
-  font-weight: 700;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-}
-
-.match-board[data-status="finished"] .score {
-  font-size: 1.05rem;
-  font-weight: 900;
-}
-
-.match-board .match-board-top.compact-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.match-board .match-status {
-  margin-left: auto;
-}
-
-.match-board[data-status="finished"] .match-board-top,
-.match-board[data-status="wo"] .match-board-top {
-  justify-content: space-between !important;
-}
-
-.match-board[data-status="finished"] .match-status,
-.match-board[data-status="wo"] .match-status {
-  margin-left: auto !important;
-  text-align: right !important;
-}
-
-/* ========================================================= RESUMO DA PARTIDA ========================================================= */
-
-.match-summary {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   min-width: 0;
 }
 
-.match-summary-title {
-  font-size: 0.95rem;
+.public-card[data-status="live"] .match-table-head > div:first-child,
+.public-card[data-status="suspended"] .match-table-head > div:first-child,
+.public-card[data-status="live"] .match-player-row > div:first-child,
+.public-card[data-status="suspended"] .match-player-row > div:first-child {
+  text-align: left;
+}
+
+.public-card[data-status="live"] .match-player-row,
+.public-card[data-status="suspended"] .match-player-row {
+  min-height: 58px;
+  margin-top: 6px;
+  padding: 0 6px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(43, 55, 79, 0.78), rgba(24, 34, 53, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.public-card[data-status="live"] .player-name,
+.public-card[data-status="suspended"] .player-name {
+  font-size: 18px;
+  line-height: 1.05;
+  padding-right: 6px;
+}
+
+.public-card[data-status="live"] .score,
+.public-card[data-status="suspended"] .score {
+  font-size: 30px;
+  line-height: 1;
+  width: 100%;
+  justify-self: center;
+  text-align: center;
+}
+
+.public-card[data-status="live"] .score.green,
+.public-card[data-status="suspended"] .score.green {
+  color: #c9ff57;
+}
+
+.public-card[data-status="live"] .score.gray,
+.public-card[data-status="suspended"] .score.gray {
+  color: #e6ecf7;
+}
+
+.public-card[data-status="live"] .match-footer,
+.public-card[data-status="suspended"] .match-footer {
+  margin-top: 8px;
+  gap: 8px;
+  font-size: 11px;
+  padding: 0 2px;
+  line-height: 1.15;
+}
+
+.public-card[data-status="live"] .match-footer strong,
+.public-card[data-status="suspended"] .match-footer strong {
+  font-size: 11px;
+}
+
+.public-card[data-status="live"] .match-chip,
+.public-card[data-status="suspended"] .match-chip,
+.public-card[data-status="live"] .score.green,
+.public-card[data-status="suspended"] .score.green {
+  text-shadow: 0 0 10px rgba(200, 255, 92, 0.12);
+}
+
+/* feed ao vivo */
+body.public-page #liveList .live-feed,
+body.public-dashboard-page #liveList .live-feed {
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(200, 255, 92, 0.14), rgba(200, 255, 92, 0.06));
+  border: 1px solid rgba(200, 255, 92, 0.18);
+  color: #d8ff63;
+  font-size: 12px;
   font-weight: 900;
-  color: #ffffff !important;
-  letter-spacing: 0.02em;
-  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 0 14px rgba(200, 255, 92, 0.10);
+}
+
+/* ========================= FINALIZADOS ========================= */
+
+.public-card[data-status="finished"] {
+  padding: 4px 6px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.public-card[data-status="finished"] .match-board-top {
+  margin-bottom: 3px;
+  gap: 6px;
+}
+
+.public-card[data-status="finished"] .match-chip,
+.public-card[data-status="finished"] .match-status {
+  font-size: 8px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .match-format {
+  margin-bottom: 4px;
+  padding: 5px 6px;
+  border-radius: 8px;
+}
+
+.public-card[data-status="finished"] .match-format span {
+  font-size: 1px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .match-format strong {
+  font-size: 10px;
+  margin-top: 1px;
+  line-height: 1.05;
+}
+
+.public-card[data-status="finished"] .match-table-head {
+  padding: 0 2px 2px;
+  font-size: 8px;
+  letter-spacing: 0.4px;
+}
+
+.public-card[data-status="finished"] .match-player-row {
+  min-height: 30px;
+  margin-top: 3px;
+  padding: 0 3px;
+  border-radius: 8px;
+}
+
+.public-card[data-status="finished"] .player-name {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .score {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.public-card[data-status="finished"] .match-footer {
+  margin-top: 3px;
+  gap: 4px;
+  padding: 0 1px;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.public-card[data-status="finished"] .match-footer strong {
+  font-size: 10px;
+}
+
+/* sem duração/rodapé nos finalizados */
+.public-card[data-status="finished"] .match-footer-finalized {
+  display: none !important;
+}
+
+/* ========================= PLAYER AVATAR / SAQUE ========================= */
+
+.player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.player-name.team-name-compact {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #1f2937;
+}
+
+.player-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.serve-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d8ff63;
+  box-shadow: 0 0 6px rgba(216, 255, 99, 0.75);
+  margin-right: 6px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.serve-ball-placeholder {
+  visibility: hidden;
+}
+
+/* ========================= SCORE / TIE BREAK / STATUS DOT ========================= */
+
+.score {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.score.green {
+  color: #c9ff57;
+}
+
+.score.gray {
+  color: #cfd8e8;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+  animation: statusBlink 1s infinite ease-in-out;
+  vertical-align: middle;
+}
+
+.status-dot-live {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+
+.status-dot-suspended {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+.match-board .set-score {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1;
+  overflow: visible !important;
+}
+
+.match-board .set-main {
+  display: inline-block;
+  line-height: 1;
+}
+
+.match-board .set-tb {
+  font-size: 0.58em !important;
+  line-height: 1 !important;
+  position: relative;
+  top: -0.45em;
+  margin-left: 1px;
+  display: inline-block;
+  vertical-align: top;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  min-width: 0;
+}
+
+/* ========================= RESUMO / ESTATÍSTICAS ========================= */
+
+.match-summary {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+}
+
+.match-summary-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 12px;
   text-align: center;
 }
 
@@ -202,48 +687,50 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  min-width: 0;
 }
 
 .match-summary-item {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
   min-width: 0;
 }
 
 .summary-label {
-  display: block;
+  font-size: 13px;
   font-weight: 800;
-  font-size: 0.92rem;
-  color: #ffffff !important;
-  margin-bottom: 6px;
-  white-space: normal !important;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  line-height: 1.15;
-  text-align: center;
+  color: rgba(255,255,255,0.96);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .summary-value {
-  display: block;
-  font-size: 0.84rem;
+  font-size: 13px;
   line-height: 1.35;
-  color: rgba(255, 255, 255, 0.86);
-  margin-top: 3px;
-  text-align: center;
+  color: rgba(255,255,255,0.82);
+  font-variant-numeric: tabular-nums;
 }
 
 .summary-value strong {
+  color: #d8ff63;
   font-weight: 900;
-  color: #ffffff;
 }
-
-/* ========================================================= ESTATÍSTICAS ========================================================= */
 
 .stats-block {
   margin-top: 14px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
 }
 
 .stats-block .stat-card {
@@ -258,13 +745,6 @@
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
   position: relative;
   overflow: hidden;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 10px;
 }
 
 .stats-block .stat-title {
@@ -282,7 +762,6 @@
   word-break: break-word;
 }
 
-/* linha principal dos valores */
 .stats-block .stat-values {
   display: flex;
   justify-content: space-between;
@@ -299,7 +778,34 @@
   text-align: center;
 }
 
-/* linha das porcentagens */
+.stats-block .stat-values-textpair {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+.stats-block .stat-values-textpair span {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff !important;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stats-block .stat-values-textpair span:first-child {
+  flex: 0 0 auto;
+}
+
+.stats-block .stat-values-textpair span:last-child {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
 .stats-block .stat-pct-row {
   display: flex;
   justify-content: space-between;
@@ -317,7 +823,6 @@
   text-align: center;
 }
 
-/* Barra comparativa */
 .stats-block .stat-compare-bar {
   display: flex;
   width: 100%;
@@ -354,37 +859,72 @@
   color: #ffffff !important;
 }
 
-/* ========================================================= SERVIÇOS EM UMA ÚNICA LINHA ========================================================= */
+.match-board[data-status="live"] .live-meta-left,
+.match-board[data-status="live"] .live-meta-right,
+.match-board[data-status="suspended"] .live-meta-left,
+.match-board[data-status="suspended"] .live-meta-right {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 700;
+}
 
-.stats-block .stat-values-textpair {
+.match-board[data-status="live"] .live-meta-left strong,
+.match-board[data-status="live"] .live-meta-right strong,
+.match-board[data-status="suspended"] .live-meta-left strong,
+.match-board[data-status="suspended"] .live-meta-right strong {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 800;
+}
+
+.live-meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 0 10px;
-  white-space: nowrap;
-  flex-wrap: nowrap;
+  gap: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
-.stats-block .stat-values-textpair span {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #ffffff !important;
+.live-meta-left,
+.live-meta-right {
   min-width: 0;
-  text-align: center;
+  flex: 1;
+}
+
+.match-top-left,
+.match-top-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.live-meta-left {
+  text-align: left;
+}
+
+.live-meta-right {
+  text-align: right;
+}
+
+.live-meta-row span {
   white-space: nowrap;
 }
 
-.stats-block .stat-values-textpair span:first-child {
-  flex: 0 0 auto;
+.match-board .match-chip {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
 }
 
-.stats-block .stat-values-textpair span:last-child {
-  flex: 0 0 auto;
-  margin-left: 8px;
-}
-
-/* ========================================================= BREAK POINT ========================================================= */
+/* ========================= BREAK POINT / ÚLTIMOS PONTOS ========================= */
 
 .break-points-block {
   margin-top: 12px;
@@ -457,134 +997,6 @@
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
 }
 
-/* ========================================================= COLUNAS / ESPAÇAMENTO GERAL ========================================================= */
-
-.match-table-head,
-.match-player-row {
-  column-gap: 12px;
-}
-
-.match-table-head > div,
-.match-player-row > div {
-  min-width: 0;
-}
-
-.set-col,
-.points-col,
-.score {
-  padding-left: 2px;
-  padding-right: 2px;
-}
-
-/* Alinhamento à esquerda para sets e pontos */
-.match-board .set-col,
-.match-board .points-col {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start !important;
-  text-align: left !important;
-  white-space: nowrap;
-  gap: 1px;
-  overflow: visible !important;
-  padding-left: 4px;
-}
-
-.match-table-head .set-col,
-.match-player-row .set-col,
-.match-table-head .points-col,
-.match-player-row .points-col {
-  justify-content: flex-start !important;
-  text-align: right !important;
-}
-
-/* ========================================================= TIE-BREAK ========================================================= */
-
-.match-board .set-score {
-  display: inline-flex;
-  align-items: flex-start;
-  justify-content: center;
-  white-space: nowrap;
-  line-height: 1;
-  overflow: visible !important;
-}
-
-.match-board .set-main {
-  display: inline-block;
-  line-height: 1;
-}
-
-.match-board .set-tb {
-  font-size: 0.58em !important;
-  line-height: 1 !important;
-  position: relative;
-  top: -0.45em;
-  margin-left: 1px;
-  display: inline-block;
-  vertical-align: top;
-  overflow: visible !important;
-  white-space: nowrap !important;
-  min-width: 0;
-}
-
-/* ========================================================= FOOTER LIVE / SUSPENSO ========================================================= */
-
-.match-board[data-status="live"] .match-footer-live,
-.match-board[data-status="suspended"] .match-footer-live {
-  align-items: center !important;
-}
-
-.match-board[data-status="live"] .match-footer-live-row,
-.match-board[data-status="suspended"] .match-footer-live-row {
-  justify-content: center !important;
-  text-align: center !important;
-  width: 100%;
-}
-
-.match-board[data-status="live"] .match-footer-live-row span,
-.match-board[data-status="suspended"] .match-footer-live-row span,
-.match-board[data-status="live"] .match-footer-live-row strong,
-.match-board[data-status="suspended"] .match-footer-live-row strong {
-  justify-content: center !important;
-  text-align: center !important;
-}
-
-/* PARTIDAS FINALIZADAS COM DURAÇÃO EM LINHA ABAIXO */
-.match-board[data-status="finished"] .match-footer-finalized {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 4px !important;
-  width: 100% !important;
-  white-space: normal !important;
-  overflow: hidden !important;
-}
-
-.match-footer-finalized-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 100%;
-}
-
-.match-footer-finalized .footer-item {
-  display: inline-flex !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  align-items: center !important;
-}
-
-.match-footer-finalized .footer-sep {
-  display: inline-flex !important;
-  opacity: 0.45 !important;
-  flex: 0 0 auto !important;
-}
-
-/* ========================================================= ÚLTIMOS 10 PONTOS JOGADOS ========================================================= */
-
 .last-points-block {
   margin-top: 12px;
   padding: 12px 12px 10px;
@@ -637,197 +1049,136 @@
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
 }
 
-/* ========================================================= AVATAR / FOTO DOS JOGADORES ========================================================= */
+/* ========================= RESPONSIVO ========================= */
 
-.player-with-avatar {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+@media (max-width: 1100px) {
+  body.public-page .public-grid.board-grid,
+  body.public-dashboard-page .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.public-page .column-panel,
+  body.public-dashboard-page .dashboard-column {
+    min-height: auto;
+  }
 }
-
-.player-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: #1f2937;
-}
-
-.player-avatar-placeholder {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 900;
-  color: #fff;
-}
-
-.serve-ball-placeholder {
-  visibility: hidden;
-}
-
-/* ========================================================= STATUS DOT ========================================================= */
-
-.status-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  margin-right: 6px;
-  flex-shrink: 0;
-  animation: statusBlink 1s infinite ease-in-out;
-  vertical-align: middle;
-}
-
-.status-dot-live {
-  background: #22c55e;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
-}
-
-.status-dot-suspended {
-  background: #f59e0b;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
-}
-
-@keyframes statusBlink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.85); }
-}
-
-/* ========================================================= CABEÇALHO SEM LABELS ========================================================= */
-
-.match-board[data-status="live"] .match-table-head.head-no-labels,
-.match-board[data-status="suspended"] .match-table-head.head-no-labels {
-  min-height: 10px;
-}
-
-.match-board[data-status="live"] .match-table-head.head-no-labels > div,
-.match-board[data-status="suspended"] .match-table-head.head-no-labels > div {
-  font-size: 0;
-  line-height: 0;
-  min-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-/* ========================================================= META DO AO VIVO ========================================================= */
-
-.match-board[data-status="live"] .live-meta-left,
-.match-board[data-status="live"] .live-meta-right,
-.match-board[data-status="suspended"] .live-meta-left,
-.match-board[data-status="suspended"] .live-meta-right {
-  color: rgba(255, 255, 255, 0.88) !important;
-  font-size: 12px;
-  line-height: 1.15;
-  font-weight: 700;
-}
-
-.match-board[data-status="live"] .live-meta-left strong,
-.match-board[data-status="live"] .live-meta-right strong,
-.match-board[data-status="suspended"] .live-meta-left strong,
-.match-board[data-status="suspended"] .live-meta-right strong {
-  color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 800;
-}
-
-.live-meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-size: 12px;
-  line-height: 1.2;
-}
-
-.live-meta-left,
-.live-meta-right {
-  min-width: 0;
-  flex: 1;
-}
-
-.match-top-left,
-.match-top-right {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.live-meta-left {
-  text-align: left;
-}
-
-.live-meta-right {
-  text-align: right;
-}
-
-.live-meta-row span {
-  white-space: nowrap;
-}
-
-/* Categoria igual à Fase: texto branco, sem fundo amarelo */
-.match-board .match-chip {
-  background: transparent !important;
-  border: none !important;
-  color: #ffffff !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  box-shadow: none !important;
-  font-weight: 800 !important;
-}
-
-/* ========================================================= RESPONSIVO ========================================================= */
 
 @media (max-width: 768px) {
-  .break-point-ball {
-    width: 13px;
-    height: 13px;
+  body.public-page .mobile-filters,
+  body.public-dashboard-page .mobile-filters {
+    display: block;
   }
 
-  .player-avatar,
-  .player-avatar-placeholder {
-    width: 24px;
-    height: 24px;
+  body.public-page .public-grid.board-grid,
+  body.public-dashboard-page .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .player-with-avatar {
-    gap: 6px;
+  body.public-page .public-grid.board-grid > .dashboard-column:nth-child(2),
+  body.public-dashboard-page .dashboard-grid > .dashboard-column:nth-child(2) {
+    padding: 18px;
+    min-height: auto;
+    transform: none;
   }
 
-  .match-board.scheduled-match .scheduled-player-line .player-name.team-name-compact {
-    font-size: 1.05rem !important;
+  .public-card[data-status="live"],
+  .public-card[data-status="suspended"] {
+    padding: 12px;
+    min-height: auto;
   }
 
-  .match-board[data-status="finished"] .score {
-    font-size: 19px !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
+  .public-card[data-status="live"] .match-table-head,
+  .public-card[data-status="suspended"] .match-table-head,
+  .public-card[data-status="live"] .match-player-row,
+  .public-card[data-status="suspended"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.2fr)
+      minmax(38px, 0.48fr)
+      minmax(38px, 0.48fr)
+      minmax(38px, 0.48fr)
+      minmax(46px, 0.55fr) !important;
+    column-gap: 4px !important;
   }
 
-  .match-board[data-status="finished"] .match-footer-finalized,
-  .match-board[data-status="finished"] .match-footer-finalized .footer-item,
-  .match-board[data-status="finished"] .match-footer-finalized strong {
+  .public-card[data-status="live"] .player-name,
+  .public-card[data-status="suspended"] .player-name {
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: none !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    font-size: 14px !important;
+    line-height: 1.18 !important;
+  }
+
+  .public-card[data-status="live"] .score,
+  .public-card[data-status="suspended"] .score {
+    font-size: 18px !important;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .public-card[data-status="live"] .set-col,
+  .public-card[data-status="live"] .points-col,
+  .public-card[data-status="suspended"] .set-col,
+  .public-card[data-status="suspended"] .points-col {
+    justify-self: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .public-card[data-status="live"] .player-avatar,
+  .public-card[data-status="suspended"] .player-avatar,
+  .public-card[data-status="live"] .player-avatar-placeholder,
+  .public-card[data-status="suspended"] .player-avatar-placeholder {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .public-card[data-status="live"] .player-with-avatar,
+  .public-card[data-status="suspended"] .player-with-avatar {
+    gap: 6px !important;
+  }
+
+  .public-card[data-status="finished"] .player-avatar,
+  .public-card[data-status="finished"] .player-avatar-placeholder {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .public-card[data-status="finished"] .player-with-avatar {
+    gap: 6px !important;
+  }
+
+  .public-card[data-status="finished"] {
+    padding: 4px 6px;
+  }
+
+  .public-card[data-status="finished"] .player-name {
     font-size: 11px !important;
-    line-height: 1.15 !important;
   }
 
-  .match-board[data-status="live"] .match-footer-live,
-  .match-board[data-status="suspended"] .match-footer-live,
-  .match-board[data-status="live"] .match-footer-live strong,
-  .match-board[data-status="suspended"] .match-footer-live strong {
-    font-size: 10px !important;
-    line-height: 1.15 !important;
+  .public-card[data-status="finished"] .score {
+    font-size: 13px !important;
+  }
+
+  .public-card[data-status="finished"] .match-table-head,
+  .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.1fr)
+      minmax(34px, 0.42fr)
+      minmax(34px, 0.42fr)
+      minmax(34px, 0.42fr)
+      minmax(40px, 0.48fr) !important;
+    column-gap: 4px !important;
+  }
+
+  .stats-grid,
+  .match-summary-grid {
+    grid-template-columns: 1fr;
   }
 
   .stats-block .stat-card,
@@ -843,6 +1194,10 @@
     font-size: 1rem;
   }
 
+  .stats-block .stat-values-textpair span {
+    font-size: 0.95rem;
+  }
+
   .stats-block .stat-pct-row span {
     font-size: 0.78rem;
   }
@@ -853,15 +1208,6 @@
 
   .stats-block .stat-compare-labels {
     font-size: 0.72rem;
-  }
-
-  .stats-block .stat-values-textpair {
-    gap: 8px;
-    padding: 0 8px;
-  }
-
-  .stats-block .stat-values-textpair span {
-    font-size: 0.95rem;
   }
 
   .last-points-block {
@@ -881,17 +1227,16 @@
     height: 10px;
   }
 
-  .break-points-balls {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 6px !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    align-items: center !important;
+  .break-points-block {
+    padding: 10px 10px 8px;
   }
 
-  .break-point-ball-wrap {
-    flex: 0 0 auto !important;
+  .break-points-title {
+    font-size: 0.78rem;
+  }
+
+  .break-points-balls {
+    gap: 6px !important;
   }
 
   .break-point-ball {
@@ -903,204 +1248,89 @@
     font-size: 10px;
   }
 
-  /* Melhor ajuste para cards live/suspended/finished no mobile */
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
-    display: grid !important;
-    grid-template-columns:
-      minmax(0, 3.45fr)
-      minmax(38px, 0.45fr)
-      minmax(38px, 0.45fr)
-      minmax(44px, 0.55fr)
-      minmax(52px, 0.70fr) !important;
-    column-gap: 8px !important;
-    align-items: center !important;
+  .match-board[data-status="live"] .match-footer,
+  .match-board[data-status="suspended"] .match-footer {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div {
-    min-width: 0 !important;
-    overflow: visible !important;
-    text-align: center !important;
+  .public-card.scheduled-match .scheduled-player-line .player-name {
+    font-size: 1.05rem !important;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head > div:first-child,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row > div:first-child,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head > div:first-child,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row > div:first-child,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head > div:first-child,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row > div:first-child {
-    text-align: left !important;
-    justify-content: flex-start !important;
-    padding-right: 6px !important;
+  .public-card.scheduled-match .player-avatar,
+  .public-card.scheduled-match .player-avatar-placeholder {
+    width: 30px !important;
+    height: 30px !important;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
-    min-width: 0 !important;
-    text-align: left !important;
-    justify-content: flex-start !important;
-    white-space: nowrap !important;
-    overflow: visible !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .set-score,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-score,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-score,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-score,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-score,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-score {
-    display: inline-flex !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    white-space: nowrap !important;
-    overflow: visible !important;
-    line-height: 1 !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .set-main,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-main,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-main,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-main,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-main,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-main {
-    font-size: 1.02em;
-    line-height: 1;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .set-tb,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-tb,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-tb,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-tb,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-tb,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-tb {
-    font-size: 0.62em !important;
-    line-height: 1 !important;
-    top: -0.55em !important;
-    margin-left: 1px !important;
-    position: relative !important;
-    display: inline-block !important;
-    white-space: nowrap !important;
-    overflow: visible !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
-  body.public-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-page #finishedList .public-card[data-status="finished"] .score,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
-    font-size: 17px !important;
-    line-height: 1 !important;
-    min-width: 22px !important;
-    overflow: visible !important;
-  }
-
-  .match-board[data-status="live"] .match-footer-live,
-  .match-board[data-status="suspended"] .match-footer-live {
-    align-items: center !important;
-  }
-
-  .match-board[data-status="live"] .match-footer-live-row,
-  .match-board[data-status="suspended"] .match-footer-live-row {
-    justify-content: center !important;
-    text-align: center !important;
-  }
-
-  .match-footer-finalized-row {
-    font-size: 10px;
-    line-height: 1.15;
-    gap: 4px;
-  }
-
-  .match-board[data-status="finished"] .match-footer-finalized {
-    gap: 3px !important;
+  .public-card.scheduled-match .player-with-avatar {
+    gap: 8px !important;
   }
 }
 
-/* ========================================================= EXTRA: AJUSTE FINO PARA TIE-BREAK E FINALIZADOS ========================================================= */
-
 @media (max-width: 480px) {
-  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+  .public-card[data-status="live"],
+  .public-card[data-status="suspended"] {
+    border-radius: 16px;
+    padding: 10px;
+  }
+
+  .public-card[data-status="live"] .player-name,
+  .public-card[data-status="suspended"] .player-name {
+    font-size: 13px !important;
+  }
+
+  .public-card[data-status="live"] .score,
+  .public-card[data-status="suspended"] .score {
+    font-size: 17px !important;
+  }
+
+  .public-card[data-status="finished"] .player-name {
+    font-size: 10px !important;
+  }
+
+  .public-card[data-status="finished"] .score {
+    font-size: 11px !important;
+  }
+
+  .public-card[data-status="finished"] .match-table-head,
+  .public-card[data-status="finished"] .match-player-row {
     grid-template-columns:
-      minmax(0, 3.35fr)
-      minmax(38px, 0.44fr)
-      minmax(38px, 0.44fr)
-      minmax(46px, 0.58fr)
-      minmax(56px, 0.78fr) !important;
-    column-gap: 6px !important;
+      minmax(0, 3.0fr)
+      minmax(32px, 0.40fr)
+      minmax(32px, 0.40fr)
+      minmax(32px, 0.40fr)
+      minmax(38px, 0.46fr) !important;
+    column-gap: 3px !important;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  .public-card.scheduled-match .scheduled-player-line {
+    gap: 6px;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .set-main,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-main,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-main,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-main,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-main,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-main {
-    font-size: 0.98em;
+  .public-card.scheduled-match .scheduled-player-line .player-name,
+  .public-card.scheduled-match .scheduled-player-line .vs-separator {
+    font-size: 13px;
   }
 
-  body.public-page #liveList .public-card[data-status="live"] .set-tb,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-tb,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-tb,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-tb,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-tb,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-tb {
-    font-size: 0.58em !important;
-    top: -0.52em !important;
+  .public-card.scheduled-match .scheduled-footer {
+    font-size: 9px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-avatar,
+  .player-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+  }
+
+  .serve-ball {
+    width: 8px;
+    height: 8px;
+    margin-right: 4px;
+    top: 0;
   }
 
   .stats-block .stat-values-textpair span {
@@ -1116,526 +1346,5 @@
     overflow-x: auto !important;
     overflow-y: hidden !important;
     padding-bottom: 2px !important;
-  }
-
-  .break-point-ball-wrap {
-    flex: 0 0 auto !important;
-  }
-}
-
-/* ========================================================= AVATAR + SAQUE CENTRALIZADO ========================================================= */
-
-.player-with-avatar {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.player-name.team-name-compact {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-}
-
-.serve-ball {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #d8ff63;
-  box-shadow: 0 0 6px rgba(216, 255, 99, 0.75);
-  margin-right: 6px;
-  flex-shrink: 0;
-  vertical-align: middle;
-  position: relative;
-  top: -1px;
-}
-
-.serve-ball-placeholder {
-  visibility: hidden;
-}
-
-.player-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: #1f2937;
-}
-
-.player-avatar-placeholder {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 900;
-  color: #fff;
-}
-
-/* Avatar maior em jogos em andamento, suspensos e finalizados */
-.match-board[data-status="live"] .player-avatar,
-.match-board[data-status="suspended"] .player-avatar,
-.match-board[data-status="finished"] .player-avatar {
-  width: 38px !important;
-  height: 38px !important;
-}
-
-.match-board[data-status="live"] .player-avatar-placeholder,
-.match-board[data-status="suspended"] .player-avatar-placeholder,
-.match-board[data-status="finished"] .player-avatar-placeholder {
-  width: 38px !important;
-  height: 38px !important;
-}
-
-.match-board[data-status="live"] .player-with-avatar,
-.match-board[data-status="suspended"] .player-with-avatar,
-.match-board[data-status="finished"] .player-with-avatar {
-  gap: 10px !important;
-}
-
-/* Ajuste fino para mobile */
-@media (max-width: 768px) {
-  .player-avatar,
-  .player-avatar-placeholder {
-    width: 24px;
-    height: 24px;
-  }
-
-  .match-board[data-status="live"] .player-avatar,
-  .match-board[data-status="suspended"] .player-avatar,
-  .match-board[data-status="finished"] .player-avatar,
-  .match-board[data-status="live"] .player-avatar-placeholder,
-  .match-board[data-status="suspended"] .player-avatar-placeholder,
-  .match-board[data-status="finished"] .player-avatar-placeholder {
-    width: 30px !important;
-    height: 30px !important;
-  }
-
-  .match-board[data-status="live"] .player-with-avatar,
-  .match-board[data-status="suspended"] .player-with-avatar,
-  .match-board[data-status="finished"] .player-with-avatar {
-    gap: 8px !important;
-  }
-
-  .serve-ball {
-    width: 9px;
-    height: 9px;
-    top: -1px;
-  }
-}
-
-/* ========================================================= FINALIZADOS SEM CABEÇALHO / PONTOS / DURAÇÃO ========================================================= */
-
-.match-board[data-status="finished"] .match-table-head {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto;
-}
-
-.match-board[data-status="finished"] .match-table-head .team-label,
-.match-board[data-status="finished"] .match-table-head .points-col {
-  display: none !important;
-}
-
-.match-board[data-status="finished"] .match-player-row {
-  grid-template-columns: 1fr auto auto auto;
-}
-
-.match-board[data-status="finished"] .match-player-row .points-col {
-  display: none !important;
-}
-
-.match-board[data-status="finished"] .match-player-row .team-col {
-  justify-content: flex-start !important;
-  text-align: left !important;
-}
-
-.match-board[data-status="finished"] .match-footer-finalized {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 6px !important;
-  flex-wrap: nowrap !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-}
-
-/* ========================================================= FINALIZADOS: AJUSTE DE COLUNAS ========================================================= */
-
-.match-board[data-status="finished"] .match-table-head {
-  grid-template-columns: 1fr auto auto auto;
-}
-
-.match-board[data-status="finished"] .match-player-row {
-  grid-template-columns: 1fr auto auto auto;
-}
-
-.match-board[data-status="finished"] .match-table-head .points-col,
-.match-board[data-status="finished"] .match-player-row .points-col {
-  display: none !important;
-}
-
-.match-board[data-status="finished"] .points-col {
-  display: none !important;
-}
-
-.match-board[data-status="finished"] .match-table-head {
-  justify-content: flex-start !important;
-}
-
-.match-board[data-status="finished"] .match-top-left {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.match-board[data-status="finished"] .match-footer-finalized {
-  display: none !important;
-}
-
-.match-board[data-status="finished"] .player-with-avatar.doubles-wrapper {
-  gap: 10px;
-}
-
-.match-board[data-status="finished"] .doubles-avatar-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.match-board[data-status="finished"] .doubles-name-group {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-
-/* ========================================================= FINALIZADOS: TORNEIO E FASE MENOR ========================================================= */
-
-.match-board[data-status="finished"] .match-top-left .live-meta-left {
-  font-size: 0.72rem !important;
-  line-height: 1.1 !important;
-}
-
-.match-board[data-status="finished"] .match-top-left .live-meta-left strong {
-  font-size: 0.72rem !important;
-  line-height: 1.1 !important;
-}
-
-/* ========================================================= MOBILE: AJUSTE FINO PARA LIVE / FINISHED ========================================================= */
-
-@media (max-width: 768px) {
-  /* Nome dos jogadores */
-  .match-board[data-status="live"] .player-name.team-name-compact,
-  .match-board[data-status="suspended"] .player-name.team-name-compact,
-  .match-board[data-status="finished"] .player-name.team-name-compact {
-    font-size: 0.82rem !important;
-    line-height: 1.08 !important;
-    font-weight: 800 !important;
-  }
-
-  /* Nome interno do atleta */
-  .match-board[data-status="live"] .team-name-compact-content,
-  .match-board[data-status="suspended"] .team-name-compact-content,
-  .match-board[data-status="finished"] .team-name-compact-content {
-    font-size: 0.82rem !important;
-    line-height: 1.08 !important;
-  }
-
-  /* Números dos sets e pontos */
-  .match-board[data-status="live"] .score,
-  .match-board[data-status="suspended"] .score,
-  .match-board[data-status="finished"] .score {
-    font-size: 0.95rem !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-    min-width: 0 !important;
-  }
-
-  /* Colunas de set e pontos mais compactas */
-  .match-board[data-status="live"] .set-col,
-  .match-board[data-status="suspended"] .set-col,
-  .match-board[data-status="finished"] .set-col,
-  .match-board[data-status="live"] .points-col,
-  .match-board[data-status="suspended"] .points-col,
-  .match-board[data-status="finished"] .points-col {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    white-space: nowrap !important;
-  }
-
-  /* Linha do jogador */
-  .match-board[data-status="live"] .match-player-row,
-  .match-board[data-status="suspended"] .match-player-row,
-  .match-board[data-status="finished"] .match-player-row {
-    min-height: 34px !important;
-  }
-
-  /* Avatar menor no mobile para não apertar a linha */
-  .match-board[data-status="live"] .player-avatar,
-  .match-board[data-status="suspended"] .player-avatar,
-  .match-board[data-status="finished"] .player-avatar,
-  .match-board[data-status="live"] .player-avatar-placeholder,
-  .match-board[data-status="suspended"] .player-avatar-placeholder,
-  .match-board[data-status="finished"] .player-avatar-placeholder {
-    width: 26px !important;
-    height: 26px !important;
-  }
-
-  /* Espaço entre avatar e nome */
-  .match-board[data-status="live"] .player-with-avatar,
-  .match-board[data-status="suspended"] .player-with-avatar,
-  .match-board[data-status="finished"] .player-with-avatar {
-    gap: 6px !important;
-  }
-
-  /* Saque centralizado e discreto */
-  .serve-ball {
-    width: 8px !important;
-    height: 8px !important;
-    margin-right: 4px !important;
-    top: 0 !important;
-  }
-
-  /* Cabeçalho do card */
-  .match-board[data-status="live"] .match-board-top,
-  .match-board[data-status="suspended"] .match-board-top,
-  .match-board[data-status="finished"] .match-board-top {
-    gap: 8px !important;
-  }
-
-  /* Torneio e Fase menores no finalizado */
-  .match-board[data-status="finished"] .match-top-left .live-meta-left,
-  .match-board[data-status="finished"] .match-top-left .live-meta-left strong {
-    font-size: 0.64rem !important;
-    line-height: 1.05 !important;
-  }
-
-  /* Duração menor no mobile */
-  .match-board[data-status="live"] .live-meta-right,
-  .match-board[data-status="suspended"] .live-meta-right {
-    font-size: 0.72rem !important;
-  }
-
-  .match-board[data-status="live"] .duration-with-icon,
-  .match-board[data-status="suspended"] .duration-with-icon {
-    gap: 4px !important;
-  }
-
-  .match-board[data-status="live"] .duration-icon,
-  .match-board[data-status="suspended"] .duration-icon {
-    font-size: 12px !important;
-  }
-
-  /* Texto dos blocos de estatísticas menor no mobile */
-  .stats-block .stat-title,
-  .match-summary-title,
-  .last-points-title,
-  .break-points-title {
-    font-size: 0.72rem !important;
-  }
-
-  .stats-block .stat-values span,
-  .stats-block .stat-values-textpair span,
-  .stats-block .stat-compare-labels {
-    font-size: 0.78rem !important;
-  }
-}
-
-/* ========================================================= AJUSTE FINAL MOBILE: TEXTO / NÚMEROS MAIS COMPACTOS ========================================================= */
-
-@media (max-width: 768px) {
-  /* Cards ao vivo e finalizados mais compactos */
-  body.public-page #liveList .public-card[data-status="live"],
-  body.public-dashboard-page #liveList .public-card[data-status="live"],
-  body.public-page #liveList .public-card[data-status="suspended"],
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"],
-  body.public-page #finishedList .public-card[data-status="finished"],
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] {
-    padding: 10px !important;
-    min-height: auto !important;
-  }
-
-  /* Cabeçalho do card mais enxuto */
-  body.public-page #liveList .public-card[data-status="live"] .match-board-top,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-board-top,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-board-top,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-board-top,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-board-top,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-board-top {
-    margin-bottom: 6px !important;
-    gap: 6px !important;
-  }
-
-  /* Nome do jogador mais compacto */
-  body.public-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
-    font-size: 13px !important;
-    line-height: 1.08 !important;
-    font-weight: 800 !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .team-name-compact,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .team-name-compact,
-  body.public-page #liveList .public-card[data-status="suspended"] .team-name-compact,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .team-name-compact,
-  body.public-page #finishedList .public-card[data-status="finished"] .team-name-compact,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .team-name-compact {
-    font-size: 13px !important;
-    line-height: 1.08 !important;
-    font-weight: 800 !important;
-  }
-
-  /* Números do placar menores */
-  body.public-page #liveList .public-card[data-status="live"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
-  body.public-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-page #finishedList .public-card[data-status="finished"] .score,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
-    font-size: 17px !important;
-    line-height: 1 !important;
-    min-width: 22px !important;
-    font-weight: 900 !important;
-  }
-
-  /* Set / pontos mais compactos */
-  body.public-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .set-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .set-col,
-  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
-  body.public-page #liveList .public-card[data-status="live"] .points-col,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .points-col,
-  body.public-page #liveList .public-card[data-status="suspended"] .points-col,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .points-col,
-  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    white-space: nowrap !important;
-  }
-
-  /* Linha do jogador mais baixa */
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
-    min-height: 36px !important;
-    margin-top: 4px !important;
-  }
-
-  /* Avatar menor para liberar espaço */
-  body.public-page #liveList .public-card[data-status="live"] .player-avatar,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar,
-  body.public-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-avatar,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-avatar,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-avatar-placeholder,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-avatar-placeholder,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder {
-    width: 26px !important;
-    height: 26px !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .player-with-avatar,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-with-avatar,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-with-avatar,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-with-avatar,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-with-avatar,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-with-avatar {
-    gap: 6px !important;
-  }
-
-  /* Texto do topo menor: torneio / fase / status */
-  body.public-page #finishedList .public-card[data-status="finished"] .match-top-left,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-top-left {
-    gap: 2px !important;
-  }
-
-  body.public-page #finishedList .public-card[data-status="finished"] .live-meta-left,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .live-meta-left,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-chip,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-chip,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-status,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-status {
-    font-size: 10px !important;
-    line-height: 1.05 !important;
-  }
-
-  /* Duração menor */
-  body.public-page #liveList .public-card[data-status="live"] .live-meta-right,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .live-meta-right,
-  body.public-page #liveList .public-card[data-status="suspended"] .live-meta-right,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .live-meta-right {
-    font-size: 11px !important;
-  }
-
-  /* Título geral do card mais compacto */
-  body.public-page #liveList .public-card[data-status="live"] .match-format strong,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-format strong,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-format strong,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-format strong {
-    font-size: 11px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  body.public-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-name,
-  body.public-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .player-name,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-name,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-name {
-    font-size: 12px !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .score,
-  body.public-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .score,
-  body.public-page #finishedList .public-card[data-status="finished"] .score,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
-    font-size: 15px !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .player-avatar,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar,
-  body.public-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .player-avatar-placeholder,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar,
-  body.public-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .player-avatar-placeholder {
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
-  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
-  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
-    min-height: 32px !important;
   }
 }
