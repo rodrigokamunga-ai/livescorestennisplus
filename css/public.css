@@ -1944,3 +1944,91 @@ body.public-dashboard-page .match-board[data-status="finished"] .match-top-left 
     color: #ffffff !important;
   }
 }
+
+/* ========================================================= PATCH DUPLAS / MOBILE ========================================================= */
+
+@media (max-width: 768px) {
+  body.public-page .match-board[data-status="live"] .player-with-avatar.doubles-wrapper,
+  body.public-page .match-board[data-status="suspended"] .player-with-avatar.doubles-wrapper,
+  body.public-page .match-board[data-status="finished"] .player-with-avatar.doubles-wrapper,
+  body.public-dashboard-page .match-board[data-status="live"] .player-with-avatar.doubles-wrapper,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-with-avatar.doubles-wrapper,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-with-avatar.doubles-wrapper {
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+
+  body.public-page .match-board[data-status="live"] .team-col,
+  body.public-page .match-board[data-status="suspended"] .team-col,
+  body.public-page .match-board[data-status="finished"] .team-col,
+  body.public-dashboard-page .match-board[data-status="live"] .team-col,
+  body.public-dashboard-page .match-board[data-status="suspended"] .team-col,
+  body.public-dashboard-page .match-board[data-status="finished"] .team-col {
+    min-width: 0 !important;
+  }
+
+  /* Dá mais espaço para o nome das duplas */
+  body.public-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="live"] .match-player-row,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-table-head,
+  body.public-dashboard-page #liveList .public-card[data-status="suspended"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.55fr)
+      minmax(34px, 0.42fr)
+      minmax(34px, 0.42fr)
+      minmax(34px, 0.42fr)
+      minmax(46px, 0.58fr) !important;
+  }
+
+  /* Evita colisão do 1º set com o nome */
+  body.public-page .match-board[data-status="finished"] .player-name,
+  body.public-dashboard-page .match-board[data-status="finished"] .player-name,
+  body.public-page .match-board[data-status="live"] .player-name,
+  body.public-dashboard-page .match-board[data-status="live"] .player-name,
+  body.public-page .match-board[data-status="suspended"] .player-name,
+  body.public-dashboard-page .match-board[data-status="suspended"] .player-name {
+    min-width: 0 !important;
+    padding-right: 4px !important;
+  }
+
+  body.public-page .match-board[data-status="finished"] .set-col,
+  body.public-dashboard-page .match-board[data-status="finished"] .set-col,
+  body.public-page .match-board[data-status="live"] .set-col,
+  body.public-dashboard-page .match-board[data-status="live"] .set-col,
+  body.public-page .match-board[data-status="suspended"] .set-col,
+  body.public-dashboard-page .match-board[data-status="suspended"] .set-col {
+    min-width: 0 !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
+  body.public-page .match-board[data-status="finished"] .points-col,
+  body.public-dashboard-page .match-board[data-status="finished"] .points-col {
+    padding-left: 8px !important;
+  }
+
+  /* Números em branco nos finalizados */
+  body.public-page .match-board[data-status="finished"] .score,
+  body.public-dashboard-page .match-board[data-status="finished"] .score {
+    color: #ffffff !important;
+  }
+}
+
+body.public-page .player-avatar-placeholder,
+body.public-dashboard-page .player-avatar-placeholder {
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
