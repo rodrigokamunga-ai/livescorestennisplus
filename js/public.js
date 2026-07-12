@@ -594,10 +594,15 @@
 
     function renderPlayerAvatar(photoSrc, playerName = "") {
       const safeName = U.escapeHtml(playerName || "Jogador");
+      const initial = String(playerName || "J")
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+    
       if (!photoSrc) {
-        return `<span class="player-avatar-placeholder" title="${safeName}"></span>`;
+        return `<span class="player-avatar-placeholder" title="${safeName}">${U.escapeHtml(initial)}</span>`;
       }
-
+    
       return `<img class="player-avatar" src="${photoSrc}" alt="${safeName}" title="${safeName}" />`;
     }
 
