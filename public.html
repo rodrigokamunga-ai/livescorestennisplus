@@ -16,7 +16,10 @@
   <title>Tela Pública - TennisPro</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/public.css" />
+
+  <style> .title-with-icon { display: inline-flex; align-items: center; gap: 8px; } .section-icon { font-size: 18px; line-height: 1; vertical-align: middle; flex: 0 0 auto; } .duration-with-icon { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; } .duration-icon { font-size: 16px; line-height: 1; flex: 0 0 auto; } .filter-select { appearance: none; -webkit-appearance: none; -moz-appearance: none; } .back-btn, button, .filter-select { border-radius: 12px; transition: 0.2s ease; } .back-btn:hover, button:hover, .filter-select:hover { transform: translateY(-1px); } </style>
 </head>
+
 <body class="public-page public-dashboard-page">
   <main class="container dashboard-container">
 
@@ -37,7 +40,7 @@
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">
           <div class="title-with-icon">
-            <span class="section-icon">🗓️</span>
+            <ion-icon name="calendar-outline" class="section-icon"></ion-icon>
             <h3>Jogos do dia</h3>
           </div>
           <span class="badge" id="countScheduled">0</span>
@@ -48,7 +51,7 @@
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">
           <div class="title-with-icon">
-            <span class="section-icon live">⚡</span>
+            <ion-icon name="flash-outline" class="section-icon live"></ion-icon>
             <h3>Em andamento</h3>
           </div>
           <span class="badge" id="countLive">0</span>
@@ -56,13 +59,10 @@
         <div id="liveList" class="cards compact-cards column-scroll dashboard-list"></div>
       </div>
 
-      
-
-
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">
           <div class="title-with-icon">
-            <span class="section-icon finished">🏁</span>
+            <ion-icon name="flag-outline" class="section-icon finished"></ion-icon>
             <h3>Finalizados</h3>
           </div>
           <span class="badge" id="countFinished">0</span>
@@ -78,6 +78,9 @@
 
   <script src="js/firebase.js"></script>
   <script src="js/public.js?v=2"></script>
+
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
 
   <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
 </body>
