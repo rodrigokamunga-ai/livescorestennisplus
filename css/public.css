@@ -1895,3 +1895,52 @@ body.public-dashboard-page .match-board[data-status="finished"] .match-top-left 
     text-overflow: ellipsis !important;
   }
 }
+
+/* ========================================================= PATCH FINALIZADOS — 3 COLUNAS, ESPAÇO E COR ========================================================= */
+
+@media (max-width: 768px) {
+  body.public-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-page #finishedList .public-card[data-status="finished"] .match-player-row,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-table-head,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .match-player-row {
+    grid-template-columns:
+      minmax(0, 3.25fr)
+      minmax(34px, 0.40fr)
+      minmax(34px, 0.40fr)
+      minmax(34px, 0.40fr)
+      minmax(46px, 0.60fr) !important;
+    column-gap: 8px !important;
+  }
+
+  /* Mesmo espaçamento entre as 3 colunas de sets */
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col {
+    justify-content: center !important;
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Deixa um espaço antes da coluna de pontos */
+  body.public-page #finishedList .public-card[data-status="finished"] .points-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .points-col {
+    padding-left: 8px !important;
+    padding-right: 0 !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  /* Número dos sets em branco */
+  body.public-page #finishedList .public-card[data-status="finished"] .score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .score {
+    color: #ffffff !important;
+  }
+
+  /* Garante que os números dos sets fiquem brancos mesmo com spans internos */
+  body.public-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-col,
+  body.public-page #finishedList .public-card[data-status="finished"] .set-score,
+  body.public-dashboard-page #finishedList .public-card[data-status="finished"] .set-score {
+    color: #ffffff !important;
+  }
+}
