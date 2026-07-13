@@ -1331,11 +1331,31 @@ body.confronto-page .confronto-match-score {
     min-height: 108px;
   }
 
+  /* Filtros em uma linha no mobile */
+  body.confronto-page .confronto-filter-wrap {
+    width: 100%;
+  }
+
+  body.confronto-page .confronto-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+  }
+
   body.confronto-page .confronto-filter-btn {
-    flex: 1 1 calc(33.333% - 8px);
+    flex: 1 1 0;
     min-width: 0;
-    padding: 0 10px;
-    font-size: 0.82rem;
+    padding: 0 8px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+
+  body.confronto-page .confronto-filter-btn ion-icon {
+    font-size: 16px;
   }
 
   body.confronto-page .confronto-search-modal-card {
@@ -1432,13 +1452,23 @@ body.confronto-page .confronto-match-score {
   }
 
   body.confronto-page .confronto-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
     gap: 4px;
+    width: 100%;
+    overflow: hidden;
   }
 
   body.confronto-page .confronto-filter-btn {
-    flex: 1 1 calc(50% - 6px);
-    min-height: 40px;
-    font-size: 0.78rem;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 6px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  body.confronto-page .confronto-filter-btn ion-icon {
+    font-size: 15px;
   }
 
   body.confronto-page .confronto-search-btn,
