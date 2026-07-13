@@ -3,17 +3,6 @@
 
   const PAGE_SIZE = 5;
 
-  const TOURNAMENT_STAGES = new Set([
-    "primeira rodada",
-    "segunda rodada",
-    "terceira rodada",
-    "oitavas de final",
-    "quartas de final",
-    "semifinais",
-    "final",
-    "grupos"
-  ]);
-
   const state = {
     currentPage: 1,
     items: [],
@@ -33,7 +22,8 @@
     searchTimeout: null,
     historicalPlayersCache: [],
     allOwnerMatches: [],
-    currentProfileName: ""
+    currentProfileName: "",
+    currentUser: null
   };
 
   function getParam(name) {
@@ -53,6 +43,19 @@
     return v ? v : "-";
   }
 
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? "";
+  }
+
+  function show(el) {
+    if (el) el.classList.remove("hidden");
+  }
+
+  function hide(el) {
+    if (el) el.classList.add("hidden");
+  }
+
   function samePair(a1, a2, b1, b2) {
     const A1 = normalize(a1);
     const A2 = normalize(a2);
@@ -67,25 +70,12 @@
     );
   }
 
-  function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value ?? "";
-  }
-
-  function show(el) {
-    if (el) el.classList.remove("hidden");
-  }
-
-  function hide(el) {
-    if (el) el.classList.add("hidden");
-  }
-
   function getGameFormat(match) {
     return String(match?.gameFormat || "").trim().toLowerCase();
   }
 
   function isDoubles(match) {
-    const gf = getGameFormat(match);
+    const gf = String(match?.gameFormat || "").trim().toLowerCase();
     return gf === "duplas" || gf === "duplas mistas";
   }
 
@@ -136,6 +126,124 @@
     return "--";
   }
 
+  function formatDateTime(value) {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "-";
+
+    return new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short"
+    }).format(d);
+  }
+
+  function getStatusIcon(status) {
+    const s = normalize(status);
+    if (s === "wo") return "close-circle-outline";
+    if (s === "ret") return "hand-left-outline";
+    return "checkmark-circle-outline";
+  }
+
+  function abbreviateFullName(name = "") {
+    const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return "-";
+    if (parts.length === 1) return parts[0];
+    const first = parts[0].charAt(0).toUpperCase() + ".";
+    const last = parts[parts.length - 1];
+    return `${first} ${last}`;
+  }
+
+  function renderCountryFlag(countryValue = "") {
+    const raw = String(countryValue || "").trim().toUpperCase();
+
+    const map = {
+      BR: "🇧🇷",
+      BRA: "🇧🇷",
+      PT: "🇵🇹",
+      PRT: "🇵🇹",
+      US: "🇺🇸",
+      USA: "🇺🇸",
+      UK: "🇬🇧",
+      GBR: "🇬🇧",
+      ES: "🇪🇸",
+      ESP: "🇪🇸",
+      FR: "🇫🇷",
+      FRA: "🇫🇷",
+      IT: "🇮🇹",
+      ITA: "🇮🇹",
+      AR: "🇦🇷",
+      ARG: "🇦🇷",
+      CL: "🇨🇱",
+      CHI: "🇨🇱",
+      CO: "🇨🇴",
+      COL: "🇨🇴",
+      DE: "🇩🇪",
+      GER: "🇩🇪",
+      AU: "🇦🇺",
+      AUS: "🇦🇺",
+      CA: "🇨🇦",
+      CAN: "🇨🇦",
+      MX: "🇲🇽",
+      MEX: "🇲🇽"
+    };
+
+    const flag = map[raw];
+    if (flag) return `${flag}`;
+    return raw || "-";
+  }
+
+  function getMatchStatusLabel(data, winner, p1, p2) {
+    const status = normalize(data?.status || "");
+
+    const isDoublesMatch =
+      normalize(data?.gameFormat || "") === "duplas" ||
+      normalize(data?.gameFormat || "") === "duplas mistas" ||
+      !!(data?.player3 || data?.player4 || data?.player3Name || data?.player4Name);
+
+    const team1A = data?.player1 || data?.player1Name || p1 || "";
+    const team1B = data?.player2 || data?.player2Name || p2 || "";
+    const team2A = data?.player3 || data?.player3Name || "";
+    const team2B = data?.player4 || data?.player4Name || "";
+
+    const team1Label = isDoublesMatch
+      ? `${abbreviateFullName(team1A)} / ${abbreviateFullName(team1B)}`
+      : abbreviateFullName(team1A);
+
+    const team2Label = isDoublesMatch
+      ? `${abbreviateFullName(team2A)} / ${abbreviateFullName(team2B)}`
+      : abbreviateFullName(team2A || p2 || "");
+
+    if (status === "wo") {
+      if (winner === 1) {
+        return isDoublesMatch ? `WO — ${team1Label} venceram` : `WO — ${team1Label} venceu`;
+      }
+      if (winner === 2) {
+        return isDoublesMatch ? `WO — ${team2Label} venceram` : `WO — ${team2Label} venceu`;
+      }
+      return "WO";
+    }
+
+    if (status === "ret") {
+      if (winner === 1) {
+        return isDoublesMatch ? `Desistência — ${team1Label} venceram` : `Desistência — ${team1Label} venceu`;
+      }
+      if (winner === 2) {
+        return isDoublesMatch ? `Desistência — ${team2Label} venceram` : `Desistência — ${team2Label} venceu`;
+      }
+      return "Desistência";
+    }
+
+    if (winner === 1) {
+      return isDoublesMatch ? `${team1Label} venceram` : `${team1Label} venceu`;
+    }
+
+    if (winner === 2) {
+      return isDoublesMatch ? `${team2Label} venceram` : `${team2Label} venceu`;
+    }
+
+    return "Sem vencedor definido";
+  }
+
   function buildMatchLine(data) {
     const isDoubleMatch =
       String(data?.gameFormat || "").trim().toLowerCase() === "duplas" ||
@@ -144,13 +252,18 @@
 
     const p1 = data?.player1 || data?.player1Name || data?.ownerName || "Jogador 1";
     const p2 = data?.player2 || data?.player2Name || data?.opponentName || "Jogador 2";
-    const p3 = data?.player3 || data?.player3Name || data?.player3FullName || data?.team1?.player1 || "";
-    const p4 = data?.player4 || data?.player4Name || data?.player4FullName || data?.team2?.player2 || "";
+    const p3 = data?.player3 || data?.player3Name || data?.player3FullName || "";
+    const p4 = data?.player4 || data?.player4Name || data?.player4FullName || "";
+
+    const p1Short = abbreviateFullName(p1);
+    const p2Short = abbreviateFullName(p2);
+    const p3Short = p3 ? abbreviateFullName(p3) : "";
+    const p4Short = p4 ? abbreviateFullName(p4) : "";
 
     const score = data?.score || {};
     const history = Array.isArray(score.setHistory) ? score.setHistory : [];
     const status = String(data?.status || "").trim().toLowerCase();
-    const date = data?.matchDateTime ? new Date(data.matchDateTime).toLocaleString("pt-BR") : "-";
+    const date = formatDateTime(data?.matchDateTime);
 
     const setText = history
       .map(getSetDisplayFromHistory)
@@ -158,28 +271,16 @@
       .join(" • ");
 
     const winner = getWinner(data);
-
-    let resultText = "Sem vencedor";
-    if (winner === 1) resultText = `${p1} venceu`;
-    if (winner === 2) resultText = `${p2} venceu`;
-
-    if (status === "wo") {
-      resultText = winner
-        ? `Finalizada por WO • ${winner === 1 ? p1 : p2} venceu`
-        : "Finalizada por WO";
-    }
-
-    if (status === "ret") {
-      resultText = winner
-        ? `Finalizada por desistência • ${winner === 1 ? p1 : p2} venceu`
-        : "Finalizada por desistência";
-    }
+    const resultText = getMatchStatusLabel(data, winner, p1, p2);
+    const statusIcon = getStatusIcon(status);
 
     const title = isDoubleMatch
-      ? `${p1} / ${p2}${p3 || p4 ? ` x ${p3 || ""}${p3 && p4 ? " / " : ""}${p4 || ""}` : ""}`
-      : `${p1} vs ${p2}`;
+      ? `${p1Short} / ${p2Short} x ${p3Short || "?"}${p3Short && p4Short ? " / " : ""}${p4Short || ""}`
+      : `${p1Short} x ${p2Short}`;
 
-    return ` <div class="confronto-match-row"> <div class="confronto-match-main"> <div class="confronto-match-title">${title}</div> <div class="confronto-match-score">${setText || "--"}</div> </div> <div class="confronto-match-meta"> <span>${date}</span> <span>${resultText}</span> </div> </div> `;
+    const scoreText = setText || `${safeValue(score.sets1 ?? 0)} x ${safeValue(score.sets2 ?? 0)}`;
+
+    return ` <div class="match-item"> <div class="match-top"> <div class="match-players"> <ion-icon name="people-outline"></ion-icon> <span class="match-players-name">${title}</span> </div> </div> <div class="match-line"> <ion-icon name="trophy-outline"></ion-icon> <span class="match-score">${scoreText}</span> </div> <div class="match-line"> <ion-icon name="calendar-outline"></ion-icon> <span class="match-datetime">${date}</span> </div> <div class="match-line"> <ion-icon name="${statusIcon}"></ion-icon> <span class="match-status">${resultText}</span> </div> </div> `;
   }
 
   function getAvatarInitial(name = "") {
@@ -250,7 +351,6 @@
     };
 
     imgEl.onerror = () => {
-      console.warn("Falha ao carregar foto do jogador:", url);
       imgEl.removeAttribute("src");
       hide(imgEl);
       show(placeholderEl);
@@ -631,24 +731,6 @@
     return `${name}_${shortUid}_id`;
   }
 
-  function getStoredWinsLossesTitles(profile = {}) {
-    const winsRaw = profile.wins ?? profile.vitorias ?? profile["vitórias"];
-    const lossesRaw = profile.losses ?? profile.derrotas;
-    const titlesRaw = profile.titles ?? profile.titulos ?? profile["títulos"];
-
-    const normalizeStored = (value) => {
-      const v = String(value ?? "").trim();
-      if (!v || v === "-") return null;
-      return v;
-    };
-
-    return {
-      wins: normalizeStored(winsRaw),
-      losses: normalizeStored(lossesRaw),
-      titles: normalizeStored(titlesRaw)
-    };
-  }
-
   function getPlayerMatchResult(match, playerName) {
     const nameNorm = normalize(playerName || "");
     if (!nameNorm) return null;
@@ -691,15 +773,9 @@
     return getPlayerMatchResult(match, playerName) === "win";
   }
 
-  function isTournamentChampionLoss(match, playerName) {
-    const stage = normalize(match.tournamentStage || "");
-    if (stage !== "final") return false;
-    return getPlayerMatchResult(match, playerName) === "loss";
-  }
-
   function getPlayerStatsFromMatches(playerName) {
     const nameNorm = normalize(playerName || "");
-  
+
     if (!nameNorm || !Array.isArray(state.allOwnerMatches) || !state.allOwnerMatches.length) {
       return {
         total: 0,
@@ -710,13 +786,16 @@
         lossesPct: "0.0"
       };
     }
-  
+
     let wins = 0;
     let losses = 0;
     let titles = 0;
     let total = 0;
-  
+
     state.allOwnerMatches.forEach((match) => {
+      const status = String(match.status || "").trim().toLowerCase();
+      if (status !== "finished" && status !== "wo" && status !== "ret") return;
+
       const candidates = [
         match.player1,
         match.player2,
@@ -729,27 +808,27 @@
       ]
         .map((v) => normalize(v || ""))
         .filter(Boolean);
-  
+
       const appears = candidates.some((p) =>
         p === nameNorm || p.includes(nameNorm) || nameNorm.includes(p)
       );
-  
+
       if (!appears) return;
-  
+
       total++;
-  
+
       const result = getPlayerMatchResult(match, playerName);
       if (result === "win") wins++;
       if (result === "loss") losses++;
-  
+
       if (isPlayerTournamentChampion(match, playerName)) {
         titles++;
       }
     });
-  
+
     const winsPct = total > 0 ? ((wins / total) * 100).toFixed(1) : "0.0";
     const lossesPct = total > 0 ? ((losses / total) * 100).toFixed(1) : "0.0";
-  
+
     return {
       total,
       wins,
@@ -760,58 +839,79 @@
     };
   }
 
-  function formatPlayerMeta(profile = {}, mode = "full") {
-    if (!profile) profile = {};
+  function formatComparisonMeta(leftProfile = {}, rightProfile = {}, h2h = {}) {
+    const leftCountryRaw = safeValue(leftProfile.country || leftProfile.countryName);
+    const rightCountryRaw = safeValue(rightProfile.country || rightProfile.countryName);
 
-    const country = safeValue(profile.country || profile.countryName);
-    const city = safeValue(profile.city || profile.cidade);
-    const age = calculateAge(profile.birthDate || profile.dateOfBirth || profile.nascimento || profile.dob);
+    const leftCity = safeValue(leftProfile.city || leftProfile.cidade || leftProfile.cityName);
+    const rightCity = safeValue(rightProfile.city || rightProfile.cidade || rightProfile.cityName);
 
-    const height = safeValue(profile.height || profile.altura);
-    const weight = safeValue(profile.weight || profile.peso);
+    const leftAge = calculateAge(leftProfile.birthDate || leftProfile.dateOfBirth || leftProfile.nascimento || leftProfile.dob);
+    const rightAge = calculateAge(rightProfile.birthDate || rightProfile.dateOfBirth || rightProfile.nascimento || rightProfile.dob);
 
-    const forehand = safeValue(profile.forehand || profile.dominantHand || profile.hand || profile.maoDominante);
-    const backhandRaw = safeValue(profile.backhand || profile.backhandStyle || profile.tipoBackhand);
-    const backhand =
-      backhandRaw === "duas_maos" ? "duas mãos" :
-      backhandRaw === "uma_mao" ? "uma mão" :
-      backhandRaw;
+    const leftHeight = safeValue(leftProfile.height || leftProfile.altura);
+    const rightHeight = safeValue(rightProfile.height || rightProfile.altura);
 
-    const playerName = profile.displayName || profile.name || profile.fullName || "";
-    const stats = getPlayerStatsFromMatches(playerName);
+    const leftWeight = safeValue(leftProfile.weight || leftProfile.peso);
+    const rightWeight = safeValue(rightProfile.weight || rightProfile.peso);
 
-    const computedId = buildProfileStyleId(
-      playerName,
-      profile.uid || profile.id || profile.playerId || profile.ownerId || ""
-    );
+    const leftForehand = safeValue(leftProfile.forehand || leftProfile.dominantHand || leftProfile.hand || leftProfile.maoDominante);
+    const rightForehand = safeValue(rightProfile.forehand || rightProfile.dominantHand || rightProfile.hand || rightProfile.maoDominante);
 
-    if (mode === "summary") {
-      return ` <div class="confronto-summary-line"> <strong>ID:</strong> ${safeValue(computedId)} - <strong>País:</strong> ${country} </div> <div class="confronto-summary-line"> <strong>Cidade:</strong> ${city} - <strong>Idade:</strong> ${age} </div> `;
-    }
+    const leftBackhandRaw = safeValue(leftProfile.backhand || leftProfile.backhandStyle || leftProfile.tipoBackhand);
+    const rightBackhandRaw = safeValue(rightProfile.backhand || rightProfile.backhandStyle || rightProfile.tipoBackhand);
+
+    const leftBackhand =
+      leftBackhandRaw === "duas_maos" ? "duas mãos" :
+      leftBackhandRaw === "uma_mao" ? "uma mão" :
+      leftBackhandRaw;
+
+    const rightBackhand =
+      rightBackhandRaw === "duas_maos" ? "duas mãos" :
+      rightBackhandRaw === "uma_mao" ? "uma mão" :
+      rightBackhandRaw;
+
+    const leftName = leftProfile.displayName || leftProfile.name || leftProfile.fullName || "Jogador 1";
+    const rightName = rightProfile.displayName || rightProfile.name || rightProfile.fullName || "Jogador 2";
+
+    const leftStats = getPlayerStatsFromMatches(leftName);
+    const rightStats = getPlayerStatsFromMatches(rightName);
+
+    const h2hWins1 = Number(h2h.wins1 || 0);
+    const h2hWins2 = Number(h2h.wins2 || 0);
+    const h2hTotal = Math.max(1, h2hWins1 + h2hWins2);
+
+    const pct1 = ((h2hWins1 / h2hTotal) * 100).toFixed(1);
+    const pct2 = ((h2hWins2 / h2hTotal) * 100).toFixed(1);
 
     const rows = [
-      { label: "País", value: country },
-      { label: "Cidade", value: city },
-      { label: "Idade", value: age },
-      { label: "Altura", value: height },
-      { label: "Peso", value: weight },
-      { label: "Mão dominante", value: forehand },
-      { label: "Backhand", value: backhand },
-      { label: "Total de Partidas", value: `${stats.total}` },
-      { label: "Vitórias", value: `${stats.wins} (${stats.winsPct}%)` },
-      { label: "Derrotas", value: `${stats.losses} (${stats.lossesPct}%)` },
-      { label: "Títulos", value: `${stats.titles}` }
+      ["Vitórias no histórico", String(h2hWins1), String(h2hWins2)],
+      ["% do confronto", `${pct1}%`, `${pct2}%`],
+      ["País", renderCountryFlag(leftCountryRaw), renderCountryFlag(rightCountryRaw)],
+      ["Cidade", leftCity, rightCity],
+      ["Idade", leftAge, rightAge],
+      ["Altura", leftHeight, rightHeight],
+      ["Peso", leftWeight, rightWeight],
+      ["Mão dominante", leftForehand, rightForehand],
+      ["Backhand", leftBackhand, rightBackhand],
+      ["Partidas", String(leftStats.total), String(rightStats.total)],
+      ["Vitórias", `${leftStats.wins} (${leftStats.winsPct}%)`, `${rightStats.wins} (${rightStats.winsPct}%)`],
+      ["Derrotas", `${leftStats.losses} (${leftStats.lossesPct}%)`, `${rightStats.losses} (${rightStats.lossesPct}%)`],
+      ["Títulos", String(leftStats.titles), String(rightStats.titles)]
     ];
 
-    return rows.map(item => ` <div class="confronto-meta-row"> <span class="confronto-meta-label">${item.label}:</span> <span class="confronto-meta-value">${item.value}</span> </div> `).join("");
+    return rows.map(([label, left, right], index) => {
+      const isTopRow = index === 0;
+      const isPercentRow = index === 1;
+
+      return ` <div class="confronto-comparison-row ${isTopRow ? "comparison-top-row" : ""} ${isPercentRow ? "comparison-percent-row" : ""}"> <div class="confronto-comparison-value left">${left}</div> <div class="confronto-comparison-label">${label}</div> <div class="confronto-comparison-value right">${right}</div> </div> `;
+    }).join("");
   }
 
-  function setPlayerMeta(id, profile, mode = "full") {
-    const metaEl = document.getElementById(id);
+  function setCenterMeta(leftProfile, rightProfile, h2h = {}) {
+    const metaEl = document.getElementById("centerProfileMeta");
     if (!metaEl) return;
-
-    metaEl.innerHTML = formatPlayerMeta(profile, mode);
-    metaEl.style.display = "block";
+    metaEl.innerHTML = formatComparisonMeta(leftProfile || {}, rightProfile || {}, h2h || {});
   }
 
   function renderPageItems(items) {
@@ -839,6 +939,12 @@
     if (nextBtn) nextBtn.disabled = state.currentPage >= totalPages;
   }
 
+  function updateFilterButtons() {
+    document.querySelectorAll(".confronto-filter-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.filter === state.currentFilter);
+    });
+  }
+
   function applyFilter() {
     let filtered = [...state.items];
 
@@ -850,18 +956,13 @@
 
     state.currentPage = 1;
     renderPageItems(filtered);
+
     setText(
       "matchesLabelSecondary",
       filtered.length ? `${filtered.length} jogo(s)` : "Nenhum jogo encontrado"
     );
 
     return filtered;
-  }
-
-  function updateFilterButtons() {
-    document.querySelectorAll(".confronto-filter-btn").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.filter === state.currentFilter);
-    });
   }
 
   function updateUrlAndReloadOpponent(opponentProfile) {
@@ -916,13 +1017,16 @@
   function openSearchModal() {
     createSearchModalIfNeeded();
     show(state.searchModal);
+
     if (state.searchInput) {
       state.searchInput.value = "";
       state.searchInput.focus();
     }
+
     if (state.searchStatus) {
       state.searchStatus.textContent = "Digite um nome para pesquisar.";
     }
+
     if (state.searchResults) {
       state.searchResults.innerHTML = "";
     }
@@ -973,7 +1077,7 @@
       const idFormatted = buildProfileStyleId(displayName, uid);
 
       const country = safeValue(profile.country || profile.countryName);
-      const city = safeValue(profile.city || profile.cidade);
+      const city = safeValue(profile.city || profile.cidade || profile.cityName);
       const age = calculateAge(profile.birthDate || profile.dateOfBirth || profile.nascimento || profile.dob);
 
       return ` <button type="button" class="confronto-search-result ${selected}" data-index="${index}"> <div class="confronto-search-result-avatar"> ${photo ? `<img src="${photo}" alt="Foto de ${displayName}" />` : `<span>${initials}</span>`} </div> <div class="confronto-search-result-info"> <div class="confronto-search-result-name">${displayName}</div> <div class="confronto-search-result-meta"> <div><strong>ID:</strong> ${idFormatted}</div> <div><strong>País:</strong> ${country}</div> <div><strong>Cidade:</strong> ${city} - <strong>Idade:</strong> ${age}</div> </div> </div> </button> `;
@@ -1028,453 +1132,148 @@
     }
   }
 
-  function isMatchForLoggedUser(match, currentUser) {
-    const ownerId = String(match.ownerId || "").trim();
-    return Boolean(currentUser && ownerId && ownerId === currentUser.uid);
-  }
+  function bindPlayerVisuals({ name, sideImgEl, sidePlaceholderEl, centerImgEl, centerPlaceholderEl, sideNameId, centerNameId, photoURL }) {
+    setText(sideNameId, name);
+    setText(centerNameId, name);
 
-  function getOwnerNameInMatch(match) {
-    const ownerName = String(match.ownerName || "").trim();
-    if (ownerName) return ownerName;
-    return state.currentProfileName || "";
-  }
-
-  function getLoggedUserOutcome(match) {
-    const winnerPos = getWinner(match);
-    if (!winnerPos) return "unknown";
-
-    const ownerId = String(match.ownerId || "").trim();
-    const isOwner = state.currentUser && ownerId === state.currentUser.uid;
-    if (!isOwner) return "unknown";
-
-    const ownerName = normalize(getOwnerNameInMatch(match));
-    const currentName = normalize(state.currentProfileName || "");
-    const p1 = normalize(match.player1 || "");
-    const p2 = normalize(match.player2 || "");
-
-    const ownerIsP1 = p1 === ownerName || p1 === currentName;
-    const ownerIsP2 = p2 === ownerName || p2 === currentName;
-
-    if (winnerPos === 1) return ownerIsP1 ? "win" : "loss";
-    if (winnerPos === 2) return ownerIsP2 ? "win" : "loss";
-    return "unknown";
-  }
-
-  function getResultType(match) {
-    const status = normalize(match.status);
-    if (status === "wo") return "WO";
-    if (status === "ret") return "RET";
-    return "";
-  }
-
-  function isTournamentMatch(match) {
-    const stage = normalize(match.tournamentStage);
-    return TOURNAMENT_STAGES.has(stage);
-  }
-
-  function isFinalMatch(match) {
-    const stage = normalize(match.tournamentStage);
-    return stage === "final";
-  }
-
-  function getTournamentSituation(match) {
-    if (!isTournamentMatch(match)) return "";
-    if (!isFinalMatch(match)) return "";
-
-    const outcome = getLoggedUserOutcome(match);
-    if (outcome === "win") return "champion";
-    if (outcome === "loss") return "runnerup";
-    return "";
-  }
-
-  function renderSummary(matches) {
-    const total = matches.length;
-
-    const playerName = state.currentPlayer1 || state.currentProfileName || "";
-
-    let wins = 0;
-    let losses = 0;
-    let wo = 0;
-    let ranking = 0;
-    let training = 0;
-    let simple = 0;
-    let doubles = 0;
-
-    matches.forEach((m) => {
-      const status = normalize(m.status);
-      if (status === "wo" || status === "ret") wo++;
-
-      const result = getPlayerMatchResult(m, playerName);
-      if (result === "win") wins++;
-      if (result === "loss") losses++;
-
-      const stage = normalize(m.tournamentStage || "");
-      if (stage === "ranking") ranking++;
-      if (stage === "treino") training++;
-
-      const gf = normalize(getGameFormat(m));
-      if (gf === "simples") simple++;
-      if (gf === "duplas" || gf === "duplas mistas") doubles++;
+    setPlayerAvatar({
+      name,
+      imgEl: sideImgEl,
+      placeholderEl: sidePlaceholderEl,
+      photoURL
     });
 
-    const tournaments = new Set();
-    let champion = 0;
-    let runnerup = 0;
-
-    matches.forEach((m) => {
-      const stage = normalize(m.tournamentStage || "");
-      if (!TOURNAMENT_STAGES.has(stage)) return;
-
-      const tournamentName = normalize(String(m.tournamentName || "").trim());
-      const year = m.matchDateTime ? (new Date(m.matchDateTime).getFullYear() || "") : "";
-      const gameFormat = normalize(getGameFormat(m));
-      const tournamentKey = `${tournamentName || "sem-nome"}::${year}::${gameFormat || "sem-formato"}`;
-      tournaments.add(tournamentKey);
-
-      if (isPlayerTournamentChampion(m, playerName)) champion++;
-      if (isTournamentChampionLoss(m, playerName)) runnerup++;
+    setPlayerAvatar({
+      name,
+      imgEl: centerImgEl,
+      placeholderEl: centerPlaceholderEl,
+      photoURL
     });
+  }
 
-    const totalPlayed = wins + losses;
-    const winPct = totalPlayed > 0 ? Math.round((wins / totalPlayed) * 100) : 0;
-    const lossPct = totalPlayed > 0 ? Math.round((losses / totalPlayed) * 100) : 0;
+  function calculateSimulationScore(stats = {}, h2hWins = 0, h2hTotal = 0) {
+    const titles = Number(stats.titles || 0);
+    const wins = Number(stats.wins || 0);
+    const losses = Number(stats.losses || 0);
+    const total = Number(stats.total || 0);
 
-    setText("totalMatches", String(total));
-    setText("totalWins", `${wins} - ${winPct}%`);
-    setText("totalLosses", `${losses} - ${lossPct}%`);
-    setText("totalWo", String(wo));
-    setText("totalTournaments", String(tournaments.size));
-    setText("totalChampion", String(champion));
-    setText("totalRunnerup", String(runnerup));
-    setText("totalRanking", String(ranking));
-    setText("totalTraining", String(training));
-    setText("totalSimple", String(simple));
-    setText("totalDoubles", String(doubles));
+    const h2hFactor = h2hTotal > 0 ? (h2hWins / h2hTotal) : 0;
 
-    const player = state.currentProfileName || "Usuário";
-    const pageTitle = document.getElementById("pageTitle");
-    const subtitle = document.getElementById("subtitle");
-    const summaryMessage = document.getElementById("summaryMessage");
+    const score =
+      (titles * 10) +
+      (h2hFactor * 6) +
+      (wins * 3) +
+      (losses * -2) +
+      (total * 1);
 
-    if (pageTitle) pageTitle.textContent = `Carreira - ${player}`;
-    if (subtitle) subtitle.textContent = "Histórico de partidas finalizadas do usuário";
+    return Math.max(0, score);
+  }
 
-    if (summaryMessage) {
-      summaryMessage.textContent = total
-        ? `Exibindo ${total} partidas finalizadas de ${player}.`
-        : `Nenhuma partida finalizada encontrada para ${player}.`;
+  function getSimulationVerdict(chance1, chance2, player1Name, player2Name) {
+    const diff = Math.abs(chance1 - chance2);
+
+    if (diff <= 7) {
+      return "Confronto equilibrado";
     }
+
+    const winner = chance1 > chance2 ? player1Name : player2Name;
+
+    if (diff >= 18) {
+      return `Favorito da partida: ${winner}`;
+    }
+
+    return `Leve vantagem para ${winner}`;
   }
 
-  function renderPagedHistory(matches) {
-    const list = document.getElementById("confrontoMatchesList");
-    if (!list) return;
+  function animateSimulationBar(el, targetPercent, colorClass) {
+    if (!el) return;
 
-    const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
-    if (state.currentPage > totalPages) state.currentPage = totalPages;
-    if (state.currentPage < 1) state.currentPage = 1;
+    el.classList.remove("bar-green", "bar-red", "bar-neutral");
+    if (colorClass) el.classList.add(colorClass);
 
-    const start = (state.currentPage - 1) * PAGE_SIZE;
-    const pageItems = matches.slice(start, start + PAGE_SIZE);
+    requestAnimationFrame(() => {
+      el.style.width = `${Math.max(0, Math.min(100, targetPercent))}%`;
+    });
+  }
 
-    if (!pageItems.length) {
-      list.innerHTML = `<div class="confronto-empty">Nenhum jogo encontrado.</div>`;
+  function renderSimulationResult(player1Name, player2Name, h2h = {}) {
+    const card = document.getElementById("simulationResult");
+    const name1El = document.getElementById("simPlayer1Name");
+    const name2El = document.getElementById("simPlayer2Name");
+    const chance1El = document.getElementById("simPlayer1Chance");
+    const chance2El = document.getElementById("simPlayer2Chance");
+    const detailsEl = document.getElementById("simulationDetails");
+    const bar1 = document.getElementById("simBarPlayer1");
+    const bar2 = document.getElementById("simBarPlayer2");
+    const verdictEl = document.getElementById("simulationVerdict");
+
+    if (!card || !name1El || !name2El || !chance1El || !chance2El || !detailsEl || !bar1 || !bar2 || !verdictEl) return;
+
+    const stats1 = getPlayerStatsFromMatches(player1Name);
+    const stats2 = getPlayerStatsFromMatches(player2Name);
+
+    const h2hWins1 = Number(h2h.wins1 || 0);
+    const h2hWins2 = Number(h2h.wins2 || 0);
+    const h2hTotal = Math.max(1, h2hWins1 + h2hWins2);
+
+    const score1 = calculateSimulationScore(stats1, h2hWins1, h2hTotal);
+    const score2 = calculateSimulationScore(stats2, h2hWins2, h2hTotal);
+
+    const totalScore = Math.max(1, score1 + score2);
+
+    const chance1 = Number(((score1 / totalScore) * 100).toFixed(1));
+    const chance2 = Number(((score2 / totalScore) * 100).toFixed(1));
+
+    const winnerIs1 = chance1 > chance2;
+    const diff = Math.abs(chance1 - chance2);
+
+    name1El.textContent = player1Name;
+    name2El.textContent = player2Name;
+    chance1El.textContent = `${chance1.toFixed(1)}%`;
+    chance2El.textContent = `${chance2.toFixed(1)}%`;
+
+    verdictEl.textContent = getSimulationVerdict(chance1, chance2, player1Name, player2Name);
+    detailsEl.innerHTML = "";
+
+    show(card);
+
+    bar1.style.width = "0%";
+    bar2.style.width = "0%";
+
+    if (chance1 === chance2) {
+      animateSimulationBar(bar1, 50, "bar-neutral");
+      animateSimulationBar(bar2, 50, "bar-neutral");
+    } else if (winnerIs1) {
+      animateSimulationBar(bar1, chance1, "bar-green");
+      animateSimulationBar(bar2, chance2, "bar-red");
     } else {
-      list.innerHTML = pageItems
-        .map((m) => {
-          const d = m;
-          const date = d.matchDateTime
-            ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(d.matchDateTime))
-            : "-";
-
-          const gameFormat = safeValue(getGameFormat(d));
-          const tournament = safeValue(d.tournamentName || "-");
-          const stage = safeValue(d.tournamentStage || "-");
-          const score = safeValue(d.score ? `${d.score.sets1 || 0}x${d.score.sets2 || 0}` : "--");
-          const outcome = getPlayerMatchResult(d, state.currentPlayer1 || state.currentProfileName);
-          const situation = isPlayerTournamentChampion(d, state.currentPlayer1 || state.currentProfileName) ? "champion" : "";
-          const resultType = normalize(d.status || "");
-          const isWinner = outcome === "win";
-          const isTreino = normalize(d.tournamentStage || "") === "treino";
-
-          const cardClass = isWinner
-            ? "career-card career-card-win"
-            : "career-card career-card-loss";
-
-          const stageNorm = normalize(d.tournamentStage || "");
-          const isTournament = TOURNAMENT_STAGES.has(stageNorm);
-
-          const situationLabel =
-            isTournament && stageNorm === "final"
-              ? situation === "champion"
-                ? "🏆 Campeão"
-                : situation === "runnerup"
-                ? "🥈 Vice-Campeão"
-                : ""
-              : "";
-
-          const outcomeLabel =
-            resultType === "wo"
-              ? (isWinner ? "VITÓRIA POR WO" : "DERROTA POR WO")
-              : resultType === "ret"
-              ? (isWinner ? "VITÓRIA POR ABANDONO" : "DERROTA POR ABANDONO")
-              : (situationLabel || (isWinner ? "VITÓRIA" : "DERROTA"));
-
-          const teamDisplay = buildMatchLine(d);
-
-          const formatIcon = (() => {
-            const format = normalize(gameFormat);
-            if (format === "simples") {
-              return `<span class="career-match-icon format">🎾</span>`;
-            }
-            if (format === "duplas" || format === "duplas mistas") {
-              return `<span class="career-match-icon format">👥</span>`;
-            }
-            return "";
-          })();
-
-          return ` <article class="${cardClass}"> <div class="career-card-top-icons"> ${formatIcon ? `<span class="career-card-icon-slot format-slot">${formatIcon}</span>` : ""} </div> <div class="career-card-top-status"> <div class="career-card-result">${outcomeLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${safeValue(date)}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> ${!isTreino ? `<div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div>` : ""} ${!isTreino ? `<div class="career-item"><span>Fase</span><strong>${stage}</strong></div>` : ""} <div class="career-item"><span>Placar</span><strong>${score}</strong></div> </div> </article> `;
-        })
-        .join("");
+      animateSimulationBar(bar1, chance1, "bar-red");
+      animateSimulationBar(bar2, chance2, "bar-green");
     }
 
-    const pageInfo = document.getElementById("pageInfo");
-    if (pageInfo) pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
-
-    const prevBtn = document.getElementById("prevPageBtn");
-    const nextBtn = document.getElementById("nextPageBtn");
-    if (prevBtn) prevBtn.disabled = state.currentPage <= 1;
-    if (nextBtn) nextBtn.disabled = state.currentPage >= totalPages;
-  }
-
-  function applyFiltersAndRender() {
-    const player = state.currentPlayer1 || state.currentProfileName || "";
-    const { gameFormat, tournament, stage, year } = getFilters();
-
-    let filtered = state.allOwnerMatches.filter((m) =>
-      isMatchForLoggedUser(m, state.currentUser)
-    );
-
-    if (state.currentFilter === "wins") {
-      filtered = filtered.filter((m) => getPlayerMatchResult(m, player) === "win");
-    } else if (state.currentFilter === "losses") {
-      filtered = filtered.filter((m) => getPlayerMatchResult(m, player) === "loss");
-    } else if (state.currentFilter === "champion") {
-      filtered = filtered.filter((m) => isPlayerTournamentChampion(m, player));
-    } else if (state.currentFilter === "runnerup") {
-      filtered = filtered.filter((m) => isTournamentChampionLoss(m, player));
-    } else if (state.currentFilter === "tournaments") {
-      filtered = filtered.filter((m) =>
-        TOURNAMENT_STAGES.has(normalize(m.tournamentStage || ""))
-      );
-    } else if (state.currentFilter === "ranking") {
-      filtered = filtered.filter((m) =>
-        normalize(m.tournamentStage || "") === "ranking"
-      );
-    } else if (state.currentFilter === "training") {
-      filtered = filtered.filter((m) =>
-        normalize(m.tournamentStage || "") === "treino"
-      );
-    } else if (state.currentFilter === "simple") {
-      filtered = filtered.filter((m) => normalize(getGameFormat(m)) === "simples");
-    } else if (state.currentFilter === "doubles") {
-      filtered = filtered.filter((m) => {
-        const gf = normalize(getGameFormat(m));
-        return gf === "duplas" || gf === "duplas mistas";
-      });
-    }
-
-    if (gameFormat) filtered = filtered.filter((m) => normalize(getGameFormat(m)) === normalize(gameFormat));
-    if (tournament) filtered = filtered.filter((m) => normalize(String(m.tournamentName || "")) === normalize(tournament));
-
-    if (stage) {
-      filtered = filtered.filter((m) => String(m.tournamentStage || "").trim() === stage);
-    }
-
-    if (year) {
-      filtered = filtered.filter((m) => {
-        const d = new Date(m.matchDateTime);
-        return !isNaN(d.getTime()) && String(d.getFullYear()) === year;
-      });
-    }
-
-    filtered.sort((a, b) => {
-      const da = a.matchDateTime ? new Date(a.matchDateTime).getTime() : 0;
-      const db = b.matchDateTime ? new Date(b.matchDateTime).getTime() : 0;
-      return db - da;
-    });
-
-    state.items = filtered;
-    state.currentPage = 1;
-
-    renderSummary(filtered);
-    renderPagedHistory(filtered);
-    updateCardFilterUI();
-  }
-
-  function updateToggleButtonUI() {
-    const btn = document.getElementById("toggleFiltersBtn");
-    if (!btn) return;
-    const icon = btn.querySelector(".career-bottom-icon");
-    const label = btn.querySelector(".career-bottom-label");
-    if (icon) icon.textContent = state.currentFilter ? "📋" : "🔎";
-    if (label) label.textContent = state.currentFilter ? "Lista" : "Filtros";
-  }
-
-  function setFiltersCollapsed(collapsed) {
-    state.filtersCollapsed = !!collapsed;
-    const filtersWrap = document.getElementById("careerFiltersSection");
-    if (filtersWrap) {
-      filtersWrap.style.display = state.filtersCollapsed ? "none" : "";
-      if (!state.filtersCollapsed) {
-        setTimeout(() => {
-          const yOffset = -100;
-          const y = filtersWrap.getBoundingClientRect().top + window.scrollY + yOffset;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }, 50);
-      }
-    }
-    updateToggleButtonUI();
-  }
-
-  function bindToggleFilters() {
-    const toggleFiltersBtn = document.getElementById("toggleFiltersBtn");
-    toggleFiltersBtn?.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const scrollPosition = window.scrollY;
-
-      setFiltersCollapsed(!state.filtersCollapsed);
-
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: "auto"
-        });
-      });
-    });
-
-    updateToggleButtonUI();
-  }
-
-  function setSummaryMessageOrDefault() {
-    const summaryMessage = document.getElementById("summaryMessage");
-    if (summaryMessage) {
-      summaryMessage.textContent = "Selecione um filtro para exibir as partidas finalizadas.";
+    verdictEl.classList.remove("verdict-equal", "verdict-green");
+    if (diff <= 7) {
+      verdictEl.classList.add("verdict-equal");
+    } else {
+      verdictEl.classList.add("verdict-green");
     }
   }
 
-  function updateCardFilterUI() {
-    document.querySelectorAll(".career-summary-card[data-filter]").forEach((card) => {
-      const isActive = card.dataset.filter === state.currentFilter;
-      card.classList.toggle("career-card-filter-active", isActive);
-      card.classList.toggle(
-        "career-card-filter-inactive",
-        state.currentFilter !== null && !isActive
-      );
-    });
-  }
+  function handleSimulateMatch() {
+    const player1Name = state.currentPlayer1 || "Jogador 1";
+    const player2Name = state.currentPlayer2 || "";
 
-  function bindCardFilters() {
-    document.querySelectorAll(".career-summary-card[data-filter]").forEach((card) => {
-      card.addEventListener("click", () => {
-        state.currentFilter = card.dataset.filter || null;
-        state.currentPage = 1;
-        applyFiltersAndRender();
-        setTimeout(() => {
-          const list = document.getElementById("confrontoMatchesList");
-          if (list) {
-            const y = list.getBoundingClientRect().top + window.scrollY - 20;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 80);
-      });
-    });
-  }
+    if (!player2Name || player2Name === "Pesquisar adversário") {
+      alert("Selecione um adversário antes de simular a partida.");
+      return;
+    }
 
-  function bindEvents() {
-    const applyFilterBtn = document.getElementById("applyFilterBtn");
-    const clearFilterBtn = document.getElementById("clearFilterBtn");
-    const prevPageBtn = document.getElementById("prevPageBtn");
-    const nextPageBtn = document.getElementById("nextPageBtn");
+    const h2h = {
+      wins1: state.simWins1 || 0,
+      wins2: state.simWins2 || 0
+    };
 
-    applyFilterBtn?.addEventListener("click", () => {
-      state.currentFilter = "all";
-      state.showMatches = true;
-      applyFiltersAndRender();
-
-      setTimeout(() => {
-        const list = document.getElementById("confrontoMatchesList");
-        if (list) {
-          const y = list.getBoundingClientRect().top + window.scrollY - 20;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
-      }, 80);
-    });
-
-    clearFilterBtn?.addEventListener("click", () => {
-      state.currentFilter = "all";
-      state.showMatches = false;
-      updateCardFilterUI();
-
-      const gameFormatFilter = document.getElementById("gameFormatFilter");
-      const tournamentFilter = document.getElementById("tournamentFilter");
-      const stageFilter = document.getElementById("stageFilter");
-      const yearFilter = document.getElementById("yearFilter");
-      const playerName = document.getElementById("player2");
-
-      if (gameFormatFilter) gameFormatFilter.value = "";
-      if (tournamentFilter) tournamentFilter.value = "";
-      if (stageFilter) stageFilter.value = "";
-      if (yearFilter) yearFilter.value = "";
-      if (playerName) playerName.value = "";
-
-      state.currentPage = 1;
-      applyFiltersAndRender();
-
-      setTimeout(() => {
-        const summary = document.querySelector(".career-summary");
-        if (summary) {
-          const y = summary.getBoundingClientRect().top + window.scrollY - 16;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
-      }, 80);
-    });
-
-    prevPageBtn?.addEventListener("click", () => {
-      if (state.currentPage > 1) {
-        state.currentPage--;
-        renderPagedHistory(state.items);
-
-        setTimeout(() => {
-          const firstCard = document.querySelector("#confrontoMatchesList .career-card");
-          if (firstCard) {
-            const y = firstCard.getBoundingClientRect().top + window.scrollY - 20;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 50);
-      }
-    });
-
-    nextPageBtn?.addEventListener("click", () => {
-      const totalPages = Math.max(1, Math.ceil(state.items.length / PAGE_SIZE));
-      if (state.currentPage < totalPages) {
-        state.currentPage++;
-        renderPagedHistory(state.items);
-
-        setTimeout(() => {
-          const firstCard = document.querySelector("#confrontoMatchesList .career-card");
-          if (firstCard) {
-            const y = firstCard.getBoundingClientRect().top + window.scrollY - 20;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 50);
-      }
-    });
-
-    bindToggleFilters();
-    bindCardFilters();
+    renderSimulationResult(player1Name, player2Name, h2h);
   }
 
   async function init() {
@@ -1482,34 +1281,40 @@
     const player2 = getParam("player2");
     const opponentId = getParam("opponentId");
     const ownerIdFromUrl = getParam("ownerId");
-  
+
     const subtitle = document.getElementById("confrontoSubtitle");
     const list = document.getElementById("confrontoMatchesList");
     const emptyState = document.getElementById("emptyState");
-  
-    const imgPlayer1 = document.getElementById("imgPlayer1");
-    const imgPlayer2 = document.getElementById("imgPlayer2");
-    const ph1 = document.getElementById("player1AvatarPlaceholder");
-    const ph2 = document.getElementById("player2AvatarPlaceholder");
-  
+
+    const imgPlayer1Side = document.getElementById("imgPlayer1Side");
+    const imgPlayer2Side = document.getElementById("imgPlayer2Side");
+    const ph1Side = document.getElementById("player1AvatarPlaceholderSide");
+    const ph2Side = document.getElementById("player2AvatarPlaceholderSide");
+
+    const imgPlayer1Center = document.getElementById("imgPlayer1");
+    const imgPlayer2Center = document.getElementById("imgPlayer2");
+    const ph1Center = document.getElementById("player1AvatarPlaceholder");
+    const ph2Center = document.getElementById("player2AvatarPlaceholder");
+
     const setInitialUi = () => {
-      setText("player1Name", "Jogador 1");
-      setText("player2Name", "Pesquisar adversário");
+      setText("player1NameSide", "Jogador 1");
+      setText("player1NameCenter", "Jogador 1");
+      setText("player2NameSide", "Pesquisar adversário");
+      setText("player2NameCenter", "Jogador 2");
       setText("confrontoScore", "0 : 0");
       setText("matchesLabel", "Pesquise um adversário");
       setText("matchesLabelSecondary", "Nenhum confronto definido ainda");
       setText("pageInfo", "Página 1 de 1");
-  
+
       if (list) {
         list.innerHTML = `<div class="confronto-empty">Nenhum confronto definido. Clique em <strong>Pesquisar adversário</strong> para iniciar.</div>`;
       }
-  
+
       show(emptyState);
     };
-  
-    // UI inicial imediata para nunca ficar presa em "Carregando..."
+
     setInitialUi();
-  
+
     if (typeof __db === "undefined") {
       if (subtitle) hide(subtitle);
       if (list) {
@@ -1518,16 +1323,17 @@
       show(emptyState);
       return;
     }
-  
+
     const authUser = await waitForAuthUser();
-  
+    state.currentUser = authUser || null;
+
     state.currentOwnerId = ownerIdFromUrl || authUser?.uid || "";
     state.currentPlayer1 = player1 || "";
     state.currentPlayer2 = player2 || "";
     state.currentOpponentId = opponentId || "";
-  
+
     const hasDefinedOpponent = Boolean(player2 || opponentId);
-  
+
     if (!state.currentOwnerId) {
       if (subtitle) hide(subtitle);
       if (list) {
@@ -1536,42 +1342,40 @@
       show(emptyState);
       return;
     }
-  
+
     try {
-      // 1) Carrega primeiro todos os jogos do usuário logado
       const snap = await __db.collection("matches")
         .where("ownerId", "==", state.currentOwnerId)
         .get();
-  
+
       state.allOwnerMatches = snap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
       }));
-  
-      // 2) Busca o perfil do jogador 1
+
       let ownerProfile = await getLoggedUserProfile();
       if (!ownerProfile && player1) {
         ownerProfile = await findProfileByName(player1);
       }
-  
-      // Fallback se não vier player1 na URL
+
       const resolvedPlayer1Name =
-  player1 ||
-  ownerProfile?.displayName ||
-  ownerProfile?.name ||
-  ownerProfile?.fullName ||
-  authUser?.displayName ||
-  "Jogador 1";
+        player1 ||
+        ownerProfile?.displayName ||
+        ownerProfile?.name ||
+        ownerProfile?.fullName ||
+        authUser?.displayName ||
+        "Jogador 1";
 
-state.currentPlayer1 = resolvedPlayer1Name;
+      state.currentPlayer1 = resolvedPlayer1Name;
+      state.currentProfileName = resolvedPlayer1Name;
 
-const pageTitleEl = document.getElementById("pageTitle");
-if (pageTitleEl) {
-  pageTitleEl.textContent = `Confrontos - ${resolvedPlayer1Name}`;
-}
+      const pageTitleEl = document.getElementById("pageTitle");
+      if (pageTitleEl) {
+        pageTitleEl.textContent = `Confrontos - ${resolvedPlayer1Name}`;
+      }
 
-document.title = `Confrontos - ${resolvedPlayer1Name}`;
-  
+      document.title = `Confrontos - ${resolvedPlayer1Name}`;
+
       if (!ownerProfile && authUser) {
         ownerProfile = {
           uid: authUser.uid || "",
@@ -1589,140 +1393,145 @@ document.title = `Confrontos - ${resolvedPlayer1Name}`;
           titles: 0
         };
       }
-  
-      // 3) Busca o perfil do adversário, se houver
+
       let opponentProfile = null;
       let resolvedPlayer2Name = "Pesquisar adversário";
-  
+
       if (hasDefinedOpponent) {
         if (opponentId) {
           opponentProfile = await getOpponentProfile(opponentId);
         }
-  
+
         if (!opponentProfile && player2) {
           opponentProfile = await findProfileByName(player2);
         }
-  
+
         resolvedPlayer2Name =
           player2 ||
           opponentProfile?.displayName ||
           opponentProfile?.name ||
           opponentProfile?.fullName ||
           "Adversário";
-  
+
         state.currentPlayer2 = resolvedPlayer2Name;
       } else {
         state.currentPlayer2 = "";
       }
-  
+
       state.ownerProfile = ownerProfile;
       state.opponentProfile = opponentProfile;
-  
+
       state.ownerProfilePhoto = getPhotoFromProfile(ownerProfile);
       state.opponentProfilePhoto = getPhotoFromProfile(opponentProfile);
-  
-      // 4) Agora sim monta os metadados, com state.allOwnerMatches já carregado
-      setText("player1Name", resolvedPlayer1Name);
-      setPlayerAvatar({
+
+      bindPlayerVisuals({
         name: resolvedPlayer1Name,
-        imgEl: imgPlayer1,
-        placeholderEl: ph1,
+        sideImgEl: imgPlayer1Side,
+        sidePlaceholderEl: ph1Side,
+        centerImgEl: imgPlayer1Center,
+        centerPlaceholderEl: ph1Center,
+        sideNameId: "player1NameSide",
+        centerNameId: "player1NameCenter",
         photoURL: state.ownerProfilePhoto
       });
-      setPlayerMeta("player1Meta", ownerProfile || {}, "full");
-  
+
       if (hasDefinedOpponent) {
-        setText("player2Name", resolvedPlayer2Name);
-        setPlayerAvatar({
+        bindPlayerVisuals({
           name: resolvedPlayer2Name,
-          imgEl: imgPlayer2,
-          placeholderEl: ph2,
+          sideImgEl: imgPlayer2Side,
+          sidePlaceholderEl: ph2Side,
+          centerImgEl: imgPlayer2Center,
+          centerPlaceholderEl: ph2Center,
+          sideNameId: "player2NameSide",
+          centerNameId: "player2NameCenter",
           photoURL: state.opponentProfilePhoto
         });
-        setPlayerMeta("player2Meta", opponentProfile || {}, "full");
       } else {
-        setText("player2Name", "Pesquisar adversário");
-        setPlayerAvatar({
+        bindPlayerVisuals({
           name: "Pesquisar adversário",
-          imgEl: imgPlayer2,
-          placeholderEl: ph2,
+          sideImgEl: imgPlayer2Side,
+          sidePlaceholderEl: ph2Side,
+          centerImgEl: imgPlayer2Center,
+          centerPlaceholderEl: ph2Center,
+          sideNameId: "player2NameSide",
+          centerNameId: "player2NameCenter",
           photoURL: ""
         });
-        setPlayerMeta("player2Meta", {
-          displayName: "Pesquisar adversário",
-          country: "-",
-          city: "-",
-          birthDate: null,
-          height: "-",
-          weight: "-",
-          forehand: "-",
-          backhand: "-",
-          wins: 0,
-          losses: 0,
-          titles: 0
-        }, "full");
       }
-  
-      // 5) Se não há adversário definido, encerra aqui
+
       if (!hasDefinedOpponent) {
         state.items = [];
         state.currentPage = 1;
-  
+
         setText("confrontoScore", "0 : 0");
         setText("matchesLabel", "Pesquise um adversário");
         setText("matchesLabelSecondary", "Nenhum confronto definido ainda");
         setText("pageInfo", "Página 1 de 1");
-  
+
         if (list) {
           list.innerHTML = `<div class="confronto-empty">Nenhum confronto definido. Clique em <strong>Pesquisar adversário</strong> para iniciar.</div>`;
         }
-  
+
         show(emptyState);
         return;
       }
-  
-      // 6) Monta o confronto entre os dois jogadores
+
       let wins1 = 0;
       let wins2 = 0;
       const items = [];
-  
+
       snap.forEach((doc) => {
         const d = doc.data() || {};
-  
-        const matchP1 = d.player1 || d.player1Name || d.ownerName || "";
-        const matchP2 = d.player2 || d.player2Name || d.opponentName || "";
-  
-        const normalizedPlayer1 = normalize(resolvedPlayer1Name);
-        const normalizedPlayer2 = normalize(resolvedPlayer2Name);
-        const normalizedMatchP1 = normalize(matchP1);
-        const normalizedMatchP2 = normalize(matchP2);
-  
-        const pairMatches =
-          (normalizedMatchP1.includes(normalizedPlayer1) && normalizedMatchP2.includes(normalizedPlayer2)) ||
-          (normalizedMatchP1.includes(normalizedPlayer2) && normalizedMatchP2.includes(normalizedPlayer1)) ||
-          samePair(matchP1, matchP2, resolvedPlayer1Name, resolvedPlayer2Name);
-  
+
+        const gameFormat = String(d.gameFormat || "").trim().toLowerCase();
+        const isDoublesMatch = gameFormat === "duplas" || gameFormat === "duplas mistas";
+
+        let pairMatches = false;
+
+        if (isDoublesMatch) {
+          const team1A = d.player1 || d.player1Name || "";
+          const team1B = d.player2 || d.player2Name || "";
+          const team2A = d.player3 || d.player3Name || "";
+          const team2B = d.player4 || d.player4Name || "";
+
+          const player1InTeam1 =
+            normalize(team1A) === normalize(resolvedPlayer1Name) ||
+            normalize(team1B) === normalize(resolvedPlayer1Name);
+
+          const player1InTeam2 =
+            normalize(team2A) === normalize(resolvedPlayer1Name) ||
+            normalize(team2B) === normalize(resolvedPlayer1Name);
+
+          pairMatches = player1InTeam1 || player1InTeam2;
+        } else {
+          const matchP1 = d.player1 || d.player1Name || d.ownerName || "";
+          const matchP2 = d.player2 || d.player2Name || d.opponentName || "";
+          pairMatches = samePair(matchP1, matchP2, resolvedPlayer1Name, resolvedPlayer2Name);
+        }
+
         if (!pairMatches) return;
-  
+
         const status = String(d.status || "").trim().toLowerCase();
         if (status !== "finished" && status !== "wo" && status !== "ret") return;
-  
+
         const winner = getWinner(d);
         if (winner === 1) wins1++;
         if (winner === 2) wins2++;
-  
+
         items.push({
           dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
           html: buildMatchLine(d),
           data: d
         });
       });
-  
+
       items.sort((a, b) => b.dateMs - a.dateMs);
-  
+
       state.items = items;
       state.currentPage = 1;
-  
+      state.simWins1 = wins1;
+      state.simWins2 = wins2;
+
       setText("confrontoScore", `${wins1} : ${wins2}`);
       setText(
         "matchesLabel",
@@ -1732,10 +1541,15 @@ document.title = `Confrontos - ${resolvedPlayer1Name}`;
         "matchesLabelSecondary",
         items.length ? `${items.length} jogo(s)` : "Nenhum jogo encontrado"
       );
-  
+
       const filtered = applyFilter();
       renderPageItems(filtered);
-  
+
+      setCenterMeta(ownerProfile || {}, opponentProfile || {}, {
+        wins1,
+        wins2
+      });
+
       if (!items.length) {
         if (list) {
           list.innerHTML = `<div class="confronto-empty">Nenhum jogo finalizado entre esses jogadores.</div>`;
@@ -1744,7 +1558,7 @@ document.title = `Confrontos - ${resolvedPlayer1Name}`;
       } else {
         hide(emptyState);
       }
-  
+
       const historical = await getPlayersFromMatches();
       state.historicalPlayersCache = historical;
     } catch (err) {
@@ -1757,17 +1571,12 @@ document.title = `Confrontos - ${resolvedPlayer1Name}`;
     }
   }
 
-
   document.addEventListener("DOMContentLoaded", async () => {
-    document.getElementById("btnReload")?.addEventListener("click", () => location.reload());
-
-    document.getElementById("btnClose")?.addEventListener("click", () => {
-      window.location.href = "admin.html";
-    });
-
     document.getElementById("btnSearchOpponent")?.addEventListener("click", () => {
       openSearchModal();
     });
+
+    document.getElementById("btnSimulateMatch")?.addEventListener("click", handleSimulateMatch);
 
     document.querySelectorAll(".confronto-filter-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
