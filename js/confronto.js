@@ -735,6 +735,54 @@
     const nameNorm = normalize(playerName || "");
     if (!nameNorm) return null;
 
+    const status = normalize(match.status || "");
+    const gameFormat = String(match?.gameFormat || "").trim().toLowerCase();
+    const isDoublesMatch =
+      gameFormat === "duplas" ||
+      gameFormat === "duplas mistas" ||
+      !!(match?.player3 || match?.player4 || match?.player3Name || match?.player4Name);
+
+    // =========================
+    // DUPLAS
+    // =========================
+    if (isDoublesMatch) {
+      const team1A = normalize(match.player1 || match.player1Name || "");
+      const team1B = normalize(match.player2 || match.player2Name || "");
+      const team2A = normalize(match.player3 || match.player3Name || "");
+      const team2B = normalize(match.player4 || match.player4Name || "");
+
+      const playerInTeam1 = team1A === nameNorm || team1B === nameNorm;
+      const playerInTeam2 = team2A === nameNorm || team2B === nameNorm;
+
+      if (!playerInTeam1 && !playerInTeam2) return null;
+
+      if (status === "wo") {
+        const winnerByWO = normalize(match.winnerByWO || "");
+        if (winnerByWO === "player1") return playerInTeam1 ? "win" : "loss";
+        if (winnerByWO === "player2") return playerInTeam2 ? "win" : "loss";
+        return null;
+      }
+
+      if (status === "ret") {
+        const winnerByRet = normalize(match.winnerByRet || "");
+        if (winnerByRet === "player1") return playerInTeam1 ? "win" : "loss";
+        if (winnerByRet === "player2") return playerInTeam2 ? "win" : "loss";
+        return null;
+      }
+
+      const score = match.score || {};
+      const s1 = Number(score.sets1 || 0);
+      const s2 = Number(score.sets2 || 0);
+
+      if (s1 > s2) return playerInTeam1 ? "win" : "loss";
+      if (s2 > s1) return playerInTeam2 ? "win" : "loss";
+
+      return null;
+    }
+
+    // =========================
+    // SIMPLES
+    // =========================
     const p1 = normalize(match.player1 || match.player1Name || match.ownerName || "");
     const p2 = normalize(match.player2 || match.player2Name || match.opponentName || "");
 
@@ -742,8 +790,6 @@
     const isPlayer2 = p2 === nameNorm;
 
     if (!isPlayer1 && !isPlayer2) return null;
-
-    const status = normalize(match.status || "");
 
     if (status === "wo") {
       const wo = normalize(match.winnerByWO || "");
@@ -796,22 +842,43 @@
       const status = String(match.status || "").trim().toLowerCase();
       if (status !== "finished" && status !== "wo" && status !== "ret") return;
 
-      const candidates = [
-        match.player1,
-        match.player2,
-        match.player3,
-        match.player4,
-        match.player1Name,
-        match.player2Name,
-        match.ownerName,
-        match.opponentName
-      ]
-        .map((v) => normalize(v || ""))
-        .filter(Boolean);
+      const gameFormat = String(match?.gameFormat || "").trim().toLowerCase();
+      const isDoublesMatch =
+        gameFormat === "duplas" ||
+        gameFormat === "duplas mistas" ||
+        !!(match?.player3 || match?.player4 || match?.player3Name || match?.player4Name);
 
-      const appears = candidates.some((p) =>
-        p === nameNorm || p.includes(nameNorm) || nameNorm.includes(p)
-      );
+      let appears = false;
+
+      if (isDoublesMatch) {
+        const team1A = normalize(match.player1 || match.player1Name || "");
+        const team1B = normalize(match.player2 || match.player2Name || "");
+        const team2A = normalize(match.player3 || match.player3Name || "");
+        const team2B = normalize(match.player4 || match.player4Name || "");
+
+        appears =
+          team1A === nameNorm ||
+          team1B === nameNorm ||
+          team2A === nameNorm ||
+          team2B === nameNorm;
+      } else {
+        const candidates = [
+          match.player1,
+          match.player2,
+          match.player3,
+          match.player4,
+          match.player1Name,
+          match.player2Name,
+          match.ownerName,
+          match.opponentName
+        ]
+          .map((v) => normalize(v || ""))
+          .filter(Boolean);
+
+        appears = candidates.some((p) =>
+          p === nameNorm || p.includes(nameNorm) || nameNorm.includes(p)
+        );
+      }
 
       if (!appears) return;
 
