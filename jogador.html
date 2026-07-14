@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f1726" />
+  <meta name="description" content="Pesquisar jogador e exibir perfil e jogos do atleta" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+
+  <title>TennisPro - Jogador</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/jogador.css" />
+</head>
+
+<body class="jogador-page">
+
+  <!-- NAVBAR FIXA NO TOPO -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal">
+    <div class="container-xl menu-navbar-top">
+
+      <!-- Seta de voltar -->
+      <a href="menu.html" class="menu-back-btn" aria-label="Voltar">
+        <ion-icon name="arrow-undo-outline"></ion-icon>
+      </a>
+
+      <!-- Marca / título -->
+      <a class="navbar-brand fw-bold d-flex align-items-center gap-2">
+        <ion-icon name="tennisball-outline" style="font-size: 1.2rem;"></ion-icon>
+        <span>Jogador</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="container dashboard-container jogador-container">
+
+    <section class="panel panel-glass" style="padding: 22px;">
+
+      <div class="career-header">
+        <div>
+          <span class="section-kicker">Pesquisa de jogador</span>
+          <h1 id="pageTitle">Perfil do atleta</h1>
+          <p id="subtitle">Pesquise um atleta para ver o perfil e os jogos encontrados.</p>
+        </div>
+        <span class="badge" id="matchesLabel">Pesquise um atleta</span>
+      </div>
+
+      <!-- BOTÃO DE PESQUISA -->
+      <div class="jogador-search-wrap">
+        <button type="button" id="btnSearchPlayer" class="ion-btn ion-btn-primary jogador-search-btn">
+          <ion-icon name="search-outline"></ion-icon>
+          <span class="jogador-search-text">Pesquisar adversário</span>
+        </button>
+      </div>
+
+      <!-- PERFIL DO ATLETA -->
+      <div class="jogador-profile-card">
+        <div class="jogador-profile-head">Perfil do atleta</div>
+
+        <div class="jogador-profile-top">
+          <div class="jogador-profile-avatar-wrap">
+            <div id="playerAvatarPlaceholder" class="avatar-placeholder hidden">A</div>
+            <img id="imgPlayer" class="jogador-player-avatar hidden" src="" alt="Imagem do atleta" />
+          </div>
+
+          <div class="jogador-profile-title">
+            <div id="playerName" class="jogador-player-name">Atleta</div>
+            <div id="playerMetaLine" class="jogador-player-meta-line">Selecione um atleta</div>
+          </div>
+        </div>
+
+        <div id="profileMeta" class="jogador-profile-meta"></div>
+      </div>
+
+      <div class="jogador-divider"></div>
+
+      <!-- FILTROS -->
+      <div class="jogador-filter-wrap">
+        <div class="jogador-filter-bar">
+          <button type="button" class="ion-btn ion-btn-segment jogador-filter-btn active" data-filter="all">
+            <ion-icon name="grid-outline"></ion-icon>
+            <span>Todos</span>
+          </button>
+          <button type="button" class="ion-btn ion-btn-segment jogador-filter-btn" data-filter="simples">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>Simples</span>
+          </button>
+          <button type="button" class="ion-btn ion-btn-segment jogador-filter-btn" data-filter="duplas">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Duplas</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- LISTA DE JOGOS -->
+      <div class="jogador-list">
+        <div class="jogador-list-head">
+          <h3>Jogos do atleta</h3>
+          <span id="matchesLabelSecondary">Nenhum jogo carregado</span>
+        </div>
+
+        <div id="jogadorMatchesList" class="matches-list">
+          <div class="jogador-empty">Nenhum atleta selecionado. Clique em <strong>Pesquisar adversário</strong>.</div>
+        </div>
+
+        <!-- PAGINAÇÃO -->
+        <div class="career-pagination jogador-pagination">
+          <button type="button" id="prevPageBtn" class="ion-btn ion-btn-primary career-page-btn">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+            <span class="career-page-btn-label">Anterior</span>
+          </button>
+
+          <span id="pageInfo" class="career-page-info">Página 1 de 1</span>
+
+          <button type="button" id="nextPageBtn" class="ion-btn ion-btn-primary career-page-btn">
+            <span class="career-page-btn-label">Próximo</span>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="emptyState" class="jogador-empty hidden" style="margin-top: 14px;">
+      Nenhum jogo encontrado para o atleta pesquisado.
+    </section>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="menu-bottom-nav">
+    <a href="menu.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">
+        <ion-icon name="home-outline"></ion-icon>
+      </span>
+      <span class="menu-bottom-label">Início</span>
+    </a>
+
+    <a href="dashboard.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+      </span>
+      <span class="menu-bottom-label">Dashboard</span>
+    </a>
+
+    <a href="admin.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">
+        <ion-icon name="tennisball-outline"></ion-icon>
+      </span>
+      <span class="menu-bottom-label">Partida</span>
+    </a>
+
+    <a href="relatorio.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </span>
+      <span class="menu-bottom-label">Relatórios</span>
+    </a>
+
+    <a href="carreira.html" class="menu-bottom-btn">
+      <span class="menu-bottom-icon">
+        <ion-icon name="trophy-outline"></ion-icon>
+      </span>
+      <span class="menu-bottom-label">Carreira</span>
+    </a>
+  </nav>
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/jogador.js?v=1"></script>
+
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("/service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration.scope); registration.update(); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
+</body>
+</html>
