@@ -26,6 +26,38 @@
       .replace(/[\u0300-\u036f]/g, "");
   }
 
+  function getCountryFlag(country = "") {
+    const c = normalize(country);
+  
+    const flags = {
+      brasil: "🇧🇷",
+      brazil: "🇧🇷",
+      "br": "🇧🇷",
+      "argentina": "🇦🇷",
+      "ar": "🇦🇷",
+      "chile": "🇨🇱",
+      "cl": "🇨🇱",
+      "uruguai": "🇺🇾",
+      "uy": "🇺🇾",
+      "paraguai": "🇵🇾",
+      "py": "🇵🇾",
+      "espanha": "🇪🇸",
+      "spain": "🇪🇸",
+      "usa": "🇺🇸",
+      "eua": "🇺🇸",
+      "estados unidos": "🇺🇸",
+      "united states": "🇺🇸",
+      "franca": "🇫🇷",
+      "france": "🇫🇷",
+      "italia": "🇮🇹",
+      "italy": "🇮🇹",
+      "portugal": "🇵🇹",
+      "pt": "🇵🇹"
+    };
+  
+    return flags[c] || "🏳️";
+  }
+
   function safeValue(value) {
     const v = String(value ?? "").trim();
     return v ? v : "-";
@@ -644,44 +676,7 @@
     return ` <div class="match-item"> <div class="match-top"> <div class="match-players"> <ion-icon name="people-outline"></ion-icon> <span class="match-players-name">${title}</span> </div> </div> <div class="match-line"> <ion-icon name="calendar-outline"></ion-icon> <span class="match-datetime">${date}</span> </div> <div class="match-line"> <ion-icon name="medal-outline"></ion-icon> <span>${infoLine || "Partida"}</span> </div> <div class="match-line"> <ion-icon name="trophy-outline"></ion-icon> <span class="match-score">${scoreText}</span> </div> <div class="match-line"> <ion-icon name="${statusIcon}"></ion-icon> <span class="match-status">${resultMessage}</span> </div> </div> `;
   }
 
-  function renderAthleteProfile(profile) {
-    const name = profile?.displayName || profile?.name || profile?.fullName || "Atleta";
-    const photo = getPhotoFromProfile(profile);
-
-    state.currentAthleteProfile = profile || null;
-    state.currentAthleteName = name;
-    state.currentAthleteId = profile?.uid || profile?.id || profile?.playerId || profile?.ownerId || "";
-
-    setText("pageTitle", `Perfil do atleta - ${name}`);
-    setText("subtitle", "Perfil do atleta pesquisado.");
-    setText("playerName", name);
-
-    const city = safeValue(profile.city || profile.cidade || profile.cityName);
-    const country = safeValue(profile.country || profile.countryName);
-    setText(
-      "playerMetaLine",
-      city !== "-" || country !== "-"
-        ? `${city !== "-" ? city : ""}${city !== "-" && country !== "-" ? " • " : ""}${country !== "-" ? country : ""}`
-        : "Dados do atleta"
-    );
-
-    setPlayerAvatar({
-      name,
-      imgEl: document.getElementById("imgPlayer"),
-      placeholderEl: document.getElementById("playerAvatarPlaceholder"),
-      photoURL: photo
-    });
-
-    const metaEl = document.getElementById("profileMeta");
-    if (metaEl) {
-      metaEl.innerHTML = buildProfileMeta(profile || {}, {
-        total: 0,
-        wins: 0,
-        losses: 0,
-        titles: 0
-      });
-    }
-  }
+  
 
   function renderPageItems(items) {
     const list = document.getElementById("jogadorMatchesList");
