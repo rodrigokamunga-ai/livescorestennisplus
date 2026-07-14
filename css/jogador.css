@@ -1,0 +1,863 @@
+/* ========================================================= JOGADOR.CSS Tela de pesquisa de jogador / perfil do atleta ========================================================= */
+
+body.jogador-page {
+  background:
+    radial-gradient(circle at top, rgba(72, 96, 136, 0.20), transparent 30%),
+    linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
+  color: #e8eefc;
+  min-height: 100vh;
+  padding-top: 52px;
+  padding-bottom: 78px;
+  overflow-x: hidden;
+}
+
+body.jogador-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body.jogador-page * {
+  box-sizing: border-box;
+}
+
+body.jogador-page .hidden {
+  display: none !important;
+}
+
+body.jogador-page .muted {
+  color: rgba(232, 238, 252, 0.68);
+}
+
+body.jogador-page img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ========================= TOPO / NAVBAR ========================= */
+body.jogador-page .menu-fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: rgba(10, 16, 28, 0.96) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  min-height: 52px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.jogador-page .menu-navbar-top {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+body.jogador-page .menu-back-btn {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #d8ff63;
+  background: transparent;
+  border: none;
+  text-decoration: none;
+}
+
+body.jogador-page .menu-back-btn ion-icon {
+  font-size: 1.55rem;
+  color: inherit;
+}
+
+body.jogador-page .navbar-brand {
+  color: #eef4ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.jogador-page .navbar-brand span {
+  line-height: 1;
+}
+
+/* ========================= LAYOUT ========================= */
+body.jogador-page .jogador-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-top: 14px;
+}
+
+body.jogador-page .panel,
+body.jogador-page .panel-glass {
+  background: linear-gradient(180deg, rgba(31, 40, 60, 0.94), rgba(20, 28, 44, 0.97));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+  border-radius: 26px;
+}
+
+/* ========================= HEADER ========================= */
+body.jogador-page .career-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+body.jogador-page .career-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #f0f4ff;
+  line-height: 1.15;
+}
+
+body.jogador-page #subtitle {
+  margin: 6px 0 0;
+  color: rgba(232, 238, 252, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+body.jogador-page .section-kicker {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d8ff63;
+}
+
+body.jogador-page #matchesLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(216, 255, 99, 0.12);
+  border: 1px solid rgba(216, 255, 99, 0.22);
+  color: #d8ff63;
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* ========================= BOTÕES ========================= */
+body.jogador-page .ion-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
+  color: #eef4ff;
+  font-weight: 800;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
+body.jogador-page .ion-btn:hover {
+  transform: translateY(-1px);
+}
+
+body.jogador-page .ion-btn-primary {
+  background: linear-gradient(180deg, #6fb1ff, #4b84f0);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+body.jogador-page .ion-btn-primary:hover {
+  background: linear-gradient(180deg, #7ab9ff, #578ef3);
+}
+
+body.jogador-page .ion-btn:disabled,
+body.jogador-page .career-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================= PESQUISA ========================= */
+body.jogador-page .jogador-search-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 14px;
+}
+
+body.jogador-page .jogador-search-btn {
+  width: min(100%, 320px);
+  min-height: 52px;
+}
+
+/* ========================= PERFIL ========================= */
+body.jogador-page .jogador-profile-card {
+  padding: 16px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+  margin-top: 8px;
+}
+
+body.jogador-page .jogador-profile-head {
+  text-align: center;
+  font-size: 0.76rem;
+  font-weight: 900;
+  color: rgba(232, 238, 252, 0.68);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+body.jogador-page .jogador-profile-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+body.jogador-page .jogador-player-avatar,
+body.jogador-page .avatar-placeholder {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  border: 3px solid rgba(216, 255, 99, 0.24);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+  background: rgba(12, 18, 30, 0.62);
+}
+
+body.jogador-page .avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(232, 238, 252, 0.72);
+  border: 3px solid rgba(216, 255, 99, 0.16);
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+body.jogador-page .jogador-player-name {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #f4f8ff;
+  text-align: left;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+body.jogador-page .jogador-player-meta-line {
+  margin-top: 6px;
+  font-size: 0.88rem;
+  color: rgba(232, 238, 252, 0.72);
+  text-align: left;
+}
+
+body.jogador-page .jogador-profile-meta {
+  display: grid;
+  gap: 8px;
+}
+
+body.jogador-page .profile-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(12, 18, 30, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.jogador-page .profile-label {
+  font-size: 0.74rem;
+  font-weight: 900;
+  color: #d8ff63;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: left;
+}
+
+body.jogador-page .profile-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #f4f8ff;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ========================= DIVISOR ========================= */
+body.jogador-page .jogador-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  margin: 12px 0;
+}
+
+/* ========================= FILTROS ========================= */
+body.jogador-page .jogador-filter-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 14px 0 6px;
+}
+
+body.jogador-page .jogador-filter-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+body.jogador-page .jogador-filter-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(216, 255, 99, 0.08));
+  color: #eef4ff;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+body.jogador-page .jogador-filter-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(216, 255, 99, 0.28);
+  background: linear-gradient(180deg, rgba(216, 255, 99, 0.18), rgba(255, 255, 255, 0.06));
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+}
+
+body.jogador-page .jogador-filter-btn.active {
+  background: linear-gradient(180deg, #d8ff63 0%, #bfe83c 100%);
+  color: #111827;
+  border-color: rgba(216, 255, 99, 0.45);
+  box-shadow: 0 14px 26px rgba(216, 255, 99, 0.20);
+}
+
+/* ========================= LISTA ========================= */
+body.jogador-page .jogador-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+body.jogador-page .jogador-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.jogador-page .jogador-list-head h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #f4f8ff;
+}
+
+body.jogador-page .jogador-list-head span {
+  font-size: 0.82rem;
+  color: rgba(232, 238, 252, 0.68);
+  font-weight: 700;
+}
+
+body.jogador-page .matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body.jogador-page .match-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.jogador-page .match-top,
+body.jogador-page .match-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.jogador-page .match-players {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+body.jogador-page .match-players ion-icon,
+body.jogador-page .match-line ion-icon {
+  font-size: 16px;
+  color: #86a8ff;
+  flex-shrink: 0;
+}
+
+body.jogador-page .match-players-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.jogador-page .match-line {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+body.jogador-page .match-score {
+  font-weight: 900;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+body.jogador-page .match-status {
+  color: #b7f5c8;
+}
+
+body.jogador-page .match-datetime {
+  color: rgba(232, 238, 252, 0.86);
+}
+
+/* ========================= ESTADO VAZIO ========================= */
+body.jogador-page .jogador-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(12, 18, 30, 0.58);
+  border: 1px dashed rgba(255, 255, 255, 0.10);
+  color: rgba(232, 238, 252, 0.72);
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ========================= PAGINAÇÃO ========================= */
+body.jogador-page .jogador-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+body.jogador-page .career-page-btn {
+  min-height: 44px;
+  height: 44px;
+  min-width: 120px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(216, 255, 99, 0.12), rgba(255, 255, 255, 0.04));
+  color: #eef4ff;
+  font-weight: 800;
+}
+
+body.jogador-page .career-page-info {
+  flex: 1 1 auto;
+  text-align: center;
+  color: rgba(232, 238, 252, 0.82);
+  font-weight: 800;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ========================= MENU INFERIOR ========================= */
+/* Sem quadrados / sem blocos ao redor dos botões */
+body.jogador-page .menu-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(10, 16, 28, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+body.jogador-page .menu-bottom-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 800;
+  padding: 8px 4px;
+  color: #eef4ff;
+  opacity: 0.92;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  transform: none;
+  cursor: pointer;
+}
+
+body.jogador-page .menu-bottom-btn:hover,
+body.jogador-page .menu-bottom-btn:active,
+body.jogador-page .menu-bottom-btn:focus {
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+body.jogador-page .menu-bottom-btn::before,
+body.jogador-page .menu-bottom-btn::after {
+  content: none;
+}
+
+body.jogador-page .menu-bottom-icon {
+  font-size: 1.22rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.jogador-page .menu-bottom-label {
+  font-size: 0.78rem;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* ========================= MODAL DE BUSCA ========================= */
+body.jogador-page .jogador-search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(4, 8, 18, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+body.jogador-page .jogador-search-modal-card {
+  width: min(100%, 720px);
+  max-height: min(86vh, 760px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(24, 33, 51, 0.98), rgba(15, 23, 38, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.38);
+}
+
+body.jogador-page .jogador-search-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.jogador-page .jogador-search-modal-head h3 {
+  margin: 0;
+  color: #f4f8ff;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+
+body.jogador-page .jogador-search-modal-head p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+body.jogador-page .jogador-search-modal-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef4ff;
+  font-size: 1.35rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.jogador-page .jogador-search-modal-body {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  overflow: hidden;
+}
+
+body.jogador-page .jogador-search-modal-input {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f8ff;
+  padding: 0 16px;
+  outline: none;
+}
+
+body.jogador-page .jogador-search-modal-input::placeholder {
+  color: rgba(232, 238, 252, 0.45);
+}
+
+body.jogador-page .jogador-search-modal-input:focus {
+  border-color: rgba(216, 255, 99, 0.34);
+  box-shadow: 0 0 0 4px rgba(216, 255, 99, 0.10);
+}
+
+body.jogador-page .jogador-search-modal-status {
+  font-size: 0.86rem;
+  line-height: 1.35;
+  min-height: 20px;
+}
+
+body.jogador-page .jogador-search-results {
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 2px;
+  max-height: 52vh;
+}
+
+body.jogador-page .jogador-search-empty {
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  color: rgba(232, 238, 252, 0.72);
+  text-align: center;
+  font-weight: 700;
+}
+
+body.jogador-page .jogador-search-result {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #eef4ff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  appearance: none;
+}
+
+body.jogador-page .jogador-search-result:hover {
+  transform: translateY(-1px);
+  background: rgba(216, 255, 99, 0.08);
+  border-color: rgba(216, 255, 99, 0.18);
+}
+
+body.jogador-page .jogador-search-result-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: rgba(12, 18, 30, 0.72);
+  border: 2px solid rgba(216, 255, 99, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(232, 238, 252, 0.82);
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+body.jogador-page .jogador-search-result-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+body.jogador-page .jogador-search-result-info {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+body.jogador-page .jogador-search-result-name {
+  font-weight: 900;
+  color: #f4f8ff;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+body.jogador-page .jogador-search-result-meta {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(232, 238, 252, 0.68);
+  display: grid;
+  gap: 3px;
+}
+
+body.jogador-page .jogador-search-result-meta strong {
+  color: #d8ff63;
+}
+
+/* ========================= RESPONSIVIDADE ========================= */
+@media (max-width: 768px) {
+  body.jogador-page .career-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.jogador-page .panel {
+    padding: 16px !important;
+    border-radius: 22px;
+  }
+
+  body.jogador-page .jogador-profile-top {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  body.jogador-page .jogador-player-name,
+  body.jogador-page .jogador-player-meta-line {
+    text-align: center;
+  }
+
+  body.jogador-page .profile-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  body.jogador-page .profile-value {
+    text-align: left;
+  }
+
+  body.jogador-page .jogador-search-btn {
+    width: 100%;
+    max-width: 100%;
+    min-height: 48px;
+  }
+
+  body.jogador-page .jogador-search-modal-card {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 22px;
+  }
+
+  body.jogador-page .jogador-search-results {
+    max-height: 48vh;
+  }
+
+  body.jogador-page .jogador-pagination {
+    gap: 6px;
+  }
+
+  body.jogador-page .career-page-btn {
+    min-width: 0;
+    padding: 0 10px;
+  }
+
+  body.jogador-page .career-page-info {
+    font-size: 0.78rem;
+  }
+
+  body.jogador-page .jogador-filter-bar {
+    gap: 8px;
+  }
+
+  body.jogador-page .jogador-filter-btn {
+    font-size: 0.76rem;
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  body.jogador-page .jogador-player-avatar,
+  body.jogador-page .avatar-placeholder {
+    width: 92px;
+    height: 92px;
+  }
+
+  body.jogador-page .jogador-search-result {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  body.jogador-page .jogador-search-result-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  body.jogador-page .menu-bottom-label {
+    font-size: 0.55rem;
+  }
+
+  body.jogador-page .jogador-filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 2px;
+  }
+
+  body.jogador-page .jogador-filter-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+  }
+}
