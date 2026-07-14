@@ -277,15 +277,18 @@ body.jogador-page .jogador-profile-meta {
   gap: 8px;
 }
 
+/* LINHAS DO PERFIL MAIS JUNTAS */
 body.jogador-page .profile-row {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 12px;
+  display: flex;
   align-items: center;
-  padding: 10px 12px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 8px 10px;
   border-radius: 14px;
   background: rgba(12, 18, 30, 0.48);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 body.jogador-page .profile-label {
@@ -293,16 +296,28 @@ body.jogador-page .profile-label {
   font-weight: 900;
   color: #d8ff63;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-align: left;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 body.jogador-page .profile-value {
   font-size: 0.92rem;
   font-weight: 800;
   color: #f4f8ff;
-  text-align: right;
+  text-align: left;
   word-break: break-word;
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: normal;
+}
+
+/* Mantém o campo País sem quebrar */
+body.jogador-page .profile-row.pais,
+body.jogador-page .profile-row.pais .profile-label,
+body.jogador-page .profile-row.pais .profile-value {
+  white-space: nowrap;
 }
 
 /* ========================= DIVISOR ========================= */
@@ -505,7 +520,6 @@ body.jogador-page .career-page-info {
 }
 
 /* ========================= MENU INFERIOR ========================= */
-/* Sem quadrados / sem blocos ao redor dos botões */
 body.jogador-page .menu-bottom-nav {
   position: fixed;
   left: 0;
@@ -779,12 +793,23 @@ body.jogador-page .jogador-search-result-meta strong {
     text-align: center;
   }
 
+  /* mantém compacto e lado a lado */
   body.jogador-page .profile-row {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     gap: 6px;
+    padding: 8px 10px;
+  }
+
+  body.jogador-page .profile-label {
+    flex: 0 0 auto;
   }
 
   body.jogador-page .profile-value {
+    flex: 0 1 auto;
+    min-width: 0;
     text-align: left;
   }
 
@@ -825,6 +850,14 @@ body.jogador-page .jogador-search-result-meta strong {
     font-size: 0.76rem;
     padding: 0 10px;
   }
+
+  body.jogador-page .menu-bottom-label {
+    font-size: 0.68rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.05;
+  }
 }
 
 @media (max-width: 480px) {
@@ -844,8 +877,30 @@ body.jogador-page .jogador-search-result-meta strong {
     height: 48px;
   }
 
+  body.jogador-page .menu-bottom-nav {
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  body.jogador-page .menu-bottom-btn {
+    padding: 6px 2px;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  body.jogador-page .menu-bottom-icon {
+    font-size: 1.08rem;
+  }
+
   body.jogador-page .menu-bottom-label {
-    font-size: 0.55rem;
+    font-size: 0.56rem;
+    line-height: 1.05;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    text-align: center;
+    display: block;
+    max-width: 100%;
   }
 
   body.jogador-page .jogador-filter-bar {
@@ -858,6 +913,13 @@ body.jogador-page .jogador-search-result-meta strong {
   body.jogador-page .jogador-filter-btn {
     flex: 1 1 0;
     min-width: 0;
+    white-space: nowrap;
+  }
+
+  /* País sem quebrar */
+  body.jogador-page .profile-row.pais,
+  body.jogador-page .profile-row.pais .profile-label,
+  body.jogador-page .profile-row.pais .profile-value {
     white-space: nowrap;
   }
 }
