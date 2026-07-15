@@ -39,6 +39,7 @@
       form: document.getElementById("profileForm"),
       displayName: document.getElementById("displayName"),
       email: document.getElementById("email"),
+      clubCondominium: document.getElementById("clubCondominium"),
       playerId: document.getElementById("playerId"),
       phone: document.getElementById("phone"),
       country: document.getElementById("country"),
@@ -73,7 +74,8 @@
       deleteMsg: document.getElementById("deleteMsg")
     };
 
-    let currentUser = null;
+    let authUser = null;
+    let profileUser = null;
     let savedPhotoBase64 = "";
     let previousDisplayName = "";
     let removePhotoRequested = false;
@@ -250,6 +252,7 @@
     function fillForm(data) {
       if (el.displayName && data.displayName) el.displayName.value = data.displayName;
       if (el.phone) el.phone.value = data.phone || "";
+      if (el.clubCondominium) el.clubCondominium.value = data.clubCondominium || "";
       if (el.gender) el.gender.value = data.gender || "";
       if (el.birthDate) el.birthDate.value = data.birthDate || "";
       if (el.height) el.height.value = data.height || "";
@@ -275,15 +278,17 @@
 
     async function loadProfile(user) {
       try {
-        if (el.email) el.email.value = user.email || "";
-        if (el.displayName) el.displayName.value = user.displayName || "";
+        profileUser = user;
+
+        if (el.email) el.email.value = profileUser.email || "";
+        if (el.displayName) el.displayName.value = profileUser.displayName || "";
         if (el.playerId) el.playerId.value = "";
 
-        previousDisplayName = user.displayName || "";
+        previousDisplayName = profileUser.displayName || "";
 
         const db = getDb();
 
-        const userDoc = await db.collection("users").doc(user.uid).get();
+        const userDoc = await db.collection("users").doc(profileUser.uid).get();
         let userData = {};
 
         if (userDoc.exists) {
@@ -291,7 +296,7 @@
           console.log("[profile] userData carregado:", userData);
 
           if (el.playerId) {
-            el.playerId.value = userData.playerId || buildFallbackPlayerId(userData, user);
+            el.playerId.value = userData.playerId || buildFallbackPlayerId(userData, profileUser);
           }
 
           if (el.displayName && !el.displayName.value && userData.displayName) {
@@ -302,13 +307,13 @@
             el.email.value = userData.email;
           }
         } else {
-          console.warn("[profile] Documento users/{uid} não encontrado:", user.uid);
+          console.warn("[profile] Documento users/{uid} não encontrado:", profileUser.uid);
           if (el.playerId) {
-            el.playerId.value = buildFallbackPlayerId({}, user);
+            el.playerId.value = buildFallbackPlayerId({}, profileUser);
           }
         }
 
-        const profileDoc = await db.collection("profiles").doc(user.uid).get();
+        const profileDoc = await db.collection("profiles").doc(profileUser.uid).get();
         if (profileDoc.exists) {
           const profileData = profileDoc.data() || {};
           fillForm(profileData);
@@ -320,7 +325,7 @@
           if (el.playerId && profileData.playerId) {
             el.playerId.value = profileData.playerId;
           } else if (el.playerId && !el.playerId.value) {
-            el.playerId.value = userData.playerId || buildFallbackPlayerId(userData, user);
+            el.playerId.value = userData.playerId || buildFallbackPlayerId(userData, profileUser);
           }
         } else {
           savedPhotoBase64 = "";
@@ -365,7 +370,7 @@
 
     async function saveProfile(e) {
       e.preventDefault();
-      if (!currentUser) return setMsg("Usuário não autenticado.", "error");
+      if (!profileUser) return setMsg("Usuário não autenticado.", "error");
       setMsg("Salvando...", "info");
 
       try {
@@ -394,7 +399,8 @@
 
         const data = {
           displayName: newDisplayName,
-          email: currentUser.email || "",
+          email: profileUser.email || "",
+          clubCondominium: el.clubCondominium?.value.trim() || "",
           phone: el.phone?.value.trim() || "",
           country: el.country?.value || "",
           state: el.state?.value || "",
@@ -409,10 +415,10 @@
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await getDb().collection("profiles").doc(currentUser.uid).set(data, { merge: true });
+        await getDb().collection("profiles").doc(profileUser.uid).set(data, { merge: true });
 
-        if (newDisplayName && newDisplayName !== currentUser.displayName) {
-          await currentUser.updateProfile({ displayName: newDisplayName });
+        if (authUser && newDisplayName && newDisplayName !== authUser.displayName) {
+          await authUser.updateProfile({ displayName: newDisplayName });
           previousDisplayName = newDisplayName;
         }
 
@@ -486,12 +492,16 @@
         return setPasswordMsg("A nova senha deve ter no mínimo 8 caracteres, com letras maiúsculas, minúsculas, número e caractere especial.", "error");
       }
 
+      if (!authUser) {
+        return setPasswordMsg("Não foi possível localizar o usuário autenticado.", "error");
+      }
+
       setPasswordMsg("Alterando senha...", "info");
 
       try {
-        const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, current);
-        await currentUser.reauthenticateWithCredential(credential);
-        await currentUser.updatePassword(next);
+        const credential = firebase.auth.EmailAuthProvider.credential(authUser.email, current);
+        await authUser.reauthenticateWithCredential(credential);
+        await authUser.updatePassword(next);
 
         if (el.currentPassword) el.currentPassword.value = "";
         if (el.newPassword) el.newPassword.value = "";
@@ -527,14 +537,14 @@
     }
 
     async function deleteAccount() {
-      if (!currentUser) return;
+      if (!authUser) return;
 
       setDeleteMsg("Excluindo conta...", "error");
       if (el.confirmDeleteBtn) el.confirmDeleteBtn.disabled = true;
 
       try {
         const db = getDb();
-        const uid = currentUser.uid;
+        const uid = authUser.uid;
 
         const password = prompt("Por segurança, confirme sua senha atual para excluir a conta:");
         if (!password) {
@@ -543,8 +553,8 @@
           return;
         }
 
-        const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, password);
-        await currentUser.reauthenticateWithCredential(credential);
+        const credential = firebase.auth.EmailAuthProvider.credential(authUser.email, password);
+        await authUser.reauthenticateWithCredential(credential);
 
         await db.collection("profiles").doc(uid).delete();
         await db.collection("users").doc(uid).delete();
@@ -556,7 +566,7 @@
           await batch.commit();
         }
 
-        await currentUser.delete();
+        await authUser.delete();
 
         localStorage.clear();
         sessionStorage.clear();
@@ -579,6 +589,7 @@
       if (!confirm("Deseja limpar os dados do formulário?")) return;
 
       if (el.phone) el.phone.value = "";
+      if (el.clubCondominium) el.clubCondominium.value = "";
       if (el.gender) el.gender.value = "";
       if (el.birthDate) el.birthDate.value = "";
       if (el.height) el.height.value = "";
@@ -689,16 +700,16 @@
 
     async function initUser(user) {
       if (user) {
-        currentUser = user;
+        authUser = user;
         const fullUser = await buildBiometricFallbackUser(user);
-        currentUser = fullUser || user;
+        profileUser = fullUser || user;
 
-        if (el.email) el.email.value = currentUser.email || "";
-        if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        if (el.email) el.email.value = profileUser.email || "";
+        if (el.displayName) el.displayName.value = profileUser.displayName || "";
         if (el.playerId) el.playerId.value = "";
 
-        previousDisplayName = currentUser.displayName || "";
-        await loadProfile(currentUser);
+        previousDisplayName = profileUser.displayName || "";
+        await loadProfile(profileUser);
         return;
       }
 
@@ -710,14 +721,14 @@
           return;
         }
 
-        currentUser = fallbackUser;
+        profileUser = fallbackUser;
 
-        if (el.email) el.email.value = currentUser.email || "";
-        if (el.displayName) el.displayName.value = currentUser.displayName || "";
+        if (el.email) el.email.value = profileUser.email || "";
+        if (el.displayName) el.displayName.value = profileUser.displayName || "";
         if (el.playerId) el.playerId.value = "";
 
-        previousDisplayName = currentUser.displayName || "";
-        await loadProfile(currentUser);
+        previousDisplayName = profileUser.displayName || "";
+        await loadProfile(profileUser);
         return;
       }
 
