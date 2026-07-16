@@ -267,10 +267,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderPlacar(match) {
-      if (!tvGridPlacar || !match) return;
+      if (!match) return;
+    
       const score = normalizeScore(match.score || {});
       const pts = getPointDisplay(score, match.matchFormat, false);
-      tvGridPlacar.textContent = `${score.games1}x${score.games2} - ${pts.p1}x${pts.p2}`;
+    
+      const isDoubles =
+        String(match.gameFormat || "").trim() === "Duplas" ||
+        String(match.gameFormat || "").trim() === "Duplas Mistas";
+    
+      const p1 = match.player1 || "Jogador A";
+      const p2 = match.player2 || "Jogador B";
+      const p3 = match.player3 || "Jogador C";
+      const p4 = match.player4 || "Jogador D";
+    
+      const team1Name = isDoubles ? `${p1}/${p2}` : p1;
+      const team2Name = isDoubles ? `${p3}/${p4}` : p2;
+    
+      const miniPlayer1 = document.getElementById("liveMiniPlayer1");
+      const miniPlayer2 = document.getElementById("liveMiniPlayer2");
+      const miniGames1 = document.getElementById("liveMiniGames1");
+      const miniGames2 = document.getElementById("liveMiniGames2");
+      const miniPoints1 = document.getElementById("liveMiniPoints1");
+      const miniPoints2 = document.getElementById("liveMiniPoints2");
+      const serveIndicator = document.getElementById("liveServeIndicator");
+      const miniStatus = document.getElementById("liveMiniStatus");
+      const tvGridPlacar = document.getElementById("tvGridPlacar");
+    
+      if (miniPlayer1) miniPlayer1.textContent = team1Name;
+      if (miniPlayer2) miniPlayer2.textContent = team2Name;
+    
+      if (miniGames1) miniGames1.textContent = String(score.games1 ?? 0);
+      if (miniGames2) miniGames2.textContent = String(score.games2 ?? 0);
+    
+      if (miniPoints1) miniPoints1.textContent = String(pts.p1 ?? "0");
+      if (miniPoints2) miniPoints2.textContent = String(pts.p2 ?? "0");
+    
+      if (serveIndicator) {
+        const server = score.server || match.server || "player1";
+        serveIndicator.textContent = server === "player1" ? "●" : "○";
+        serveIndicator.style.color = "#d8ff63";
+      }
+    
+      if (miniStatus) {
+        miniStatus.textContent =
+          match.status === "live"
+            ? "AO VIVO"
+            : match.status === "suspended"
+              ? "SUSPENSA"
+              : match.status === "finished"
+                ? "FINALIZADA"
+                : "NÃO INICIADA";
+      }
+    
+      if (tvGridPlacar) {
+        tvGridPlacar.textContent = `${score.games1}x${score.games2} - ${pts.p1}x${pts.p2}`;
+      }
     }
 
     function listenToMatch() {
