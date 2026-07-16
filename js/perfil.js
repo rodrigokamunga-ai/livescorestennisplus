@@ -246,7 +246,7 @@
     function buildFallbackPlayerId(userData, user) {
       const base = normalizePlayerName(userData?.displayName || user?.displayName || "") || "player";
       const shortUid = (user?.uid || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toLowerCase();
-      return shortUid ? `${base}_${shortUid}_id` : `${base}_id`;
+      return shortUid ? `@${base}_${shortUid}` : `@${base}`;
     }
 
     function fillForm(data) {
