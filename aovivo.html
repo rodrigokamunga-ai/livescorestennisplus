@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/public.css" />
 
-  <style> body { margin: 0; background: #0f1726; color: #fff; font-family: Arial, sans-serif; } .live-page { min-height: 100vh; display: flex; flex-direction: column; gap: 12px; padding: 12px; box-sizing: border-box; } .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); } .status { font-weight: 900; font-size: 15px; margin-bottom: 4px; } .info { font-size: 12px; opacity: 0.85; } .actions { display: flex; gap: 10px; flex-wrap: wrap; } .btn { border: none; border-radius: 12px; padding: 11px 14px; font-weight: 800; cursor: pointer; color: #fff; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 8px; } .btn:hover { transform: translateY(-1px); filter: brightness(1.05); } .btn.green { background: linear-gradient(135deg, #16a34a, #15803d); } .btn.gray { background: linear-gradient(135deg, #6b7280, #4b5563); } .video-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); } #liveVideo { width: 100%; height: 100%; object-fit: cover; background: #000; display: block; } .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0, 0, 0, 0.25); color: #fff; font-weight: 900; text-align: center; padding: 16px; } .score-box { padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); } .score-title { font-size: 14px; font-weight: 900; margin-bottom: 8px; opacity: 0.9; } #tvGridPlacar { font-size: 28px; font-weight: 900; letter-spacing: 0.02em; line-height: 1.1; min-height: 34px; } .debug { font-size: 12px; line-height: 1.35; opacity: 0.85; white-space: pre-wrap; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); min-height: 60px; } @media (max-width: 768px) { .topbar { align-items: flex-start; } #tvGridPlacar { font-size: 22px; } .btn { width: 100%; justify-content: center; } .actions { width: 100%; } } </style>
+  <style> body { margin: 0; background: #0f1726; color: #fff; font-family: Arial, sans-serif; } .live-page { min-height: 100vh; display: flex; flex-direction: column; gap: 12px; padding: 12px; box-sizing: border-box; } .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); } .status { font-weight: 900; font-size: 15px; margin-bottom: 4px; } .info { font-size: 12px; opacity: 0.85; } .actions { display: flex; gap: 10px; flex-wrap: wrap; } .btn { border: none; border-radius: 12px; padding: 11px 14px; font-weight: 800; cursor: pointer; color: #fff; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 8px; } .btn:hover { transform: translateY(-1px); filter: brightness(1.05); } .btn.green { background: linear-gradient(135deg, #16a34a, #15803d); } .btn.gray { background: linear-gradient(135deg, #6b7280, #4b5563); } .video-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); } #liveVideo { width: 100%; height: 100%; object-fit: cover; background: #000; display: block; } .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0, 0, 0, 0.25); color: #fff; font-weight: 900; text-align: center; padding: 16px; z-index: 5; } /* PLACAR COMPACTO NO CANTO INFERIOR ESQUERDO */ .live-mini-scoreboard-bottom { position: absolute; left: 12px; bottom: 12px; z-index: 25; display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 12px; background: rgba(0, 0, 0, 0.62); color: #fff; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); max-width: calc(100vw - 24px); min-width: 180px; } .live-mini-row { display: grid; grid-template-columns: 12px 1fr 26px 28px; align-items: center; gap: 6px; font-size: 12px; line-height: 1.1; } .live-serve-indicator { width: 12px; text-align: center; font-weight: 900; color: #d8ff63; text-shadow: 0 0 8px rgba(216, 255, 99, 0.75); } .live-serve-indicator.placeholder { visibility: hidden; } .live-mini-player { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; } .live-mini-games, .live-mini-points { font-weight: 900; text-align: right; min-width: 0; } #cameraStatus, #cameraDebug { display: none !important; } @media (max-width: 768px) { .topbar { align-items: flex-start; } .btn { width: 100%; justify-content: center; } .actions { width: 100%; } .live-mini-scoreboard-bottom { left: 8px; bottom: 8px; padding: 6px 8px; min-width: 160px; } .live-mini-row { grid-template-columns: 10px 1fr 22px 24px; gap: 4px; font-size: 11px; } } </style>
 </head>
 
 <body>
@@ -44,15 +44,26 @@
     </section>
 
     <section class="video-wrap">
+      <div class="live-mini-scoreboard-bottom">
+        <div class="live-mini-row">
+          <span class="live-serve-indicator" id="liveServeIndicator">●</span>
+          <span class="live-mini-player" id="liveMiniPlayer1">Jogador A</span>
+          <span class="live-mini-games" id="liveMiniGames1">0</span>
+          <span class="live-mini-points" id="liveMiniPoints1">0</span>
+        </div>
+
+        <div class="live-mini-row">
+          <span class="live-serve-indicator placeholder">●</span>
+          <span class="live-mini-player" id="liveMiniPlayer2">Jogador B</span>
+          <span class="live-mini-games" id="liveMiniGames2">0</span>
+          <span class="live-mini-points" id="liveMiniPoints2">0</span>
+        </div>
+      </div>
+
       <video id="liveVideo" autoplay muted playsinline></video>
       <div class="overlay" id="telaInicial">
         Aguardando vídeo...
       </div>
-    </section>
-
-    <section class="score-box">
-      <div class="score-title">Placar ao vivo</div>
-      <div id="tvGridPlacar">0x0 - 00x00</div>
     </section>
 
     <section class="debug" id="cameraStatus"></section>
