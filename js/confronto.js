@@ -23,7 +23,10 @@
     historicalPlayersCache: [],
     allOwnerMatches: [],
     currentProfileName: "",
-    currentUser: null
+    currentUser: null,
+    matchId: "",
+    matchDataFromUrl: null,
+    h2hMode: false
   };
 
   function getParam(name) {
@@ -280,7 +283,7 @@
 
     const scoreText = setText || `${safeValue(score.sets1 ?? 0)} x ${safeValue(score.sets2 ?? 0)}`;
 
-    return ` <div class="match-item"> <div class="match-top"> <div class="match-players"> <ion-icon name="people-outline"></ion-icon> <span class="match-players-name">${title}</span> </div> </div> <div class="match-line"> <ion-icon name="trophy-outline"></ion-icon> <span class="match-score">${scoreText}</span> </div> <div class="match-line"> <ion-icon name="calendar-outline"></ion-icon> <span class="match-datetime">${date}</span> </div> <div class="match-line"> <ion-icon name="${statusIcon}"></ion-icon> <span class="match-status">${resultText}</span> </div> </div> `;
+    return ` <div class="match-item"> <div class="match-top"> <div class="match-players"> <ion-icon name="people-outline"></ion-icon> <span class="match-players-name">${title}</span> </div> </div> <div class="match-line"> <ion-icon name="trophy-outline"></ion-icon> <span class="match-score">${scoreText}</span> </div> <div class="match-line"> <ion-icon name="calendar-outline"></ion-icon> <span class="match-datetime">${date}</span> </div> <div class="match-line"> <ion-icon name="${statusIcon}"></ion-icon> <span class="match-status">${resultText}</span> </div> </div>`;
   }
 
   function getAvatarInitial(name = "") {
@@ -742,9 +745,6 @@
       gameFormat === "duplas mistas" ||
       !!(match?.player3 || match?.player4 || match?.player3Name || match?.player4Name);
 
-    // =========================
-    // DUPLAS
-    // =========================
     if (isDoublesMatch) {
       const team1A = normalize(match.player1 || match.player1Name || "");
       const team1B = normalize(match.player2 || match.player2Name || "");
@@ -780,9 +780,6 @@
       return null;
     }
 
-    // =========================
-    // SIMPLES
-    // =========================
     const p1 = normalize(match.player1 || match.player1Name || match.ownerName || "");
     const p2 = normalize(match.player2 || match.player2Name || match.opponentName || "");
 
@@ -971,7 +968,7 @@
       const isTopRow = index === 0;
       const isPercentRow = index === 1;
 
-      return ` <div class="confronto-comparison-row ${isTopRow ? "comparison-top-row" : ""} ${isPercentRow ? "comparison-percent-row" : ""}"> <div class="confronto-comparison-value left">${left}</div> <div class="confronto-comparison-label">${label}</div> <div class="confronto-comparison-value right">${right}</div> </div> `;
+      return ` <div class="confronto-comparison-row ${isTopRow ? "comparison-top-row" : ""} ${isPercentRow ? "comparison-percent-row" : ""}"> <div class="confronto-comparison-value left">${left}</div> <div class="confronto-comparison-label">${label}</div> <div class="confronto-comparison-value right">${right}</div> </div>`;
     }).join("");
   }
 
@@ -1052,7 +1049,7 @@
     const overlay = document.createElement("div");
     overlay.className = "confronto-search-modal hidden";
     overlay.id = "confrontoSearchModal";
-    overlay.innerHTML = ` <div class="confronto-search-modal-card"> <div class="confronto-search-modal-head"> <div> <h3>Pesquisar adversário</h3> <p class="muted">Digite o nome para listar os jogadores encontrados.</p> </div> <button type="button" class="confronto-search-modal-close" id="closeSearchModalBtn">×</button> </div> <div class="confronto-search-modal-body"> <input type="text" id="searchOpponentInput" class="confronto-search-modal-input" placeholder="Digite o nome do adversário" autocomplete="off" /> <div id="searchOpponentStatus" class="confronto-search-modal-status muted"></div> <div id="searchOpponentResults" class="confronto-search-results"></div> </div> </div> `;
+    overlay.innerHTML = ` <div class="confronto-search-modal-card"> <div class="confronto-search-modal-head"> <div> <h3>Pesquisar adversário</h3> <p class="muted">Digite o nome para listar os jogadores encontrados.</p> </div> <button type="button" class="confronto-search-modal-close" id="closeSearchModalBtn">×</button> </div> <div class="confronto-search-modal-body"> <input type="text" id="searchOpponentInput" class="confronto-search-modal-input" placeholder="Digite o nome do adversário" autocomplete="off" /> <div id="searchOpponentStatus" class="confronto-search-modal-status muted"></div> <div id="searchOpponentResults" class="confronto-search-results"></div> </div> </div>`;
 
     document.body.appendChild(overlay);
 
@@ -1147,7 +1144,7 @@
       const city = safeValue(profile.city || profile.cidade || profile.cityName);
       const age = calculateAge(profile.birthDate || profile.dateOfBirth || profile.nascimento || profile.dob);
 
-      return ` <button type="button" class="confronto-search-result ${selected}" data-index="${index}"> <div class="confronto-search-result-avatar"> ${photo ? `<img src="${photo}" alt="Foto de ${displayName}" />` : `<span>${initials}</span>`} </div> <div class="confronto-search-result-info"> <div class="confronto-search-result-name">${displayName}</div> <div class="confronto-search-result-meta"> <div><strong>ID:</strong> ${idFormatted}</div> <div><strong>País:</strong> ${country}</div> <div><strong>Cidade:</strong> ${city} - <strong>Idade:</strong> ${age}</div> </div> </div> </button> `;
+      return ` <button type="button" class="confronto-search-result ${selected}" data-index="${index}"> <div class="confronto-search-result-avatar"> ${photo ? `<img src="${photo}" alt="Foto de ${displayName}" />` : `<span>${initials}</span>`} </div> <div class="confronto-search-result-info"> <div class="confronto-search-result-name">${displayName}</div> <div class="confronto-search-result-meta"> <div><strong>ID:</strong> ${idFormatted}</div> <div><strong>País:</strong> ${country}</div> <div><strong>Cidade:</strong> ${city} - <strong>Idade:</strong> ${age}</div> </div> </div> </button>`;
     }).join("");
 
     state.searchResults.querySelectorAll(".confronto-search-result").forEach((btn) => {
@@ -1343,11 +1340,49 @@
     renderSimulationResult(player1Name, player2Name, h2h);
   }
 
+  async function loadMatchFromUrl() {
+    const matchId = getParam("matchId") || getParam("id");
+    if (!matchId || typeof __db === "undefined") return null;
+
+    try {
+      const snap = await __db.collection("matches").doc(matchId).get();
+      if (!snap.exists) return null;
+      return { id: snap.id, ...snap.data() };
+    } catch (err) {
+      console.error("Erro ao carregar partida da URL:", err);
+      return null;
+    }
+  }
+
+  function getNamesFromMatch(match) {
+    const dbl = isDoubles(match);
+
+    if (dbl) {
+      const t1a = match.player1 || match.player1Name || "Jogador 1";
+      const t1b = match.player2 || match.player2Name || "Jogador 2";
+      const t2a = match.player3 || match.player3Name || "Jogador 3";
+      const t2b = match.player4 || match.player4Name || "Jogador 4";
+
+      return {
+        player1: `${t1a}/${t1b}`,
+        player2: `${t2a}/${t2b}`,
+        doubles: true
+      };
+    }
+
+    return {
+      player1: match.player1 || match.player1Name || match.ownerName || "Jogador 1",
+      player2: match.player2 || match.player2Name || match.opponentName || "Jogador 2",
+      doubles: false
+    };
+  }
+
   async function init() {
     const player1 = getParam("player1");
     const player2 = getParam("player2");
     const opponentId = getParam("opponentId");
     const ownerIdFromUrl = getParam("ownerId");
+    const matchId = getParam("matchId") || getParam("id");
 
     const subtitle = document.getElementById("confrontoSubtitle");
     const list = document.getElementById("confrontoMatchesList");
@@ -1398,10 +1433,12 @@
     state.currentPlayer1 = player1 || "";
     state.currentPlayer2 = player2 || "";
     state.currentOpponentId = opponentId || "";
+    state.matchId = matchId || "";
+    state.h2hMode = !!matchId;
 
     const hasDefinedOpponent = Boolean(player2 || opponentId);
 
-    if (!state.currentOwnerId) {
+    if (!state.currentOwnerId && !state.h2hMode) {
       if (subtitle) hide(subtitle);
       if (list) {
         list.innerHTML = `<div class="confronto-empty">Não foi possível identificar o usuário logado.</div>`;
@@ -1411,9 +1448,26 @@
     }
 
     try {
-      const snap = await __db.collection("matches")
-        .where("ownerId", "==", state.currentOwnerId)
-        .get();
+      let matchFromUrl = null;
+      if (state.h2hMode) {
+        matchFromUrl = await loadMatchFromUrl();
+        state.matchDataFromUrl = matchFromUrl;
+
+        if (matchFromUrl) {
+          const names = getNamesFromMatch(matchFromUrl);
+
+          state.currentPlayer1 = names.player1;
+          state.currentPlayer2 = names.player2;
+          state.currentOwnerId = matchFromUrl.ownerId || state.currentOwnerId || authUser?.uid || "";
+          state.currentOpponentId = getParam("opponentId") || "";
+        }
+      }
+
+      const snap = state.currentOwnerId
+        ? await __db.collection("matches")
+            .where("ownerId", "==", state.currentOwnerId)
+            .get()
+        : await __db.collection("matches").get();
 
       state.allOwnerMatches = snap.docs.map((doc) => ({
         id: doc.id,
@@ -1426,6 +1480,7 @@
       }
 
       const resolvedPlayer1Name =
+        state.currentPlayer1 ||
         player1 ||
         ownerProfile?.displayName ||
         ownerProfile?.name ||
@@ -1464,7 +1519,11 @@
       let opponentProfile = null;
       let resolvedPlayer2Name = "Pesquisar adversário";
 
-      if (hasDefinedOpponent) {
+      if (state.h2hMode && state.matchDataFromUrl) {
+        const names = getNamesFromMatch(state.matchDataFromUrl);
+        resolvedPlayer2Name = names.player2 || "Jogador 2";
+        state.currentPlayer2 = resolvedPlayer2Name;
+      } else if (hasDefinedOpponent) {
         if (opponentId) {
           opponentProfile = await getOpponentProfile(opponentId);
         }
@@ -1502,7 +1561,18 @@
         photoURL: state.ownerProfilePhoto
       });
 
-      if (hasDefinedOpponent) {
+      if (state.h2hMode && state.matchDataFromUrl) {
+        bindPlayerVisuals({
+          name: resolvedPlayer2Name,
+          sideImgEl: imgPlayer2Side,
+          sidePlaceholderEl: ph2Side,
+          centerImgEl: imgPlayer2Center,
+          centerPlaceholderEl: ph2Center,
+          sideNameId: "player2NameSide",
+          centerNameId: "player2NameCenter",
+          photoURL: ""
+        });
+      } else if (hasDefinedOpponent) {
         bindPlayerVisuals({
           name: resolvedPlayer2Name,
           sideImgEl: imgPlayer2Side,
@@ -1526,73 +1596,72 @@
         });
       }
 
-      if (!hasDefinedOpponent) {
-        state.items = [];
-        state.currentPage = 1;
-
-        setText("confrontoScore", "0 : 0");
-        setText("matchesLabel", "Pesquise um adversário");
-        setText("matchesLabelSecondary", "Nenhum confronto definido ainda");
-        setText("pageInfo", "Página 1 de 1");
-
-        if (list) {
-          list.innerHTML = `<div class="confronto-empty">Nenhum confronto definido. Clique em <strong>Pesquisar adversário</strong> para iniciar.</div>`;
-        }
-
-        show(emptyState);
-        return;
-      }
-
+      let items = [];
       let wins1 = 0;
       let wins2 = 0;
-      const items = [];
 
-      snap.forEach((doc) => {
-        const d = doc.data() || {};
-
-        const gameFormat = String(d.gameFormat || "").trim().toLowerCase();
-        const isDoublesMatch = gameFormat === "duplas" || gameFormat === "duplas mistas";
-
-        let pairMatches = false;
-
-        if (isDoublesMatch) {
-          const team1A = d.player1 || d.player1Name || "";
-          const team1B = d.player2 || d.player2Name || "";
-          const team2A = d.player3 || d.player3Name || "";
-          const team2B = d.player4 || d.player4Name || "";
-
-          const player1InTeam1 =
-            normalize(team1A) === normalize(resolvedPlayer1Name) ||
-            normalize(team1B) === normalize(resolvedPlayer1Name);
-
-          const player1InTeam2 =
-            normalize(team2A) === normalize(resolvedPlayer1Name) ||
-            normalize(team2B) === normalize(resolvedPlayer1Name);
-
-          pairMatches = player1InTeam1 || player1InTeam2;
-        } else {
-          const matchP1 = d.player1 || d.player1Name || d.ownerName || "";
-          const matchP2 = d.player2 || d.player2Name || d.opponentName || "";
-          pairMatches = samePair(matchP1, matchP2, resolvedPlayer1Name, resolvedPlayer2Name);
-        }
-
-        if (!pairMatches) return;
-
+      if (state.h2hMode && state.matchDataFromUrl) {
+        const d = state.matchDataFromUrl;
         const status = String(d.status || "").trim().toLowerCase();
-        if (status !== "finished" && status !== "wo" && status !== "ret") return;
+        if (status === "finished" || status === "wo" || status === "ret") {
+          const winner = getWinner(d);
+          if (winner === 1) wins1++;
+          if (winner === 2) wins2++;
 
-        const winner = getWinner(d);
-        if (winner === 1) wins1++;
-        if (winner === 2) wins2++;
+          items.push({
+            dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
+            html: buildMatchLine(d),
+            data: d
+          });
+        }
+      } else {
+        snap.forEach((doc) => {
+          const d = doc.data() || {};
 
-        items.push({
-          dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
-          html: buildMatchLine(d),
-          data: d
+          const gameFormat = String(d.gameFormat || "").trim().toLowerCase();
+          const isDoublesMatch = gameFormat === "duplas" || gameFormat === "duplas mistas";
+
+          let pairMatches = false;
+
+          if (isDoublesMatch) {
+            const team1A = d.player1 || d.player1Name || "";
+            const team1B = d.player2 || d.player2Name || "";
+            const team2A = d.player3 || d.player3Name || "";
+            const team2B = d.player4 || d.player4Name || "";
+
+            const player1InTeam1 =
+              normalize(team1A) === normalize(resolvedPlayer1Name) ||
+              normalize(team1B) === normalize(resolvedPlayer1Name);
+
+            const player1InTeam2 =
+              normalize(team2A) === normalize(resolvedPlayer1Name) ||
+              normalize(team2B) === normalize(resolvedPlayer1Name);
+
+            pairMatches = player1InTeam1 || player1InTeam2;
+          } else {
+            const matchP1 = d.player1 || d.player1Name || d.ownerName || "";
+            const matchP2 = d.player2 || d.player2Name || d.opponentName || "";
+            pairMatches = samePair(matchP1, matchP2, resolvedPlayer1Name, resolvedPlayer2Name);
+          }
+
+          if (!pairMatches) return;
+
+          const status = String(d.status || "").trim().toLowerCase();
+          if (status !== "finished" && status !== "wo" && status !== "ret") return;
+
+          const winner = getWinner(d);
+          if (winner === 1) wins1++;
+          if (winner === 2) wins2++;
+
+          items.push({
+            dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
+            html: buildMatchLine(d),
+            data: d
+          });
         });
-      });
 
-      items.sort((a, b) => b.dateMs - a.dateMs);
+        items.sort((a, b) => b.dateMs - a.dateMs);
+      }
 
       state.items = items;
       state.currentPage = 1;
