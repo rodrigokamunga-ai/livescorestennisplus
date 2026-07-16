@@ -16,8 +16,6 @@
   <title>Tela Pública - TennisPro</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/public.css" />
-
-  <style> .title-with-icon { display: inline-flex; align-items: center; gap: 8px; } .section-icon { font-size: 18px; line-height: 1; vertical-align: middle; flex: 0 0 auto; } .duration-with-icon { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; } .duration-icon { font-size: 16px; line-height: 1; flex: 0 0 auto; } .filter-select { appearance: none; -webkit-appearance: none; -moz-appearance: none; } .back-btn, button, .filter-select { border-radius: 12px; transition: 0.2s ease; } .back-btn:hover, button:hover, .filter-select:hover { transform: translateY(-1px); } </style>
 </head>
 
 <body class="public-page public-dashboard-page">
@@ -34,6 +32,30 @@
         <option value="live">Jogos em andamento</option>
         <option value="finished">Jogos finalizados</option>
       </select>
+    </div>
+
+    <!-- Campo de probabilidade de vitória -->
+    <div class="probability-wrapper">
+      <div class="win-probability-title">Probabilidade de vitória</div>
+      <div class="win-probability-box" id="winProbabilityBox"></div>
+    </div>
+
+    <!-- Botões abaixo do campo de probabilidade -->
+    <div class="public-actions-row" aria-label="Ações da partida">
+      <button id="liveTvBtn" class="action-btn action-live" type="button">
+        <ion-icon name="share-social-outline"></ion-icon>
+        Live
+      </button>
+
+      <button id="statsBtn" class="action-btn action-stats" type="button">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        Stats
+      </button>
+
+      <button id="h2hBtn" class="action-btn action-h2h" type="button">
+        <ion-icon name="people-outline"></ion-icon>
+        H2H
+      </button>
     </div>
 
     <section class="public-grid board-grid dashboard-grid" id="gamesGrid">
@@ -72,12 +94,16 @@
     </section>
   </main>
 
+  <script> document.addEventListener("DOMContentLoaded", () => { const liveBtn = document.getElementById("liveTvBtn"); const statsBtn = document.getElementById("statsBtn"); const h2hBtn = document.getElementById("h2hBtn"); async function getCurrentUserLiveMatchId() { try { if (!window.__auth || !window.__db) return null; const user = window.__auth.currentUser; if (!user) return null; const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) return null; return snap.docs[0].id; } catch (err) { console.error("Erro ao buscar partida ao vivo:", err); return null; } } async function shareLiveMatch() { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada."); return; } const url = `aovivo.html?id=${encodeURIComponent(matchId)}&role=viewer`; if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a partida ao vivo.", url }); } else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); alert("Link copiado!"); } else { prompt("Copie o link:", url); } } if (liveBtn) { liveBtn.addEventListener("click", shareLiveMatch); } if (statsBtn) { statsBtn.addEventListener("click", () => { alert("Stats ainda não definido."); }); } if (h2hBtn) { h2hBtn.addEventListener("click", async () => { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada."); return; } window.open(`confronto.html?id=${encodeURIComponent(matchId)}`, "_blank"); }); } }); </script>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <script src="js/firebase.js"></script>
   <script src="js/public.js?v=2"></script>
+
+  <script> document.addEventListener("DOMContentLoaded", () => { const liveBtn = document.getElementById("liveTvBtn"); const statsBtn = document.getElementById("statsBtn"); const h2hBtn = document.getElementById("h2hBtn"); async function getCurrentUserLiveMatchId() { try { if (!window.__auth || !window.__db) return null; const user = window.__auth.currentUser; if (!user) return null; const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) return null; return snap.docs[0].id; } catch (err) { console.error("Erro ao buscar partida ao vivo:", err); return null; } } async function shareLiveMatch() { try { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } const url = `aovivo.html?id=${encodeURIComponent(matchId)}&role=viewer`; if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a partida ao vivo em andamento.", url }); } else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); alert("Link da partida copiado!"); } else { prompt("Copie o link da partida:", url); } } catch (err) { console.error(err); alert("Não foi possível compartilhar a partida."); } } if (liveBtn) { liveBtn.addEventListener("click", shareLiveMatch); } if (statsBtn) { statsBtn.addEventListener("click", () => { alert("Tela Stats ainda não definida."); }); } if (h2hBtn) { h2hBtn.addEventListener("click", async () => { try { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } const url = `confronto.html?id=${encodeURIComponent(matchId)}`; window.open(url, "_blank"); } catch (err) { console.error(err); alert("Não foi possível abrir o confronto."); } }); } }); </script>
 
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
