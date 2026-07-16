@@ -14,6 +14,7 @@
   <link rel="apple-touch-icon" href="img/icon-192.png" />
 
   <title>Tela Pública - TennisPro</title>
+
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/public.css" />
 </head>
@@ -34,29 +35,36 @@
       </select>
     </div>
 
-    <!-- Campo de probabilidade de vitória -->
-    <div class="probability-wrapper">
-      <div class="win-probability-title">Probabilidade de vitória</div>
-      <div class="win-probability-box" id="winProbabilityBox"></div>
-    </div>
+    <section class="public-actions-section">
+      <div class="probability-wrapper">
+        <div class="win-probability-title">Probabilidade de vitória</div>
+        <div class="win-probability-box" id="winProbabilityBox"></div>
+      </div>
 
-    <!-- Botões abaixo do campo de probabilidade -->
-    <div class="public-actions-row" aria-label="Ações da partida">
-      <button id="liveTvBtn" class="action-btn action-live" type="button">
-        <ion-icon name="share-social-outline"></ion-icon>
-        Live
-      </button>
+      <div class="public-actions-row" aria-label="Ações da partida">
+        <button id="liveTvBtn" class="action-btn action-live" type="button">
+          <ion-icon name="share-social-outline"></ion-icon>
+          <span>Live</span>
+        </button>
 
-      <button id="statsBtn" class="action-btn action-stats" type="button">
-        <ion-icon name="stats-chart-outline"></ion-icon>
-        Stats
-      </button>
+        <button id="statsBtn" class="action-btn action-stats" type="button">
+          <ion-icon name="stats-chart-outline"></ion-icon>
+          <span>Stats</span>
+        </button>
 
-      <button id="h2hBtn" class="action-btn action-h2h" type="button">
-        <ion-icon name="people-outline"></ion-icon>
-        H2H
-      </button>
-    </div>
+        <button id="h2hBtn" class="action-btn action-h2h" type="button">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>H2H</span>
+        </button>
+      </div>
+
+      <div class="public-actions-row" aria-label="Transmissão">
+        <button id="broadcastBtn" class="action-btn action-live" type="button">
+          <ion-icon name="videocam-outline"></ion-icon>
+          <span>Transmitir</span>
+        </button>
+      </div>
+    </section>
 
     <section class="public-grid board-grid dashboard-grid" id="gamesGrid">
       <div class="panel panel-glass column-panel dashboard-column">
@@ -94,8 +102,6 @@
     </section>
   </main>
 
-  <script> document.addEventListener("DOMContentLoaded", () => { const liveBtn = document.getElementById("liveTvBtn"); const statsBtn = document.getElementById("statsBtn"); const h2hBtn = document.getElementById("h2hBtn"); async function getCurrentUserLiveMatchId() { try { if (!window.__auth || !window.__db) return null; const user = window.__auth.currentUser; if (!user) return null; const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) return null; return snap.docs[0].id; } catch (err) { console.error("Erro ao buscar partida ao vivo:", err); return null; } } async function shareLiveMatch() { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada."); return; } const url = `aovivo.html?id=${encodeURIComponent(matchId)}&role=viewer`; if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a partida ao vivo.", url }); } else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); alert("Link copiado!"); } else { prompt("Copie o link:", url); } } if (liveBtn) { liveBtn.addEventListener("click", shareLiveMatch); } if (statsBtn) { statsBtn.addEventListener("click", () => { alert("Stats ainda não definido."); }); } if (h2hBtn) { h2hBtn.addEventListener("click", async () => { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada."); return; } window.open(`confronto.html?id=${encodeURIComponent(matchId)}`, "_blank"); }); } }); </script>
-
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -103,7 +109,7 @@
   <script src="js/firebase.js"></script>
   <script src="js/public.js?v=2"></script>
 
-  <script> document.addEventListener("DOMContentLoaded", () => { const liveBtn = document.getElementById("liveTvBtn"); const statsBtn = document.getElementById("statsBtn"); const h2hBtn = document.getElementById("h2hBtn"); async function getCurrentUserLiveMatchId() { try { if (!window.__auth || !window.__db) return null; const user = window.__auth.currentUser; if (!user) return null; const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) return null; return snap.docs[0].id; } catch (err) { console.error("Erro ao buscar partida ao vivo:", err); return null; } } async function shareLiveMatch() { try { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } const url = `aovivo.html?id=${encodeURIComponent(matchId)}&role=viewer`; if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a partida ao vivo em andamento.", url }); } else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); alert("Link da partida copiado!"); } else { prompt("Copie o link da partida:", url); } } catch (err) { console.error(err); alert("Não foi possível compartilhar a partida."); } } if (liveBtn) { liveBtn.addEventListener("click", shareLiveMatch); } if (statsBtn) { statsBtn.addEventListener("click", () => { alert("Tela Stats ainda não definida."); }); } if (h2hBtn) { h2hBtn.addEventListener("click", async () => { try { const matchId = await getCurrentUserLiveMatchId(); if (!matchId) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } const url = `confronto.html?id=${encodeURIComponent(matchId)}`; window.open(url, "_blank"); } catch (err) { console.error(err); alert("Não foi possível abrir o confronto."); } }); } }); </script>
+  <script> document.addEventListener("DOMContentLoaded", () => { const liveBtn = document.getElementById("liveTvBtn"); const broadcastBtn = document.getElementById("broadcastBtn"); const statsBtn = document.getElementById("statsBtn"); const h2hBtn = document.getElementById("h2hBtn"); async function getCurrentUserLiveMatch() { try { if (!window.__auth || !window.__db) return null; const user = window.__auth.currentUser; if (!user) return null; const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) return null; const doc = snap.docs[0]; return { id: doc.id, data: doc.data() }; } catch (err) { console.error("Erro ao buscar partida ao vivo:", err); return null; } } async function buildViewerUrl() { const match = await getCurrentUserLiveMatch(); if (!match) return null; const matchId = match.id; const shareToken = String(match.data?.shareToken || "").trim(); const url = new URL("aovivo.html", window.location.href); url.searchParams.set("id", matchId); url.searchParams.set("role", "viewer"); if (shareToken) { url.searchParams.set("shareToken", shareToken); } return url.toString(); } async function buildBroadcasterUrl() { const match = await getCurrentUserLiveMatch(); if (!match) return null; const matchId = match.id; const shareToken = String(match.data?.shareToken || "").trim(); const url = new URL("aovivo.html", window.location.href); url.searchParams.set("id", matchId); url.searchParams.set("role", "broadcaster"); if (shareToken) { url.searchParams.set("shareToken", shareToken); } return url.toString(); } async function shareLiveMatch() { try { const shareUrl = await buildViewerUrl(); if (!shareUrl) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a transmissão ao vivo da partida.", url: shareUrl }); } else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(shareUrl); alert("Link copiado!"); } else { prompt("Copie o link da transmissão:", shareUrl); } } catch (err) { console.error(err); alert("Não foi possível compartilhar a partida."); } } async function openBroadcaster() { try { const url = await buildBroadcasterUrl(); if (!url) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } window.open(url, "_blank"); } catch (err) { console.error(err); alert("Não foi possível abrir o transmissor."); } } if (liveBtn) { liveBtn.addEventListener("click", shareLiveMatch); } if (broadcastBtn) { broadcastBtn.addEventListener("click", openBroadcaster); } if (statsBtn) { statsBtn.addEventListener("click", () => { alert("Tela Stats ainda não definida."); }); } if (h2hBtn) { h2hBtn.addEventListener("click", async () => { try { const match = await getCurrentUserLiveMatch(); if (!match) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } const url = `confronto.html?id=${encodeURIComponent(match.id)}`; window.open(url, "_blank"); } catch (err) { console.error(err); alert("Não foi possível abrir o confronto."); } }); } }); </script>
 
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
