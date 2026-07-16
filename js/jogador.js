@@ -8,6 +8,7 @@
     items: [],
     filteredItems: [],
     currentFilter: "all",
+    currentYearFilter: "",
     searchModal: null,
     searchInput: null,
     searchResults: null,
@@ -15,7 +16,8 @@
     searchTimeout: null,
     currentAthleteProfile: null,
     currentAthleteName: "",
-    currentAthleteId: ""
+    currentAthleteId: "",
+    currentMatchId: ""
   };
 
   function normalize(text = "") {
@@ -24,38 +26,6 @@
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
-  }
-
-  function getCountryFlag(country = "") {
-    const c = normalize(country);
-  
-    const flags = {
-      brasil: "🇧🇷",
-      brazil: "🇧🇷",
-      "br": "🇧🇷",
-      "argentina": "🇦🇷",
-      "ar": "🇦🇷",
-      "chile": "🇨🇱",
-      "cl": "🇨🇱",
-      "uruguai": "🇺🇾",
-      "uy": "🇺🇾",
-      "paraguai": "🇵🇾",
-      "py": "🇵🇾",
-      "espanha": "🇪🇸",
-      "spain": "🇪🇸",
-      "usa": "🇺🇸",
-      "eua": "🇺🇸",
-      "estados unidos": "🇺🇸",
-      "united states": "🇺🇸",
-      "franca": "🇫🇷",
-      "france": "🇫🇷",
-      "italia": "🇮🇹",
-      "italy": "🇮🇹",
-      "portugal": "🇵🇹",
-      "pt": "🇵🇹"
-    };
-  
-    return flags[c] || "🏳️";
   }
 
   function safeValue(value) {
@@ -316,16 +286,6 @@
     return "Partida";
   }
 
-  function getMatchCategoryLabel(match = {}) {
-    return safeValue(
-      match.categoryName ||
-      match.category ||
-      match.categoryTitle ||
-      match.modality ||
-      match.surfaceType
-    );
-  }
-
   function getTournamentNameLabel(match = {}) {
     return safeValue(match.tournamentName || match.eventName || match.tournament || "");
   }
@@ -431,11 +391,158 @@
     return { total, wins, losses, titles };
   }
 
-  async function findProfileByName(name) {
-    if (!name || typeof __db === "undefined") return null;
+  function getCityValue(profile = {}) {
+    return safeValue(
+      profile.city ||
+      profile.cidade ||
+      profile.cityName ||
+      profile.locationCity ||
+      profile.residenceCity ||
+      profile.addressCity ||
+      profile.profileCity ||
+      profile.userCity ||
+      profile.localidade ||
+      ""
+    );
+  }
+
+  function getCountryValue(profile = {}) {
+    return safeValue(
+      profile.country ||
+      profile.countryName ||
+      profile.countryCode ||
+      profile.nationality ||
+      profile.nacionalidade ||
+      ""
+    );
+  }
+
+  function getCountryFlag(country = "") {
+    const c = normalize(country);
+
+    const flags = {
+      brasil: "🇧🇷",
+      brazil: "🇧🇷",
+      br: "🇧🇷",
+      argentina: "🇦🇷",
+      ar: "🇦🇷",
+      chile: "🇨🇱",
+      cl: "🇨🇱",
+      uruguai: "🇺🇾",
+      uy: "🇺🇾",
+      paraguai: "🇵🇾",
+      py: "🇵🇾",
+      espanha: "🇪🇸",
+      spain: "🇪🇸",
+      usa: "🇺🇸",
+      eua: "🇺🇸",
+      "estados unidos": "🇺🇸",
+      "united states": "🇺🇸",
+      franca: "🇫🇷",
+      france: "🇫🇷",
+      italia: "🇮🇹",
+      italy: "🇮🇹",
+      portugal: "🇵🇹",
+      pt: "🇵🇹"
+    };
+
+    return flags[c] || "🏳️";
+  }
+
+  function getClubValue(profile = {}) {
+    return safeValue(
+      profile.clubCondominium ||
+      profile.club ||
+      profile.clube ||
+      profile.condominium ||
+      profile.condominio ||
+      ""
+    );
+  }
+
+  function getEquipmentValue(profile = {}) {
+    return safeValue(
+      profile.equipment ||
+      profile.equipamento ||
+      profile.racket ||
+      profile.material ||
+      ""
+    );
+  }
+
+  function getPlayerIdValue(profile = {}) {
+    return safeValue(
+      profile.playerId ||
+      profile.idPlayer ||
+      profile.playerID ||
+      profile.player_id ||
+      profile.uid ||
+      profile.id ||
+      ""
+    );
+  }
+
+  function getSimplifiedPlayerId(profile = {}) {
+    const raw = String(getPlayerIdValue(profile)).trim();
+    if (raw && raw !== "-") {
+      if (raw.startsWith("@")) return raw;
+      return `@${normalize(raw).replace(/[^a-z0-9_]/g, "")}`;
+    }
+
+    const displayName = normalize(
+      profile.displayName ||
+      profile.name ||
+      profile.fullName ||
+      profile.nome ||
+      profile.ownerName ||
+      profile.playerName ||
+      ""
+    ).replace(/[^a-z0-9]/g, "");
+
+    const shortId = String(profile.uid || profile.id || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toLowerCase();
+
+    if (displayName && shortId) return `@${displayName}_${shortId}`;
+    if (displayName) return `@${displayName}`;
+    if (shortId) return `@player_${shortId}`;
+    return "@player";
+  }
+
+  function getMatchYear(match = {}) {
+    const dateValue = match?.matchDateTime || match?.startedAt || match?.finishedAt;
+    if (!dateValue) return "";
+
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return "";
+
+    return String(d.getFullYear());
+  }
+
+  function getAvailableYears(items = []) {
+    const years = items
+      .map((item) => getMatchYear(item.data || {}))
+      .filter(Boolean);
+
+    return [...new Set(years)].sort((a, b) => Number(b) - Number(a));
+  }
+
+  function populateYearFilter(items = []) {
+    const select = document.getElementById("yearFilter");
+    if (!select) return;
+
+    const years = getAvailableYears(items);
+
+    select.innerHTML = `<option value="">Selecione o ano</option>${years .map((year) => `<option value="${year}">${year}</option>`) .join("")}`;
+
+    if (state.currentYearFilter) {
+      select.value = state.currentYearFilter;
+    }
+  }
+
+  async function findProfileByName(term) {
+    if (!term || typeof __db === "undefined") return null;
 
     try {
-      const query = normalize(name);
+      const query = normalize(term);
       const collections = ["profiles", "users"];
 
       for (const col of collections) {
@@ -455,12 +562,23 @@
             d.playerName ||
             "";
 
-          const norm = normalize(displayName);
-          if (!norm) return;
+          const playerId =
+            d.playerId ||
+            d.idPlayer ||
+            d.playerID ||
+            d.player_id ||
+            d.uid ||
+            d.id ||
+            "";
 
-          if (norm === query) {
+          const normName = normalize(displayName);
+          const normId = normalize(playerId);
+
+          if (!normName && !normId) return;
+
+          if (normName === query || normId === query) {
             exact = { id: doc.id, collection: col, ...d };
-          } else if (!partial && norm.includes(query)) {
+          } else if (!partial && (normName.includes(query) || normId.includes(query))) {
             partial = { id: doc.id, collection: col, ...d };
           }
         });
@@ -479,43 +597,70 @@
     if (!term || typeof __db === "undefined") return [];
 
     const query = normalize(term);
+    if (query.length < 2) return [];
+
     const results = [];
+    const seen = new Set();
 
     try {
-      for (const col of ["profiles", "users"]) {
-        const snap = await __db.collection(col).get();
+      const snap = await __db.collection("profiles").get();
 
-        snap.forEach((doc) => {
-          const d = doc.data() || {};
-          const displayName =
-            d.displayName ||
-            d.name ||
-            d.fullName ||
-            d.nome ||
-            d.ownerName ||
-            d.playerName ||
-            "";
+      snap.forEach((doc) => {
+        const d = doc.data() || {};
 
-          const norm = normalize(displayName);
-          if (!norm) return;
+        const displayName =
+          d.displayName ||
+          d.name ||
+          d.fullName ||
+          d.nome ||
+          d.ownerName ||
+          d.playerName ||
+          "";
 
-          if (norm.includes(query) || query.includes(norm)) {
-            results.push({
-              id: doc.id,
-              collection: col,
-              ...d
-            });
-          }
+        const playerId =
+          d.playerId ||
+          d.idPlayer ||
+          d.playerID ||
+          d.player_id ||
+          d.uid ||
+          d.id ||
+          "";
+
+        const normName = normalize(displayName);
+        const normId = normalize(playerId);
+
+        if (!normName && !normId) return;
+
+        const nameWords = normName.split(/\s+/).filter(Boolean);
+
+        const matchesName =
+          normName === query ||
+          nameWords.some((w) => w.startsWith(query)) ||
+          normName.startsWith(query);
+
+        const matchesId =
+          query.startsWith("@")
+            ? normId === query || normId.startsWith(query) || normId.includes(query)
+            : false;
+
+        if (!matchesName && !matchesId) return;
+
+        const uniqueKey =
+          normalize(playerId) ||
+          normalize(d.email) ||
+          normalize(displayName);
+
+        if (!uniqueKey || seen.has(uniqueKey)) return;
+        seen.add(uniqueKey);
+
+        results.push({
+          id: doc.id,
+          collection: "profiles",
+          ...d
         });
-      }
-
-      const seen = new Set();
-      return results.filter((item) => {
-        const key = normalize(item.displayName || item.name || item.fullName || "");
-        if (!key || seen.has(key)) return false;
-        seen.add(key);
-        return true;
       });
+
+      return results;
     } catch (err) {
       console.error("Erro ao pesquisar perfis:", err);
       return [];
@@ -552,12 +697,29 @@
     return results.sort((a, b) => b.dateMs - a.dateMs);
   }
 
+  async function getMatchById(matchId) {
+    if (!matchId || typeof __db === "undefined") return null;
+
+    try {
+      const snap = await __db.collection("matches").doc(matchId).get();
+      if (!snap.exists) return null;
+
+      return {
+        id: snap.id,
+        data: snap.data() || {}
+      };
+    } catch (err) {
+      console.error("Erro ao buscar partida por ID:", err);
+      return null;
+    }
+  }
+
   function buildProfileMeta(profile = {}, stats = { total: 0, wins: 0, losses: 0, titles: 0 }) {
-    const country = safeValue(profile.country || profile.countryName);
-    const city = safeValue(profile.city || profile.cidade || profile.cityName);
+    const club = getClubValue(profile);
     const age = calculateAge(profile.birthDate || profile.dateOfBirth || profile.nascimento || profile.dob);
     const height = safeValue(profile.height || profile.altura);
     const weight = safeValue(profile.weight || profile.peso);
+    const equipment = getEquipmentValue(profile);
     const hand = safeValue(profile.hand || profile.dominantHand || profile.maoDominante || profile.forehand);
     const backhandRaw = safeValue(profile.backhand || profile.backhandStyle || profile.tipoBackhand);
     const backhand =
@@ -566,11 +728,11 @@
       backhandRaw;
 
     const rows = [
-      ["País", country],
-      ["Cidade", city],
+      ["Clube", club],
       ["Idade", age],
       ["Altura", height],
       ["Peso", weight],
+      ["Equipamento", equipment],
       ["Mão dominante", hand],
       ["Backhand", backhand],
       ["Partidas", String(stats.total || 0)],
@@ -579,7 +741,9 @@
       ["Títulos", String(stats.titles || 0)]
     ];
 
-    return rows.map(([label, value]) => ` <div class="profile-row"> <div class="profile-label">${label}</div> <div class="profile-value">${value}</div> </div> `).join("");
+    return rows
+      .map(([label, value]) => ` <div class="profile-row"> <div class="profile-label">${label}</div> <div class="profile-value">${value}</div> </div> `)
+      .join("");
   }
 
   function getWinnersLabel(match, winnerSide) {
@@ -676,8 +840,6 @@
     return ` <div class="match-item"> <div class="match-top"> <div class="match-players"> <ion-icon name="people-outline"></ion-icon> <span class="match-players-name">${title}</span> </div> </div> <div class="match-line"> <ion-icon name="calendar-outline"></ion-icon> <span class="match-datetime">${date}</span> </div> <div class="match-line"> <ion-icon name="medal-outline"></ion-icon> <span>${infoLine || "Partida"}</span> </div> <div class="match-line"> <ion-icon name="trophy-outline"></ion-icon> <span class="match-score">${scoreText}</span> </div> <div class="match-line"> <ion-icon name="${statusIcon}"></ion-icon> <span class="match-status">${resultMessage}</span> </div> </div> `;
   }
 
-  
-
   function renderPageItems(items) {
     const list = document.getElementById("jogadorMatchesList");
     if (!list) return;
@@ -717,6 +879,10 @@
       filtered = filtered.filter((m) => isDoubles(m.data));
     }
 
+    if (state.currentYearFilter) {
+      filtered = filtered.filter((m) => getMatchYear(m.data || {}) === state.currentYearFilter);
+    }
+
     state.filteredItems = filtered;
 
     setText(
@@ -753,11 +919,13 @@
       const photo = getPhotoFromProfile(profile);
       const initials = getAvatarInitial(displayName);
 
-      const country = safeValue(profile.country || profile.countryName);
-      const city = safeValue(profile.city || profile.cidade || profile.cityName);
+      const club = getClubValue(profile);
+      const country = getCountryValue(profile);
+      const city = getCityValue(profile);
+      const flag = getCountryFlag(country);
       const age = calculateAge(profile.birthDate || profile.dateOfBirth || profile.nascimento || profile.dob);
 
-      return ` <button type="button" class="jogador-search-result" data-index="${index}"> <div class="jogador-search-result-avatar"> ${photo ? `<img src="${photo}" alt="Foto de ${displayName}" />` : `<span>${initials}</span>`} </div> <div class="jogador-search-result-info"> <div class="jogador-search-result-name">${displayName}</div> <div class="jogador-search-result-meta"> <div><strong>País:</strong> ${country}</div> <div><strong>Cidade:</strong> ${city} - <strong>Idade:</strong> ${age}</div> </div> </div> </button> `;
+      return ` <button type="button" class="jogador-search-result" data-index="${index}"> <div class="jogador-search-result-avatar"> ${photo ? `<img src="${photo}" alt="Foto de ${displayName}" />` : `<span>${initials}</span>`} </div> <div class="jogador-search-result-info"> <div class="jogador-search-result-name">${displayName}</div> <div class="jogador-search-result-meta"> <div><strong>Clube:</strong> ${club}</div> <div><strong>País:</strong> ${flag !== "🏳️" ? flag : country}</div> <div><strong>Cidade:</strong> ${city} - <strong>Idade:</strong> ${age}</div> </div> </div> </button> `;
     }).join("");
 
     state.searchResults.querySelectorAll(".jogador-search-result").forEach((btn) => {
@@ -777,6 +945,12 @@
 
     if (!query) {
       state.searchStatus.textContent = "Digite um nome para pesquisar.";
+      state.searchResults.innerHTML = "";
+      return;
+    }
+
+    if (query.length < 2) {
+      state.searchStatus.textContent = "Digite pelo menos 2 caracteres.";
       state.searchResults.innerHTML = "";
       return;
     }
@@ -877,12 +1051,13 @@
     setText("subtitle", "Perfil do atleta pesquisado.");
     setText("playerName", name);
 
-    const city = safeValue(profile.city || profile.cidade || profile.cityName);
-    const country = safeValue(profile.country || profile.countryName);
+    const city = getCityValue(profile);
+    const country = getCountryValue(profile);
+
     setText(
       "playerMetaLine",
       city !== "-" || country !== "-"
-        ? `${city !== "-" ? city : ""}${city !== "-" && country !== "-" ? " • " : ""}${country !== "-" ? country : ""}`
+        ? `${country !== "-" ? country : ""}${country !== "-" && city !== "-" ? " • " : ""}${city !== "-" ? city : ""}`
         : "Dados do atleta"
     );
 
@@ -909,7 +1084,6 @@
 
     const athleteName = getFullPlayerDisplay(profile, "Atleta");
 
-    // renderiza o perfil inicial
     renderAthleteProfile(profile);
 
     setText("matchesLabel", "Carregando jogos...");
@@ -920,11 +1094,12 @@
     state.items = matches;
     state.filteredItems = [...matches];
     state.currentPage = 1;
+    state.currentYearFilter = "";
 
-    // recalcula as estatísticas depois de carregar os jogos
+    populateYearFilter(matches);
+
     const stats = getPlayerStatsFromMatches(athleteName);
 
-    // atualiza o bloco "Dados do atleta" com os valores reais
     const metaEl = document.getElementById("profileMeta");
     if (metaEl) {
       metaEl.innerHTML = buildProfileMeta(profile || {}, stats);
@@ -955,40 +1130,53 @@
     }
   }
 
-  function buildProfileMeta(profile = {}, stats = { total: 0, wins: 0, losses: 0, titles: 0 }) {
-    const country = safeValue(profile.country || profile.countryName);
-    const city = safeValue(profile.city || profile.cidade || profile.cityName);
-    const age = calculateAge(profile.birthDate || profile.dateOfBirth || profile.nascimento || profile.dob);
-    const height = safeValue(profile.height || profile.altura);
-    const weight = safeValue(profile.weight || profile.peso);
-    const hand = safeValue(profile.hand || profile.dominantHand || profile.maoDominante || profile.forehand);
-    const backhandRaw = safeValue(profile.backhand || profile.backhandStyle || profile.tipoBackhand);
-    const backhand =
-      backhandRaw === "duas_maos" ? "duas mãos" :
-      backhandRaw === "uma_mao" ? "uma mão" :
-      backhandRaw;
+  async function selectMatchById(matchId) {
+    const match = await getMatchById(matchId);
+    if (!match) return false;
 
-    const rows = [
-      ["País", country],
-      ["Cidade", city],
-      ["Idade", age],
-      ["Altura", height],
-      ["Peso", weight],
-      ["Mão dominante", hand],
-      ["Backhand", backhand],
-      ["Partidas", String(stats.total || 0)],
-      ["Vitórias", String(stats.wins || 0)],
-      ["Derrotas", String(stats.losses || 0)],
-      ["Títulos", String(stats.titles || 0)]
-    ];
+    state.currentMatchId = matchId;
 
-    return rows.map(([label, value]) => ` <div class="profile-row"> <div class="profile-label">${label}</div> <div class="profile-value">${value}</div> </div> `).join("");
+    const data = match.data || {};
+    const athleteName = data.player1 || data.ownerName || data.player2 || "Atleta";
+
+    const profile = await findProfileByName(athleteName);
+    if (profile) {
+      renderAthleteProfile(profile);
+    } else {
+      renderAthleteProfile({
+        displayName: athleteName
+      });
+    }
+
+    state.items = [{
+      id: match.id,
+      data,
+      dateMs: data.matchDateTime ? new Date(data.matchDateTime).getTime() : 0,
+      html: buildMatchLine(data)
+    }];
+
+    state.filteredItems = [...state.items];
+    state.currentPage = 1;
+    state.currentYearFilter = "";
+    populateYearFilter(state.items);
+
+    const stats = getPlayerStatsFromMatches(athleteName);
+    const metaEl = document.getElementById("profileMeta");
+    if (metaEl) {
+      metaEl.innerHTML = buildProfileMeta(profile || { displayName: athleteName }, stats);
+    }
+
+    setText("matchesLabel", "1 jogo encontrado");
+    setText("matchesLabelSecondary", "1 jogo encontrado");
+    renderPageItems(state.items);
+    return true;
   }
 
   async function init() {
     const params = new URLSearchParams(window.location.search);
+    const queryId = params.get("id") || "";
     const queryName = params.get("player") || params.get("player1") || params.get("player2") || "";
-    const queryId = params.get("playerId") || params.get("opponentId") || "";
+    const queryPlayerId = params.get("playerId") || params.get("opponentId") || "";
 
     const list = document.getElementById("jogadorMatchesList");
     const emptyState = document.getElementById("emptyState");
@@ -1005,10 +1193,15 @@
 
     await waitForAuthUser();
 
+    if (queryId) {
+      const loaded = await selectMatchById(queryId);
+      if (loaded) return;
+    }
+
     let profile = null;
 
-    if (queryId) {
-      profile = await findProfileByName(queryId);
+    if (queryPlayerId) {
+      profile = await findProfileByName(queryPlayerId);
     }
 
     if (!profile && queryName) {
@@ -1051,6 +1244,13 @@
         const filtered = applyFilter();
         renderPageItems(filtered);
       });
+    });
+
+    document.getElementById("yearFilter")?.addEventListener("change", (e) => {
+      state.currentYearFilter = e.target.value || "";
+      state.currentPage = 1;
+      const filtered = applyFilter();
+      renderPageItems(filtered);
     });
 
     updateFilterButtons();
