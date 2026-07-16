@@ -2201,3 +2201,263 @@ body.public-dashboard-page .win-probability-title {
     font-size: 0.9rem !important;
   }
 }
+
+/* ========================================================= AÇÕES DA PARTIDA / BOTÕES ========================================================= */
+
+body.public-page .public-actions-section,
+body.public-dashboard-page .public-actions-section {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+body.public-page .public-actions-row,
+body.public-dashboard-page .public-actions-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+body.public-page .action-btn,
+body.public-dashboard-page .action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.80rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+}
+
+body.public-page .action-btn:hover,
+body.public-dashboard-page .action-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+body.public-page .action-btn ion-icon,
+body.public-dashboard-page .action-btn ion-icon {
+  font-size: 16px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+body.public-page .action-live,
+body.public-dashboard-page .action-live {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+body.public-page .action-stats,
+body.public-dashboard-page .action-stats {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+body.public-page .action-h2h,
+body.public-dashboard-page .action-h2h {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+body.public-page .action-broadcast,
+body.public-dashboard-page .action-broadcast {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+/* mantém todos na mesma linha até em telas menores */
+@media (max-width: 768px) {
+  body.public-page .public-actions-row,
+  body.public-dashboard-page .public-actions-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  body.public-page .action-btn,
+  body.public-dashboard-page .action-btn {
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 0.72rem;
+    gap: 4px;
+  }
+
+  body.public-page .action-btn ion-icon,
+  body.public-dashboard-page .action-btn ion-icon {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  body.public-page .public-actions-row,
+  body.public-dashboard-page .public-actions-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  body.public-page .action-btn,
+  body.public-dashboard-page .action-btn {
+    min-height: 32px;
+    padding: 6px 6px;
+    font-size: 0.68rem;
+  }
+
+  body.public-page .action-btn span,
+  body.public-dashboard-page .action-btn span {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.live-mini-scoreboard {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  max-width: calc(100vw - 24px);
+}
+
+.live-mini-scoreboard-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.live-mini-players {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.live-mini-status {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.live-mini-score {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  min-width: 44px;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .live-mini-scoreboard {
+    top: 8px;
+    left: 8px;
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .live-mini-players {
+    max-width: 120px;
+    font-size: 11px;
+  }
+
+  .live-mini-score {
+    font-size: 16px;
+    min-width: 36px;
+  }
+}
+
+.video-wrap {
+  position: relative;
+}
+
+.live-mini-scoreboard-bottom {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  max-width: calc(100vw - 24px);
+  min-width: 180px;
+}
+
+.live-mini-row {
+  display: grid;
+  grid-template-columns: 12px 1fr 26px 28px;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.live-serve-indicator {
+  width: 12px;
+  text-align: center;
+  font-weight: 900;
+  color: #d8ff63;
+  text-shadow: 0 0 8px rgba(216, 255, 99, 0.75);
+}
+
+.live-serve-indicator.placeholder {
+  visibility: hidden;
+}
+
+.live-mini-player {
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-mini-games,
+.live-mini-points {
+  font-weight: 900;
+  text-align: right;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .live-mini-scoreboard-bottom {
+    left: 8px;
+    bottom: 8px;
+    padding: 6px 8px;
+    min-width: 160px;
+  }
+
+  .live-mini-row {
+    grid-template-columns: 10px 1fr 22px 24px;
+    gap: 4px;
+    font-size: 11px;
+  }
+}
