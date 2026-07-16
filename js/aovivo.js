@@ -1,19 +1,12 @@
-// =========================================================================
-// TENNISPRO TV - PAINEL AO VIVO
-// CÂMERA TRASEIRA + FIRESTORE + RENDER DO PLACAR
-// SEM FULLSCREEN
-// SEM BLOQUEIO DE ORIENTAÇÃO
-// =========================================================================
-
 document.addEventListener("DOMContentLoaded", () => {
-  const checarFirebasePronto = setInterval(() => {
+  const waitFirebase = setInterval(() => {
     if (typeof firebase !== "undefined") {
-      clearInterval(checarFirebasePronto);
-      inicializarPlacarTelevisao();
+      clearInterval(waitFirebase);
+      initApp();
     }
   }, 50);
 
-  function inicializarPlacarTelevisao() {
+  async function initApp() {
     const firebaseConfig = {
       apiKey: "AIzaSyBngwZh3oErADZoTFG6AOqj6QLzwv1R6qY",
       authDomain: "live-scores-tennis-plus.firebaseapp.com",
@@ -28,377 +21,159 @@ document.addEventListener("DOMContentLoaded", () => {
       firebase.initializeApp(firebaseConfig);
     }
 
-    window.__auth = firebase.auth();
-    window.__db = firebase.firestore();
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    window.__db = db;
+    window.__auth = auth;
     window.firebaseAppReady = true;
 
     const params = new URLSearchParams(window.location.search);
     const matchId = (params.get("id") || "").trim();
+    const role = (params.get("role") || "viewer").trim().toLowerCase();
+    let shareToken = (params.get("shareToken") || "").trim();
 
-    const videoElement = document.getElementById("liveVideo");
+    const videoEl = document.getElementById("liveVideo");
     const btnAbrirCamera = document.getElementById("btnAbrirCamera");
     const btnTentarNovamente = document.getElementById("btnTentarNovamente");
     const cameraStatus = document.getElementById("cameraStatus");
     const cameraDebug = document.getElementById("cameraDebug");
-    const cameraHint = document.getElementById("cameraHint");
-    const modoAppInfo = document.getElementById("modoAppInfo");
     const tvGridPlacar = document.getElementById("tvGridPlacar");
     const tvStatus = document.getElementById("tvStatus");
     const tvInfoBox = document.getElementById("tvInfoBox");
+    const telaInicial = document.getElementById("telaInicial");
 
-    let cameraStream = null;
-    let relayInterval = null;
-    let latestPayload = null;
+    const state = {
+      match: null,
+      localStream: null,
+      viewerPc: null,
+      broadcasterPcMap: new Map(),
+      peerId: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      unsubMatch: null,
+      unsubPeers: null,
+      unsubPeerDoc: null,
+      unsubCandidateListeners: new Map(),
+      started: false,
+      serverReady: false,
+      serverStartedAt: null
+    };
 
-    const canalTv = ("BroadcastChannel" in window)
-      ? new BroadcastChannel("tennis_tv_channel")
-      : null;
+    const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
 
-    // ---------------------------------------------------------------------
-    // DEBUG / MENSAGENS
-    // ---------------------------------------------------------------------
-    function escapeHtml(str = "") {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    function logLine(msg, isError = false) {
+      const line = `[${new Date().toLocaleTimeString("pt-BR")}] ${msg}`;
+      console[isError ? "error" : "log"](line);
+
+      const style = `font-size:12px;line-height:1.35;margin-top:4px;color:${isError ? "#ffb4b4" : "#fff"};white-space:pre-wrap;`;
+
+      if (cameraStatus) {
+        const div = document.createElement("div");
+        div.style.cssText = style;
+        div.textContent = line;
+        cameraStatus.appendChild(div);
+      }
+
+      if (cameraDebug) {
+        const div = document.createElement("div");
+        div.style.cssText = style;
+        div.textContent = line;
+        cameraDebug.appendChild(div);
+      }
     }
 
-    function clearDebug() {
+    function resetDebugBoxes() {
       if (cameraStatus) cameraStatus.innerHTML = "";
       if (cameraDebug) cameraDebug.innerHTML = "";
     }
 
-    function appendDebug(msg, isError = false) {
-      const time = new Date().toLocaleTimeString("pt-BR");
-      const text = `[${time}] ${msg}`;
-      console.log(text);
-
-      const lineHtml = ` <div style="font-size:13px; line-height:1.4; color:${isError ? "#ffb4b4" : "#fff"}; white-space:pre-wrap; margin-top:4px;"> ${escapeHtml(text)} </div> `;
-
-      if (cameraStatus) {
-        cameraStatus.innerHTML = (cameraStatus.innerHTML || "") + lineHtml;
-      }
-
-      if (cameraDebug) {
-        cameraDebug.innerHTML = (cameraDebug.innerHTML || "") + lineHtml;
-      }
+    function setStatus(text) {
+      if (tvStatus) tvStatus.textContent = text || "";
     }
 
-    function showDebugLines(lines = []) {
-      clearDebug();
-      lines.forEach((line) => appendDebug(line.text, line.type === "error"));
-    }
-
-    function setTvInfo(msg = "") {
-      if (tvInfoBox) tvInfoBox.textContent = msg;
-    }
-
-    function setCameraHint(msg = "") {
-      if (cameraHint) cameraHint.textContent = msg;
+    function setInfo(text) {
+      if (tvInfoBox) tvInfoBox.textContent = text || "";
     }
 
     function showPermissionHelp() {
-      setCameraHint(
-        "Permissão da câmera negada no Android. Toque no cadeado na barra do navegador > Permissões > Câmera > Permitir e tente novamente."
-      );
       if (btnTentarNovamente) btnTentarNovamente.style.display = "inline-block";
     }
 
     function hidePermissionHelp() {
-      setCameraHint("");
       if (btnTentarNovamente) btnTentarNovamente.style.display = "none";
     }
 
-    function mostrarModoApp() {
-      if (!modoAppInfo) return;
-
-      const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-      const isFullscreen = window.matchMedia("(display-mode: fullscreen)").matches;
-      const isMinimalUi = window.matchMedia("(display-mode: minimal-ui)").matches;
-      const isBrowser = window.matchMedia("(display-mode: browser)").matches;
-
-      let modo = "Chrome normal";
-      if (isStandalone) modo = "PWA / standalone";
-      else if (isFullscreen) modo = "fullscreen";
-      else if (isMinimalUi) modo = "minimal-ui";
-      else if (isBrowser) modo = "Chrome normal";
-
-      modoAppInfo.textContent =
-        `Modo detectado: ${modo}\n` +
-        `standalone: ${isStandalone}\n` +
-        `fullscreen: ${isFullscreen}\n` +
-        `minimal-ui: ${isMinimalUi}\n` +
-        `browser: ${isBrowser}`;
+    function ensureVideoVisible() {
+      if (videoEl) {
+        videoEl.style.display = "block";
+        videoEl.style.visibility = "visible";
+        videoEl.style.opacity = "1";
+        videoEl.style.zIndex = "1";
+      }
+      if (telaInicial) {
+        telaInicial.style.display = "none";
+      }
     }
 
-    // ---------------------------------------------------------------------
-    // CÂMERA
-    // ---------------------------------------------------------------------
     function stopCamera() {
-      if (cameraStream && typeof cameraStream.getTracks === "function") {
-        cameraStream.getTracks().forEach((track) => track.stop());
+      if (state.localStream && typeof state.localStream.getTracks === "function") {
+        state.localStream.getTracks().forEach((track) => {
+          try { track.stop(); } catch (_) {}
+        });
       }
-      cameraStream = null;
+      state.localStream = null;
 
-      if (videoElement) {
-        videoElement.srcObject = null;
-      }
-    }
-
-    function stopRelay() {
-      if (relayInterval) {
-        clearInterval(relayInterval);
-        relayInterval = null;
+      if (videoEl) {
+        try { videoEl.srcObject = null; } catch (_) {}
       }
     }
 
-    async function ligarCameraTraseira() {
-      try {
-        hidePermissionHelp();
+    function stopWebRtc() {
+      state.broadcasterPcMap.forEach((pc) => {
+        try { pc.close(); } catch (_) {}
+      });
+      state.broadcasterPcMap.clear();
 
-        showDebugLines([
-          { type: "info", text: "Tentando iniciar câmera..." },
-          { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
-          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` },
-          { type: "info", text: `userAgent: ${navigator.userAgent}` },
-          { type: "info", text: `protocol: ${window.location.protocol}` },
-          { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
-        ]);
+      state.unsubCandidateListeners.forEach((unsub) => {
+        try { unsub(); } catch (_) {}
+      });
+      state.unsubCandidateListeners.clear();
 
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error("getUserMedia não suportado neste navegador.");
-        }
-
-        if (!videoElement) {
-          throw new Error("Elemento <video id='liveVideo'> não encontrado.");
-        }
-
-        stopCamera();
-
-        let stream = null;
-
-        // 1) câmera traseira explícita
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { exact: "environment" },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            },
-            audio: false
-          });
-        } catch (e1) {
-          appendDebug(`Falhou exact environment -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
-        }
-
-        // 2) lista dispositivos e tenta achar a traseira
-        if (!stream) {
-          try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter((d) => d.kind === "videoinput");
-
-            if (!videoDevices.length) {
-              throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
-            }
-
-            const backCamera =
-              videoDevices.find((d) =>
-                /back|rear|environment|traseira|câmera traseira/i.test(d.label || "")
-              ) || videoDevices[videoDevices.length - 1];
-
-            appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
-
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
-              audio: false
-            });
-          } catch (e2) {
-            appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
-          }
-        }
-
-        // 3) fallback environment
-        if (!stream) {
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: { ideal: "environment" },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
-              audio: false
-            });
-          } catch (e3) {
-            appendDebug(`Falhou ideal environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
-          }
-        }
-
-        // 4) último fallback qualquer câmera
-        if (!stream) {
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: true,
-              audio: false
-            });
-          } catch (e4) {
-            appendDebug(`Falhou video:true -> ${e4.name || "Erro"} - ${e4.message || e4}`, true);
-            throw e4;
-          }
-        }
-
-        cameraStream = stream;
-
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          videoElement.muted = true;
-          videoElement.playsInline = true;
-          videoElement.setAttribute("autoplay", "");
-          videoElement.setAttribute("muted", "");
-          videoElement.setAttribute("playsinline", "");
-
-          try {
-            await videoElement.play();
-          } catch (playErr) {
-            appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
-          }
-        }
-
-        return true;
-      } catch (error) {
-        const nomeErro = error?.name || "Sem nome";
-        const mensagemErro = error?.message || String(error);
-
-        let msg = "CÂMERA INDISPONÍVEL";
-        if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
-        else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
-        else if (nomeErro === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
-        else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
-        else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
-        else if (mensagemErro) msg = mensagemErro.toUpperCase();
-
-        if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
-
-        showDebugLines([
-          { type: "error", text: "Falha ao iniciar a câmera." },
-          { type: "error", text: `Nome do erro: ${nomeErro}` },
-          { type: "error", text: `Mensagem do erro: ${mensagemErro}` },
-          { type: "warn", text: `Mensagem exibida: ${msg}` },
-          {
-            type: "info",
-            text:
-              "Objeto completo: " +
-              JSON.stringify(
-                {
-                  name: error?.name || null,
-                  message: error?.message || null,
-                  stack: error?.stack || null
-                },
-                null,
-                2
-              )
-          }
-        ]);
-
-        if (nomeErro === "NotAllowedError") {
-          showPermissionHelp();
-        }
-
-        return false;
+      if (state.viewerPc) {
+        try { state.viewerPc.close(); } catch (_) {}
+        state.viewerPc = null;
       }
     }
 
-    async function iniciarFluxoTransmissaoNativa() {
-      const sucesso = await ligarCameraTraseira();
+    function cleanup() {
+      try { state.unsubMatch?.(); } catch (_) {}
+      try { state.unsubPeers?.(); } catch (_) {}
+      try { state.unsubPeerDoc?.(); } catch (_) {}
 
-      if (sucesso) {
-        const telaInicial = document.getElementById("telaInicial");
-        if (telaInicial) telaInicial.style.display = "none";
-        pedirPlacarAtual();
-      } else {
-        appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
-      }
-    }
+      state.unsubMatch = null;
+      state.unsubPeers = null;
+      state.unsubPeerDoc = null;
 
-    function tentarNovamente() {
-      iniciarFluxoTransmissaoNativa();
-    }
-
-    window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
-    window.tentarNovamenteCamera = tentarNovamente;
-
-    if (btnAbrirCamera) {
-      btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
-    }
-
-    if (btnTentarNovamente) {
-      btnTentarNovamente.addEventListener("click", tentarNovamente);
-    }
-
-    window.addEventListener("beforeunload", () => {
+      stopWebRtc();
       stopCamera();
-      stopRelay();
-      if (canalTv) canalTv.close();
-    });
-
-    // ---------------------------------------------------------------------
-    // UTILITÁRIOS DE PLACAR
-    // ---------------------------------------------------------------------
-    function getGameFormat(match) {
-      return String(match?.gameFormat || "Simples").trim();
     }
 
-    function isDoublesFormat(match) {
-      const gf = getGameFormat(match);
-      return gf === "Duplas" || gf === "Duplas Mistas";
+    function getMatchRef() {
+      return db.collection("matches").doc(matchId);
     }
 
-    function renderPlayerNameTV(match, which) {
-      const doubles = isDoublesFormat(match);
-
-      if (!doubles) {
-        return which === 1
-          ? String(match.player1 || "Jogador 1").trim()
-          : String(match.player2 || "Jogador 2").trim();
-      }
-
-      const p1 = which === 1
-        ? String(match.player1 || "Jogador 1").trim()
-        : String(match.player3 || "Jogador 3").trim();
-      const p2 = which === 1
-        ? String(match.player2 || "Jogador 2").trim()
-        : String(match.player4 || "Jogador 4").trim();
-
-      return `${p1}/${p2}`;
+    function getPeersCol() {
+      return getMatchRef().collection("peers");
     }
 
-    function durationText(ms) {
-      if (!ms || ms < 0) return "00:00:00";
-      const s = Math.floor(ms / 1000);
-      const h = String(Math.floor(s / 3600)).padStart(2, "0");
-      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-      const sec = String(s % 60).padStart(2, "0");
-      return `${h}:${m}:${sec}`;
+    function getPeerDoc(peerId) {
+      return getPeersCol().doc(peerId);
     }
 
-    function mapStatus(status) {
-      switch (String(status || "").toLowerCase()) {
-        case "live": return "EM ANDAMENTO";
-        case "suspended": return "SUSPENSA";
-        case "finished": return "FINALIZADA";
-        case "wo": return "WO";
-        case "ret": return "RET";
-        default: return "NÃO INICIADA";
-      }
+    function getPeerCandidatesCol(peerId) {
+      return getPeerDoc(peerId).collection("candidates");
     }
 
-    function normalizeScoreLocal(score = {}) {
+    function normalizeScore(score = {}) {
       return {
         points1: Number(score.points1 || 0),
         points2: Number(score.points2 || 0),
@@ -418,17 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
-    function tennisPointLabelLocal(points) {
-      switch (Number(points || 0)) {
-        case 0: return "00";
-        case 1: return "15";
-        case 2: return "30";
-        case 3: return "40";
-        default: return "40";
-      }
-    }
-
-    function getPointDisplayTV(score, matchFormat, isFinished = false) {
+    function getPointDisplay(score, matchFormat, isFinished = false) {
       if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
         return { p1: String(score.tieBreakPoints1 ?? 0), p2: String(score.tieBreakPoints2 ?? 0) };
       }
@@ -443,6 +208,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const p1 = score.points1;
       const p2 = score.points2;
 
+      const tennisPointLabel = (points) => {
+        switch (Number(points || 0)) {
+          case 0: return "00";
+          case 1: return "15";
+          case 2: return "30";
+          case 3: return "40";
+          default: return "40";
+        }
+      };
+
       if (hasAd && !noAd) {
         if (score.advantage === "player1") return { p1: "AD", p2: "40" };
         if (score.advantage === "player2") return { p1: "40", p2: "AD" };
@@ -451,12 +226,12 @@ document.addEventListener("DOMContentLoaded", () => {
           if (p1 > p2) return { p1: "AD", p2: "40" };
           if (p2 > p1) return { p1: "40", p2: "AD" };
         }
-        return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
+        return { p1: tennisPointLabel(p1), p2: tennisPointLabel(p2) };
       }
 
       if (noAd) {
         if (p1 === 3 && p2 === 3) return { p1: "40", p2: "40" };
-        return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
+        return { p1: tennisPointLabel(p1), p2: tennisPointLabel(p2) };
       }
 
       if (score.advantage === "player1") return { p1: "AD", p2: "40" };
@@ -468,424 +243,362 @@ document.addEventListener("DOMContentLoaded", () => {
         if (p2 > p1) return { p1: "40", p2: "AD" };
       }
 
-      return { p1: tennisPointLabelLocal(p1), p2: tennisPointLabelLocal(p2) };
+      return { p1: tennisPointLabel(p1), p2: tennisPointLabel(p2) };
     }
 
-    function toDateLocal(value) {
-      if (!value) return null;
-      if (value.toDate && typeof value.toDate === "function") return value.toDate();
-      const d = new Date(value);
-      return isNaN(d.getTime()) ? null : d;
+    function buildMatchScoreText(data) {
+      const score = normalizeScore(data.score);
+      if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
+        return `${score.tieBreakPoints1}x${score.tieBreakPoints2}`;
+      }
+      return `${score.games1}x${score.games2} - ${getPointDisplay(score, data.matchFormat).p1}x${getPointDisplay(score, data.matchFormat).p2}`;
     }
 
-    function buildDurationLocal(match) {
-      const accumulated = Number(match.accumulatedSeconds || 0);
+    function renderPlacar(match) {
+      if (!tvGridPlacar || !match) return;
+      const score = normalizeScore(match.score || {});
+      const pts = getPointDisplay(score, match.matchFormat, false);
 
-      if (match.status === "suspended") {
-        return durationText(accumulated * 1000);
-      }
-
-      if (match.status === "live") {
-        const started = toDateLocal(match.startedAt);
-        if (started && !isNaN(started.getTime())) {
-          const elapsed = Math.floor((Date.now() - started.getTime()) / 1000);
-          return durationText((accumulated + elapsed) * 1000);
-        }
-        return durationText(accumulated * 1000);
-      }
-
-      if (match.durationSeconds && Number(match.durationSeconds) > 0) {
-        return durationText(Number(match.durationSeconds) * 1000);
-      }
-
-      return "00:00:00";
+      tvGridPlacar.textContent = `${score.games1}x${score.games2} - ${pts.p1}x${pts.p2}`;
     }
 
-    function getSetColumnsLocal(match, score) {
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
+    function listenToMatch() {
+      if (!matchId) {
+        setStatus("SEM ID DE PARTIDA");
+        return;
+      }
 
-      function formatSet(setObj) {
-        if (!setObj) return { p1: "0", p2: "0", tb1: 0, tb2: 0 };
-        const g1 = Number(setObj.games1 ?? 0);
-        const g2 = Number(setObj.games2 ?? 0);
-        const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
-        const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
+      try { state.unsubMatch?.(); } catch (_) {}
 
-        if (setObj.tieBreakMode === "tb7" || setObj.tieBreakMode === "super10") {
-          if (tb1 > 0 || tb2 > 0) {
-            return {
-              p1: String(tb1 > tb2 ? 7 : 6),
-              p2: String(tb1 > tb2 ? 6 : 7),
-              tb1: tb1 > tb2 ? tb1 : 0,
-              tb2: tb2 > tb1 ? tb2 : 0
-            };
+      state.unsubMatch = getMatchRef().onSnapshot(
+        (snap) => {
+          if (!snap.exists) {
+            setStatus("PARTIDA NÃO ENCONTRADA");
+            return;
           }
+
+          const data = { id: snap.id, ...snap.data() };
+          state.match = data;
+          window.currentMatch = data;
+          window.matchData = data;
+          window.currentShareToken = String(data.shareToken || shareToken || "").trim();
+
+          renderPlacar(data);
+        },
+        (err) => {
+          setStatus("ERRO AO CARREGAR PARTIDA");
+          logLine(`Erro Firestore match: ${err?.message || err}`, true);
         }
-
-        return { p1: String(g1), p2: String(g2), tb1: 0, tb2: 0 };
-      }
-
-      const setsTratados = [];
-      for (let i = 0; i < 3; i++) {
-        if (history[i]) {
-          setsTratados.push(formatSet(history[i]));
-        } else if (history.length === i) {
-          setsTratados.push({
-            p1: String(score.games1 ?? 0),
-            p2: String(score.games2 ?? 0),
-            tb1: 0,
-            tb2: 0
-          });
-        }
-      }
-
-      return setsTratados;
+      );
     }
 
-    // ---------------------------------------------------------------------
-    // RENDER DO PLACAR
-    // ---------------------------------------------------------------------
-    function renderPlacar(data) {
-      if (!data || !data.score || !tvGridPlacar) return;
-
-      const score = normalizeScoreLocal(data.score || {});
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-
-      const fmt = String(data.matchFormat || "").toLowerCase();
-      const hasTwoSets = fmt.includes("2 sets");
-      const hasThreeSets = fmt.includes("3 sets");
-
-      let qtdCols = 1;
-      if (hasTwoSets || hasThreeSets) qtdCols = 2;
-      if (hasThreeSets) qtdCols = 3;
-
-      const isDuplas = String(data.gameFormat || "").includes("Duplas");
-      let name1 = String(data.player1 || "Jogador 1");
-      let name2 = String(data.player2 || "Jogador 2");
-
-      if (isDuplas) {
-        name1 = `${data.player1 || "Jogador 1"}/${data.player2 || "Jogador 2"}`;
-        name2 = `${data.player3 || "Jogador 3"}/${data.player4 || "Jogador 4"}`;
-      }
-
-      const isTieBreakAtivo = score.tieBreakMode === "tb7" || score.tieBreakMode === "super10";
-      let viewPts1 = "00";
-      let viewPts2 = "00";
-
-      if (isTieBreakAtivo) {
-        viewPts1 = String(score.tieBreakPoints1 ?? 0);
-        viewPts2 = String(score.tieBreakPoints2 ?? 0);
-        if (tvStatus) {
-          tvStatus.innerText = score.tieBreakMode === "super10" ? "SUPER TIE-BREAK" : "TIE-BREAK";
-        }
-      } else {
-        if (tvStatus) {
-          if (data.status === "live") tvStatus.innerText = "EM ANDAMENTO";
-          else if (data.status === "suspended") tvStatus.innerText = "SUSPENSA";
-          else if (data.status === "finished") tvStatus.innerText = "FINALIZADA";
-          else tvStatus.innerText = "NÃO INICIADA";
-        }
-
-        const deparaTenis = { "0": "00", "1": "15", "2": "30", "3": "40" };
-
-        if (score.advantage === "player1") {
-          viewPts1 = "AD";
-          viewPts2 = "40";
-        } else if (score.advantage === "player2") {
-          viewPts1 = "40";
-          viewPts2 = "AD";
-        } else {
-          viewPts1 = deparaTenis[String(score.points1 ?? 0)] || "00";
-          viewPts2 = deparaTenis[String(score.points2 ?? 0)] || "00";
-        }
-      }
-
-      const setsHtmlHead = [];
-      const setsHtmlRow1 = [];
-      const setsHtmlRow2 = [];
-
-      for (let i = 0; i < qtdCols; i++) {
-        setsHtmlHead.push(`<th class="th-set">${i + 1}º SET</th>`);
-
-        const g1 = history[i]
-          ? String(history[i].games1 ?? 0)
-          : (history.length === i ? String(score.games1 ?? 0) : "--");
-
-        const g2 = history[i]
-          ? String(history[i].games2 ?? 0)
-          : (history.length === i ? String(score.games2 ?? 0) : "--");
-
-        setsHtmlRow1.push(`<td class="set-tv-score">${g1}</td>`);
-        setsHtmlRow2.push(`<td class="set-tv-score">${g2}</td>`);
-      }
-
-      const server = score.server || data.server || "player1";
-      const ball1 = server === "player1" ? '<span class="serve-ball-tv"></span>' : "";
-      const ball2 = server === "player2" ? '<span class="serve-ball-tv"></span>' : "";
-
-      tvGridPlacar.innerHTML = ` <table class="tabela-tv-placar"> <thead> <tr> <th class="th-jogador">Jogador</th> ${setsHtmlHead.join("")} <th class="th-pontos">Pontos</th> </tr> </thead> <tbody> <tr class="linha-jogador-tv"> <td> <div class="nome-tv-atleta">${ball1}<span>${escapeHtml(name1.toUpperCase())}</span></div> </td> ${setsHtmlRow1.join("")} <td class="pontos-tv-score">${viewPts1}</td> </tr> <tr class="linha-jogador-tv"> <td> <div class="nome-tv-atleta">${ball2}<span>${escapeHtml(name2.toUpperCase())}</span></div> </td> ${setsHtmlRow2.join("")} <td class="pontos-tv-score">${viewPts2}</td> </tr> </tbody> </table> `;
-
-      if (tvInfoBox) {
-        tvInfoBox.textContent = data.court ? `Quadra: ${data.court}` : (data.tournamentStage ? `Fase: ${data.tournamentStage}` : "");
-      }
+    async function fetchMatchAndToken() {
+      const snap = await getMatchRef().get();
+      if (!snap.exists) return null;
+      const data = snap.data() || {};
+      if (!shareToken && data.shareToken) shareToken = String(data.shareToken || "").trim();
+      return data;
     }
 
-    // ---------------------------------------------------------------------
-    // RECEPTOR DE DADOS
-    // ---------------------------------------------------------------------
-    function processPayload(payload) {
-      if (!payload) return;
+    async function createBroadcasterPeer(viewerId) {
+      if (state.broadcasterPcMap.has(viewerId)) return;
 
-      if (payload.score) {
-        latestPayload = payload;
-        stopRelay();
-        renderPlacar(payload);
-        return;
+      const pc = new RTCPeerConnection({ iceServers });
+      state.broadcasterPcMap.set(viewerId, pc);
+
+      if (state.localStream) {
+        state.localStream.getTracks().forEach((track) => pc.addTrack(track, state.localStream));
       }
 
-      if (payload.type === "matchUpdate" && payload.match && payload.match.score) {
-        latestPayload = payload.match;
-        stopRelay();
-        renderPlacar(payload.match);
-        return;
-      }
-    }
-
-    function pedirPlacarAtual() {
-      if (canalTv) {
-        canalTv.postMessage("PEDIR_PLACAR_ATUAL");
-      }
-
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({ type: "PEDIR_PLACAR_ATUAL" }, "*");
-      }
-
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: "PEDIR_PLACAR_ATUAL" }, "*");
-      }
-    }
-
-    if (canalTv) {
-      canalTv.onmessage = (event) => {
-        processPayload(event.data);
-      };
-    }
-
-    window.addEventListener("message", (event) => {
-      processPayload(event.data);
-    });
-
-    // ---------------------------------------------------------------------
-    // CÂMERA
-    // ---------------------------------------------------------------------
-    async function ligarCameraTraseira() {
-      try {
-        hidePermissionHelp();
-
-        showDebugLines([
-          { type: "info", text: "Tentando iniciar câmera..." },
-          { type: "info", text: `navigator.mediaDevices: ${!!navigator.mediaDevices}` },
-          { type: "info", text: `getUserMedia: ${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)}` },
-          { type: "info", text: `userAgent: ${navigator.userAgent}` },
-          { type: "info", text: `protocol: ${window.location.protocol}` },
-          { type: "info", text: `isSecureContext: ${window.isSecureContext}` }
-        ]);
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error("getUserMedia não suportado neste navegador.");
-        }
-
-        if (!videoElement) {
-          throw new Error("Elemento <video id='liveVideo'> não encontrado.");
-        }
-
-        stopCamera();
-
-        let stream = null;
-
-        // 1) câmera traseira explícita
+      pc.onicecandidate = async (event) => {
+        if (!event.candidate) return;
         try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { exact: "environment" },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            },
-            audio: false
+          await getPeerCandidatesCol(viewerId).add({
+            side: "broadcaster",
+            candidate: event.candidate.toJSON(),
+            ts: firebase.firestore.FieldValue.serverTimestamp()
           });
-        } catch (e1) {
-          appendDebug(`Falhou exact environment -> ${e1.name || "Erro"} - ${e1.message || e1}`, true);
+        } catch (err) {
+          logLine(`Erro ICE broadcaster: ${err?.message || err}`, true);
         }
+      };
 
-        // 2) lista dispositivos e tenta achar a traseira
-        if (!stream) {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      await getPeerDoc(viewerId).set({
+        role: "viewer",
+        status: "offered",
+        peerUid: viewerId,
+        shareToken: shareToken,
+        broadcasterPeerId: state.peerId,
+        offer: { type: offer.type, sdp: offer.sdp },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      const unsubPeer = getPeerDoc(viewerId).onSnapshot(async (snap) => {
+        const data = snap.data() || {};
+        if (data.answer && !pc.currentRemoteDescription) {
           try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter((d) => d.kind === "videoinput");
-
-            if (!videoDevices.length) {
-              throw new Error("Nenhuma câmera de vídeo foi encontrada no dispositivo.");
-            }
-
-            const backCamera =
-              videoDevices.find((d) =>
-                /back|rear|environment|traseira|câmera traseira/i.test(d.label || "")
-              ) || videoDevices[videoDevices.length - 1];
-
-            appendDebug(`Tentando câmera: ${backCamera.label || backCamera.deviceId || "sem label"}`);
-
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                deviceId: backCamera.deviceId ? { exact: backCamera.deviceId } : undefined,
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
-              audio: false
-            });
-          } catch (e2) {
-            appendDebug(`Falhou deviceId -> ${e2.name || "Erro"} - ${e2.message || e2}`, true);
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          } catch (err) {
+            logLine(`Erro aplicar answer: ${err?.message || err}`, true);
           }
         }
+      });
 
-        // 3) fallback environment
-        if (!stream) {
+      const unsubCandidates = getPeerCandidatesCol(viewerId).onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach(async (change) => {
+          if (change.type !== "added") return;
+          const c = change.doc.data();
+          if (!c?.candidate || c.side !== "viewer") return;
           try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: { ideal: "environment" },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
-              audio: false
-            });
-          } catch (e3) {
-            appendDebug(`Falhou ideal environment -> ${e3.name || "Erro"} - ${e3.message || e3}`, true);
+            await pc.addIceCandidate(new RTCIceCandidate(c.candidate));
+          } catch (err) {
+            logLine(`Erro addIceCandidate viewer->broadcaster: ${err?.message || err}`, true);
           }
-        }
+        });
+      });
 
-        // 4) último fallback qualquer câmera
-        if (!stream) {
-          stream = await navigator.mediaDevices.getUserMedia({
+      state.unsubCandidateListeners.set(`peer-${viewerId}-doc`, unsubPeer);
+      state.unsubCandidateListeners.set(`peer-${viewerId}-cand`, unsubCandidates);
+    }
+
+    async function startBroadcaster() {
+      if (!matchId) {
+        setStatus("SEM ID DE PARTIDA");
+        return;
+      }
+
+      const matchData = await fetchMatchAndToken();
+      if (!matchData || matchData.shareEnabled !== true) {
+        setStatus("PARTIDA NÃO DISPONÍVEL");
+        logLine("shareEnabled não está true no documento da partida.", true);
+        return;
+      }
+
+      if (!shareToken) {
+        setStatus("SEM SHARE TOKEN");
+        logLine("shareToken ausente.", true);
+        return;
+      }
+
+      hidePermissionHelp();
+      setStatus("ABRINDO CÂMERA...");
+      logLine("Modo transmissor detectado. Abrindo câmera...");
+
+      try {
+        state.localStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch (e1) {
+        try {
+          state.localStream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false
           });
+        } catch (e2) {
+          setStatus("CÂMERA INDISPONÍVEL");
+          logLine(`Erro câmera: ${e2?.name || "Erro"} - ${e2?.message || e2}`, true);
+          if (String(e2?.name || "") === "NotAllowedError") showPermissionHelp();
+          return;
         }
+      }
 
-        cameraStream = stream;
+      if (videoEl) {
+        videoEl.srcObject = state.localStream;
+        videoEl.muted = true;
+        videoEl.playsInline = true;
+        videoEl.setAttribute("autoplay", "");
+        videoEl.setAttribute("muted", "");
+        videoEl.setAttribute("playsinline", "");
+        try { await videoEl.play(); } catch (_) {}
+      }
 
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          videoElement.muted = true;
-          videoElement.playsInline = true;
-          videoElement.setAttribute("autoplay", "");
-          videoElement.setAttribute("muted", "");
-          videoElement.setAttribute("playsinline", "");
+      ensureVideoVisible();
+
+      await getMatchRef().set({
+        streamActive: true,
+        streamRole: "broadcaster",
+        broadcasterPeerId: state.peerId,
+        broadcasterStartedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      setStatus("TRANSMITINDO AO VIVO");
+      state.serverReady = true;
+      state.serverStartedAt = Date.now();
+
+      state.unsubPeers = getPeersCol().onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const data = change.doc.data() || {};
+          const viewerId = change.doc.id;
+
+          if (data.role !== "viewer") return;
+
+          if ((change.type === "added" || change.type === "modified") &&
+              (data.status === "requesting" || data.status === "answered")) {
+            if (!state.broadcasterPcMap.has(viewerId)) {
+              createBroadcasterPeer(viewerId).catch((err) => {
+                logLine(`Erro criar peer broadcaster: ${err?.message || err}`, true);
+              });
+            }
+          }
+        });
+      });
+    }
+
+    async function startViewer() {
+      if (!matchId) {
+        setStatus("SEM ID DE PARTIDA");
+        return;
+      }
+
+      const matchData = await fetchMatchAndToken();
+      if (!matchData || matchData.shareEnabled !== true) {
+        setStatus("PARTIDA NÃO DISPONÍVEL");
+        return;
+      }
+
+      if (!shareToken) {
+        setStatus("SEM SHARE TOKEN");
+        return;
+      }
+
+      setStatus("CONECTANDO TRANSMISSÃO...");
+      logLine("Modo espectador detectado.");
+
+      const myPeerId = state.peerId;
+      const myPeerRef = getPeerDoc(myPeerId);
+      const myCandidatesRef = getPeerCandidatesCol(myPeerId);
+
+      await myPeerRef.set({
+        role: "viewer",
+        status: "requesting",
+        peerUid: myPeerId,
+        shareToken: shareToken,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      const pc = new RTCPeerConnection({ iceServers });
+      state.viewerPc = pc;
+
+      pc.ontrack = (event) => {
+        const remoteStream = event.streams[0];
+        if (videoEl) {
+          videoEl.srcObject = remoteStream;
+          videoEl.muted = true;
+          videoEl.playsInline = true;
+          videoEl.setAttribute("autoplay", "");
+          videoEl.setAttribute("playsinline", "");
+          try { videoEl.play(); } catch (_) {}
+        }
+        ensureVideoVisible();
+        setStatus("ASSISTINDO AO VIVO");
+      };
+
+      pc.onicecandidate = async (event) => {
+        if (!event.candidate) return;
+        try {
+          await myCandidatesRef.add({
+            side: "viewer",
+            candidate: event.candidate.toJSON(),
+            ts: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } catch (err) {
+          logLine(`Erro ICE viewer: ${err?.message || err}`, true);
+        }
+      };
+
+      const unsubPeer = myPeerRef.onSnapshot(async (snap) => {
+        const data = snap.data() || {};
+        if (data.offer && !pc.currentRemoteDescription) {
           try {
-            await videoElement.play();
-          } catch (playErr) {
-            appendDebug(`Erro no play(): ${playErr.name || "Erro"} - ${playErr.message || playErr}`, true);
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+
+            await myPeerRef.set({
+              role: "viewer",
+              status: "answered",
+              peerUid: myPeerId,
+              shareToken: shareToken,
+              answer: { type: answer.type, sdp: answer.sdp },
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+          } catch (err) {
+            logLine(`Erro viewer offer/answer: ${err?.message || err}`, true);
+            setStatus("ERRO NA CONEXÃO");
           }
         }
+      });
 
-        return true;
-      } catch (error) {
-        const nomeErro = error?.name || "Sem nome";
-        const mensagemErro = error?.message || String(error);
-
-        let msg = "CÂMERA INDISPONÍVEL";
-        if (nomeErro === "NotAllowedError") msg = "PERMISSÃO DE CÂMERA NEGADA";
-        else if (nomeErro === "NotFoundError") msg = "NENHUMA CÂMERA FOI ENCONTRADA";
-        else if (nomeErro === "NotReadableError") msg = "CÂMERA EM USO POR OUTRO APP";
-        else if (nomeErro === "OverconstrainedError") msg = "CONFIGURAÇÃO DA CÂMERA NÃO SUPORTADA";
-        else if (nomeErro === "SecurityError") msg = "A CÂMERA EXIGE HTTPS OU LOCALHOST";
-        else if (mensagemErro) msg = mensagemErro.toUpperCase();
-
-        if (tvStatus) tvStatus.innerText = "CÂMERA INDISPONÍVEL";
-
-        showDebugLines([
-          { type: "error", text: "Falha ao iniciar a câmera." },
-          { type: "error", text: `Nome do erro: ${nomeErro}` },
-          { type: "error", text: `Mensagem do erro: ${mensagemErro}` },
-          { type: "warn", text: `Mensagem exibida: ${msg}` },
-          {
-            type: "info",
-            text:
-              "Objeto completo: " +
-              JSON.stringify(
-                {
-                  name: error?.name || null,
-                  message: error?.message || null,
-                  stack: error?.stack || null
-                },
-                null,
-                2
-              )
+      const unsubCandidates = myCandidatesRef.onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach(async (change) => {
+          if (change.type !== "added") return;
+          const c = change.doc.data();
+          if (!c?.candidate || c.side !== "broadcaster") return;
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(c.candidate));
+          } catch (err) {
+            logLine(`Erro addIceCandidate broadcaster->viewer: ${err?.message || err}`, true);
           }
-        ]);
+        });
+      });
 
-        if (nomeErro === "NotAllowedError") {
-          showPermissionHelp();
-        }
-
-        return false;
-      }
+      state.unsubPeerDoc = unsubPeer;
+      state.unsubCandidateListeners.set(`viewer-${myPeerId}`, unsubCandidates);
     }
 
-    async function iniciarFluxoTransmissaoNativa() {
-      const sucesso = await ligarCameraTraseira();
+    async function start() {
+      if (state.started) return;
+      state.started = true;
 
-      if (sucesso) {
-        const telaInicial = document.getElementById("telaInicial");
-        if (telaInicial) telaInicial.style.display = "none";
-        pedirPlacarAtual();
+      resetDebugBoxes();
+      ensureVideoVisible();
+      listenToMatch();
+
+      if (!matchId) {
+        setStatus("SEM ID DE PARTIDA");
+        logLine("URL inválida: matchId ausente", true);
+        return;
+      }
+
+      await fetchMatchAndToken();
+
+      logLine(`Iniciando como ${role}`);
+      logLine(`matchId: ${matchId}`);
+      logLine(`shareToken: ${shareToken ? "OK" : "AUSENTE"}`);
+
+      if (role === "broadcaster") {
+        await startBroadcaster();
       } else {
-        appendDebug("A câmera falhou. Mantendo a tela inicial visível.", true);
+        await startViewer();
       }
     }
 
-    function tentarNovamente() {
-      iniciarFluxoTransmissaoNativa();
+    async function retryStart() {
+      state.started = false;
+      cleanup();
+      await start();
     }
-
-    window.iniciarFluxoTransmissaoNativa = iniciarFluxoTransmissaoNativa;
-    window.tentarNovamenteCamera = tentarNovamente;
 
     if (btnAbrirCamera) {
-      btnAbrirCamera.addEventListener("click", iniciarFluxoTransmissaoNativa);
+      btnAbrirCamera.addEventListener("click", startBroadcaster);
     }
 
     if (btnTentarNovamente) {
-      btnTentarNovamente.addEventListener("click", tentarNovamente);
+      btnTentarNovamente.addEventListener("click", retryStart);
     }
 
-    window.addEventListener("beforeunload", () => {
-      stopCamera();
-      stopRelay();
-      if (canalTv) canalTv.close();
-    });
+    window.addEventListener("beforeunload", cleanup);
 
-    if (matchId && matchId !== "null" && window.__db) {
-      window.__db.collection("matches").doc(matchId).onSnapshot(
-        (doc) => {
-          try {
-            if (!doc.exists) return;
-            const data = { id: doc.id, ...doc.data() };
-            latestPayload = data;
-            renderPlacar(data);
-          } catch (_) {}
-        },
-        () => {}
-      );
-    } else {
-      if (tvStatus) tvStatus.innerText = "SEM ID DE PARTIDA";
-    }
-
-    relayInterval = setInterval(() => {
-      if (!latestPayload) {
-        pedirPlacarAtual();
-      }
-    }, 1000);
-
-    mostrarModoApp();
+    setInfo(role === "broadcaster" ? "Modo transmissor" : "Modo espectador");
+    await start();
   }
 });
