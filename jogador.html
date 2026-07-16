@@ -45,7 +45,7 @@
 
       <div class="career-header">
         <div>
-          <span class="section-kicker">Pesquisa de jogador</span>
+          <span class="section-kicker">Pesquisar jogador</span>
           <h1 id="pageTitle">Perfil do atleta</h1>
           <p id="subtitle">Pesquise um atleta para ver o perfil e os jogos encontrados.</p>
         </div>
@@ -56,7 +56,7 @@
       <div class="jogador-search-wrap">
         <button type="button" id="btnSearchPlayer" class="ion-btn ion-btn-primary jogador-search-btn">
           <ion-icon name="search-outline"></ion-icon>
-          <span class="jogador-search-text">Pesquisar adversário</span>
+          <span class="jogador-search-text">Pesquisar jogador</span>
         </button>
       </div>
 
@@ -76,12 +76,23 @@
           </div>
         </div>
 
+        <!-- O JS deve preencher as linhas aqui, por exemplo: <div class="profile-row pais"> <div class="profile-label">País</div> <div class="profile-value">BR</div> </div> -->
         <div id="profileMeta" class="jogador-profile-meta"></div>
       </div>
 
       <div class="jogador-divider"></div>
 
       <!-- FILTROS -->
+
+      <div class="ionic-filter-card">
+        <label for="yearFilter">
+          <span class="ionic-label">Ano da Partida</span>
+          <select id="yearFilter" class="ionic-select">
+            <option value="">Selecione o ano</option>
+          </select>
+        </label>
+      </div> 
+      
       <div class="jogador-filter-wrap">
         <div class="jogador-filter-bar">
           <button type="button" class="ion-btn ion-btn-segment jogador-filter-btn active" data-filter="all">
@@ -107,7 +118,7 @@
         </div>
 
         <div id="jogadorMatchesList" class="matches-list">
-          <div class="jogador-empty">Nenhum atleta selecionado. Clique em <strong>Pesquisar adversário</strong>.</div>
+          <div class="jogador-empty">Nenhum atleta selecionado. Clique em <strong>Pesquisar jogador</strong>.</div>
         </div>
 
         <!-- PAGINAÇÃO -->
