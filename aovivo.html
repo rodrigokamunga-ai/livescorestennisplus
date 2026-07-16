@@ -3,41 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="theme-color" content="#0f1726" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Transmissão ao vivo TennisPro" />
+
   <title>Ao Vivo - TennisPro</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/public.css" />
 
-  <style> body { margin: 0; background: #0f1726; color: #fff; font-family: Arial, sans-serif; } .live-page { min-height: 100vh; display: flex; flex-direction: column; gap: 12px; padding: 12px; box-sizing: border-box; } .topbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); } .topbar .status { font-weight: 900; font-size: 15px; } .topbar .info { font-size: 12px; opacity: .85; } .actions { display: flex; gap: 10px; flex-wrap: wrap; } .btn { border: none; border-radius: 12px; padding: 11px 14px; font-weight: 800; cursor: pointer; color: #fff; background: #2563eb; } .btn.red { background: #dc2626; } .btn.green { background: #16a34a; } .btn.gray { background: #6b7280; } .video-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); } video { width: 100%; height: 100%; object-fit: cover; background: #000; } .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,0.25); color: #fff; font-weight: 900; text-align: center; padding: 16px; } .score-box { padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); } .score-title { font-size: 14px; font-weight: 900; margin-bottom: 8px; opacity: .9; } .score-text { font-size: 28px; font-weight: 900; letter-spacing: .02em; } .debug { font-size: 12px; line-height: 1.35; opacity: .85; white-space: pre-wrap; padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); min-height: 80px; } </style>
+  <style> body { margin: 0; background: #0f1726; color: #fff; font-family: Arial, sans-serif; } .live-page { min-height: 100vh; display: flex; flex-direction: column; gap: 12px; padding: 12px; box-sizing: border-box; } .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); } .status { font-weight: 900; font-size: 15px; margin-bottom: 4px; } .info { font-size: 12px; opacity: 0.85; } .actions { display: flex; gap: 10px; flex-wrap: wrap; } .btn { border: none; border-radius: 12px; padding: 11px 14px; font-weight: 800; cursor: pointer; color: #fff; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 8px; } .btn:hover { transform: translateY(-1px); filter: brightness(1.05); } .btn.green { background: linear-gradient(135deg, #16a34a, #15803d); } .btn.gray { background: linear-gradient(135deg, #6b7280, #4b5563); } .video-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); } #liveVideo { width: 100%; height: 100%; object-fit: cover; background: #000; display: block; } .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0, 0, 0, 0.25); color: #fff; font-weight: 900; text-align: center; padding: 16px; } .score-box { padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); } .score-title { font-size: 14px; font-weight: 900; margin-bottom: 8px; opacity: 0.9; } #tvGridPlacar { font-size: 28px; font-weight: 900; letter-spacing: 0.02em; line-height: 1.1; min-height: 34px; } .debug { font-size: 12px; line-height: 1.35; opacity: 0.85; white-space: pre-wrap; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); min-height: 60px; } @media (max-width: 768px) { .topbar { align-items: flex-start; } #tvGridPlacar { font-size: 22px; } .btn { width: 100%; justify-content: center; } .actions { width: 100%; } } </style>
 </head>
 
 <body>
   <main class="live-page">
+
     <section class="topbar">
       <div>
         <div class="status" id="tvStatus">Carregando...</div>
-        <div class="info" id="tvInfoBox">Inicializando</div>
+        <div class="info" id="tvInfoBox">Inicializando transmissão</div>
       </div>
 
       <div class="actions">
-        <button class="btn green" id="btnAbrirCamera">Iniciar transmissão</button>
-        <button class="btn gray" id="btnTentarNovamente" style="display:none;">Tentar novamente</button>
+        <button class="btn green" id="btnAbrirCamera" type="button">
+          <ion-icon name="videocam-outline"></ion-icon>
+          <span>Iniciar transmissão</span>
+        </button>
+
+        <button class="btn gray" id="btnTentarNovamente" type="button" style="display:none;">
+          <ion-icon name="refresh-outline"></ion-icon>
+          <span>Tentar novamente</span>
+        </button>
       </div>
     </section>
 
     <section class="video-wrap">
       <video id="liveVideo" autoplay muted playsinline></video>
-      <div class="overlay" id="telaInicial">Aguardando vídeo...</div>
+      <div class="overlay" id="telaInicial">
+        Aguardando vídeo...
+      </div>
     </section>
 
     <section class="score-box">
       <div class="score-title">Placar ao vivo</div>
-      <div id="tvGridPlacar" class="score-text">0x0</div>
+      <div id="tvGridPlacar">0x0 - 00x00</div>
     </section>
 
     <section class="debug" id="cameraStatus"></section>
     <section class="debug" id="cameraDebug"></section>
+
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
