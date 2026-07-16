@@ -46,16 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const state = {
       match: null,
       localStream: null,
-      viewerPc: null,
       broadcasterPcMap: new Map(),
+      viewerPc: null,
       peerId: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       unsubMatch: null,
       unsubPeers: null,
       unsubPeerDoc: null,
       unsubCandidateListeners: new Map(),
-      started: false,
-      serverReady: false,
-      serverStartedAt: null
+      started: false
     };
 
     const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
@@ -117,29 +115,39 @@ document.addEventListener("DOMContentLoaded", () => {
     function stopCamera() {
       if (state.localStream && typeof state.localStream.getTracks === "function") {
         state.localStream.getTracks().forEach((track) => {
-          try { track.stop(); } catch (_) {}
+          try {
+            track.stop();
+          } catch (_) {}
         });
       }
       state.localStream = null;
 
       if (videoEl) {
-        try { videoEl.srcObject = null; } catch (_) {}
+        try {
+          videoEl.srcObject = null;
+        } catch (_) {}
       }
     }
 
     function stopWebRtc() {
       state.broadcasterPcMap.forEach((pc) => {
-        try { pc.close(); } catch (_) {}
+        try {
+          pc.close();
+        } catch (_) {}
       });
       state.broadcasterPcMap.clear();
 
       state.unsubCandidateListeners.forEach((unsub) => {
-        try { unsub(); } catch (_) {}
+        try {
+          unsub();
+        } catch (_) {}
       });
       state.unsubCandidateListeners.clear();
 
       if (state.viewerPc) {
-        try { state.viewerPc.close(); } catch (_) {}
+        try {
+          state.viewerPc.close();
+        } catch (_) {}
         state.viewerPc = null;
       }
     }
@@ -193,13 +201,29 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
+    function tennisPointLabel(points) {
+      switch (Number(points || 0)) {
+        case 0: return "00";
+        case 1: return "15";
+        case 2: return "30";
+        case 3: return "40";
+        default: return "40";
+      }
+    }
+
     function getPointDisplay(score, matchFormat, isFinished = false) {
       if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-        return { p1: String(score.tieBreakPoints1 ?? 0), p2: String(score.tieBreakPoints2 ?? 0) };
+        return {
+          p1: String(score.tieBreakPoints1 ?? 0),
+          p2: String(score.tieBreakPoints2 ?? 0)
+        };
       }
 
       if (isFinished && (score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10")) {
-        return { p1: String(score.lastTieBreakPoints1 ?? 0), p2: String(score.lastTieBreakPoints2 ?? 0) };
+        return {
+          p1: String(score.lastTieBreakPoints1 ?? 0),
+          p2: String(score.lastTieBreakPoints2 ?? 0)
+        };
       }
 
       const fmt = String(matchFormat || "").toLowerCase();
@@ -207,16 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const hasAd = fmt.includes("com vantagem") || fmt.includes("3 sets");
       const p1 = score.points1;
       const p2 = score.points2;
-
-      const tennisPointLabel = (points) => {
-        switch (Number(points || 0)) {
-          case 0: return "00";
-          case 1: return "15";
-          case 2: return "30";
-          case 3: return "40";
-          default: return "40";
-        }
-      };
 
       if (hasAd && !noAd) {
         if (score.advantage === "player1") return { p1: "AD", p2: "40" };
@@ -248,17 +262,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildMatchScoreText(data) {
       const score = normalizeScore(data.score);
-      if (score.tieBreakMode === "tb7" || score.tieBreakMode === "super10") {
-        return `${score.tieBreakPoints1}x${score.tieBreakPoints2}`;
-      }
-      return `${score.games1}x${score.games2} - ${getPointDisplay(score, data.matchFormat).p1}x${getPointDisplay(score, data.matchFormat).p2}`;
+      const pts = getPointDisplay(score, data.matchFormat, false);
+      return `${score.games1}x${score.games2} - ${pts.p1}x${pts.p2}`;
     }
 
     function renderPlacar(match) {
       if (!tvGridPlacar || !match) return;
       const score = normalizeScore(match.score || {});
       const pts = getPointDisplay(score, match.matchFormat, false);
-
       tvGridPlacar.textContent = `${score.games1}x${score.games2} - ${pts.p1}x${pts.p2}`;
     }
 
@@ -268,7 +279,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      try { state.unsubMatch?.(); } catch (_) {}
+      try {
+        state.unsubMatch?.();
+      } catch (_) {}
 
       state.unsubMatch = getMatchRef().onSnapshot(
         (snap) => {
@@ -293,11 +306,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function fetchMatchAndToken() {
-      const snap = await getMatchRef().get();
-      if (!snap.exists) return null;
-      const data = snap.data() || {};
-      if (!shareToken && data.shareToken) shareToken = String(data.shareToken || "").trim();
-      return data;
+      try {
+        const snap = await getMatchRef().get();
+        if (!snap.exists) return null;
+        const data = snap.data() || {};
+        if (!shareToken && data.shareToken) {
+          shareToken = String(data.shareToken || "").trim();
+        }
+        return data;
+      } catch (err) {
+        logLine(`Erro ao buscar partida: ${err?.message || err}`, true);
+        return null;
+      }
     }
 
     async function createBroadcasterPeer(viewerId) {
@@ -307,7 +327,9 @@ document.addEventListener("DOMContentLoaded", () => {
       state.broadcasterPcMap.set(viewerId, pc);
 
       if (state.localStream) {
-        state.localStream.getTracks().forEach((track) => pc.addTrack(track, state.localStream));
+        state.localStream.getTracks().forEach((track) => {
+          pc.addTrack(track, state.localStream);
+        });
       }
 
       pc.onicecandidate = async (event) => {
@@ -323,6 +345,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === "connected") {
+          getPeerDoc(viewerId).set({
+            status: "connected",
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).catch(() => {});
+        }
+      };
+
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
@@ -332,7 +363,10 @@ document.addEventListener("DOMContentLoaded", () => {
         peerUid: viewerId,
         shareToken: shareToken,
         broadcasterPeerId: state.peerId,
-        offer: { type: offer.type, sdp: offer.sdp },
+        offer: {
+          type: offer.type,
+          sdp: offer.sdp
+        },
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
 
@@ -341,6 +375,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.answer && !pc.currentRemoteDescription) {
           try {
             await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            await getPeerDoc(viewerId).set({
+              status: "answered",
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
           } catch (err) {
             logLine(`Erro aplicar answer: ${err?.message || err}`, true);
           }
@@ -417,7 +455,9 @@ document.addEventListener("DOMContentLoaded", () => {
         videoEl.setAttribute("autoplay", "");
         videoEl.setAttribute("muted", "");
         videoEl.setAttribute("playsinline", "");
-        try { await videoEl.play(); } catch (_) {}
+        try {
+          await videoEl.play();
+        } catch (_) {}
       }
 
       ensureVideoVisible();
@@ -430,18 +470,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }, { merge: true });
 
       setStatus("TRANSMITINDO AO VIVO");
-      state.serverReady = true;
-      state.serverStartedAt = Date.now();
 
       state.unsubPeers = getPeersCol().onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
-          const data = change.doc.data() || {};
-          const viewerId = change.doc.id;
+          const doc = change.doc;
+          const data = doc.data() || {};
+          const viewerId = doc.id;
 
           if (data.role !== "viewer") return;
 
-          if ((change.type === "added" || change.type === "modified") &&
-              (data.status === "requesting" || data.status === "answered")) {
+          if (
+            (change.type === "added" || change.type === "modified") &&
+            (data.status === "requesting" || data.status === "answered")
+          ) {
             if (!state.broadcasterPcMap.has(viewerId)) {
               createBroadcasterPeer(viewerId).catch((err) => {
                 logLine(`Erro criar peer broadcaster: ${err?.message || err}`, true);
@@ -496,7 +537,9 @@ document.addEventListener("DOMContentLoaded", () => {
           videoEl.playsInline = true;
           videoEl.setAttribute("autoplay", "");
           videoEl.setAttribute("playsinline", "");
-          try { videoEl.play(); } catch (_) {}
+          try {
+            videoEl.play();
+          } catch (_) {}
         }
         ensureVideoVisible();
         setStatus("ASSISTINDO AO VIVO");
@@ -528,7 +571,10 @@ document.addEventListener("DOMContentLoaded", () => {
               status: "answered",
               peerUid: myPeerId,
               shareToken: shareToken,
-              answer: { type: answer.type, sdp: answer.sdp },
+              answer: {
+                type: answer.type,
+                sdp: answer.sdp
+              },
               updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
           } catch (err) {
