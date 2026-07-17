@@ -26,52 +26,119 @@ document.addEventListener("DOMContentLoaded", () => {
     window.__db = db;
     window.firebaseAppReady = true;
 
-    const params = new URLSearchParams(window.location.search);
-    const matchId = String(params.get("id") || "").trim();
-    const role = String(params.get("role") || "viewer").trim().toLowerCase();
-    let shareToken = String(params.get("shareToken") || "").trim();
+    const params = new URLSearchParams(
+      window.location.search
+    );
 
-    const videoEl = document.getElementById("liveVideo");
-    const videoWrap = document.getElementById("videoWrap");
-    const btnAbrirCamera = document.getElementById("btnAbrirCamera");
-    const btnExpandirTela = document.getElementById("btnExpandirTela");
-    const btnTentarNovamente = document.getElementById("btnTentarNovamente");
-    const cameraStatus = document.getElementById("cameraStatus");
-    const cameraDebug = document.getElementById("cameraDebug");
-    const tvStatus = document.getElementById("tvStatus");
-    const tvInfoBox = document.getElementById("tvInfoBox");
-    const telaInicial = document.getElementById("telaInicial");
-    const tvGridPlacar = document.getElementById("tvGridPlacar");
-    const liveEndingMessage = document.getElementById("liveEndingMessage");
+    const matchId = String(
+      params.get("id") || ""
+    ).trim();
+
+    const role = String(
+      params.get("role") || "viewer"
+    ).trim().toLowerCase();
+
+    let shareToken = String(
+      params.get("shareToken") || ""
+    ).trim();
+
+    const videoEl =
+      document.getElementById("liveVideo");
+
+    const videoWrap =
+      document.getElementById("videoWrap");
+
+    const btnAbrirCamera =
+      document.getElementById("btnAbrirCamera");
+
+    const btnExpandirTela =
+      document.getElementById("btnExpandirTela");
+
+    const btnTentarNovamente =
+      document.getElementById("btnTentarNovamente");
+
+    const btnIniciarGravacao =
+      document.getElementById("btnIniciarGravacao");
+
+    const btnPararGravacao =
+      document.getElementById("btnPararGravacao");
+
+    const btnAtivarAudio =
+      document.getElementById("btnAtivarAudio");
+
+    const cameraStatus =
+      document.getElementById("cameraStatus");
+
+    const cameraDebug =
+      document.getElementById("cameraDebug");
+
+    const tvStatus =
+      document.getElementById("tvStatus");
+
+    const tvInfoBox =
+      document.getElementById("tvInfoBox");
+
+    const telaInicial =
+      document.getElementById("telaInicial");
+
+    const tvGridPlacar =
+      document.getElementById("tvGridPlacar");
+
+    const liveEndingMessage =
+      document.getElementById("liveEndingMessage");
 
     const state = {
       match: null,
       localStream: null,
+
       broadcasterPcMap: new Map(),
       viewerPc: null,
-      peerId: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+
+      peerId: `${role}-${Date.now()}-${Math.random() .toString(36) .slice(2, 10)}`,
+
       unsubMatch: null,
       unsubPeers: null,
       unsubPeerDoc: null,
       unsubCandidateListeners: new Map(),
+
       started: false,
       transmissionEnded: false,
-      finishTimer: null
+      finishTimer: null,
+
+      mediaRecorder: null,
+      recordedChunks: [],
+      recordingMimeType: "",
+      recordingStream: null,
+      recordingCanvas: null,
+      recordingContext: null,
+      recordingAnimationFrame: null,
+      scoreboardSnapshotCanvas: null,
+      isRecording: false,
+
+      microphoneEnabled: true,
+      viewerAudioUnlocked: false
     };
 
     const iceServers = [
-      { urls: "stun:stun.l.google.com:19302" }
+      {
+        urls: "stun:stun.l.google.com:19302"
+      }
     ];
 
     function injectCompactScoreboardStyles() {
-      if (document.getElementById("aovivoCompactScoreStyles")) {
+      if (
+        document.getElementById(
+          "aovivoCompactScoreStyles"
+        )
+      ) {
         return;
       }
 
       const style = document.createElement("style");
+
       style.id = "aovivoCompactScoreStyles";
 
-      style.textContent = ` .aovivo-compact-scoreboard { display: flex; flex-direction: column; gap: 1px; width: min(100%, 390px); padding: 5px 7px; border-radius: 6px; background: rgba(0, 0, 0, 0.68); color: #fff; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28); box-sizing: border-box; } .aovivo-compact-row { display: grid; align-items: center; gap: 1px; min-height: 20px; width: 100%; line-height: 1; } .aovivo-compact-name { display: flex; align-items: center; min-width: 0; width: 100%; overflow: hidden; white-space: nowrap; } .aovivo-compact-serve { width: 7px; height: 7px; flex: 0 0 7px; margin-right: 4px; border-radius: 50%; background: #d8ff63; box-shadow: 0 0 6px rgba(216, 255, 99, 0.9); } .aovivo-compact-serve.hidden { visibility: hidden; } .aovivo-compact-player { display: block; min-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; line-height: 1; font-weight: 800; } .aovivo-compact-number { min-width: 18px; text-align: center; font-size: 12px; line-height: 1; font-weight: 900; color: #fff; } .aovivo-compact-number.current { color: #d8ff63; } .aovivo-compact-number.empty { visibility: hidden; } .aovivo-compact-score-set { display: inline-flex; align-items: flex-start; justify-content: center; white-space: nowrap; } .aovivo-compact-score-main { line-height: 1; } .aovivo-compact-score-tb { position: relative; top: -0.42em; margin-left: 1px; font-size: 0.58em; line-height: 1; } #videoWrap:fullscreen { width: 100vw; height: 100vh; aspect-ratio: auto; border: 0; border-radius: 0; background: #000; } #videoWrap:fullscreen #liveVideo { width: 100vw; height: 100vh; object-fit: contain; } #videoWrap:fullscreen .live-public-scoreboard { left: 3vw; bottom: 3vh; width: min(94vw, 560px); } @media (max-width: 768px) { .aovivo-compact-scoreboard { width: min(100%, 330px); padding: 4px 6px; } .aovivo-compact-row { gap: 1px; min-height: 18px; } .aovivo-compact-player { font-size: 9px; } .aovivo-compact-number { min-width: 16px; font-size: 11px; } .aovivo-compact-serve { width: 6px; height: 6px; flex-basis: 6px; margin-right: 3px; } } @media (max-width: 480px) { .aovivo-compact-scoreboard { width: min(100%, 285px); padding: 4px 5px; } .aovivo-compact-player { font-size: 8px; } .aovivo-compact-number { min-width: 15px; font-size: 10px; } } `;
+      style.textContent = ` .aovivo-compact-scoreboard { display: flex; flex-direction: column; gap: 1px; width: fit-content; max-width: calc(100vw - 20px); padding: 5px 7px; border-radius: 6px; background: rgba(0, 0, 0, 0.70); color: #fff; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28); box-sizing: border-box; } .aovivo-compact-row { display: grid; align-items: center; gap: 0; min-height: 20px; width: 100%; line-height: 1; } .aovivo-compact-name { display: flex; align-items: center; min-width: 0; width: 100%; overflow: hidden; white-space: nowrap; } .aovivo-compact-serve { width: 7px; height: 7px; flex: 0 0 7px; margin-right: 4px; border-radius: 50%; background: #d8ff63; box-shadow: 0 0 6px rgba(216, 255, 99, 0.9); } .aovivo-compact-serve.hidden { visibility: hidden; } .aovivo-compact-player { display: block; min-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; line-height: 1; font-weight: 800; } .aovivo-compact-number { min-width: 18px; text-align: center; font-size: 12px; line-height: 1; font-weight: 900; color: #fff; } .aovivo-compact-number.current { color: #d8ff63; } .aovivo-compact-number.empty { visibility: hidden; } .aovivo-compact-score-set { display: inline-flex; align-items: flex-start; justify-content: center; white-space: nowrap; } .aovivo-compact-score-tb { position: relative; top: -0.42em; margin-left: 1px; font-size: 0.58em; line-height: 1; } @media screen and (max-width: 768px) and (orientation: portrait) { .aovivo-compact-scoreboard { padding: 5px 7px; } .aovivo-compact-row { min-height: 21px; } .aovivo-compact-player { font-size: 11px; } .aovivo-compact-number { min-width: 19px; font-size: 12px; } } @media screen and (max-width: 480px) and (orientation: portrait) { .aovivo-compact-player { font-size: 10px; } .aovivo-compact-number { min-width: 18px; font-size: 11px; } } #videoWrap:fullscreen { width: 100vw; height: 100vh; aspect-ratio: auto; border: 0; border-radius: 0; background: #000; } #videoWrap:fullscreen #liveVideo { width: 100vw; height: 100vh; object-fit: contain; } `;
 
       document.head.appendChild(style);
     }
@@ -86,17 +153,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function logLine(message, isError = false) {
-      const line = `[${new Date().toLocaleTimeString("pt-BR")}] ${message}`;
+      const line = `[${new Date().toLocaleTimeString( "pt-BR" )}] ${message}`;
 
       console[isError ? "error" : "log"](line);
 
-      [cameraStatus, cameraDebug].forEach((target) => {
+      [
+        cameraStatus,
+        cameraDebug
+      ].forEach((target) => {
         if (!target) {
           return;
         }
 
         const div = document.createElement("div");
+
         div.textContent = line;
+
         div.style.cssText = ` font-size: 12px; line-height: 1.35; margin-top: 4px; color: ${isError ? "#ffb4b4" : "#fff"}; white-space: pre-wrap; `;
 
         target.appendChild(div);
@@ -125,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    function showInitialScreen(text = "Aguardando vídeo...") {
+    function showInitialScreen( text = "Aguardando vídeo..." ) {
       if (telaInicial) {
         telaInicial.textContent = text;
         telaInicial.style.display = "flex";
@@ -151,13 +223,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showPermissionHelp() {
       if (btnTentarNovamente) {
-        btnTentarNovamente.style.display = "inline-flex";
+        btnTentarNovamente.style.display =
+          "inline-flex";
       }
     }
 
     function hidePermissionHelp() {
       if (btnTentarNovamente) {
-        btnTentarNovamente.style.display = "none";
+        btnTentarNovamente.style.display =
+          "none";
       }
     }
 
@@ -166,7 +240,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return null;
       }
 
-      if (value.toDate && typeof value.toDate === "function") {
+      if (
+        value.toDate &&
+        typeof value.toDate === "function"
+      ) {
         return value.toDate();
       }
 
@@ -190,7 +267,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getPeerCandidatesCol(peerId) {
-      return getPeerDoc(peerId).collection("candidates");
+      return getPeerDoc(peerId).collection(
+        "candidates"
+      );
     }
 
     function normalizeScore(score = {}) {
@@ -210,8 +289,13 @@ document.addEventListener("DOMContentLoaded", () => {
             ? score.tieBreakMode
             : null,
 
-        tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
-        tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
+        tieBreakPoints1: Number(
+          score.tieBreakPoints1 || 0
+        ),
+
+        tieBreakPoints2: Number(
+          score.tieBreakPoints2 || 0
+        ),
 
         lastTieBreakMode:
           score.lastTieBreakMode === "tb7" ||
@@ -219,10 +303,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ? score.lastTieBreakMode
             : null,
 
-        lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-        lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+        lastTieBreakPoints1: Number(
+          score.lastTieBreakPoints1 || 0
+        ),
 
-        setHistory: Array.isArray(score.setHistory)
+        lastTieBreakPoints2: Number(
+          score.lastTieBreakPoints2 || 0
+        ),
+
+        setHistory: Array.isArray(
+          score.setHistory
+        )
           ? score.setHistory
           : [],
 
@@ -252,8 +343,12 @@ document.addEventListener("DOMContentLoaded", () => {
         score.tieBreakMode === "super10"
       ) {
         return {
-          p1: String(score.tieBreakPoints1 || 0),
-          p2: String(score.tieBreakPoints2 || 0)
+          p1: String(
+            score.tieBreakPoints1 || 0
+          ),
+          p2: String(
+            score.tieBreakPoints2 || 0
+          )
         };
       }
 
@@ -265,12 +360,18 @@ document.addEventListener("DOMContentLoaded", () => {
         )
       ) {
         return {
-          p1: String(score.lastTieBreakPoints1 || 0),
-          p2: String(score.lastTieBreakPoints2 || 0)
+          p1: String(
+            score.lastTieBreakPoints1 || 0
+          ),
+          p2: String(
+            score.lastTieBreakPoints2 || 0
+          )
         };
       }
 
-      const format = String(matchFormat || "").toLowerCase();
+      const format = String(
+        matchFormat || ""
+      ).toLowerCase();
 
       const noAd =
         format.includes("sem vantagem") ||
@@ -281,53 +382,95 @@ document.addEventListener("DOMContentLoaded", () => {
         format.includes("com vantagem") ||
         format.includes("3 sets");
 
-      const points1 = Number(score.points1 || 0);
-      const points2 = Number(score.points2 || 0);
+      const points1 = Number(
+        score.points1 || 0
+      );
+
+      const points2 = Number(
+        score.points2 || 0
+      );
 
       if (hasAdvantage && !noAd) {
         if (score.advantage === "player1") {
-          return { p1: "AD", p2: "40" };
+          return {
+            p1: "AD",
+            p2: "40"
+          };
         }
 
         if (score.advantage === "player2") {
-          return { p1: "40", p2: "AD" };
+          return {
+            p1: "40",
+            p2: "AD"
+          };
         }
 
         if (points1 >= 3 && points2 >= 3) {
           if (points1 === points2) {
-            return { p1: "40", p2: "40" };
+            return {
+              p1: "40",
+              p2: "40"
+            };
           }
 
           if (points1 > points2) {
-            return { p1: "AD", p2: "40" };
+            return {
+              p1: "AD",
+              p2: "40"
+            };
           }
 
-          return { p1: "40", p2: "AD" };
+          return {
+            p1: "40",
+            p2: "AD"
+          };
         }
       }
 
-      if (noAd && points1 === 3 && points2 === 3) {
-        return { p1: "40", p2: "40" };
+      if (
+        noAd &&
+        points1 === 3 &&
+        points2 === 3
+      ) {
+        return {
+          p1: "40",
+          p2: "40"
+        };
       }
 
       if (score.advantage === "player1") {
-        return { p1: "AD", p2: "40" };
+        return {
+          p1: "AD",
+          p2: "40"
+        };
       }
 
       if (score.advantage === "player2") {
-        return { p1: "40", p2: "AD" };
+        return {
+          p1: "40",
+          p2: "AD"
+        };
       }
 
       if (points1 >= 3 && points2 >= 3) {
         if (points1 === points2) {
-          return { p1: "40", p2: "40" };
+          return {
+            p1: "40",
+            p2: "40"
+          };
         }
 
         if (points1 > points2) {
-          return { p1: "AD", p2: "40" };
+          return {
+            p1: "AD",
+            p2: "40"
+          };
         }
 
-        return { p1: "40", p2: "AD" };
+        return {
+          p1: "40",
+          p2: "AD"
+        };
       }
 
       return {
@@ -337,7 +480,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isDoubles(match) {
-      const gameFormat = String(match.gameFormat || "").trim();
+      const gameFormat = String(
+        match.gameFormat || ""
+      ).trim();
 
       return (
         gameFormat === "Duplas" ||
@@ -346,8 +491,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getPlayerNames(match) {
-      const player1 = String(match.player1 || "Jogador A").trim();
-      const player2 = String(match.player2 || "Jogador B").trim();
+      const player1 = String(
+        match.player1 || "Jogador A"
+      ).trim();
+
+      const player2 = String(
+        match.player2 || "Jogador B"
+      ).trim();
 
       if (!isDoubles(match)) {
         return {
@@ -356,8 +506,13 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       }
 
-      const player3 = String(match.player3 || "Jogador C").trim();
-      const player4 = String(match.player4 || "Jogador D").trim();
+      const player3 = String(
+        match.player3 || "Jogador C"
+      ).trim();
+
+      const player4 = String(
+        match.player4 || "Jogador D"
+      ).trim();
 
       return {
         player1: `${player1}/${player2}`,
@@ -400,7 +555,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setData.tieBreakPoints2 || 0
       );
 
-      if (setData.tieBreakMode === "super10") {
+      if (
+        setData.tieBreakMode === "super10"
+      ) {
         return String(
           playerPosition === 1
             ? tieBreakPoints1
@@ -444,11 +601,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getVisibleSetCount(match, score) {
-      const history = Array.isArray(score.setHistory)
+      const history = Array.isArray(
+        score.setHistory
+      )
         ? score.setHistory
         : [];
 
-      const status = String(match.status || "").toLowerCase();
+      const status = String(
+        match.status || ""
+      ).toLowerCase();
 
       const isFinished =
         status === "finished" ||
@@ -469,11 +630,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getSetValues( match, score, playerPosition, visibleSetCount ) {
-      const history = Array.isArray(score.setHistory)
+      const history = Array.isArray(
+        score.setHistory
+      )
         ? score.setHistory
         : [];
 
-      const status = String(match.status || "").toLowerCase();
+      const status = String(
+        match.status || ""
+      ).toLowerCase();
 
       const isFinished =
         status === "finished" ||
@@ -513,8 +678,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
           values.push(
             playerPosition === 1
-              ? String(score.tieBreakPoints1 || 0)
-              : String(score.tieBreakPoints2 || 0)
+              ? String(
+                  score.tieBreakPoints1 || 0
+                )
+              : String(
+                  score.tieBreakPoints2 || 0
+                )
           );
 
           continue;
@@ -527,8 +696,12 @@ document.addEventListener("DOMContentLoaded", () => {
             main: "6",
             tieBreak:
               playerPosition === 1
-                ? String(score.tieBreakPoints1 || 0)
-                : String(score.tieBreakPoints2 || 0)
+                ? String(
+                    score.tieBreakPoints1 || 0
+                  )
+                : String(
+                    score.tieBreakPoints2 || 0
+                  )
           });
 
           continue;
@@ -554,10 +727,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (typeof value === "object") {
-        return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }"> <span class="aovivo-compact-score-set"> <span class="aovivo-compact-score-main"> ${escapeHtml(value.main)} </span> <span class="aovivo-compact-score-tb"> ${escapeHtml(value.tieBreak)} </span> </span> </span> `;
+        return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }" > <span class="aovivo-compact-score-set"> <span> ${escapeHtml(value.main)} </span> <span class="aovivo-compact-score-tb"> ${escapeHtml(value.tieBreak)} </span> </span> </span> `;
       }
 
-      return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }"> ${escapeHtml(String(value))} </span> `;
+      return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }" > ${escapeHtml(String(value))} </span> `;
     }
 
     function renderCompactPlayerRow( match, score, playerPosition, pointDisplay, visibleSetCount, isFinished ) {
@@ -592,6 +765,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const showPoints = !isFinished;
 
+      const nameColumn =
+        window.innerWidth <= 480
+          ? "112px"
+          : window.innerWidth <= 768
+            ? "130px"
+            : "150px";
+
       const scoreColumns = Array.from(
         {
           length: visibleSetCount
@@ -600,10 +780,11 @@ document.addEventListener("DOMContentLoaded", () => {
       ).join(" ");
 
       const columns = showPoints
-        ? ` minmax(0, 1fr) ${scoreColumns} 26px `
-        : ` minmax(0, 1fr) ${scoreColumns} `;
+        ? `${nameColumn} ${scoreColumns} 26px`
+        : `${nameColumn} ${scoreColumns}`;
 
-      const server = score.server || "player1";
+      const server =
+        score.server || "player1";
 
       const isServing =
         playerPosition === 1
@@ -615,7 +796,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? pointDisplay.p1
           : pointDisplay.p2;
 
-      return ` <div class="aovivo-compact-row" style="grid-template-columns: ${columns};" > <div class="aovivo-compact-name"> <span class="aovivo-compact-serve ${ isServing ? "" : "hidden" }" ></span> <span class="aovivo-compact-player"> ${escapeHtml(playerName)} </span> </div> ${setMarkup.join("")} ${ showPoints ? ` <span class="aovivo-compact-number current"> ${escapeHtml(pointValue)} </span> ` : "" } </div> `;
+      return ` <div class="aovivo-compact-row" style=" grid-template-columns: ${columns}; width: fit-content; " > <div class="aovivo-compact-name"> <span class="aovivo-compact-serve ${ isServing ? "" : "hidden" }" ></span> <span class="aovivo-compact-player"> ${escapeHtml(playerName)} </span> </div> ${setMarkup.join("")} ${ showPoints ? ` <span class="aovivo-compact-number current"> ${escapeHtml(pointValue)} </span> ` : "" } </div> `;
     }
 
     function renderPlacar(match) {
@@ -623,9 +804,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const score = normalizeScore(match.score || {});
+      const score = normalizeScore(
+        match.score || {}
+      );
 
-      const status = String(match.status || "").toLowerCase();
+      const status = String(
+        match.status || ""
+      ).toLowerCase();
 
       const isFinished =
         status === "finished" ||
@@ -641,7 +826,559 @@ document.addEventListener("DOMContentLoaded", () => {
       const visibleSetCount =
         getVisibleSetCount(match, score);
 
-      tvGridPlacar.innerHTML = ` <div class="aovivo-compact-scoreboard"> ${renderCompactPlayerRow( match, score, 1, pointDisplay, visibleSetCount, isFinished )} ${renderCompactPlayerRow( match, score, 2, pointDisplay, visibleSetCount, isFinished )} </div> `;
+      const scoreboardState =
+        isFinished
+          ? "finished"
+          : "live";
+
+      tvGridPlacar.innerHTML = ` <div class=" aovivo-compact-scoreboard ${scoreboardState} sets-${visibleSetCount} " > ${renderCompactPlayerRow( match, score, 1, pointDisplay, visibleSetCount, isFinished )} ${renderCompactPlayerRow( match, score, 2, pointDisplay, visibleSetCount, isFinished )} </div> `;
+
+      if (state.isRecording) {
+        updateScoreboardRecordingSnapshot();
+      }
+    }
+
+    function getSupportedRecordingMimeType() {
+      if (
+        typeof MediaRecorder ===
+        "undefined"
+      ) {
+        return "";
+      }
+
+      const mimeTypes = [
+        "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+        "video/mp4",
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm"
+      ];
+
+      for (const mimeType of mimeTypes) {
+        if (
+          MediaRecorder.isTypeSupported(
+            mimeType
+          )
+        ) {
+          return mimeType;
+        }
+      }
+
+      return "";
+    }
+
+    function updateRecordingButtons() {
+      const isBroadcaster =
+        role === "broadcaster";
+
+      if (btnIniciarGravacao) {
+        btnIniciarGravacao.style.display =
+          isBroadcaster &&
+          !state.isRecording &&
+          !!state.localStream
+            ? "inline-flex"
+            : "none";
+      }
+
+      if (btnPararGravacao) {
+        btnPararGravacao.style.display =
+          isBroadcaster &&
+          state.isRecording
+            ? "inline-flex"
+            : "none";
+      }
+
+      if (btnAtivarAudio) {
+        btnAtivarAudio.style.display =
+          isBroadcaster &&
+          !!state.localStream
+            ? "inline-flex"
+            : "none";
+
+        if (isBroadcaster) {
+          btnAtivarAudio.innerHTML =
+            state.microphoneEnabled
+              ? ` <ion-icon name="mic-outline"></ion-icon> <span>Desativar áudio</span> `
+              : ` <ion-icon name="mic-off-outline"></ion-icon> <span>Ativar áudio</span> `;
+        }
+      }
+    }
+
+    function toggleMicrophone() {
+      if (
+        role !== "broadcaster" ||
+        !state.localStream
+      ) {
+        return;
+      }
+
+      const audioTracks =
+        state.localStream.getAudioTracks();
+
+      if (!audioTracks.length) {
+        alert(
+          "Nenhum microfone foi encontrado."
+        );
+        return;
+      }
+
+      state.microphoneEnabled =
+        !state.microphoneEnabled;
+
+      audioTracks.forEach((track) => {
+        track.enabled =
+          state.microphoneEnabled;
+      });
+
+      updateRecordingButtons();
+
+      setStatus(
+        state.microphoneEnabled
+          ? "MICROFONE ATIVADO"
+          : "MICROFONE DESATIVADO"
+      );
+    }
+
+    async function updateScoreboardRecordingSnapshot() {
+      if (
+        typeof html2canvas === "undefined" ||
+        !tvGridPlacar ||
+        !state.recordingCanvas
+      ) {
+        return;
+      }
+
+      try {
+        const scoreboard =
+          await html2canvas(
+            tvGridPlacar,
+            {
+              backgroundColor: null,
+              scale: 1,
+              useCORS: true,
+              logging: false
+            }
+          );
+
+        state.scoreboardSnapshotCanvas =
+          scoreboard;
+      } catch (error) {
+        console.error(
+          "Erro ao capturar placar:",
+          error
+        );
+      }
+    }
+
+    function getRecordingCanvasSize() {
+      return {
+        width:
+          videoEl?.videoWidth ||
+          videoEl?.clientWidth ||
+          1280,
+
+        height:
+          videoEl?.videoHeight ||
+          videoEl?.clientHeight ||
+          720
+      };
+    }
+
+    function drawRecordingFrame() {
+      if (
+        !state.recordingCanvas ||
+        !state.recordingContext ||
+        !videoEl ||
+        videoEl.readyState < 2
+      ) {
+        state.recordingAnimationFrame =
+          requestAnimationFrame(
+            drawRecordingFrame
+          );
+
+        return;
+      }
+
+      const canvas =
+        state.recordingCanvas;
+
+      const context =
+        state.recordingContext;
+
+      const videoWidth =
+        videoEl.videoWidth ||
+        canvas.width;
+
+      const videoHeight =
+        videoEl.videoHeight ||
+        canvas.height;
+
+      const canvasRatio =
+        canvas.width / canvas.height;
+
+      const videoRatio =
+        videoWidth / videoHeight;
+
+      let drawWidth = canvas.width;
+      let drawHeight = canvas.height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (videoRatio > canvasRatio) {
+        drawHeight = canvas.height;
+        drawWidth = drawHeight * videoRatio;
+        offsetX =
+          (canvas.width - drawWidth) / 2;
+      } else {
+        drawWidth = canvas.width;
+        drawHeight = drawWidth / videoRatio;
+        offsetY =
+          (canvas.height - drawHeight) / 2;
+      }
+
+      context.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      context.fillStyle = "#000";
+
+      context.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      context.drawImage(
+        videoEl,
+        offsetX,
+        offsetY,
+        drawWidth,
+        drawHeight
+      );
+
+      if (
+        state.scoreboardSnapshotCanvas &&
+        videoWrap &&
+        tvGridPlacar
+      ) {
+        const videoRect =
+          videoWrap.getBoundingClientRect();
+
+        const scoreboardRect =
+          tvGridPlacar.getBoundingClientRect();
+
+        if (
+          videoRect.width > 0 &&
+          videoRect.height > 0
+        ) {
+          const scaleX =
+            canvas.width / videoRect.width;
+
+          const scaleY =
+            canvas.height / videoRect.height;
+
+          const x =
+            (scoreboardRect.left -
+              videoRect.left) * scaleX;
+
+          const y =
+            (scoreboardRect.top -
+              videoRect.top) * scaleY;
+
+          const width =
+            scoreboardRect.width * scaleX;
+
+          const height =
+            scoreboardRect.height * scaleY;
+
+          context.drawImage(
+            state.scoreboardSnapshotCanvas,
+            x,
+            y,
+            width,
+            height
+          );
+        }
+      }
+
+      state.recordingAnimationFrame =
+        requestAnimationFrame(
+          drawRecordingFrame
+        );
+    }
+
+    function createRecordingStream() {
+      const size =
+        getRecordingCanvasSize();
+
+      const canvas =
+        document.createElement("canvas");
+
+      canvas.width = size.width;
+      canvas.height = size.height;
+
+      const context =
+        canvas.getContext("2d");
+
+      state.recordingCanvas = canvas;
+      state.recordingContext = context;
+
+      const canvasStream =
+        canvas.captureStream(30);
+
+      if (state.localStream) {
+        state.localStream
+          .getAudioTracks()
+          .forEach((track) => {
+            canvasStream.addTrack(track);
+          });
+      }
+
+      state.recordingStream =
+        canvasStream;
+
+      drawRecordingFrame();
+
+      return canvasStream;
+    }
+    function stopRecordingCanvas() {
+      if (
+        state.recordingAnimationFrame
+      ) {
+        cancelAnimationFrame(
+          state.recordingAnimationFrame
+        );
+
+        state.recordingAnimationFrame =
+          null;
+      }
+
+      if (state.recordingStream) {
+        state.recordingStream
+          .getTracks()
+          .forEach((track) => {
+            try {
+              track.stop();
+            } catch (_) {}
+          });
+      }
+
+      state.recordingStream = null;
+      state.recordingCanvas = null;
+      state.recordingContext = null;
+      state.scoreboardSnapshotCanvas = null;
+    }
+
+    async function startRecording() {
+      if (role !== "broadcaster") {
+        return;
+      }
+
+      if (!state.localStream) {
+        alert(
+          "A câmera ainda não foi iniciada."
+        );
+        return;
+      }
+
+      if (
+        typeof MediaRecorder ===
+        "undefined"
+      ) {
+        alert(
+          "Este navegador não suporta gravação de vídeo."
+        );
+        return;
+      }
+
+      if (state.isRecording) {
+        return;
+      }
+
+      const mimeType =
+        getSupportedRecordingMimeType();
+
+      const options = mimeType
+        ? {
+            mimeType,
+            videoBitsPerSecond: 2500000,
+            audioBitsPerSecond: 128000
+          }
+        : {};
+
+      try {
+        state.recordedChunks = [];
+        state.recordingMimeType = mimeType;
+
+        await updateScoreboardRecordingSnapshot();
+
+        const recordingStream =
+          createRecordingStream();
+
+        state.mediaRecorder =
+          new MediaRecorder(
+            recordingStream,
+            options
+          );
+
+        state.mediaRecorder.ondataavailable =
+          (event) => {
+            if (
+              event.data &&
+              event.data.size > 0
+            ) {
+              state.recordedChunks.push(
+                event.data
+              );
+            }
+          };
+
+        state.mediaRecorder.onstart = () => {
+          state.isRecording = true;
+
+          updateRecordingButtons();
+
+          setStatus(
+            "TRANSMITINDO E GRAVANDO"
+          );
+        };
+
+        state.mediaRecorder.onerror =
+          (event) => {
+            console.error(
+              "Erro no MediaRecorder:",
+              event.error
+            );
+
+            state.isRecording = false;
+
+            updateRecordingButtons();
+            stopRecordingCanvas();
+
+            alert(
+              "Erro ao gravar a partida."
+            );
+          };
+
+        state.mediaRecorder.onstop = () => {
+          state.isRecording = false;
+
+          updateRecordingButtons();
+          stopRecordingCanvas();
+
+          saveRecordedVideo();
+        };
+
+        state.mediaRecorder.start(1000);
+      } catch (error) {
+        console.error(
+          "Erro ao iniciar gravação:",
+          error
+        );
+
+        stopRecordingCanvas();
+
+        alert(
+          "Não foi possível iniciar a gravação."
+        );
+      }
+    }
+
+    function stopRecording() {
+      if (
+        !state.mediaRecorder ||
+        state.mediaRecorder.state ===
+          "inactive"
+      ) {
+        return;
+      }
+
+      state.mediaRecorder.stop();
+    }
+
+    async function saveRecordedVideo() {
+      if (!state.recordedChunks.length) {
+        alert(
+          "Nenhum vídeo foi gravado."
+        );
+        return;
+      }
+
+      const mimeType =
+        state.recordingMimeType ||
+        "video/webm";
+
+      const extension =
+        mimeType.includes("mp4")
+          ? "mp4"
+          : "webm";
+
+      const blob = new Blob(
+        state.recordedChunks,
+        {
+          type: mimeType
+        }
+      );
+
+      const fileName =
+        `tennispro-partida-${Date.now()}.${extension}`;
+
+      const file = new File(
+        [blob],
+        fileName,
+        {
+          type: mimeType
+        }
+      );
+
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({
+          files: [file]
+        })
+      ) {
+        try {
+          await navigator.share({
+            title: "Gravação da partida",
+            text: "Vídeo gravado pelo TennisPro",
+            files: [file]
+          });
+
+          return;
+        } catch (error) {
+          console.warn(
+            "Compartilhamento cancelado:",
+            error
+          );
+        }
+      }
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const anchor =
+        document.createElement("a");
+
+      anchor.href = url;
+      anchor.download = fileName;
+      anchor.style.display = "none";
+
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 3000);
+
+      alert(
+        "O vídeo foi preparado para ser salvo no celular."
+      );
     }
 
     function stopCamera() {
@@ -650,11 +1387,13 @@ document.addEventListener("DOMContentLoaded", () => {
         typeof state.localStream.getTracks ===
           "function"
       ) {
-        state.localStream.getTracks().forEach((track) => {
-          try {
-            track.stop();
-          } catch (_) {}
-        });
+        state.localStream.getTracks().forEach(
+          (track) => {
+            try {
+              track.stop();
+            } catch (_) {}
+          }
+        );
       }
 
       state.localStream = null;
@@ -667,19 +1406,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function stopWebRtc() {
-      state.broadcasterPcMap.forEach((pc) => {
-        try {
-          pc.close();
-        } catch (_) {}
-      });
+      state.broadcasterPcMap.forEach(
+        (pc) => {
+          try {
+            pc.close();
+          } catch (_) {}
+        }
+      );
 
       state.broadcasterPcMap.clear();
 
-      state.unsubCandidateListeners.forEach((unsubscribe) => {
-        try {
-          unsubscribe();
-        } catch (_) {}
-      });
+      state.unsubCandidateListeners.forEach(
+        (unsubscribe) => {
+          try {
+            unsubscribe();
+          } catch (_) {}
+        }
+      );
 
       state.unsubCandidateListeners.clear();
 
@@ -714,22 +1457,37 @@ document.addEventListener("DOMContentLoaded", () => {
         state.finishTimer = null;
       }
 
+      if (
+        role === "broadcaster" &&
+        state.isRecording &&
+        state.mediaRecorder
+      ) {
+        try {
+          state.mediaRecorder.stop();
+        } catch (_) {}
+      }
+
+      stopRecordingCanvas();
       stopWebRtc();
       stopCamera();
     }
 
     async function fetchMatchAndToken() {
       try {
-        const snap = await getMatchRef().get();
+        const snap =
+          await getMatchRef().get();
 
         if (!snap.exists) {
           return null;
         }
 
-        const data = snap.data() || {};
+        const data =
+          snap.data() || {};
 
         if (!shareToken && data.shareToken) {
-          shareToken = String(data.shareToken || "").trim();
+          shareToken = String(
+            data.shareToken || ""
+          ).trim();
         }
 
         return data;
@@ -744,7 +1502,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function createBroadcasterPeer(viewerId) {
-      if (state.broadcasterPcMap.has(viewerId)) {
+      if (
+        state.broadcasterPcMap.has(viewerId)
+      ) {
         return;
       }
 
@@ -752,12 +1512,20 @@ document.addEventListener("DOMContentLoaded", () => {
         iceServers
       });
 
-      state.broadcasterPcMap.set(viewerId, pc);
+      state.broadcasterPcMap.set(
+        viewerId,
+        pc
+      );
 
       if (state.localStream) {
-        state.localStream.getTracks().forEach((track) => {
-          pc.addTrack(track, state.localStream);
-        });
+        state.localStream.getTracks().forEach(
+          (track) => {
+            pc.addTrack(
+              track,
+              state.localStream
+            );
+          }
+        );
       }
 
       pc.onicecandidate = async (event) => {
@@ -766,10 +1534,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-          await getPeerCandidatesCol(viewerId).add({
+          await getPeerCandidatesCol(
+            viewerId
+          ).add({
             side: "broadcaster",
-            candidate: event.candidate.toJSON(),
-            ts: firebase.firestore.FieldValue.serverTimestamp()
+            candidate:
+              event.candidate.toJSON(),
+            ts:
+              firebase.firestore.FieldValue
+                .serverTimestamp()
           });
         } catch (error) {
           logLine(
@@ -780,13 +1553,16 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === "connected") {
+        if (
+          pc.connectionState === "connected"
+        ) {
           getPeerDoc(viewerId)
             .set(
               {
                 status: "connected",
                 updatedAt:
-                  firebase.firestore.FieldValue.serverTimestamp()
+                  firebase.firestore.FieldValue
+                    .serverTimestamp()
               },
               { merge: true }
             )
@@ -794,7 +1570,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      const offer = await pc.createOffer();
+      const offer =
+        await pc.createOffer();
 
       await pc.setLocalDescription(offer);
 
@@ -810,72 +1587,85 @@ document.addEventListener("DOMContentLoaded", () => {
             sdp: offer.sdp
           },
           updatedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
+            firebase.firestore.FieldValue
+              .serverTimestamp()
         },
         { merge: true }
       );
 
-      const unsubscribePeer = getPeerDoc(viewerId).onSnapshot(
-        async (snap) => {
-          const data = snap.data() || {};
+      const unsubscribePeer =
+        getPeerDoc(viewerId).onSnapshot(
+          async (snap) => {
+            const data =
+              snap.data() || {};
 
-          if (
-            data.answer &&
-            !pc.currentRemoteDescription
-          ) {
-            try {
-              await pc.setRemoteDescription(
-                new RTCSessionDescription(data.answer)
-              );
-
-              await getPeerDoc(viewerId).set(
-                {
-                  status: "answered",
-                  updatedAt:
-                    firebase.firestore.FieldValue.serverTimestamp()
-                },
-                { merge: true }
-              );
-            } catch (error) {
-              logLine(
-                `Erro ao aplicar answer: ${ error?.message || error }`,
-                true
-              );
-            }
-          }
-        }
-      );
-
-      const unsubscribeCandidates =
-        getPeerCandidatesCol(viewerId).onSnapshot(
-          (snapshot) => {
-            snapshot.docChanges().forEach(async (change) => {
-              if (change.type !== "added") {
-                return;
-              }
-
-              const data = change.doc.data();
-
-              if (
-                !data?.candidate ||
-                data.side !== "viewer"
-              ) {
-                return;
-              }
-
+            if (
+              data.answer &&
+              !pc.currentRemoteDescription
+            ) {
               try {
-                await pc.addIceCandidate(
-                  new RTCIceCandidate(data.candidate)
+                await pc.setRemoteDescription(
+                  new RTCSessionDescription(
+                    data.answer
+                  )
+                );
+
+                await getPeerDoc(viewerId).set(
+                  {
+                    status: "answered",
+                    updatedAt:
+                      firebase.firestore
+                        .FieldValue
+                        .serverTimestamp()
+                  },
+                  { merge: true }
                 );
               } catch (error) {
                 logLine(
-                  `Erro ao adicionar ICE: ${ error?.message || error }`,
+                  `Erro ao aplicar answer: ${ error?.message || error }`,
                   true
                 );
               }
-            });
+            }
           }
         );
+
+      const unsubscribeCandidates =
+        getPeerCandidatesCol(viewerId)
+          .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach(
+              async (change) => {
+                if (
+                  change.type !== "added"
+                ) {
+                  return;
+                }
+
+                const data =
+                  change.doc.data();
+
+                if (
+                  !data?.candidate ||
+                  data.side !== "viewer"
+                ) {
+                  return;
+                }
+
+                try {
+                  await pc.addIceCandidate(
+                    new RTCIceCandidate(
+                      data.candidate
+                    )
+                  );
+                } catch (error) {
+                  logLine(
+                    `Erro ao adicionar ICE: ${ error?.message || error }`,
+                    true
+                  );
+                }
+              }
+            );
+          });
 
       state.unsubCandidateListeners.set(
         `peer-${viewerId}-doc`,
@@ -894,13 +1684,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const matchData = await fetchMatchAndToken();
+      const matchData =
+        await fetchMatchAndToken();
 
       if (
         !matchData ||
         matchData.shareEnabled !== true
       ) {
-        setStatus("PARTIDA NÃO DISPONÍVEL");
+        setStatus(
+          "PARTIDA NÃO DISPONÍVEL"
+        );
         return;
       }
 
@@ -916,29 +1709,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         state.localStream =
-          await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: {
-                ideal: "environment"
+          await navigator.mediaDevices
+            .getUserMedia({
+              video: {
+                facingMode: {
+                  ideal: "environment"
+                },
+                width: {
+                  ideal: 1280
+                },
+                height: {
+                  ideal: 720
+                }
               },
-              width: {
-                ideal: 1280
-              },
-              height: {
-                ideal: 720
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
               }
-            },
-            audio: false
-          });
+            });
       } catch (_) {
         try {
           state.localStream =
-            await navigator.mediaDevices.getUserMedia({
-              video: true,
-              audio: false
-            });
+            await navigator.mediaDevices
+              .getUserMedia({
+                video: true,
+                audio: {
+                  echoCancellation: true,
+                  noiseSuppression: true,
+                  autoGainControl: true
+                }
+              });
         } catch (error) {
-          setStatus("CÂMERA INDISPONÍVEL");
+          setStatus(
+            "CÂMERA INDISPONÍVEL"
+          );
 
           logLine(
             `Erro câmera: ${ error?.name || "Erro" } - ${ error?.message || error }`,
@@ -956,8 +1761,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      const audioTracks =
+        state.localStream.getAudioTracks();
+
+      state.microphoneEnabled =
+        audioTracks.length > 0;
+
       if (videoEl) {
-        videoEl.srcObject = state.localStream;
+        videoEl.srcObject =
+          state.localStream;
+
         videoEl.muted = true;
         videoEl.playsInline = true;
 
@@ -967,6 +1780,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       ensureVideoVisible();
+      updateRecordingButtons();
 
       await getMatchRef().set(
         {
@@ -974,20 +1788,26 @@ document.addEventListener("DOMContentLoaded", () => {
           streamRole: "broadcaster",
           broadcasterPeerId: state.peerId,
           broadcasterStartedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
+            firebase.firestore.FieldValue
+              .serverTimestamp()
         },
         { merge: true }
       );
 
-      setStatus("TRANSMITINDO AO VIVO");
+      setStatus(
+        "TRANSMITINDO AO VIVO"
+      );
 
       state.unsubPeers =
         getPeersCol().onSnapshot(
           (snapshot) => {
             snapshot.docChanges().forEach(
               (change) => {
-                const viewerId = change.doc.id;
-                const data = change.doc.data() || {};
+                const viewerId =
+                  change.doc.id;
+
+                const data =
+                  change.doc.data() || {};
 
                 if (data.role !== "viewer") {
                   return;
@@ -1004,15 +1824,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (
                   validChange &&
                   validStatus &&
-                  !state.broadcasterPcMap.has(viewerId)
+                  !state.broadcasterPcMap.has(
+                    viewerId
+                  )
                 ) {
-                  createBroadcasterPeer(viewerId)
-                    .catch((error) => {
-                      logLine(
-                        `Erro ao criar peer: ${ error?.message || error }`,
-                        true
-                      );
-                    });
+                  createBroadcasterPeer(
+                    viewerId
+                  ).catch((error) => {
+                    logLine(
+                      `Erro ao criar peer: ${ error?.message || error }`,
+                      true
+                    );
+                  });
                 }
               }
             );
@@ -1026,13 +1849,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const matchData = await fetchMatchAndToken();
+      const matchData =
+        await fetchMatchAndToken();
 
       if (
         !matchData ||
         matchData.shareEnabled !== true
       ) {
-        setStatus("PARTIDA NÃO DISPONÍVEL");
+        setStatus(
+          "PARTIDA NÃO DISPONÍVEL"
+        );
         return;
       }
 
@@ -1041,12 +1867,24 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      setStatus("CONECTANDO TRANSMISSÃO...");
+      setStatus(
+        "CONECTANDO TRANSMISSÃO..."
+      );
+
       setInfo("Modo espectador");
 
+      if (btnAtivarAudio) {
+        btnAtivarAudio.style.display =
+          "none";
+      }
+
       const myPeerId = state.peerId;
-      const myPeerRef = getPeerDoc(myPeerId);
-      const myCandidatesRef = getPeerCandidatesCol(myPeerId);
+
+      const myPeerRef =
+        getPeerDoc(myPeerId);
+
+      const myCandidatesRef =
+        getPeerCandidatesCol(myPeerId);
 
       await myPeerRef.set(
         {
@@ -1054,10 +1892,14 @@ document.addEventListener("DOMContentLoaded", () => {
           status: "requesting",
           peerUid: myPeerId,
           shareToken,
+
           createdAt:
-            firebase.firestore.FieldValue.serverTimestamp(),
+            firebase.firestore.FieldValue
+              .serverTimestamp(),
+
           updatedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
+            firebase.firestore.FieldValue
+              .serverTimestamp()
         },
         { merge: true }
       );
@@ -1069,27 +1911,125 @@ document.addEventListener("DOMContentLoaded", () => {
       state.viewerPc = pc;
 
       pc.ontrack = (event) => {
-        const remoteStream = event.streams[0];
+        let remoteStream =
+          event.streams &&
+          event.streams[0];
 
-        if (videoEl) {
-          videoEl.srcObject = remoteStream;
-          videoEl.muted = true;
-          videoEl.playsInline = true;
+        if (!remoteStream) {
+          remoteStream =
+            new MediaStream();
 
-          videoEl.play().catch(() => {});
+          if (event.track) {
+            remoteStream.addTrack(
+              event.track
+            );
+          }
+        }
+
+        if (!videoEl) {
+          return;
+        }
+
+        videoEl.srcObject =
+          remoteStream;
+
+        videoEl.playsInline = true;
+        videoEl.autoplay = true;
+        videoEl.controls = false;
+
+        /* Tentativa principal: vídeo com áudio. */
+        videoEl.muted = false;
+        videoEl.removeAttribute("muted");
+        videoEl.volume = 1;
+
+        const playWithAudio =
+          videoEl.play();
+
+        if (
+          playWithAudio &&
+          typeof playWithAudio.catch ===
+            "function"
+        ) {
+          playWithAudio.catch(() => {
+            /* Alguns navegadores bloqueiam autoplay com áudio. Nesse caso, o vídeo continua funcionando silenciosamente e o primeiro toque no vídeo libera o áudio. */
+            videoEl.muted = true;
+
+            videoEl.play().catch(() => {});
+
+            if (telaInicial) {
+              telaInicial.textContent =
+                "Iniciar transmissão da partida";
+              telaInicial.style.display =
+                "flex";
+              telaInicial.style.pointerEvents =
+                "auto";
+              telaInicial.style.cursor =
+                "pointer";
+
+              const enableAudio =
+                async () => {
+                  try {
+                    videoEl.muted = false;
+                    videoEl.removeAttribute(
+                      "muted"
+                    );
+                    videoEl.volume = 1;
+
+                    await videoEl.play();
+
+                    telaInicial.style.display =
+                      "none";
+
+                    telaInicial.style.pointerEvents =
+                      "none";
+
+                    videoEl.removeEventListener(
+                      "click",
+                      enableAudio
+                    );
+                  } catch (error) {
+                    console.error(
+                      "Erro ao ativar áudio:",
+                      error
+                    );
+                  }
+                };
+
+              telaInicial.addEventListener(
+                "click",
+                enableAudio,
+                { once: true }
+              );
+
+              videoEl.addEventListener(
+                "click",
+                enableAudio,
+                { once: true }
+              );
+            }
+          });
         }
 
         ensureVideoVisible();
-        setStatus("ASSISTINDO AO VIVO");
+        setStatus(
+          "ASSISTINDO AO VIVO"
+        );
       };
 
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === "failed") {
+        if (
+          pc.connectionState === "failed"
+        ) {
           setStatus("ERRO NA CONEXÃO");
         }
 
-        if (pc.connectionState === "disconnected") {
-          setStatus("TRANSMISSÃO DESCONECTADA");
+        if (
+          pc.connectionState ===
+          "disconnected"
+        ) {
+          setStatus(
+            "TRANSMISSÃO DESCONECTADA"
+          );
         }
       };
 
@@ -1101,9 +2041,11 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           await myCandidatesRef.add({
             side: "viewer",
-            candidate: event.candidate.toJSON(),
+            candidate:
+              event.candidate.toJSON(),
             ts:
-              firebase.firestore.FieldValue.serverTimestamp()
+              firebase.firestore.FieldValue
+                .serverTimestamp()
           });
         } catch (error) {
           logLine(
@@ -1116,7 +2058,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const unsubscribePeer =
         myPeerRef.onSnapshot(
           async (snap) => {
-            const data = snap.data() || {};
+            const data =
+              snap.data() || {};
 
             if (
               data.offer &&
@@ -1124,13 +2067,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
               try {
                 await pc.setRemoteDescription(
-                  new RTCSessionDescription(data.offer)
+                  new RTCSessionDescription(
+                    data.offer
+                  )
                 );
 
                 const answer =
                   await pc.createAnswer();
 
-                await pc.setLocalDescription(answer);
+                await pc.setLocalDescription(
+                  answer
+                );
 
                 await myPeerRef.set(
                   {
@@ -1138,12 +2085,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     status: "answered",
                     peerUid: myPeerId,
                     shareToken,
+
                     answer: {
                       type: answer.type,
                       sdp: answer.sdp
                     },
+
                     updatedAt:
-                      firebase.firestore.FieldValue
+                      firebase.firestore
+                        .FieldValue
                         .serverTimestamp()
                   },
                   { merge: true }
@@ -1154,7 +2104,9 @@ document.addEventListener("DOMContentLoaded", () => {
                   true
                 );
 
-                setStatus("ERRO NA CONEXÃO");
+                setStatus(
+                  "ERRO NA CONEXÃO"
+                );
               }
             }
           }
@@ -1165,11 +2117,14 @@ document.addEventListener("DOMContentLoaded", () => {
           (snapshot) => {
             snapshot.docChanges().forEach(
               async (change) => {
-                if (change.type !== "added") {
+                if (
+                  change.type !== "added"
+                ) {
                   return;
                 }
 
-                const data = change.doc.data();
+                const data =
+                  change.doc.data();
 
                 if (
                   !data?.candidate ||
@@ -1180,7 +2135,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 try {
                   await pc.addIceCandidate(
-                    new RTCIceCandidate(data.candidate)
+                    new RTCIceCandidate(
+                      data.candidate
+                    )
                   );
                 } catch (error) {
                   logLine(
@@ -1193,7 +2150,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         );
 
-      state.unsubPeerDoc = unsubscribePeer;
+      state.unsubPeerDoc =
+        unsubscribePeer;
 
       state.unsubCandidateListeners.set(
         `viewer-${myPeerId}`,
@@ -1208,11 +2166,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
       state.transmissionEnded = true;
 
-      if (liveEndingMessage) {
-        liveEndingMessage.style.display = "flex";
+      if (
+        role === "broadcaster" &&
+        state.isRecording &&
+        state.mediaRecorder
+      ) {
+        try {
+          state.mediaRecorder.stop();
+        } catch (_) {}
       }
 
-      setStatus("TRANSMISSÃO ENCERRADA");
+      if (liveEndingMessage) {
+        liveEndingMessage.style.display =
+          "flex";
+      }
+
+      setStatus(
+        "TRANSMISSÃO ENCERRADA"
+      );
 
       stopWebRtc();
 
@@ -1224,7 +2195,8 @@ document.addEventListener("DOMContentLoaded", () => {
             {
               streamActive: false,
               streamEndedAt:
-                firebase.firestore.FieldValue.serverTimestamp()
+                firebase.firestore.FieldValue
+                  .serverTimestamp()
             },
             { merge: true }
           )
@@ -1237,11 +2209,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function startEndingCountdown(match) {
-      if (!match || state.transmissionEnded) {
+      if (
+        !match ||
+        state.transmissionEnded
+      ) {
         return;
       }
 
-      const status = String(match.status || "").toLowerCase();
+      const status = String(
+        match.status || ""
+      ).toLowerCase();
 
       const isFinished =
         status === "finished" ||
@@ -1258,14 +2235,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const finishedAt =
-        getTimestampDate(match.finishedAt);
+        getTimestampDate(
+          match.finishedAt
+        );
 
       if (!finishedAt) {
         return;
       }
 
       const elapsed =
-        Date.now() - finishedAt.getTime();
+        Date.now() -
+        finishedAt.getTime();
 
       const remaining = Math.max(
         0,
@@ -1301,7 +2281,9 @@ document.addEventListener("DOMContentLoaded", () => {
         getMatchRef().onSnapshot(
           (snap) => {
             if (!snap.exists) {
-              setStatus("PARTIDA NÃO ENCONTRADA");
+              setStatus(
+                "PARTIDA NÃO ENCONTRADA"
+              );
               return;
             }
 
@@ -1329,18 +2311,28 @@ document.addEventListener("DOMContentLoaded", () => {
             ).toLowerCase();
 
             if (status === "finished") {
-              setStatus("PARTIDA FINALIZADA");
-            } else if (status === "suspended") {
-              setStatus("PARTIDA SUSPENSA");
+              setStatus(
+                "PARTIDA FINALIZADA"
+              );
+            } else if (
+              status === "suspended"
+            ) {
+              setStatus(
+                "PARTIDA SUSPENSA"
+              );
             } else if (
               status === "live" &&
               role === "viewer"
             ) {
-              setStatus("ASSISTINDO AO VIVO");
+              setStatus(
+                "ASSISTINDO AO VIVO"
+              );
             }
           },
           (error) => {
-            setStatus("ERRO AO CARREGAR PARTIDA");
+            setStatus(
+              "ERRO AO CARREGAR PARTIDA"
+            );
 
             logLine(
               `Erro Firestore match: ${ error?.message || error }`,
@@ -1405,6 +2397,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resetDebugBoxes();
       injectCompactScoreboardStyles();
       showInitialScreen();
+      updateRecordingButtons();
 
       listenToMatch();
 
@@ -1435,7 +2428,8 @@ document.addEventListener("DOMContentLoaded", () => {
       cleanup();
 
       if (liveEndingMessage) {
-        liveEndingMessage.style.display = "none";
+        liveEndingMessage.style.display =
+          "none";
       }
 
       await start();
@@ -1443,15 +2437,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (btnAbrirCamera) {
       if (role === "viewer") {
-        btnAbrirCamera.style.display = "none";
+        btnAbrirCamera.style.display =
+          "none";
       } else {
-        btnAbrirCamera.style.display = "inline-flex";
+        btnAbrirCamera.style.display =
+          "inline-flex";
 
         btnAbrirCamera.addEventListener(
           "click",
           startBroadcaster
         );
       }
+    }
+
+    if (btnIniciarGravacao) {
+      btnIniciarGravacao.addEventListener(
+        "click",
+        startRecording
+      );
+    }
+
+    if (btnPararGravacao) {
+      btnPararGravacao.addEventListener(
+        "click",
+        stopRecording
+      );
+    }
+
+    if (btnAtivarAudio) {
+      btnAtivarAudio.addEventListener(
+        "click",
+        toggleMicrophone
+      );
     }
 
     if (btnExpandirTela) {
@@ -1468,7 +2485,9 @@ document.addEventListener("DOMContentLoaded", () => {
       videoWrap.addEventListener(
         "click",
         async (event) => {
-          if (event.target.closest("button")) {
+          if (
+            event.target.closest("button")
+          ) {
             return;
           }
 
