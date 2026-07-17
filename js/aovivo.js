@@ -109,9 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const LIVEKIT_URL =
       "wss://livescoretennis-hkk3b2oi.livekit.cloud";
 
-    const LIVEKIT_TOKEN_SERVER_ID =
-      "livescoretennis-97cavx";
-
     const params =
       new URLSearchParams(
         window.location.search
@@ -175,29 +172,27 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("tvGridPlacar");
 
     const liveEndingMessage =
-      document.getElementById("liveEndingMessage");
+      document.getElementById(
+        "liveEndingMessage"
+      );
+
+    let viewerStartButton = null;
 
     const state = {
       match: null,
-
       liveKitRoom: null,
       liveKitLocalTracks: [],
       liveKitAudioElements: [],
-
       localStream: null,
-
       unsubMatch: null,
-
       started: false,
       transmissionEnded: false,
       refreshLock: false,
       finishTimer: null,
-
       mediaRecorder: null,
       recordedChunks: [],
       recordingMimeType: "",
       isRecording: false,
-
       recordingCanvas: null,
       recordingContext: null,
       recordingStream: null,
@@ -246,15 +241,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showInitialScreen( text = "Aguardando vídeo..." ) {
-      if (telaInicial) {
-        telaInicial.textContent = text;
-        telaInicial.style.display = "flex";
+      if (!telaInicial) return;
+
+      telaInicial.innerHTML = "";
+      telaInicial.style.display = "flex";
+      telaInicial.style.pointerEvents = "auto";
+      telaInicial.style.flexDirection = "column";
+      telaInicial.style.alignItems = "center";
+      telaInicial.style.justifyContent = "center";
+      telaInicial.style.gap = "12px";
+
+      if (role === "viewer") {
+        viewerStartButton =
+          document.createElement("button");
+
+        viewerStartButton.type = "button";
+        viewerStartButton.className =
+          "btn green";
+
+        viewerStartButton.style.display =
+          "inline-flex";
+
+        viewerStartButton.style.pointerEvents =
+          "auto";
+
+        viewerStartButton.innerHTML = ` <ion-icon name="radio-outline"></ion-icon> <span>Iniciar transmissão</span> `;
+
+        viewerStartButton.addEventListener(
+          "click",
+          async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            await activateViewerAudio();
+          }
+        );
+
+        telaInicial.appendChild(
+          viewerStartButton
+        );
       }
+
+      const message =
+        document.createElement("div");
+
+      message.textContent = text;
+      message.style.fontWeight = "900";
+      message.style.textAlign = "center";
+
+      telaInicial.appendChild(message);
     }
 
     function hideInitialScreen() {
       if (telaInicial) {
         telaInicial.style.display = "none";
+        telaInicial.style.pointerEvents =
+          "none";
       }
     }
 
@@ -550,14 +591,13 @@ document.addEventListener("DOMContentLoaded", () => {
           playerPosition === 1
             ? String(finalGames1)
             : String(finalGames2),
-
         tieBreak: String(
           playerPosition === 1 ? tb1 : tb2
         )
       };
     }
 
-    function getVisibleSetCount(match, score) {
+    function getVisibleSetCount( match, score ) {
       const history =
         Array.isArray(score.setHistory)
           ? score.setHistory
@@ -793,10 +833,6 @@ document.addEventListener("DOMContentLoaded", () => {
           : "live";
 
       tvGridPlacar.innerHTML = ` <div class=" aovivo-compact-scoreboard ${stateClass} sets-${visibleSetCount} " > ${renderCompactPlayerRow( match, score, 1, pointDisplay, visibleSetCount, isFinished )} ${renderCompactPlayerRow( match, score, 2, pointDisplay, visibleSetCount, isFinished )} </div> `;
-
-      if (state.isRecording) {
-        updateScoreboardRecordingSnapshot();
-      }
     }
 
     function createIdentity() {
@@ -840,15 +876,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "livescoretennis-97cavx"
           );
 
-      console.log(
-        "[LiveKit] Solicitando token.",
-        {
-          roomName,
-          identity,
-          role
-        }
-      );
-
       const result =
         await tokenSource.fetch({
           roomName,
@@ -875,15 +902,6 @@ document.addEventListener("DOMContentLoaded", () => {
           "Token Server não retornou token."
         );
       }
-
-      console.log(
-        "[LiveKit] Token recebido.",
-        {
-          serverUrl,
-          roomName,
-          identity
-        }
-      );
 
       return {
         token,
@@ -962,12 +980,7 @@ document.addEventListener("DOMContentLoaded", () => {
               logging: false
             }
           );
-      } catch (error) {
-        console.warn(
-          "Erro ao capturar placar:",
-          error
-        );
-      }
+      } catch (_) {}
     }
 
     function getRecordingCanvasSize() {
@@ -1043,26 +1056,14 @@ document.addEventListener("DOMContentLoaded", () => {
             canvas.height /
             videoRect.height;
 
-          const x =
-            (scoreRect.left -
-              videoRect.left) * scaleX;
-
-          const y =
-            (scoreRect.top -
-              videoRect.top) * scaleY;
-
-          const width =
-            scoreRect.width * scaleX;
-
-          const height =
-            scoreRect.height * scaleY;
-
           context.drawImage(
             state.scoreboardSnapshotCanvas,
-            x,
-            y,
-            width,
-            height
+            (scoreRect.left -
+              videoRect.left) * scaleX,
+            (scoreRect.top -
+              videoRect.top) * scaleY,
+            scoreRect.width * scaleX,
+            scoreRect.height * scaleY
           );
         }
       }
@@ -1089,30 +1090,27 @@ document.addEventListener("DOMContentLoaded", () => {
       state.recordingContext =
         canvas.getContext("2d");
 
-      const canvasStream =
+      const stream =
         canvas.captureStream(30);
 
       state.liveKitLocalTracks
         .forEach((localTrack) => {
-          const mediaTrack =
+          const track =
             localTrack.mediaStreamTrack;
 
           if (
-            mediaTrack &&
-            mediaTrack.kind === "audio"
+            track &&
+            track.kind === "audio"
           ) {
-            canvasStream.addTrack(
-              mediaTrack
-            );
+            stream.addTrack(track);
           }
         });
 
-      state.recordingStream =
-        canvasStream;
+      state.recordingStream = stream;
 
       drawRecordingFrame();
 
-      return canvasStream;
+      return stream;
     }
 
     function stopRecordingCanvas() {
@@ -1143,7 +1141,6 @@ document.addEventListener("DOMContentLoaded", () => {
       state.scoreboardSnapshotCanvas =
         null;
     }
-
     async function startRecording() {
       if (role !== "broadcaster") {
         return;
@@ -1178,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         await updateScoreboardRecordingSnapshot();
 
-        const recordingStream =
+        const stream =
           createRecordingStream();
 
         const options =
@@ -1195,7 +1192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         state.mediaRecorder =
           new MediaRecorder(
-            recordingStream,
+            stream,
             options
           );
 
@@ -1342,10 +1339,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const credentials =
         await getLiveKitCredentials();
 
-      console.log(
-        "[LiveKit] Conectando transmissor..."
-      );
-
       const room =
         new LivekitClient.Room({
           adaptiveStream: true,
@@ -1355,25 +1348,11 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-      state.liveKitRoom =
-        room;
-
-      room.on(
-        LivekitClient.RoomEvent.Disconnected,
-        () => {
-          setStatus(
-            "TRANSMISSÃO DESCONECTADA"
-          );
-        }
-      );
+      state.liveKitRoom = room;
 
       await room.connect(
         credentials.serverUrl,
         credentials.token
-      );
-
-      console.log(
-        "[LiveKit] Transmissor conectado."
       );
 
       const tracks =
@@ -1396,8 +1375,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-      state.liveKitLocalTracks =
-        tracks;
+      state.liveKitLocalTracks = tracks;
 
       const mediaTracks = [];
 
@@ -1412,9 +1390,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           );
 
-        if (
-          localTrack.mediaStreamTrack
-        ) {
+        if (localTrack.mediaStreamTrack) {
           mediaTracks.push(
             localTrack.mediaStreamTrack
           );
@@ -1459,17 +1435,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function attachLiveKitTrack(track) {
       if (!track) {
-        console.error(
-          "[LiveKit] Track vazia."
-        );
-
         return;
       }
-
-      console.log(
-        "[LiveKit] Track recebida:",
-        track.kind
-      );
 
       if (
         track.kind ===
@@ -1495,10 +1462,9 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           hideInitialScreen();
-        }).catch((error) => {
-          console.warn(
-            "[LiveKit] Reprodução automática bloqueada:",
-            error
+        }).catch(() => {
+          showInitialScreen(
+            "Toque na tela para iniciar a transmissão"
           );
 
           if (btnAtivarAudio) {
@@ -1515,17 +1481,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Iniciar transmissão";
             }
           }
-
-          if (telaInicial) {
-            telaInicial.style.display =
-              "flex";
-
-            telaInicial.textContent =
-              "Toque na tela para iniciar a transmissão";
-          }
         });
 
         setStatus("ASSISTINDO AO VIVO");
+
         return;
       }
 
@@ -1580,10 +1539,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const credentials =
         await getLiveKitCredentials();
 
-      console.log(
-        "[LiveKit] Conectando espectador..."
-      );
-
       const room =
         new LivekitClient.Room({
           adaptiveStream: true,
@@ -1591,39 +1546,11 @@ document.addEventListener("DOMContentLoaded", () => {
           autoSubscribe: true
         });
 
-      state.liveKitRoom =
-        room;
-
-      room.on(
-        LivekitClient.RoomEvent.ParticipantConnected,
-        (participant) => {
-          console.log(
-            "[LiveKit] Participante conectado:",
-            participant.identity
-          );
-        }
-      );
-
-      room.on(
-        LivekitClient.RoomEvent.TrackPublished,
-        (publication, participant) => {
-          console.log(
-            "[LiveKit] Track publicada:",
-            publication.kind,
-            participant?.identity
-          );
-        }
-      );
+      state.liveKitRoom = room;
 
       room.on(
         LivekitClient.RoomEvent.TrackSubscribed,
-        (track, publication, participant) => {
-          console.log(
-            "[LiveKit] Track inscrita:",
-            track.kind,
-            participant?.identity
-          );
-
+        (track) => {
           attachLiveKitTrack(track);
         }
       );
@@ -1639,17 +1566,8 @@ document.addEventListener("DOMContentLoaded", () => {
         LivekitClient.RoomEvent.ConnectionStateChanged,
         (connectionState) => {
           console.log(
-            "[LiveKit] Estado da conexão:",
+            "[LiveKit] Estado:",
             connectionState
-          );
-        }
-      );
-
-      room.on(
-        LivekitClient.RoomEvent.Disconnected,
-        () => {
-          setStatus(
-            "TRANSMISSÃO DESCONECTADA"
           );
         }
       );
@@ -1659,19 +1577,10 @@ document.addEventListener("DOMContentLoaded", () => {
         credentials.token
       );
 
-      console.log(
-        "[LiveKit] Espectador conectado."
-      );
-
       for (
         const participant
         of room.remoteParticipants.values()
       ) {
-        console.log(
-          "[LiveKit] Participante remoto:",
-          participant.identity
-        );
-
         for (
           const publication
           of participant.trackPublications.values()
@@ -1685,7 +1594,7 @@ document.addEventListener("DOMContentLoaded", () => {
               );
             } catch (error) {
               console.error(
-                "[LiveKit] Erro ao assinar track:",
+                "Erro ao assinar track:",
                 error
               );
             }
@@ -1715,10 +1624,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         await connectBroadcaster();
       } catch (error) {
-        console.error(
-          "Erro transmissor:",
-          error
-        );
+        console.error(error);
 
         logLine(
           `Erro transmissor LiveKit: ${ error?.message || error }`,
@@ -1744,10 +1650,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         await connectViewer();
       } catch (error) {
-        console.error(
-          "Erro espectador:",
-          error
-        );
+        console.error(error);
 
         logLine(
           `Erro espectador LiveKit: ${ error?.message || error }`,
@@ -1812,22 +1715,53 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    function cleanup() {
-      try {
-        state.unsubMatch?.();
-      } catch (_) {}
+    function disableTransmissionInterface() {
+      state.transmissionEnded = true;
 
-      state.unsubMatch = null;
+      document
+        .querySelectorAll("button")
+        .forEach((button) => {
+          button.disabled = true;
+          button.style.pointerEvents =
+            "none";
+          button.style.opacity = "0.35";
+          button.style.cursor =
+            "not-allowed";
 
-      if (state.finishTimer) {
-        clearTimeout(state.finishTimer);
-        state.finishTimer = null;
+          button.setAttribute(
+            "aria-disabled",
+            "true"
+          );
+        });
+
+      if (videoEl) {
+        try {
+          videoEl.muted = true;
+          videoEl.pause();
+          videoEl.removeAttribute(
+            "autoplay"
+          );
+          videoEl.setAttribute(
+            "muted",
+            ""
+          );
+        } catch (_) {}
       }
 
+      state.liveKitAudioElements
+        .forEach((audioElement) => {
+          try {
+            audioElement.muted = true;
+            audioElement.pause();
+            audioElement.remove();
+          } catch (_) {}
+        });
+
+      state.liveKitAudioElements = [];
+
       if (
-        role === "broadcaster" &&
-        state.isRecording &&
-        state.mediaRecorder
+        state.mediaRecorder &&
+        state.isRecording
       ) {
         try {
           state.mediaRecorder.stop();
@@ -1835,8 +1769,51 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       stopRecordingCanvas();
-      stopCamera();
-      stopLiveKit().catch(() => {});
+
+      if (viewerStartButton) {
+        viewerStartButton.disabled = true;
+        viewerStartButton.style.pointerEvents =
+          "none";
+      }
+
+      document.body.classList.add(
+        "transmission-ended"
+      );
+    }
+
+    function cleanup() {
+      try {
+        if (state.unsubMatch) {
+          state.unsubMatch();
+          state.unsubMatch = null;
+        }
+      } catch (_) {}
+
+      if (state.finishTimer) {
+        clearTimeout(state.finishTimer);
+        state.finishTimer = null;
+      }
+
+      if (
+        state.mediaRecorder &&
+        state.isRecording
+      ) {
+        try {
+          state.mediaRecorder.stop();
+        } catch (_) {}
+      }
+
+      try {
+        stopRecordingCanvas();
+      } catch (_) {}
+
+      try {
+        stopCamera();
+      } catch (_) {}
+
+      try {
+        stopLiveKit().catch(() => {});
+      } catch (_) {}
     }
 
     function endTransmission() {
@@ -1844,17 +1821,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      state.transmissionEnded = true;
-
-      if (
-        role === "broadcaster" &&
-        state.isRecording &&
-        state.mediaRecorder
-      ) {
-        try {
-          state.mediaRecorder.stop();
-        } catch (_) {}
-      }
+      disableTransmissionInterface();
 
       if (liveEndingMessage) {
         liveEndingMessage.style.display =
@@ -1865,7 +1832,10 @@ document.addEventListener("DOMContentLoaded", () => {
         "TRANSMISSÃO ENCERRADA"
       );
 
-      stopRecordingCanvas();
+      setInfo(
+        "A transmissão foi encerrada."
+      );
+
       stopLiveKit().catch(() => {});
       stopCamera();
 
@@ -1881,10 +1851,6 @@ document.addEventListener("DOMContentLoaded", () => {
             { merge: true }
           )
           .catch(() => {});
-      } else if (videoEl) {
-        try {
-          videoEl.pause();
-        } catch (_) {}
       }
     }
 
@@ -1922,7 +1888,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const remaining = Math.max(
         0,
-        10 * 1000 - elapsed
+        5 * 60 * 1000 - elapsed
       );
 
       if (remaining <= 0) {
@@ -2056,10 +2022,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         await start();
       } catch (error) {
-        console.error(
-          "Erro ao atualizar espectador:",
-          error
-        );
+        console.error(error);
 
         setStatus(
           "ERRO AO ATUALIZAR TRANSMISSÃO"
@@ -2102,10 +2065,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hideInitialScreen();
         setStatus("ASSISTINDO AO VIVO");
       } catch (error) {
-        console.error(
-          "Erro ao ativar áudio:",
-          error
-        );
+        console.error(error);
       }
     }
 
@@ -2123,10 +2083,7 @@ document.addEventListener("DOMContentLoaded", () => {
           videoWrap.webkitRequestFullscreen();
         }
       } catch (error) {
-        console.error(
-          "Erro ao abrir tela cheia:",
-          error
-        );
+        console.error(error);
       }
     }
 
@@ -2272,6 +2229,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
+          if (
+            role === "viewer" &&
+            videoEl &&
+            videoEl.srcObject
+          ) {
+            await activateViewerAudio();
+          }
+
           const isFullscreen =
             document.fullscreenElement ||
             document.webkitFullscreenElement;
@@ -2297,4 +2262,3 @@ document.addEventListener("DOMContentLoaded", () => {
     await start();
   }
 });
-
