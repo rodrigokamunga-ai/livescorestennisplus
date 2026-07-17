@@ -109,6 +109,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const LIVEKIT_URL =
       "wss://livescoretennis-hkk3b2oi.livekit.cloud";
 
+    const LIVEKIT_TOKEN_SERVER_ID =
+      "livescoretennis-97cavx";
+
     const params =
       new URLSearchParams(
         window.location.search
@@ -180,19 +183,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const state = {
       match: null,
+
       liveKitRoom: null,
       liveKitLocalTracks: [],
       liveKitAudioElements: [],
+
       localStream: null,
       unsubMatch: null,
+
       started: false,
       transmissionEnded: false,
       refreshLock: false,
       finishTimer: null,
+
       mediaRecorder: null,
       recordedChunks: [],
       recordingMimeType: "",
       isRecording: false,
+
       recordingCanvas: null,
       recordingContext: null,
       recordingStream: null,
@@ -211,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function logLine(message, isError = false) {
       const line =
-        `[${new Date().toLocaleTimeString("pt-BR")}] ${message}`;
+        `[${new Date().toLocaleTimeString( "pt-BR" )}] ${message}`;
 
       console[isError ? "error" : "log"](line);
 
@@ -249,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
       telaInicial.style.flexDirection = "column";
       telaInicial.style.alignItems = "center";
       telaInicial.style.justifyContent = "center";
-      telaInicial.style.gap = "12px";
+      telaInicial.style.gap = "10px";
 
       if (role === "viewer") {
         viewerStartButton =
@@ -259,8 +267,30 @@ document.addEventListener("DOMContentLoaded", () => {
         viewerStartButton.className =
           "btn green";
 
-        viewerStartButton.style.display =
-          "inline-flex";
+        /* Tamanho normal do botão no celular. */
+        viewerStartButton.style.width =
+          "auto";
+
+        viewerStartButton.style.minWidth =
+          "auto";
+
+        viewerStartButton.style.maxWidth =
+          "220px";
+
+        viewerStartButton.style.padding =
+          "9px 13px";
+
+        viewerStartButton.style.borderRadius =
+          "9px";
+
+        viewerStartButton.style.fontSize =
+          "13px";
+
+        viewerStartButton.style.lineHeight =
+          "1";
+
+        viewerStartButton.style.flex =
+          "0 0 auto";
 
         viewerStartButton.style.pointerEvents =
           "auto";
@@ -272,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
           async (event) => {
             event.preventDefault();
             event.stopPropagation();
+
             await activateViewerAudio();
           }
         );
@@ -287,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
       message.textContent = text;
       message.style.fontWeight = "900";
       message.style.textAlign = "center";
+      message.style.fontSize = "13px";
 
       telaInicial.appendChild(message);
     }
@@ -591,13 +623,14 @@ document.addEventListener("DOMContentLoaded", () => {
           playerPosition === 1
             ? String(finalGames1)
             : String(finalGames2),
+
         tieBreak: String(
           playerPosition === 1 ? tb1 : tb2
         )
       };
     }
 
-    function getVisibleSetCount( match, score ) {
+    function getVisibleSetCount(match, score) {
       const history =
         Array.isArray(score.setHistory)
           ? score.setHistory
@@ -939,12 +972,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateRecordingButtons() {
-      const isBroadcaster =
+      const broadcaster =
         role === "broadcaster";
 
       if (btnIniciarGravacao) {
         btnIniciarGravacao.style.display =
-          isBroadcaster &&
+          broadcaster &&
           !state.isRecording
             ? "inline-flex"
             : "none";
@@ -952,13 +985,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (btnPararGravacao) {
         btnPararGravacao.style.display =
-          isBroadcaster &&
+          broadcaster &&
           state.isRecording
             ? "inline-flex"
             : "none";
       }
     }
-
     async function updateScoreboardRecordingSnapshot() {
       if (
         typeof html2canvas ===
@@ -1084,9 +1116,7 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.width = size.width;
       canvas.height = size.height;
 
-      state.recordingCanvas =
-        canvas;
-
+      state.recordingCanvas = canvas;
       state.recordingContext =
         canvas.getContext("2d");
 
@@ -1107,7 +1137,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
       state.recordingStream = stream;
-
       drawRecordingFrame();
 
       return stream;
@@ -1141,6 +1170,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.scoreboardSnapshotCanvas =
         null;
     }
+
     async function startRecording() {
       if (role !== "broadcaster") {
         return;
@@ -1211,7 +1241,6 @@ document.addEventListener("DOMContentLoaded", () => {
         state.mediaRecorder.onstart = () => {
           state.isRecording = true;
           updateRecordingButtons();
-
           setStatus(
             "TRANSMITINDO E GRAVANDO"
           );
@@ -1375,7 +1404,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-      state.liveKitLocalTracks = tracks;
+      state.liveKitLocalTracks =
+        tracks;
 
       const mediaTracks = [];
 
@@ -1390,7 +1420,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           );
 
-        if (localTrack.mediaStreamTrack) {
+        if (
+          localTrack.mediaStreamTrack
+        ) {
           mediaTracks.push(
             localTrack.mediaStreamTrack
           );
@@ -1484,7 +1516,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         setStatus("ASSISTINDO AO VIVO");
-
         return;
       }
 
@@ -2069,10 +2100,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    function applyFullscreenClass() {
+      if (!videoWrap) return;
+
+      videoWrap.classList.add(
+        "aovivo-fullscreen"
+      );
+
+      document.body.classList.add(
+        "aovivo-fullscreen-body"
+      );
+    }
+
+    function removeFullscreenClass() {
+      if (!videoWrap) return;
+
+      videoWrap.classList.remove(
+        "aovivo-fullscreen"
+      );
+
+      document.body.classList.remove(
+        "aovivo-fullscreen-body"
+      );
+    }
+
     async function enterFullscreen() {
       if (!videoWrap) {
         return;
       }
+
+      applyFullscreenClass();
 
       try {
         if (videoWrap.requestFullscreen) {
@@ -2083,11 +2140,27 @@ document.addEventListener("DOMContentLoaded", () => {
           videoWrap.webkitRequestFullscreen();
         }
       } catch (error) {
-        console.error(error);
+        console.warn(
+          "Fullscreen API bloqueada. Usando CSS:",
+          error
+        );
       }
+
+      try {
+        if (
+          screen.orientation &&
+          screen.orientation.lock
+        ) {
+          await screen.orientation.lock(
+            "any"
+          );
+        }
+      } catch (_) {}
     }
 
     async function exitFullscreen() {
+      removeFullscreenClass();
+
       try {
         if (document.fullscreenElement) {
           await document.exitFullscreen();
@@ -2097,14 +2170,32 @@ document.addEventListener("DOMContentLoaded", () => {
           document.webkitExitFullscreen();
         }
       } catch (_) {}
+
+      try {
+        if (
+          screen.orientation &&
+          screen.orientation.unlock
+        ) {
+          screen.orientation.unlock();
+        }
+      } catch (_) {}
     }
 
     async function toggleFullscreen() {
-      const isFullscreen =
+      const cssFullscreen =
+        videoWrap &&
+        videoWrap.classList.contains(
+          "aovivo-fullscreen"
+        );
+
+      const browserFullscreen =
         document.fullscreenElement ||
         document.webkitFullscreenElement;
 
-      if (isFullscreen) {
+      if (
+        cssFullscreen ||
+        browserFullscreen
+      ) {
         await exitFullscreen();
       } else {
         await enterFullscreen();
@@ -2206,6 +2297,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btnExpandirTela.addEventListener(
         "click",
         (event) => {
+          event.preventDefault();
           event.stopPropagation();
           toggleFullscreen();
         }
@@ -2247,6 +2339,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
     }
+
+    document.addEventListener(
+      "fullscreenchange",
+      () => {
+        if (
+          !document.fullscreenElement &&
+          videoWrap &&
+          videoWrap.classList.contains(
+            "aovivo-fullscreen"
+          )
+        ) {
+          removeFullscreenClass();
+        }
+      }
+    );
 
     window.addEventListener(
       "beforeunload",
