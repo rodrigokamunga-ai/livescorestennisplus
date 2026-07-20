@@ -1,255 +1,1088 @@
-html, body.aovivo-page {
+/* ============================================================ BASE ============================================================ */
+
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background-color: #000;
-  font-family: Arial, sans-serif;
+  min-width: 100%;
+  min-height: 100%;
+  background: #000;
+  color: #fff;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  overscroll-behavior: none;
 }
 
 body.aovivo-page {
   position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #0f1726;
 }
 
-/* Vídeo de fundo */
-#liveVideo {
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: #000;
-}
+/* ============================================================ ESTRUTURA PRINCIPAL ============================================================ */
 
-/* Tela inicial */
-#telaInicial {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #0f172a;
-  z-index: 99;
+.live-page {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
   box-sizing: border-box;
-  text-align: center;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.status {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.info {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ============================================================ BOTÕES ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+.btn.green {
+  background: linear-gradient(
+    135deg,
+    #16a34a,
+    #15803d
+  );
+}
+
+.btn.gray {
+  background: linear-gradient(
+    135deg,
+    #6b7280,
+    #4b5563
+  );
+}
+
+.btn.recording {
+  background: linear-gradient(
+    135deg,
+    #dc2626,
+    #991b1b
+  );
 }
 
 .btn-iniciar-tv {
+  padding: 16px 30px;
+  border: 0;
+  border-radius: 999px;
   background: #d8ff63;
   color: #0f172a;
-  border: none;
-  padding: 16px 32px;
   font-size: 16px;
   font-weight: 900;
-  border-radius: 50px;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(216,255,99,0.3);
-  text-transform: uppercase;
   letter-spacing: 0.03em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 30px rgba(216, 255, 99, 0.28);
+  cursor: pointer;
 }
 
-/* Overlay do placar */
-.tv-overlay-container {
+.btn-retry {
+  padding: 12px 22px;
+  border: 1px solid rgba(216, 255, 99, 0.35);
+  border-radius: 999px;
+  background: transparent;
+  color: #d8ff63;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#btnIniciarGravacao,
+#btnPararGravacao,
+#btnAtivarAudio,
+#btnAtualizarTela {
+  display: none;
+}
+
+/* ============================================================ VÍDEO ============================================================ */
+
+.video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: #000;
+}
+
+#liveVideo {
   position: absolute;
-  z-index: 2;
-  left: 3vw;
-  bottom: 4vh;
-  width: auto;
-  height: auto;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-weight: 900;
+  text-align: center;
   pointer-events: none;
 }
 
-.placar-tv-box {
-  background: transparent;
-  width: min(42vw, 420px);
-  max-width: 92vw;
+#telaInicial {
+  position: absolute;
+  inset: 0;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+  text-align: center;
 }
 
-/* Status superior */
+#telaInicial .btn {
+  width: auto !important;
+  min-width: auto !important;
+  max-width: 220px !important;
+  flex: 0 0 auto !important;
+  padding: 9px 13px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* ============================================================ STATUS E DEBUG ============================================================ */
+
+.camera-status {
+  max-width: 92vw;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.camera-hint {
+  max-width: 92vw;
+  color: #ffd37a;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.camera-debug {
+  max-width: 92vw;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+#cameraStatus,
+#cameraDebug {
+  display: none !important;
+}
+
+/* ============================================================ PLACAR ANTIGO / COMPATIBILIDADE ============================================================ */
+
+.tv-overlay-container {
+  position: absolute;
+  left: 4vw;
+  bottom: 4vh;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.placar-tv-container {
+  width: min(92vw, 560px);
+  pointer-events: none;
+}
+
 .status-badge-tv {
-  text-align: right;
+  margin-bottom: 6px;
+  padding-right: 8px;
   color: #d8ff63;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.08em;
+  text-align: right;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
   text-transform: uppercase;
-  margin-bottom: 4px;
-  padding-right: 8px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+}
+
+#tvGridPlacar {
+  width: fit-content !important;
+  max-width: 100% !important;
+}
+
+.score-board {
+  display: grid;
+  gap: 6px;
+}
+
+.score-head,
+.score-row {
+  display: grid;
+  align-items: stretch;
+  gap: 0;
+}
+
+.score-head {
+  margin-bottom: 2px;
+}
+
+.score-head-col {
+  padding: 0 8px;
+  color: #a9c6e6;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  text-transform: uppercase;
+}
+
+.score-head-name {
+  text-align: left;
+}
+
+.score-head-set,
+.score-head-points {
+  text-align: center;
+}
+
+.score-row {
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.score-name,
+.set-tv-score,
+.score-points {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-name {
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0 12px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serve-ball-tv {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #d8ff63;
+  box-shadow: 0 0 8px #d8ff63;
+}
+
+.set-tv-score {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d8ff63;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.score-points {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
 }
 
 .tv-info-box {
   margin-top: 10px;
   color: #cbd5e1;
   font-size: 12px;
-  text-align: right;
   opacity: 0.9;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.85);
+  text-align: right;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
 }
 
-/* Garante visibilidade do placar no iOS */
+/* ============================================================ PLACAR COMPACTO DA TRANSMISSÃO ============================================================ */
+
+.live-public-scoreboard {
+  position: absolute !important;
+  left: 10px !important;
+  bottom: 10px !important;
+  z-index: 30 !important;
+  width: fit-content !important;
+  max-width: calc(100% - 20px) !important;
+  pointer-events: none !important;
+}
+
+.live-scoreboard-shell {
+  width: fit-content !important;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.live-scoreboard-status {
+  display: none !important;
+}
+
+.live-scoreboard-content,
 #tvGridPlacar {
-  display: block;
-  width: 100%;
-  position: relative;
-  z-index: 3;
-  visibility: visible;
-  opacity: 1;
+  width: fit-content !important;
+  max-width: 100% !important;
 }
 
-/* Tabela do placar */
-.tabela-tv-placar {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 4px;
-  table-layout: fixed;
+.aovivo-compact-scoreboard {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+  width: fit-content !important;
+  max-width: calc(100vw - 20px) !important;
+  padding: 4px 5px !important;
+  box-sizing: border-box !important;
+  border-radius: 5px !important;
+  background: rgba(0, 0, 0, 0.72) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
 }
 
-.tabela-tv-placar th {
-  color: #a9c6e6;
-  font-size: 9px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0 8px 2px 8px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+.aovivo-compact-row {
+  display: grid !important;
+  align-items: center !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  min-height: 18px !important;
+  gap: 0 !important;
+  line-height: 1 !important;
 }
 
-.th-jogador {
-  text-align: left;
+.aovivo-compact-name {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
 }
 
-.th-set {
-  text-align: center;
-  width: 42px;
+.aovivo-compact-serve {
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  min-width: 6px !important;
+  flex: 0 0 6px !important;
+  margin-right: 3px !important;
+  border-radius: 50% !important;
+  background: #d8ff63 !important;
+  box-shadow: 0 0 5px rgba(216, 255, 99, 0.9) !important;
 }
 
-.th-pontos {
-  text-align: center;
-  width: 56px;
+.aovivo-compact-serve.hidden {
+  visibility: hidden !important;
 }
 
-.linha-jogador-tv td {
-  background: rgba(15, 23, 42, 0.92);
-  height: 34px;
-  vertical-align: middle;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.45);
-  border-top: 1px solid rgba(255,255,255,0.08);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+.aovivo-compact-player {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: #fff !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
-.linha-jogador-tv td:first-child {
-  border-left: 1px solid rgba(15, 23, 42, 0.85);
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-  padding-left: 10px;
+.aovivo-compact-number {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 18px !important;
+  height: 17px !important;
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: center !important;
 }
 
-.linha-jogador-tv td:last-child {
-  border-right: 1px solid rgba(15, 23, 42, 0.85);
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+.aovivo-compact-number.current {
+  color: #d8ff63 !important;
 }
 
-.nome-tv-atleta {
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
+.aovivo-compact-number.empty {
+  visibility: hidden !important;
+}
+
+.aovivo-compact-score-set {
+  display: inline-flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+.aovivo-compact-score-main {
+  line-height: 1 !important;
+}
+
+.aovivo-compact-score-tb {
+  position: relative !important;
+  top: -0.42em !important;
+  margin-left: 1px !important;
+  font-size: 0.58em !important;
+  line-height: 1 !important;
+}
+
+/* ============================================================ COLUNAS DO PLACAR ============================================================ */
+
+.aovivo-compact-scoreboard.live.sets-1
+.aovivo-compact-row {
+  grid-template-columns:
+    minmax(0, 125px)
+    19px
+    22px !important;
+}
+
+.aovivo-compact-scoreboard.live.sets-2
+.aovivo-compact-row {
+  grid-template-columns:
+    minmax(0, 125px)
+    19px
+    19px
+    22px !important;
+}
+
+.aovivo-compact-scoreboard.live.sets-3
+.aovivo-compact-row {
+  grid-template-columns:
+    minmax(0, 125px)
+    19px
+    19px
+    19px
+    22px !important;
+}
+
+.aovivo-compact-scoreboard.finished.sets-1
+.aovivo-compact-row {
+  grid-template-columns:
+    minmax(0, 125px)
+    19px !important;
+}
+
+.aovivo-compact-scoreboard.finished.sets-2
+.aovivo-compact-row {
+  grid-template-columns:
+    minmax(0, 125px)
+    19px
+    19px !important;
+}
+
+.aovivo-compact-scoreboard.finished.sets-3
+.aovivo-compact-row {
+  grid-template-columns:
+    minmax(0, 125px)
+    19px
+    19px
+    19px !important;
+}
+
+/* ============================================================ ENCERRAMENTO DA TRANSMISSÃO ============================================================ */
+
+.live-scoreboard-ending {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: none;
   align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
-  min-width: 0;
-}
-
-.serve-ball-tv {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #d8ff63;
-  box-shadow: 0 0 6px #d8ff63;
-  flex-shrink: 0;
-}
-
-.set-tv-score {
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: clamp(20px, 5vw, 42px);
+  font-weight: 900;
+  letter-spacing: 0.03em;
   text-align: center;
-  color: #d8ff63;
-  font-size: 13px;
-  font-weight: 800;
 }
 
-.pontos-tv-score {
-  text-align: center;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.05);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+body.transmission-ended .btn {
+  filter: grayscale(1);
 }
 
-/* Paisagem */
-@media (orientation: landscape) {
-  .tv-overlay-container {
-    left: 3vw;
-    bottom: 3.5vh;
-  }
-
-  .placar-tv-box {
-    width: min(38vw, 390px);
-  }
-
-  .nome-tv-atleta {
-    max-width: 170px;
-  }
+body.transmission-ended .topbar {
+  opacity: 0.6;
 }
 
-/* Retrato */
-@media (orientation: portrait) {
-  .tv-overlay-container {
-    left: 2.5vw;
-    bottom: 3vh;
-  }
-
-  .placar-tv-box {
-    width: 92vw;
-    max-width: 92vw;
-  }
-
-  .nome-tv-atleta {
-    max-width: 130px;
-    font-size: 10px;
-  }
-
-  .tabela-tv-placar th {
-    font-size: 8px;
-  }
-
-  .set-tv-score,
-  .pontos-tv-score {
-    font-size: 12px;
-  }
-
-  .linha-jogador-tv td {
-    height: 31px;
-  }
+body.transmission-ended
+.live-scoreboard-ending {
+  display: flex !important;
 }
 
-/* Telas pequenas */
+.livekit-audio-element {
+  display: none !important;
+}
+
+/* ============================================================ MOBILE ============================================================ */
+
 @media (max-width: 768px) {
-  .status-badge-tv {
-    font-size: 10px;
+  .live-page {
+    padding: 8px;
   }
 
-  .placar-tv-box {
-    max-width: 94vw;
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  #telaInicial .btn {
+    width: auto !important;
+    max-width: 220px !important;
+    flex: 0 0 auto !important;
+    padding: 9px 13px !important;
+    font-size: 13px !important;
+  }
+
+  .live-public-scoreboard {
+    left: 7px !important;
+    bottom: 7px !important;
+    max-width: calc(100% - 14px) !important;
+  }
+
+  .aovivo-compact-scoreboard {
+    max-width: calc(100vw - 14px) !important;
+    padding: 3px 4px !important;
+  }
+
+  .aovivo-compact-row {
+    min-height: 16px !important;
+  }
+
+  .aovivo-compact-player {
+    font-size: 10px !important;
+  }
+
+  .aovivo-compact-number {
+    min-width: 15px !important;
+    height: 15px !important;
+    font-size: 9px !important;
+  }
+
+  .aovivo-compact-serve {
+    width: 5px !important;
+    height: 5px !important;
+    min-width: 5px !important;
+    flex-basis: 5px !important;
+    margin-right: 3px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-1
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 120px)
+      18px
+      22px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-2
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 120px)
+      18px
+      18px
+      22px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-3
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 120px)
+      18px
+      18px
+      18px
+      22px !important;
+  }
+
+  .aovivo-compact-scoreboard.finished.sets-1
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 120px)
+      18px !important;
+  }
+
+  .aovivo-compact-scoreboard.finished.sets-2
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 120px)
+      18px
+      18px !important;
+  }
+
+  .aovivo-compact-scoreboard.finished.sets-3
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 120px)
+      18px
+      18px
+      18px !important;
+  }
+
+  .camera-status {
+    font-size: 13px;
+  }
+}
+
+/* ============================================================ CELULARES PEQUENOS ============================================================ */
+
+@media (max-width: 480px) {
+  #telaInicial .btn {
+    max-width: 200px !important;
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .aovivo-compact-player {
+    font-size: 8px !important;
+  }
+
+  .aovivo-compact-number {
+    min-width: 14px !important;
+    font-size: 8px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-1
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 105px)
+      17px
+      21px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-2
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 105px)
+      17px
+      17px
+      21px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-3
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 105px)
+      17px
+      17px
+      17px
+      21px !important;
+  }
+}
+
+/* ============================================================ RETRATO ============================================================ */
+
+@media screen and (max-width: 768px)
+and (orientation: portrait) {
+  .aovivo-compact-scoreboard {
+    padding: 5px 7px !important;
+  }
+
+  .aovivo-compact-row {
+    min-height: 21px !important;
+  }
+
+  .aovivo-compact-player {
+    font-size: 11px !important;
+    line-height: 1.05 !important;
+  }
+
+  .aovivo-compact-number {
+    min-width: 19px !important;
+    height: 20px !important;
+    font-size: 12px !important;
+  }
+
+  .aovivo-compact-serve {
+    width: 7px !important;
+    height: 7px !important;
+    min-width: 7px !important;
+    flex-basis: 7px !important;
+    margin-right: 4px !important;
+  }
+}
+
+@media screen and (max-width: 480px)
+and (orientation: portrait) {
+  .aovivo-compact-scoreboard {
+    padding: 5px 6px !important;
+  }
+
+  .aovivo-compact-row {
+    min-height: 20px !important;
+  }
+
+  .aovivo-compact-player {
+    font-size: 10px !important;
+    line-height: 1.05 !important;
+  }
+
+  .aovivo-compact-number {
+    min-width: 18px !important;
+    height: 19px !important;
+    font-size: 11px !important;
+  }
+
+  .aovivo-compact-serve {
+    width: 6px !important;
+    height: 6px !important;
+    min-width: 6px !important;
+    flex-basis: 6px !important;
+    margin-right: 4px !important;
+  }
+}
+
+/* ============================================================ PAISAGEM ============================================================ */
+
+@media screen
+and (orientation: landscape)
+and (max-height: 600px) {
+  .aovivo-compact-scoreboard {
+    width: fit-content !important;
+    max-width: 430px !important;
+    padding: 5px 7px !important;
+  }
+
+  .aovivo-compact-row {
+    min-height: 20px !important;
+    gap: 0 !important;
+  }
+
+  .aovivo-compact-player {
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  .aovivo-compact-number {
+    min-width: 17px !important;
+    width: 17px !important;
+    height: 18px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+
+  .aovivo-compact-serve {
+    width: 6px !important;
+    height: 6px !important;
+    min-width: 6px !important;
+    flex-basis: 6px !important;
+    margin-right: 3px !important;
+  }
+
+  /* * Números mais próximos dos nomes. */
+  .aovivo-compact-scoreboard.live.sets-1
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 108px)
+      17px
+      20px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-2
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 108px)
+      17px
+      17px
+      20px !important;
+  }
+
+  .aovivo-compact-scoreboard.live.sets-3
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 108px)
+      17px
+      17px
+      17px
+      20px !important;
+  }
+
+  .aovivo-compact-scoreboard.finished.sets-1
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 108px)
+      17px !important;
+  }
+
+  .aovivo-compact-scoreboard.finished.sets-2
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 108px)
+      17px
+      17px !important;
+  }
+
+  .aovivo-compact-scoreboard.finished.sets-3
+  .aovivo-compact-row {
+    grid-template-columns:
+      minmax(0, 108px)
+      17px
+      17px
+      17px !important;
+  }
+}
+
+/* ============================================================ TELA CHEIA ============================================================ */
+
+body.aovivo-fullscreen-body {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+body.aovivo-fullscreen-body .live-page {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+body.aovivo-fullscreen-body .topbar {
+  display: none !important;
+}
+
+#videoWrap.aovivo-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  overflow: hidden !important;
+}
+
+#videoWrap.aovivo-fullscreen #liveVideo {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  background: #000 !important;
+}
+
+#videoWrap.aovivo-fullscreen
+.live-public-scoreboard {
+  position: absolute !important;
+  left: max(8px, 3vw) !important;
+  bottom: max(8px, 3vh) !important;
+  z-index: 100000 !important;
+  max-width: calc(100vw - 16px) !important;
+}
+
+#videoWrap:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+}
+
+#videoWrap:fullscreen #liveVideo {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  object-fit: cover;
+}
+
+#videoWrap:fullscreen
+.live-public-scoreboard {
+  left: 3vw !important;
+  bottom: 3vh !important;
+  width: fit-content !important;
+}
+
+/* ============================================================ TELA CHEIA EM RETRATO ============================================================ */
+
+@media screen
+and (orientation: portrait)
+and (max-width: 768px) {
+  #videoWrap.aovivo-fullscreen
+  #liveVideo {
+    object-fit: cover !important;
+  }
+
+  #videoWrap.aovivo-fullscreen
+  .live-public-scoreboard {
+    left: 8px !important;
+    bottom: 16px !important;
+  }
+}
+
+/* ============================================================ TELA CHEIA EM PAISAGEM ============================================================ */
+
+@media screen
+and (orientation: landscape)
+and (max-height: 600px) {
+  #videoWrap.aovivo-fullscreen
+  #liveVideo {
+    object-fit: cover !important;
+  }
+
+  #videoWrap.aovivo-fullscreen
+  .live-public-scoreboard {
+    left: 12px !important;
+    bottom: 12px !important;
+  }
+}
+
+/* ============================================================ SAFE AREA PARA CELULARES COM NOTCH ============================================================ */
+
+@supports (
+  padding: env(safe-area-inset-bottom)
+) {
+  #videoWrap.aovivo-fullscreen
+  .live-public-scoreboard {
+    left: max(
+      8px,
+      calc(8px + env(safe-area-inset-left))
+    ) !important;
+
+    bottom: max(
+      12px,
+      calc(12px + env(safe-area-inset-bottom))
+    ) !important;
   }
 }
