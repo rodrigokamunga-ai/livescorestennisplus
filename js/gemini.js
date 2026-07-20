@@ -15,7 +15,6 @@
     let ultimaInteractionId = null;
     let requisicaoGeminiAtual = null;
   
-    /* * Mantido desativado para deixar cada consulta * independente e mais rápida. */
     const USAR_HISTORICO_CONVERSA = false;
   
     document.addEventListener("DOMContentLoaded", () => {
@@ -145,7 +144,6 @@
       function mostrarCarregando(estado) {
         geminiLoading.hidden = !estado;
   
-        /* * Impede nova edição enquanto o Gemini responde. */
         geminiPrompt.disabled = estado;
         geminiSubmitBtn.disabled = estado;
   
@@ -169,13 +167,11 @@
   
         let html = escaparHTML(texto);
   
-        /* * Converte **texto** para negrito. */
         html = html.replace(
           /\*\*(.*?)\*\*/g,
           "<strong>$1</strong>"
         );
   
-        /* * Converte linhas com "- " em marcadores. */
         html = html.replace(
           /^- (.*)$/gm,
           "• $1"
@@ -252,7 +248,6 @@
           );
         }
   
-        /* * Compatibilidade com sessão biométrica/local. */
         try {
           const usuarioBiometrico =
             localStorage.getItem(
@@ -338,7 +333,7 @@
             return valor.toISOString();
           }
         } catch (_) {
-          // Continua convertendo como texto.
+          // Continua como texto.
         }
   
         return String(valor);
@@ -540,7 +535,6 @@
           return "derrota";
         }
   
-        /* * O resultado é calculado pelo placar. */
         const placar =
           obterPlacarNumerico(data);
   
@@ -694,10 +688,8 @@
             sets2: placar.sets2,
             games1: placar.games1,
             games2: placar.games2,
-  
             tieBreakPoints1:
               placar.tieBreakPoints1,
-  
             tieBreakPoints2:
               placar.tieBreakPoints2
           },
@@ -949,7 +941,36 @@
               contentType
             );
   
+            let dados = null;
+  
+            if (
+              contentType.includes(
+                "application/json"
+              ) &&
+              textoResposta
+            ) {
+              try {
+                dados = JSON.parse(
+                  textoResposta
+                );
+              } catch (_) {
+                dados = null;
+              }
+            }
+  
             if (!resposta.ok) {
+              /* * Tratamento amigável do limite 429. */
+              if (
+                resposta.status === 429 ||
+                dados?.codigo ===
+                  "LIMITE_CONSULTAS"
+              ) {
+                throw new Error(
+                  dados?.error ||
+                    "Você atingiu o limite gratuito de consultas do Assistente Gemini. Aguarde alguns segundos e tente novamente."
+                );
+              }
+  
               const erroTemporario =
                 resposta.status === 502 ||
                 resposta.status === 503 ||
@@ -969,8 +990,8 @@
               }
   
               throw new Error(
-                `O backend respondeu HTTP ${resposta.status}. ` +
-                `Conteúdo recebido: ${textoResposta.slice( 0, 400 )}`
+                dados?.error ||
+                  `O backend respondeu HTTP ${resposta.status}. Conteúdo recebido: ${textoResposta.slice(0, 400)}`
               );
             }
   
@@ -993,18 +1014,12 @@
   
               throw new Error(
                 "O backend não retornou JSON. " +
-                `Content-Type: ${contentType}. ` +
-                `Resposta: ${textoResposta.slice( 0, 400 )}`
+                  `Content-Type: ${contentType}. ` +
+                  `Resposta: ${textoResposta.slice( 0, 400 )}`
               );
             }
   
-            let dados;
-  
-            try {
-              dados = JSON.parse(
-                textoResposta
-              );
-            } catch (_) {
+            if (!dados) {
               throw new Error(
                 "O backend retornou um JSON inválido."
               );
@@ -1031,6 +1046,18 @@
               throw new Error(
                 "A consulta foi cancelada."
               );
+            }
+  
+            /* * Erros 429 não devem ser repetidos * automaticamente, pois são limite de cota. */
+            if (
+              error.message.includes(
+                "limite gratuito"
+              ) ||
+              error.message.includes(
+                "LIMITE_CONSULTAS"
+              )
+            ) {
+              throw error;
             }
   
             const mensagem =
@@ -1143,7 +1170,6 @@
               "Analisando os dados com o Gemini..."
             );
   
-            /* * Envia somente a pergunta original. * O prompt completo é montado no backend. */
             const resposta =
               await consultarBackend(
                 pergunta,
