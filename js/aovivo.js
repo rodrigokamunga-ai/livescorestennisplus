@@ -88,13 +88,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function initApp() {
     const firebaseConfig = {
-      apiKey: "AIzaSyBngwZh3oErADZoTFG6AOqj6QLzwv1R6qY",
-      authDomain: "live-scores-tennis-plus.firebaseapp.com",
-      projectId: "live-scores-tennis-plus",
-      storageBucket: "live-scores-tennis-plus.firebasestorage.app",
-      messagingSenderId: "949079557619",
-      appId: "1:949079557619:web:d1715339815c28d971be86",
-      measurementId: "G-NDT9YVW4C6"
+      apiKey:
+        "AIzaSyBngwZh3oErADZoTFG6AOqj6QLzwv1R6qY",
+      authDomain:
+        "live-scores-tennis-plus.firebaseapp.com",
+      projectId:
+        "live-scores-tennis-plus",
+      storageBucket:
+        "live-scores-tennis-plus.firebasestorage.app",
+      messagingSenderId:
+        "949079557619",
+      appId:
+        "1:949079557619:web:d1715339815c28d971be86",
+      measurementId:
+        "G-NDT9YVW4C6"
     };
 
     if (!firebase.apps.length) {
@@ -105,12 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.__db = db;
     window.firebaseAppReady = true;
-
-    const LIVEKIT_URL =
-      "wss://livescoretennis-hkk3b2oi.livekit.cloud";
-
-    const LIVEKIT_TOKEN_SERVER_ID =
-      "livescoretennis-97cavx";
 
     const params =
       new URLSearchParams(
@@ -124,10 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
       String(params.get("role") || "viewer")
         .trim()
         .toLowerCase();
-
-    const shareToken =
-      String(params.get("shareToken") || "")
-        .trim();
 
     const videoEl =
       document.getElementById("liveVideo");
@@ -145,22 +142,34 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("btnTentarNovamente");
 
     const btnIniciarGravacao =
-      document.getElementById("btnIniciarGravacao");
+      document.getElementById(
+        "btnIniciarGravacao"
+      );
 
     const btnPararGravacao =
-      document.getElementById("btnPararGravacao");
+      document.getElementById(
+        "btnPararGravacao"
+      );
 
     const btnAtivarAudio =
-      document.getElementById("btnAtivarAudio");
+      document.getElementById(
+        "btnAtivarAudio"
+      );
 
     const btnAtualizarTela =
-      document.getElementById("btnAtualizarTela");
+      document.getElementById(
+        "btnAtualizarTela"
+      );
 
     const cameraStatus =
-      document.getElementById("cameraStatus");
+      document.getElementById(
+        "cameraStatus"
+      );
 
     const cameraDebug =
-      document.getElementById("cameraDebug");
+      document.getElementById(
+        "cameraDebug"
+      );
 
     const tvStatus =
       document.getElementById("tvStatus");
@@ -172,7 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("telaInicial");
 
     const tvGridPlacar =
-      document.getElementById("tvGridPlacar");
+      document.getElementById(
+        "tvGridPlacar"
+      );
 
     const liveEndingMessage =
       document.getElementById(
@@ -217,11 +228,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/'/g, "&#039;");
     }
 
-    function logLine(message, isError = false) {
+    function logLine( message, isError = false ) {
       const line =
         `[${new Date().toLocaleTimeString( "pt-BR" )}] ${message}`;
 
-      console[isError ? "error" : "log"](line);
+      console[isError ? "error" : "log"](
+        line
+      );
 
       [cameraStatus, cameraDebug].forEach(
         (target) => {
@@ -254,9 +267,11 @@ document.addEventListener("DOMContentLoaded", () => {
       telaInicial.innerHTML = "";
       telaInicial.style.display = "flex";
       telaInicial.style.pointerEvents = "auto";
-      telaInicial.style.flexDirection = "column";
+      telaInicial.style.flexDirection =
+        "column";
       telaInicial.style.alignItems = "center";
-      telaInicial.style.justifyContent = "center";
+      telaInicial.style.justifyContent =
+        "center";
       telaInicial.style.gap = "10px";
 
       if (role === "viewer") {
@@ -267,7 +282,6 @@ document.addEventListener("DOMContentLoaded", () => {
         viewerStartButton.className =
           "btn green";
 
-        /* Tamanho normal do botão no celular. */
         viewerStartButton.style.width =
           "auto";
 
@@ -359,15 +373,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getMatchRef() {
-      return db.collection("matches").doc(matchId);
+      return db
+        .collection("matches")
+        .doc(matchId);
     }
 
     function normalizeScore(score = {}) {
       return {
         points1: Number(score.points1 || 0),
         points2: Number(score.points2 || 0),
+
         games1: Number(score.games1 || 0),
         games2: Number(score.games2 || 0),
+
         sets1: Number(score.sets1 || 0),
         sets2: Number(score.sets2 || 0),
 
@@ -405,8 +423,11 @@ document.addEventListener("DOMContentLoaded", () => {
           ? score.setHistory
           : [],
 
-        server: score.server || "player1",
-        advantage: score.advantage || null
+        server:
+          score.server || "player1",
+
+        advantage:
+          score.advantage || null
       };
     }
 
@@ -431,8 +452,12 @@ document.addEventListener("DOMContentLoaded", () => {
         score.tieBreakMode === "super10"
       ) {
         return {
-          p1: String(score.tieBreakPoints1 || 0),
-          p2: String(score.tieBreakPoints2 || 0)
+          p1: String(
+            score.tieBreakPoints1 || 0
+          ),
+          p2: String(
+            score.tieBreakPoints2 || 0
+          )
         };
       }
 
@@ -474,23 +499,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (hasAdvantage && !noAd) {
         if (score.advantage === "player1") {
-          return { p1: "AD", p2: "40" };
+          return {
+            p1: "AD",
+            p2: "40"
+          };
         }
 
         if (score.advantage === "player2") {
-          return { p1: "40", p2: "AD" };
+          return {
+            p1: "40",
+            p2: "AD"
+          };
         }
 
         if (points1 >= 3 && points2 >= 3) {
           if (points1 === points2) {
-            return { p1: "40", p2: "40" };
+            return {
+              p1: "40",
+              p2: "40"
+            };
           }
 
           if (points1 > points2) {
-            return { p1: "AD", p2: "40" };
+            return {
+              p1: "AD",
+              p2: "40"
+            };
           }
 
-          return { p1: "40", p2: "AD" };
+          return {
+            p1: "40",
+            p2: "AD"
+          };
         }
       }
 
@@ -499,27 +539,45 @@ document.addEventListener("DOMContentLoaded", () => {
         points1 === 3 &&
         points2 === 3
       ) {
-        return { p1: "40", p2: "40" };
+        return {
+          p1: "40",
+          p2: "40"
+        };
       }
 
       if (score.advantage === "player1") {
-        return { p1: "AD", p2: "40" };
+        return {
+          p1: "AD",
+          p2: "40"
+        };
       }
 
       if (score.advantage === "player2") {
-        return { p1: "40", p2: "AD" };
+        return {
+          p1: "40",
+          p2: "AD"
+        };
       }
 
       if (points1 >= 3 && points2 >= 3) {
         if (points1 === points2) {
-          return { p1: "40", p2: "40" };
+          return {
+            p1: "40",
+            p2: "40"
+          };
         }
 
         if (points1 > points2) {
-          return { p1: "AD", p2: "40" };
+          return {
+            p1: "AD",
+            p2: "40"
+          };
         }
 
-        return { p1: "40", p2: "AD" };
+        return {
+          p1: "40",
+          p2: "AD"
+        };
       }
 
       return {
@@ -598,7 +656,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setData.tieBreakMode === "super10"
       ) {
         return String(
-          playerPosition === 1 ? tb1 : tb2
+          playerPosition === 1
+            ? tb1
+            : tb2
         );
       }
 
@@ -625,12 +685,14 @@ document.addEventListener("DOMContentLoaded", () => {
             : String(finalGames2),
 
         tieBreak: String(
-          playerPosition === 1 ? tb1 : tb2
+          playerPosition === 1
+            ? tb1
+            : tb2
         )
       };
     }
 
-    function getVisibleSetCount(match, score) {
+    function getVisibleSetCount( match, score ) {
       const history =
         Array.isArray(score.setHistory)
           ? score.setHistory
@@ -751,14 +813,14 @@ document.addEventListener("DOMContentLoaded", () => {
         value === undefined ||
         value === ""
       ) {
-        return ` <span class="aovivo-compact-number empty" ></span> `;
+        return ` <span class="aovivo-compact-number empty"></span> `;
       }
 
       if (typeof value === "object") {
-        return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }" > <span class="aovivo-compact-score-set"> <span class="aovivo-compact-score-main"> ${escapeHtml(value.main)} </span> <span class="aovivo-compact-score-tb"> ${escapeHtml(value.tieBreak)} </span> </span> </span> `;
+        return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }"> <span class="aovivo-compact-score-set"> <span class="aovivo-compact-score-main"> ${escapeHtml(value.main)} </span> <span class="aovivo-compact-score-tb"> ${escapeHtml(value.tieBreak)} </span> </span> </span> `;
       }
 
-      return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }" > ${escapeHtml(String(value))} </span> `;
+      return ` <span class="aovivo-compact-number ${ isCurrent ? "current" : "" }"> ${escapeHtml(String(value))} </span> `;
     }
 
     function renderCompactPlayerRow( match, score, playerPosition, pointDisplay, visibleSetCount, isFinished ) {
@@ -795,24 +857,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const showPoints = !isFinished;
 
+      /* * Coluna compacta dos nomes. * A largura foi reduzida para aproximar * os números dos jogadores. */
       const nameColumn =
         window.innerWidth <= 480
-          ? "112px"
+          ? "105px"
           : window.innerWidth <= 768
-            ? "130px"
-            : "150px";
+            ? "112px"
+            : "125px";
 
       const scoreColumns =
         Array.from(
           {
             length: visibleSetCount
           },
-          () => "21px"
+          () => "19px"
         ).join(" ");
 
       const columns = showPoints
-        ? ` ${nameColumn} ${scoreColumns} 26px `
-        : ` ${nameColumn} ${scoreColumns} `;
+        ? `${nameColumn} ${scoreColumns} 22px`
+        : `${nameColumn} ${scoreColumns}`;
 
       const server =
         score.server || "player1";
@@ -827,7 +890,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ? pointDisplay.p1
           : pointDisplay.p2;
 
-      return ` <div class="aovivo-compact-row" style=" grid-template-columns: ${columns}; width: fit-content; " > <div class="aovivo-compact-name"> <span class="aovivo-compact-serve ${ isServing ? "" : "hidden" }" ></span> <span class="aovivo-compact-player"> ${escapeHtml(playerName)} </span> </div> ${setMarkup.join("")} ${ showPoints ? ` <span class=" aovivo-compact-number current " > ${escapeHtml(pointValue)} </span> ` : "" } </div> `;
+      return ` <div class="aovivo-compact-row" style=" grid-template-columns: ${columns}; width: fit-content; " > <div class="aovivo-compact-name"> <span class="aovivo-compact-serve ${ isServing ? "" : "hidden" }" ></span> <span class="aovivo-compact-player"> ${escapeHtml(playerName)} </span> </div> ${setMarkup.join("")} ${ showPoints ? ` <span class="aovivo-compact-number current"> ${escapeHtml(pointValue)} </span> ` : "" } </div> `;
     }
 
     function renderPlacar(match) {
@@ -991,6 +1054,7 @@ document.addEventListener("DOMContentLoaded", () => {
             : "none";
       }
     }
+
     async function updateScoreboardRecordingSnapshot() {
       if (
         typeof html2canvas ===
@@ -1091,9 +1155,11 @@ document.addEventListener("DOMContentLoaded", () => {
           context.drawImage(
             state.scoreboardSnapshotCanvas,
             (scoreRect.left -
-              videoRect.left) * scaleX,
+              videoRect.left) *
+              scaleX,
             (scoreRect.top -
-              videoRect.top) * scaleY,
+              videoRect.top) *
+              scaleY,
             scoreRect.width * scaleX,
             scoreRect.height * scaleY
           );
@@ -1487,33 +1553,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ensureVideoVisible();
 
-        videoEl.play().then(() => {
-          if (btnAtivarAudio) {
-            btnAtivarAudio.style.display =
-              "none";
-          }
-
-          hideInitialScreen();
-        }).catch(() => {
-          showInitialScreen(
-            "Toque na tela para iniciar a transmissão"
-          );
-
-          if (btnAtivarAudio) {
-            btnAtivarAudio.style.display =
-              "inline-flex";
-
-            const label =
-              btnAtivarAudio.querySelector(
-                "span"
-              );
-
-            if (label) {
-              label.textContent =
-                "Iniciar transmissão";
+        videoEl
+          .play()
+          .then(() => {
+            if (btnAtivarAudio) {
+              btnAtivarAudio.style.display =
+                "none";
             }
-          }
-        });
+
+            hideInitialScreen();
+          })
+          .catch(() => {
+            showInitialScreen(
+              "Toque na tela para iniciar a transmissão"
+            );
+
+            if (btnAtivarAudio) {
+              btnAtivarAudio.style.display =
+                "inline-flex";
+
+              const label =
+                btnAtivarAudio.querySelector(
+                  "span"
+                );
+
+              if (label) {
+                label.textContent =
+                  "Iniciar transmissão";
+              }
+            }
+          });
 
         setStatus("ASSISTINDO AO VIVO");
         return;
@@ -2100,8 +2169,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    /* * FUNÇÕES DE TELA CHEIA * * O modo CSS é ativado antes da Fullscreen API. * Isso permite que funcione também em celulares * que limitam requestFullscreen(). */
     function applyFullscreenClass() {
-      if (!videoWrap) return;
+      if (!videoWrap) {
+        return;
+      }
 
       videoWrap.classList.add(
         "aovivo-fullscreen"
@@ -2110,18 +2182,30 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add(
         "aovivo-fullscreen-body"
       );
+
+      requestAnimationFrame(() => {
+        window.dispatchEvent(
+          new Event("resize")
+        );
+      });
     }
 
     function removeFullscreenClass() {
-      if (!videoWrap) return;
-
-      videoWrap.classList.remove(
-        "aovivo-fullscreen"
-      );
+      if (videoWrap) {
+        videoWrap.classList.remove(
+          "aovivo-fullscreen"
+        );
+      }
 
       document.body.classList.remove(
         "aovivo-fullscreen-body"
       );
+
+      requestAnimationFrame(() => {
+        window.dispatchEvent(
+          new Event("resize")
+        );
+      });
     }
 
     async function enterFullscreen() {
@@ -2132,16 +2216,20 @@ document.addEventListener("DOMContentLoaded", () => {
       applyFullscreenClass();
 
       try {
-        if (videoWrap.requestFullscreen) {
+        if (
+          videoWrap.requestFullscreen &&
+          !document.fullscreenElement
+        ) {
           await videoWrap.requestFullscreen();
         } else if (
-          videoWrap.webkitRequestFullscreen
+          videoWrap.webkitRequestFullscreen &&
+          !document.webkitFullscreenElement
         ) {
           videoWrap.webkitRequestFullscreen();
         }
       } catch (error) {
         console.warn(
-          "Fullscreen API bloqueada. Usando CSS:",
+          "Fullscreen API indisponível. Usando modo CSS:",
           error
         );
       }
@@ -2165,11 +2253,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.fullscreenElement) {
           await document.exitFullscreen();
         } else if (
-          document.webkitFullscreenElement
+          document.webkitFullscreenElement &&
+          document.webkitExitFullscreen
         ) {
           document.webkitExitFullscreen();
         }
-      } catch (_) {}
+      } catch (error) {
+        console.warn(
+          "Não foi possível sair da tela cheia:",
+          error
+        );
+      }
 
       try {
         if (
@@ -2182,25 +2276,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function toggleFullscreen() {
-      const cssFullscreen =
+      const modoCssAtivo =
         videoWrap &&
         videoWrap.classList.contains(
           "aovivo-fullscreen"
         );
 
-      const browserFullscreen =
+      const modoNativoAtivo =
         document.fullscreenElement ||
         document.webkitFullscreenElement;
 
       if (
-        cssFullscreen ||
-        browserFullscreen
+        modoCssAtivo ||
+        modoNativoAtivo
       ) {
         await exitFullscreen();
       } else {
         await enterFullscreen();
       }
     }
+
+    function handleFullscreenChange() {
+      const modoNativoAtivo =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement;
+
+      /* * Alguns celulares encerram a Fullscreen API, * mas continuam utilizando o modo CSS. */
+      if (
+        !modoNativoAtivo &&
+        videoWrap &&
+        videoWrap.classList.contains(
+          "aovivo-fullscreen"
+        )
+      ) {
+        return;
+      }
+    }
+
+    document.addEventListener(
+      "fullscreenchange",
+      handleFullscreenChange
+    );
+
+    document.addEventListener(
+      "webkitfullscreenchange",
+      handleFullscreenChange
+    );
+
+    window.addEventListener(
+      "orientationchange",
+      () => {
+        if (
+          videoWrap &&
+          videoWrap.classList.contains(
+            "aovivo-fullscreen"
+          )
+        ) {
+          requestAnimationFrame(() => {
+            window.dispatchEvent(
+              new Event("resize")
+            );
+          });
+        }
+      }
+    );
+
+    window.addEventListener(
+      "resize",
+      () => {
+        if (
+          videoWrap &&
+          videoWrap.classList.contains(
+            "aovivo-fullscreen"
+          )
+        ) {
+          requestAnimationFrame(() => {
+            videoWrap.style.width =
+              `${window.innerWidth}px`;
+
+            videoWrap.style.height =
+              `${window.innerHeight}px`;
+          });
+        }
+      }
+    );
 
     async function start() {
       if (state.started) {
@@ -2296,10 +2455,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnExpandirTela) {
       btnExpandirTela.addEventListener(
         "click",
-        (event) => {
+        async (event) => {
           event.preventDefault();
           event.stopPropagation();
-          toggleFullscreen();
+
+          await toggleFullscreen();
         }
       );
     }
@@ -2333,27 +2493,17 @@ document.addEventListener("DOMContentLoaded", () => {
             document.fullscreenElement ||
             document.webkitFullscreenElement;
 
-          if (isFullscreen) {
-            await exitFullscreen();
+          if (
+            isFullscreen &&
+            !videoWrap.classList.contains(
+              "aovivo-fullscreen"
+            )
+          ) {
+            applyFullscreenClass();
           }
         }
       );
     }
-
-    document.addEventListener(
-      "fullscreenchange",
-      () => {
-        if (
-          !document.fullscreenElement &&
-          videoWrap &&
-          videoWrap.classList.contains(
-            "aovivo-fullscreen"
-          )
-        ) {
-          removeFullscreenClass();
-        }
-      }
-    );
 
     window.addEventListener(
       "beforeunload",
