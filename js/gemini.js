@@ -1,8 +1,12 @@
 (() => {
     "use strict";
   
-    const GEMINI_BACKEND_URL =
-      "http://localhost:3000/api/gemini";
+ 
+  const GEMINI_BACKEND_URL =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api/gemini"
+    : "https://tennispro-backend.onrender.com";
   
     let ultimaInteractionId = null;
     let requisicaoGeminiAtual = null;
