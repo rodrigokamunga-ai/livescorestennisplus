@@ -1,4 +1,4 @@
-const CACHE_NAME = "tennispro-v8";
+const CACHE_NAME = "tennispro-v17";
 
 const ASSETS_TO_CACHE = [
   "./",
@@ -39,6 +39,7 @@ const ASSETS_TO_CACHE = [
   "./js/dashboard.js",
   "./js/public.js",
   "./js/confronto.js",
+  "./js/gemini.js",
 
   "./img/icon-192.png",
   "./img/icon-512.png",
