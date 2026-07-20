@@ -17,6 +17,8 @@
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/public.css" />
+
+  
 </head>
 
 <body class="public-page public-dashboard-page">
@@ -35,64 +37,61 @@
       </select>
     </div>
 
-    <!-- BOTÕES NO LUGAR DO RESUMO DA PARTIDA -->
-    <section class="public-actions-section">
-      <div class="public-actions-row" aria-label="Ações da partida">
-        <button id="liveTvBtn" class="action-btn action-live" type="button">
-          <ion-icon name="share-social-outline"></ion-icon>
-          <span>Live</span>
-        </button>
-
-        <button id="statsBtn" class="action-btn action-stats" type="button">
-          <ion-icon name="stats-chart-outline"></ion-icon>
-          <span>Stats</span>
-        </button>
-
-        <button id="h2hBtn" class="action-btn action-h2h" type="button">
-          <ion-icon name="people-outline"></ion-icon>
-          <span>H2H</span>
-        </button>
-
-        <button id="broadcastBtn" class="action-btn action-live" type="button">
-          <ion-icon name="videocam-outline"></ion-icon>
-          <span>Transmitir</span>
-        </button>
-      </div>
-    </section>
+    <!-- Botão invisível utilizado pelo public.js. Os botões visíveis são criados abaixo da probabilidade de vitória. -->
+    <button id="statsBtn" type="button" hidden aria-hidden="true" tabindex="-1">
+      Stats
+    </button>
 
     <section class="public-grid board-grid dashboard-grid" id="gamesGrid">
+
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">
           <div class="title-with-icon">
-            <ion-icon name="calendar-outline" class="section-icon"></ion-icon>
+            <ion-icon name="calendar-outline" class="section-icon">
+            </ion-icon>
+
             <h3>Jogos do dia</h3>
           </div>
+
           <span class="badge" id="countScheduled">0</span>
         </div>
-        <div id="scheduledList" class="cards compact-cards column-scroll dashboard-list"></div>
+
+        <div id="scheduledList" class="cards compact-cards column-scroll dashboard-list">
+        </div>
       </div>
 
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">
           <div class="title-with-icon">
-            <ion-icon name="flash-outline" class="section-icon live"></ion-icon>
+            <ion-icon name="flash-outline" class="section-icon live">
+            </ion-icon>
+
             <h3>Em andamento</h3>
           </div>
+
           <span class="badge" id="countLive">0</span>
         </div>
-        <div id="liveList" class="cards compact-cards column-scroll dashboard-list"></div>
+
+        <div id="liveList" class="cards compact-cards column-scroll dashboard-list">
+        </div>
       </div>
 
       <div class="panel panel-glass column-panel dashboard-column">
         <div class="dashboard-title">
           <div class="title-with-icon">
-            <ion-icon name="flag-outline" class="section-icon finished"></ion-icon>
+            <ion-icon name="flag-outline" class="section-icon finished">
+            </ion-icon>
+
             <h3>Finalizados</h3>
           </div>
+
           <span class="badge" id="countFinished">0</span>
         </div>
-        <div id="finishedList" class="cards compact-cards column-scroll dashboard-list"></div>
+
+        <div id="finishedList" class="cards compact-cards column-scroll dashboard-list">
+        </div>
       </div>
+
     </section>
   </main>
 
@@ -101,13 +100,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <script src="js/firebase.js"></script>
-  <script src="js/public.js?v=2"></script>
+  <script src="js/public.js?v=10"></script>
 
-  <script> document.addEventListener("DOMContentLoaded", () => { const liveBtn = document.getElementById("liveTvBtn"); const broadcastBtn = document.getElementById("broadcastBtn"); const statsBtn = document.getElementById("statsBtn"); const h2hBtn = document.getElementById("h2hBtn"); async function getCurrentUserLiveMatch() { try { if (!window.__auth || !window.__db) return null; const user = window.__auth.currentUser; if (!user) return null; const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) return null; const doc = snap.docs[0]; return { id: doc.id, data: doc.data() }; } catch (err) { console.error("Erro ao buscar partida ao vivo:", err); return null; } } async function buildViewerUrl() { const match = await getCurrentUserLiveMatch(); if (!match) return null; const matchId = match.id; const shareToken = String(match.data?.shareToken || "").trim(); const url = new URL("aovivo.html", window.location.href); url.searchParams.set("id", matchId); url.searchParams.set("role", "viewer"); if (shareToken) { url.searchParams.set("shareToken", shareToken); } return url.toString(); } async function buildBroadcasterUrl() { const match = await getCurrentUserLiveMatch(); if (!match) return null; const matchId = match.id; const shareToken = String(match.data?.shareToken || "").trim(); const url = new URL("aovivo.html", window.location.href); url.searchParams.set("id", matchId); url.searchParams.set("role", "broadcaster"); if (shareToken) { url.searchParams.set("shareToken", shareToken); } return url.toString(); } async function shareLiveMatch() { try { const shareUrl = await buildViewerUrl(); if (!shareUrl) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a transmissão ao vivo da partida.", url: shareUrl }); } else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(shareUrl); alert("Link copiado!"); } else { prompt("Copie o link da transmissão:", shareUrl); } } catch (err) { console.error(err); alert("Não foi possível compartilhar a partida."); } } async function openBroadcaster() { try { const url = await buildBroadcasterUrl(); if (!url) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } window.open(url, "_blank"); } catch (err) { console.error(err); alert("Não foi possível abrir o transmissor."); } } if (liveBtn) { liveBtn.addEventListener("click", shareLiveMatch); } if (broadcastBtn) { broadcastBtn.addEventListener("click", openBroadcaster); } if (statsBtn) { statsBtn.addEventListener("click", () => { alert("Tela Stats ainda não definida."); }); } if (h2hBtn) { h2hBtn.addEventListener("click", async () => { try { const match = await getCurrentUserLiveMatch(); if (!match) { alert("Nenhuma partida ao vivo encontrada para este usuário."); return; } const data = match.data || {}; const opponentName = String( data.player2 || data.player2Name || data.opponent || data.opponentName || data.away || data.awayName || data.player3 || data.player3Name || data.player4 || data.player4Name || "" ).trim(); const opponentId = String( data.opponentId || data.player2Id || data.playerId2 || data.awayId || data.player3Id || data.player4Id || "" ).trim(); if (!opponentName && !opponentId) { alert("Não foi possível identificar o adversário da partida."); return; } const url = new URL("confronto.html", window.location.href); if (opponentName) { url.searchParams.set("player2", opponentName); } if (opponentId) { url.searchParams.set("opponentId", opponentId); } window.open(url.toString(), "_blank"); } catch (err) { console.error(err); alert("Não foi possível abrir o confronto."); } }); } }); </script>
+  <script> document.addEventListener("DOMContentLoaded", () => { async function getCurrentUserLiveMatch() { try { if (!window.__auth || !window.__db) { return null; } const user = window.__auth.currentUser; if (!user) { return null; } const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) { return null; } const doc = snap.docs[0]; return { id: doc.id, data: doc.data() }; } catch (error) { console.error( "Erro ao buscar partida ao vivo:", error ); return null; } } async function buildViewerUrl() { const match = await getCurrentUserLiveMatch(); if (!match) { return null; } const url = new URL( "aovivo.html", window.location.href ); url.searchParams.set("id", match.id); url.searchParams.set("role", "viewer"); const shareToken = String( match.data?.shareToken || "" ).trim(); if (shareToken) { url.searchParams.set( "shareToken", shareToken ); } return url.toString(); } async function buildBroadcasterUrl() { const match = await getCurrentUserLiveMatch(); if (!match) { return null; } const url = new URL( "aovivo.html", window.location.href ); url.searchParams.set("id", match.id); url.searchParams.set("role", "broadcaster"); const shareToken = String( match.data?.shareToken || "" ).trim(); if (shareToken) { url.searchParams.set( "shareToken", shareToken ); } return url.toString(); } async function shareLiveMatch() { try { const shareUrl = await buildViewerUrl(); if (!shareUrl) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a transmissão ao vivo da partida.", url: shareUrl }); return; } if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText( shareUrl ); alert("Link copiado!"); return; } prompt( "Copie o link da transmissão:", shareUrl ); } catch (error) { console.error(error); alert( "Não foi possível compartilhar a partida." ); } } async function openBroadcaster() { try { const url = await buildBroadcasterUrl(); if (!url) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } window.open(url, "_blank"); } catch (error) { console.error(error); alert( "Não foi possível abrir o transmissor." ); } } async function openH2H() { try { const match = await getCurrentUserLiveMatch(); if (!match) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } const data = match.data || {}; const opponentName = String( data.player2 || data.player2Name || data.opponent || data.opponentName || data.away || data.awayName || data.player3 || data.player3Name || data.player4 || data.player4Name || "" ).trim(); const opponentId = String( data.opponentId || data.player2Id || data.playerId2 || data.awayId || data.player3Id || data.player4Id || "" ).trim(); if (!opponentName && !opponentId) { alert( "Não foi possível identificar o adversário da partida." ); return; } const url = new URL( "confronto.html", window.location.href ); if (opponentName) { url.searchParams.set( "player2", opponentName ); } if (opponentId) { url.searchParams.set( "opponentId", opponentId ); } window.open(url.toString(), "_blank"); } catch (error) { console.error(error); alert( "Não foi possível abrir o confronto." ); } } function openStats() { const statsButton = document.getElementById("statsBtn"); if (statsButton) { statsButton.click(); } } function createActionButtons() { const probabilityBlocks = document.querySelectorAll( ".win-probability-chart" ); probabilityBlocks.forEach((probabilityBlock) => { if ( probabilityBlock.nextElementSibling?.classList.contains( "public-actions-section" ) ) { return; } const actionsSection = document.createElement("section"); actionsSection.className = "public-actions-section"; actionsSection.innerHTML = ` <div class="public-actions-row" aria-label="Ações da partida"> <button type="button" class="action-btn public-action-btn" data-action="live"> <ion-icon name="share-social-outline"></ion-icon> <span>Live</span> </button> <button type="button" class="action-btn public-action-btn" data-action="stats"> <ion-icon name="stats-chart-outline"></ion-icon> <span>Stats</span> </button> <button type="button" class="action-btn public-action-btn" data-action="h2h"> <ion-icon name="people-outline"></ion-icon> <span>H2H</span> </button> <button type="button" class="action-btn public-action-btn" data-action="broadcast"> <ion-icon name="videocam-outline"></ion-icon> <span>Transmitir</span> </button> </div> `; probabilityBlock.insertAdjacentElement( "afterend", actionsSection ); }); } document.addEventListener("click", (event) => { const actionButton = event.target.closest( ".public-action-btn" ); if (!actionButton) { return; } event.preventDefault(); event.stopPropagation(); const action = actionButton.dataset.action || ""; if (action === "live") { shareLiveMatch(); return; } if (action === "stats") { openStats(); return; } if (action === "h2h") { openH2H(); return; } if (action === "broadcast") { openBroadcaster(); } }); const observer = new MutationObserver(() => { createActionButtons(); }); const liveList = document.getElementById("liveList"); if (liveList) { observer.observe(liveList, { childList: true, subtree: true }); } createActionButtons(); }); </script>
 
-  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js">
+  </script>
 
-  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js") .then((registration) => { console.log("Service Worker registrado:", registration); }) .catch((error) => { console.error("Erro ao registrar Service Worker:", error); }); }); } </script>
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js">
+  </script>
+
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker .register("./service-worker.js") .then((registration) => { console.log( "Service Worker registrado:", registration ); }) .catch((error) => { console.error( "Erro ao registrar Service Worker:", error ); }); }); } </script>
 </body>
 </html>
