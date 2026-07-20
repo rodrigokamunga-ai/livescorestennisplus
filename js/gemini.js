@@ -931,16 +931,6 @@
                 "content-type"
               ) || "";
   
-            console.log(
-              "Status do backend:",
-              resposta.status
-            );
-  
-            console.log(
-              "Content-Type:",
-              contentType
-            );
-  
             let dados = null;
   
             if (
@@ -959,16 +949,19 @@
             }
   
             if (!resposta.ok) {
-              /* * Tratamento amigável do limite 429. */
+              /* * Tratamento exclusivo do limite 429. */
               if (
-                resposta.status === 429 ||
-                dados?.codigo ===
-                  "LIMITE_CONSULTAS"
+                resposta.status === 429
               ) {
-                throw new Error(
+                const erroQuota = new Error(
                   dados?.error ||
-                    "Você atingiu o limite gratuito de consultas do Assistente Gemini. Aguarde alguns segundos e tente novamente."
+                    "Você atingiu o limite gratuito de consultas do Assistente Gemini. Aguarde aproximadamente alguns segundos e tente novamente."
                 );
+  
+                erroQuota.codigo =
+                  "LIMITE_CONSULTAS";
+  
+                throw erroQuota;
               }
   
               const erroTemporario =
@@ -991,7 +984,7 @@
   
               throw new Error(
                 dados?.error ||
-                  `O backend respondeu HTTP ${resposta.status}. Conteúdo recebido: ${textoResposta.slice(0, 400)}`
+                  `O backend respondeu HTTP ${resposta.status}.`
               );
             }
   
@@ -1013,15 +1006,13 @@
               }
   
               throw new Error(
-                "O backend não retornou JSON. " +
-                  `Content-Type: ${contentType}. ` +
-                  `Resposta: ${textoResposta.slice( 0, 400 )}`
+                "O backend não retornou uma resposta válida."
               );
             }
   
             if (!dados) {
               throw new Error(
-                "O backend retornou um JSON inválido."
+                "O backend retornou uma resposta inválida."
               );
             }
   
@@ -1048,14 +1039,10 @@
               );
             }
   
-            /* * Erros 429 não devem ser repetidos * automaticamente, pois são limite de cota. */
+            /* * Não repete automaticamente erros de cota. */
             if (
-              error.message.includes(
-                "limite gratuito"
-              ) ||
-              error.message.includes(
-                "LIMITE_CONSULTAS"
-              )
+              error.codigo ===
+              "LIMITE_CONSULTAS"
             ) {
               throw error;
             }
@@ -1070,7 +1057,7 @@
               mensagem.includes("504") ||
               mensagem.includes("failed to fetch") ||
               mensagem.includes("networkerror") ||
-              mensagem.includes("não retornou json");
+              mensagem.includes("servidor está");
   
             if (
               erroTemporario &&
@@ -1183,10 +1170,21 @@
               error
             );
   
-            mostrarResposta(
-              `Erro: ${error.message}`,
-              true
-            );
+            /* * Para limite de consultas, mostra somente * a mensagem amigável, sem "Erro:". */
+            if (
+              error.codigo ===
+              "LIMITE_CONSULTAS"
+            ) {
+              mostrarResposta(
+                error.message,
+                true
+              );
+            } else {
+              mostrarResposta(
+                `Erro: ${error.message}`,
+                true
+              );
+            }
           } finally {
             mostrarCarregando(false);
           }
