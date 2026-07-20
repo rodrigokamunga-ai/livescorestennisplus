@@ -420,7 +420,7 @@
       const style = document.createElement("style");
       style.id = "publicAppInlineStyles";
       style.textContent = ` .match-footer-inline { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; font-size:12px; } .match-footer-inline span { white-space:nowrap; flex:0 0 auto; } .team-name-compact { white-space:pre-line; display:inline-block; font-weight:700; font-size:0.86rem; line-height:1.15; overflow-wrap:anywhere; word-break:break-word; } .player-name.team-name-compact { text-transform:none !important; } .serve-ball { display:inline-block; width:9px; height:9px; border-radius:50%; background:#d8ff63; box-shadow:0 0 6px rgba(216,255,99,0.75); margin-right:5px; flex-shrink:0; vertical-align:middle; } .tb-active-label { text-align:center; font-size:0.70rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:#d8ff63; padding:3px 0 2px; } .status-suspended { color: #fbbf24; } .suspended-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(251,191,36,0.14); border:1px solid rgba(251,191,36,0.28); color:#fbbf24; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em; } .suspended-duration { text-align:center; font-size:11px; font-weight:800; color:rgba(251,191,36,0.85); padding:2px 0 4px; letter-spacing:0.04em; } .match-footer-finalized { display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:6px !important; flex-wrap:nowrap !important; white-space:nowrap !important; overflow:hidden !important; width:100% !important; font-size:12px !important; } .match-footer-finalized .footer-item, .match-footer-finalized span { display:inline-flex !important; flex:0 0 auto !important; white-space:nowrap !important; align-items:center !important; } .match-footer-finalized .footer-sep { display:inline-flex !important; opacity:0.45 !important; flex:0 0 auto !important; } .match-footer-live { display:flex; flex-direction:column; gap:4px; font-size:12px; } .match-footer-live-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; white-space:nowrap; overflow:hidden; } .match-footer-live-row span { white-space:nowrap; flex:0 0 auto; } .team-col { min-width:0; } .set-col { text-align:center; } .points-col { text-align:center; } .team-name-compact.doubles-name { white-space: normal !important; line-height: 1.08 !important; } .team-name-compact.doubles-name .name-line { display:block; white-space: normal !important; } .match-summary .summary-label, .match-summary .summary-value, .match-summary-title { word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; } .match-table-head, .match-player-row { column-gap: 12px !important; } .match-board[data-status="finished"] .match-status.status-finished, .match-status.status-finished { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .match-status.status-wo { display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 4px 10px !important; border-radius: 999px !important; background: rgba(239, 68, 68, 0.16) !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; color: #ff5f5f !important; font-weight: 900 !important; letter-spacing: 0.03em !important; text-transform: uppercase !important; } .stats-block { margin-top: 14px; } .stats-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin-top:10px; } .stat-card { background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 18px; padding: 14px 16px 16px; min-height: 86px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(0,0,0,0.15); } .stat-title { text-align:center; color:#a9c6e6; font-size:0.88rem; line-height:1.15; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px; } .stat-values { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:0 10px; } .stat-values span { font-size:1.1rem; font-weight:800; color:#b9ff5f; min-width:44px; text-align:center; } .values-multi span { min-width:64px; } .last-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .last-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .last-points-balls { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap; } .last-point-ball { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .last-point-ball.empty { background: transparent; } .last-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .last-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } .break-points-block { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; } .break-points-title { text-align: center; color: #a9c6e6; font-size: 0.78rem; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; } .break-points-balls { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 8px; } .break-point-ball-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; } .break-point-number { font-size: 11px; font-weight: 800; color: #cbd5e1; line-height: 1; } .break-point-ball { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.28); background: transparent; box-shadow: none; flex: 0 0 auto; } .break-point-ball.empty { background: transparent; } .break-point-ball.p1 { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.65); } .break-point-ball.p2 { background: #3b82f6; box-shadow: 0 0 6px rgba(59, 130, 246, 0.65); } .player-with-avatar { display: inline-flex; align-items: center; gap: 6px; min-width: 0; } .player-avatar { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; border: 1px solid rgba(255,255,255,0.18); background: #1f2937; } .player-avatar-placeholder { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.10); } @media (max-width:768px) { .match-footer-inline { gap:6px; font-size:11px; } .team-name-compact { font-size:0.72rem; line-height:1.1; } .match-footer-finalized { font-size:10px !important; gap:4px !important; } .match-footer-live { font-size:10px; gap:3px; } .match-footer-live-row { gap:5px; } .match-table-head, .match-player-row { column-gap: 16px !important; } .team-name-compact.doubles-name { padding-right: 6px !important; } .match-board .set-tb { font-size: 0.55em !important; top: -0.5em !important; margin-left: 1px !important; } .stats-grid { grid-template-columns: 1fr; } .stat-card { min-height: 80px; } .break-points-balls { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; } .break-point-ball { width: 12px; height: 12px; } .break-point-number { font-size: 10px; } .player-avatar, .player-avatar-placeholder { width: 16px; height: 16px; } } `;
-      document.head.appendChild(style);
+      style.textContent += ` .public-stats-player-header { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 22px; align-items: stretch; } .public-stats-player-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px 12px; border-radius: 16px; background: rgba(25, 34, 54, 0.82); border: 1px solid rgba(255,255,255,0.08); text-align: center; } .public-stats-player-card.player1 { border-bottom: 3px solid #22c55e; } .public-stats-player-card.player2 { border-bottom: 3px solid #3b82f6; } .public-stats-player-photo, .public-stats-player-photo-placeholder { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #1f2937; border: 2px solid rgba(255,255,255,0.2); } .public-stats-player-photo-placeholder { display: flex; align-items: center; justify-content: center; color: #dbeafe; font-size: 28px; font-weight: 800; } .public-stats-player-name { color: #ffffff; font-weight: 800; font-size: 1rem; line-height: 1.2; } .public-stats-player-label { color: #9fb4ce; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; } .public-stat-comparison { display: flex !important; width: 100% !important; height: 8px !important; overflow: hidden !important; border-radius: 999px !important; background: rgba(255,255,255,0.08) !important; } .public-stat-comparison-p1 { background: #22c55e !important; height: 100% !important; transition: width 0.35s ease !important; } .public-stat-comparison-p2 { background: #3b82f6 !important; height: 100% !important; transition: width 0.35s ease !important; } @media (max-width: 600px) { .public-stats-player-header { gap: 10px; } .public-stats-player-photo, .public-stats-player-photo-placeholder { width: 58px; height: 58px; } .public-stats-player-name { font-size: 0.82rem; } } `; document.head.appendChild(style);
     }
 
     function formatDateTime(value) {
@@ -1128,7 +1128,14 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
           ? `<div class="tb-active-label">🎾 Tie-break</div>`
           : "";
 
-      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> <div class="match-top-left"> ${category ? `<div class="match-chip">${category}</div>` : ""} ${!isSuspended && stage ? `<div class="live-meta-left"><span><strong>${stage}</strong></span></div>` : ""} </div> <div class="match-top-right"> <div class="match-status ${U.statusClass(rawStatus)}"> ${getStatusDot(rawStatus)} <span>${U.statusLabel(rawStatus)}</span> </div> ${!isSuspended && duration ? ` <div class="live-meta-right"> <span class="duration-with-icon"> <ion-icon name="time-outline" class="duration-icon"></ion-icon> <strong>${duration}</strong> </span> </div> ` : ""} </div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(match, setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} ${!isSuspended ? renderLastPointsLine(match) : ""} ${!isSuspended ? renderBreakPointBalls(match) : ""} ${!isSuspended ? renderWinProbabilityChart(match) : ""} ${!isSuspended ? renderMatchSummary(match) : ""} ${!isSuspended ? renderStatistics(match) : ""} <div class="match-footer compact-footer match-footer-live"></div> </article> `;
+      return ` <article class="public-card match-board compact-match-board" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> <div class="match-top-left"> ${category ? `<div class="match-chip">${category}</div>` : ""} ${!isSuspended && stage ? `<div class="live-meta-left"><span><strong>${stage}</strong></span></div>` : ""} </div> <div class="match-top-right"> <div class="match-status ${U.statusClass(rawStatus)}"> ${getStatusDot(rawStatus)} <span>${U.statusLabel(rawStatus)}</span> </div> ${!isSuspended && duration ? ` <div class="live-meta-right"> <span class="duration-with-icon"> <ion-icon name="time-outline" class="duration-icon"></ion-icon> <strong>${duration}</strong> </span> </div> ` : ""} </div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(match, setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} 
+      
+      ${!isSuspended ? renderLastPointsLine(match) : ""}
+${!isSuspended ? renderBreakPointBalls(match) : ""}
+${!isSuspended ? renderWinProbabilityChart(match) : ""}
+<div class="match-footer compact-footer match-footer-live"></div> 
+      
+      </article> `;
     }
 
     function createScheduledCard(match) {
@@ -1164,8 +1171,14 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
         const ownerProfileId = String(match?.ownerId || "").trim();
         if (ownerProfileId) ownerIds.add(ownerProfileId);
 
-        const player2Name = String(match?.player2 || "").trim();
-        if (player2Name) opponentNames.add(player2Name);
+        [
+          match?.player2,
+          match?.player3,
+          match?.player4
+        ].forEach((playerName) => {
+          const name = String(playerName || "").trim();
+          if (name) opponentNames.add(name);
+        });
       });
 
       await Promise.all([...ownerIds].map((profileId) => loadProfileData(profileId)));
@@ -1347,16 +1360,1332 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
       });
     }
 
-    function init() {
-      injectInlineStyles();
-      initFilter();
-      listenPublicMatches();
-      listenSingleMatch();
-      state.timer = setInterval(refreshLiveDurations, 1000);
+    function ensureStatsModal() {
+      if (document.getElementById("publicStatsModal")) {
+        return;
+      }
+    
+      const modal = document.createElement("div");
+    
+      modal.id = "publicStatsModal";
+      modal.className = "public-stats-modal-overlay";
+      modal.setAttribute("aria-hidden", "true");
+    
+      modal.innerHTML = ` <div class="public-stats-modal" role="dialog" aria-modal="true" aria-labelledby="publicStatsModalTitle" > <div class="public-stats-modal-header"> <div> <div class="public-stats-modal-kicker"> Análise completa </div> <h2 id="publicStatsModalTitle"> Estatísticas da partida </h2> <div id="publicStatsModalSubtitle" class="public-stats-modal-subtitle" ></div> </div> <button type="button" id="closePublicStatsModal" class="public-stats-close" aria-label="Fechar estatísticas" > ✕ </button> </div> <div id="publicStatsModalBody" class="public-stats-modal-body" ></div> <div class="public-stats-modal-footer"> <button type="button" id="closePublicStatsModalFooter" class="public-stats-close-footer" > Fechar </button> </div> </div> `;
+    
+      document.body.appendChild(modal);
+    
+      const closeButton =
+        document.getElementById(
+          "closePublicStatsModal"
+        );
+    
+      const closeFooter =
+        document.getElementById(
+          "closePublicStatsModalFooter"
+        );
+    
+      closeButton?.addEventListener(
+        "click",
+        closeStatsModal
+      );
+    
+      closeFooter?.addEventListener(
+        "click",
+        closeStatsModal
+      );
+    
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeStatsModal();
+        }
+      });
+    
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeStatsModal();
+        }
+      });
+    }
+    
+    function closeStatsModal() {
+      const modal =
+        document.getElementById(
+          "publicStatsModal"
+        );
+    
+      if (!modal) {
+        return;
+      }
+    
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove(
+        "public-stats-modal-open"
+      );
+    }
+    
+    function getStatsTargetMatch() {
+      const queryMatchId =
+        String(matchId || "").trim();
+    
+      if (queryMatchId) {
+        const matchById =
+          state.cachedMatches.find(
+            (item) =>
+              String(item.id) === queryMatchId
+          );
+    
+        if (matchById) {
+          return matchById;
+        }
+      }
+    
+      const liveMatch =
+        state.cachedMatches.find((item) => {
+          const status = String(
+            item.status || ""
+          ).toLowerCase();
+    
+          return (
+            status === "live" ||
+            status === "suspended"
+          );
+        });
+    
+      if (liveMatch) {
+        return liveMatch;
+      }
+    
+      const finishedMatch =
+        state.cachedMatches.find((item) => {
+          const status = String(
+            item.status || ""
+          ).toLowerCase();
+    
+          return (
+            status === "finished" ||
+            status === "wo" ||
+            status === "ret"
+          );
+        });
+    
+      if (finishedMatch) {
+        return finishedMatch;
+      }
+    
+      return state.cachedMatches[0] || null;
+    }
+    
+    function getNestedStat( playerStats, aliases = [], fallback = 0 ) {
+      const stats = playerStats || {};
+    
+      for (const key of aliases) {
+        if (
+          stats[key] !== undefined &&
+          stats[key] !== null &&
+          stats[key] !== ""
+        ) {
+          return stats[key];
+        }
+      }
+    
+      return fallback;
+    }
+    
+    function getNumericStat( playerStats, aliases = [] ) {
+      const value = getNestedStat(
+        playerStats,
+        aliases,
+        0
+      );
+    
+      const number = Number(value);
+    
+      return Number.isFinite(number)
+        ? number
+        : 0;
+    }
+    
+    function formatStatPair( player1Value, player2Value ) {
+      const value1 =
+        Number.isFinite(Number(player1Value))
+          ? Number(player1Value)
+          : player1Value || "0";
+    
+      const value2 =
+        Number.isFinite(Number(player2Value))
+          ? Number(player2Value)
+          : player2Value || "0";
+    
+      return {
+        value1: String(value1),
+        value2: String(value2)
+      };
+    }
+    
+    function renderDetailedStatRow( label, player1Value, player2Value, extraClass = "" ) {
+      const values = formatStatPair(
+        player1Value,
+        player2Value
+      );
+    
+      return ` <div class="public-stat-detail-row ${extraClass}"> <div class="public-stat-detail-label"> ${U.escapeHtml(label)} </div> <div class="public-stat-detail-value player1"> ${U.escapeHtml(values.value1)} </div> <div class="public-stat-detail-value player2"> ${U.escapeHtml(values.value2)} </div> </div> `;
+    }
+    
+    function renderStatsComparisonBar( player1Value, player2Value ) {
+      const value1 = Number(player1Value) || 0;
+      const value2 = Number(player2Value) || 0;
+      const total = value1 + value2;
+    
+      const width1 =
+        total > 0
+          ? (value1 / total) * 100
+          : 50;
+    
+      const width2 =
+        total > 0
+          ? (value2 / total) * 100
+          : 50;
+    
+      return ` <div class="public-stat-comparison"> <div class="public-stat-comparison-p1" style="width:${width1}%" ></div> <div class="public-stat-comparison-p2" style="width:${width2}%" ></div> </div> `;
+    }
+    
+    function renderDetailedStats(match) {
+      const stats =
+        match?.stats ||
+        match?.statistics ||
+        {};
+    
+      const player1 =
+        stats.player1 ||
+        stats.p1 ||
+        {};
+    
+      const player2 =
+        stats.player2 ||
+        stats.p2 ||
+        {};
+    
+      const score =
+        U.normalizeScore(match?.score || {});
+    
+      const numberStat = ( player, aliases ) => {
+        return getNumericStat(player, aliases);
+      };
+    
+      const ratio = ( won, attempts ) => {
+        return `${won}/${attempts}`;
+      };
+    
+      const performance = ( player, aliases ) => {
+        const value = numberStat(
+          player,
+          aliases
+        );
+    
+        return `${value.toFixed(1)}%`;
+      };
+    
+      const sections = [
+        {
+          title: "Serviço",
+    
+          rows: [
+            {
+              label: "Aces",
+              p1: numberStat(player1, ["ace", "aces"]),
+              p2: numberStat(player2, ["ace", "aces"])
+            },
+    
+            {
+              label: "Duplas faltas",
+              p1: numberStat(
+                player1,
+                [
+                  "doubleFault",
+                  "doubleFaults",
+                  "duplasFaltas"
+                ]
+              ),
+              p2: numberStat(
+                player2,
+                [
+                  "doubleFault",
+                  "doubleFaults",
+                  "duplasFaltas"
+                ]
+              )
+            },
+    
+            {
+              label: "1º serviço vencido",
+              p1: ratio(
+                numberStat(player1, [
+                  "serve1Won",
+                  "firstServeWon"
+                ]),
+                numberStat(player1, [
+                  "serve1Attempts",
+                  "firstServeAttempts"
+                ])
+              ),
+              p2: ratio(
+                numberStat(player2, [
+                  "serve1Won",
+                  "firstServeWon"
+                ]),
+                numberStat(player2, [
+                  "serve1Attempts",
+                  "firstServeAttempts"
+                ])
+              ),
+              p1Bar: numberStat(player1, [
+                "serve1Won",
+                "firstServeWon"
+              ]),
+              p2Bar: numberStat(player2, [
+                "serve1Won",
+                "firstServeWon"
+              ])
+            },
+    
+            {
+              label: "2º serviço vencido",
+              p1: ratio(
+                numberStat(player1, [
+                  "serve2Won",
+                  "secondServeWon"
+                ]),
+                numberStat(player1, [
+                  "serve2Attempts",
+                  "secondServeAttempts"
+                ])
+              ),
+              p2: ratio(
+                numberStat(player2, [
+                  "serve2Won",
+                  "secondServeWon"
+                ]),
+                numberStat(player2, [
+                  "serve2Attempts",
+                  "secondServeAttempts"
+                ])
+              ),
+              p1Bar: numberStat(player1, [
+                "serve2Won",
+                "secondServeWon"
+              ]),
+              p2Bar: numberStat(player2, [
+                "serve2Won",
+                "secondServeWon"
+              ])
+            },
+    
+            {
+              label: "Performance",
+              p1: performance(player1, [
+                "serveSuccessPct",
+                "performance"
+              ]),
+              p2: performance(player2, [
+                "serveSuccessPct",
+                "performance"
+              ]),
+              p1Bar: numberStat(player1, [
+                "serveSuccessPct",
+                "performance"
+              ]),
+              p2Bar: numberStat(player2, [
+                "serveSuccessPct",
+                "performance"
+              ])
+            }
+          ]
+        },
+    
+        {
+          title: "Pontos na rede",
+    
+          rows: [
+            {
+              label: "Pontos na rede vencidos",
+              p1: numberStat(player1, [
+                "netWon",
+                "netPointsWon",
+                "pontosNaRedeVencidos"
+              ]),
+              p2: numberStat(player2, [
+                "netWon",
+                "netPointsWon",
+                "pontosNaRedeVencidos"
+              ])
+            },
+    
+            {
+              label: "Pontos na rede perdidos",
+              p1: numberStat(player1, [
+                "netLost",
+                "netPointsLost",
+                "pontosNaRedePerdidos"
+              ]),
+              p2: numberStat(player2, [
+                "netLost",
+                "netPointsLost",
+                "pontosNaRedePerdidos"
+              ])
+            }
+          ]
+        },
+    
+        {
+          title: "Golpes e erros",
+    
+          rows: [
+            {
+              label: "Erros não forçados de forehand",
+              p1: numberStat(player1, [
+                "enfFH",
+                "unforcedErrorFH",
+                "unforcedErrorsForehand",
+                "forehandUnforcedError"
+              ]),
+              p2: numberStat(player2, [
+                "enfFH",
+                "unforcedErrorFH",
+                "unforcedErrorsForehand",
+                "forehandUnforcedError"
+              ])
+            },
+    
+            {
+              label: "Erros não forçados de backhand",
+              p1: numberStat(player1, [
+                "enfBH",
+                "unforcedErrorBH",
+                "unforcedErrorsBackhand",
+                "backhandUnforcedError"
+              ]),
+              p2: numberStat(player2, [
+                "enfBH",
+                "unforcedErrorBH",
+                "unforcedErrorsBackhand",
+                "backhandUnforcedError"
+              ])
+            },
+    
+            {
+              label: "Erros forçados de forehand",
+              p1: numberStat(player1, [
+                "forcedErrorFH",
+                "forcedErrorsFH",
+                "errosForcadosFH",
+                "forehandForcedError"
+              ]),
+              p2: numberStat(player2, [
+                "forcedErrorFH",
+                "forcedErrorsFH",
+                "errosForcadosFH",
+                "forehandForcedError"
+              ])
+            },
+    
+            {
+              label: "Erros forçados de backhand",
+              p1: numberStat(player1, [
+                "forcedErrorBH",
+                "forcedErrorsBH",
+                "errosForcadosBH",
+                "backhandForcedError"
+              ]),
+              p2: numberStat(player2, [
+                "forcedErrorBH",
+                "forcedErrorsBH",
+                "errosForcadosBH",
+                "backhandForcedError"
+              ])
+            },
+    
+            {
+              label: "Dropshot winners",
+              p1: numberStat(player1, [
+                "dropshotWinner",
+                "dropShotWinner"
+              ]),
+              p2: numberStat(player2, [
+                "dropshotWinner",
+                "dropShotWinner"
+              ])
+            },
+    
+            {
+              label: "Dropshot erros",
+              p1: numberStat(player1, [
+                "dropshotError",
+                "dropShotError"
+              ]),
+              p2: numberStat(player2, [
+                "dropshotError",
+                "dropShotError"
+              ])
+            }
+          ]
+        },
+    
+        {
+          title: "Devolução",
+    
+          rows: [
+            {
+              label: "Pontos de devolução vencidos",
+              p1: numberStat(player1, [
+                "returnPoint",
+                "returnPointsWon"
+              ]),
+              p2: numberStat(player2, [
+                "returnPoint",
+                "returnPointsWon"
+              ])
+            },
+    
+            {
+              label: "Erros de devolução",
+              p1: numberStat(player1, [
+                "returnError",
+                "returnErrors"
+              ]),
+              p2: numberStat(player2, [
+                "returnError",
+                "returnErrors"
+              ])
+            },
+    
+            {
+              label: "Break points vencidos",
+              p1: ratio(
+                Number(
+                  score.breakPointsWon1 ||
+                    player1.breakPointsWon ||
+                    0
+                ),
+                Number(
+                  score.breakPointsChances1 ||
+                    player1.breakPointsChances ||
+                    0
+                )
+              ),
+              p2: ratio(
+                Number(
+                  score.breakPointsWon2 ||
+                    player2.breakPointsWon ||
+                    0
+                ),
+                Number(
+                  score.breakPointsChances2 ||
+                    player2.breakPointsChances ||
+                    0
+                )
+              ),
+              p1Bar: Number(
+                score.breakPointsWon1 ||
+                  player1.breakPointsWon ||
+                  0
+              ),
+              p2Bar: Number(
+                score.breakPointsWon2 ||
+                  player2.breakPointsWon ||
+                  0
+              )
+            }
+          ]
+        },
+    
+        {
+          title: "Linha de base",
+    
+          rows: [
+            {
+              label: "Pontos vencidos na linha de base",
+              p1: numberStat(player1, [
+                "baselinePoint",
+                "baselinePointsWon"
+              ]),
+              p2: numberStat(player2, [
+                "baselinePoint",
+                "baselinePointsWon"
+              ])
+            },
+    
+            {
+              label: "Erros na linha de base",
+              p1: numberStat(player1, [
+                "baselineError",
+                "baselineErrors"
+              ]),
+              p2: numberStat(player2, [
+                "baselineError",
+                "baselineErrors"
+              ])
+            }
+          ]
+        },
+    
+        {
+          title: "Resumo",
+    
+          rows: [
+            {
+              label: "Total de pontos vencidos",
+              p1: Number(
+                score.totalPoints1 ||
+                  player1.totalPointsWon ||
+                  0
+              ),
+              p2: Number(
+                score.totalPoints2 ||
+                  player2.totalPointsWon ||
+                  0
+              )
+            },
+    
+            {
+              label: "Sets",
+              p1: score.sets1,
+              p2: score.sets2
+            },
+    
+            {
+              label: "Games",
+              p1: score.games1,
+              p2: score.games2
+            }
+          ]
+        }
+      ];
+    
+      const sectionHtml = sections
+        .map((section) => {
+          const rowsHtml = section.rows
+            .map((row) => {
+              return renderStatsRow(
+                row.label,
+                row.p1,
+                row.p2,
+                row.p1Bar ?? row.p1,
+                row.p2Bar ?? row.p2
+              );
+            })
+            .join("");
+    
+          return ` <section class="public-stat-detail-section"> <h3> ${U.escapeHtml(section.title)} </h3> ${rowsHtml} </section> `;
+        })
+        .join("");
+    
+      return ` <div class="public-stats-player-header"> 
+      ${renderStatsPlayerHeader(match, 1)} ${renderStatsPlayerHeader(match, 2)} </div> ${sectionHtml} `;
+    }
+    
+    function showStatsModal() {
+      ensureStatsModal();
+    
+      const modal =
+        document.getElementById(
+          "publicStatsModal"
+        );
+    
+      const body =
+        document.getElementById(
+          "publicStatsModalBody"
+        );
+    
+      const subtitle =
+        document.getElementById(
+          "publicStatsModalSubtitle"
+        );
+    
+      const match = getStatsTargetMatch();
+    
+      if (!match) {
+        body.innerHTML = ` <div class="public-stats-empty"> Nenhuma partida disponível para exibir estatísticas. </div> `;
+    
+        subtitle.textContent = "";
+      } else {
+        const dateText = match.matchDateTime
+          ? formatDateTime(match.matchDateTime)
+          : "";
+    
+        subtitle.textContent =
+          dateText
+            ? `${dateText} • ${getGameFormat(match)}`
+            : getGameFormat(match);
+    
+        body.innerHTML =
+          renderDetailedStats(match);
+      }
+    
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    
+      document.body.classList.add(
+        "public-stats-modal-open"
+      );
+    }
+    
+    function initStatsButton() {
+      const statsBtn =
+        document.getElementById("statsBtn");
+    
+      if (!statsBtn) {
+        return;
+      }
+    
+      statsBtn.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+    
+          showStatsModal();
+        }
+      );
     }
 
-    return { init };
+    function ensureStatsModal() {
+      if (document.getElementById("publicStatsModal")) {
+        return;
+      }
+    
+      const modal = document.createElement("div");
+    
+      modal.id = "publicStatsModal";
+      modal.className = "public-stats-modal-overlay";
+      modal.setAttribute("aria-hidden", "true");
+    
+      modal.innerHTML = ` <div class="public-stats-modal" role="dialog" aria-modal="true" aria-labelledby="publicStatsModalTitle" > <div class="public-stats-modal-header"> <div> <div class="public-stats-modal-kicker"> Análise completa </div> <h2 id="publicStatsModalTitle"> Estatísticas da partida </h2> <div id="publicStatsModalSubtitle" class="public-stats-modal-subtitle" ></div> </div> <button type="button" id="closePublicStatsModal" class="public-stats-close" aria-label="Fechar estatísticas" > ✕ </button> </div> <div id="publicStatsModalBody" class="public-stats-modal-body" ></div> <div class="public-stats-modal-footer"> <button type="button" id="closePublicStatsModalFooter" class="public-stats-close-footer" > Fechar </button> </div> </div> `;
+    
+      document.body.appendChild(modal);
+    
+      document
+        .getElementById("closePublicStatsModal")
+        ?.addEventListener(
+          "click",
+          closeStatsModal
+        );
+    
+      document
+        .getElementById("closePublicStatsModalFooter")
+        ?.addEventListener(
+          "click",
+          closeStatsModal
+        );
+    
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeStatsModal();
+        }
+      });
+    
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeStatsModal();
+        }
+      });
+    }
+    
+    function closeStatsModal() {
+      const modal =
+        document.getElementById(
+          "publicStatsModal"
+        );
+    
+      if (!modal) {
+        return;
+      }
+    
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    
+      document.body.classList.remove(
+        "public-stats-modal-open"
+      );
+    }
+    
+    function getStatsTargetMatch() {
+      const queryMatchId =
+        String(matchId || "").trim();
+    
+      if (queryMatchId) {
+        const matchById =
+          state.cachedMatches.find(
+            (item) =>
+              String(item.id) === queryMatchId
+          );
+    
+        if (matchById) {
+          return matchById;
+        }
+      }
+    
+      const liveMatch =
+        state.cachedMatches.find((item) => {
+          const status = String(
+            item.status || ""
+          ).toLowerCase();
+    
+          return (
+            status === "live" ||
+            status === "suspended"
+          );
+        });
+    
+      if (liveMatch) {
+        return liveMatch;
+      }
+    
+      const finishedMatch =
+        state.cachedMatches.find((item) => {
+          const status = String(
+            item.status || ""
+          ).toLowerCase();
+    
+          return (
+            status === "finished" ||
+            status === "wo" ||
+            status === "ret"
+          );
+        });
+    
+      if (finishedMatch) {
+        return finishedMatch;
+      }
+    
+      return state.cachedMatches[0] || null;
+    }
+    
+    function getNumericStat( playerStats, aliases = [] ) {
+      const stats = playerStats || {};
+    
+      for (const alias of aliases) {
+        if (
+          stats[alias] !== undefined &&
+          stats[alias] !== null &&
+          stats[alias] !== ""
+        ) {
+          const value = Number(stats[alias]);
+    
+          return Number.isFinite(value)
+            ? value
+            : stats[alias];
+        }
+      }
+    
+      return 0;
+    }
+    
+    function renderStatsRow( label, player1Display, player2Display, player1BarValue = null, player2BarValue = null ) {
+      const parseBarValue = (value) => {
+        if (value !== null && value !== undefined && value !== "") {
+          const numeric = Number(value);
+    
+          if (Number.isFinite(numeric)) {
+            return numeric;
+          }
+        }
+    
+        const text = String(value ?? "0");
+        const firstPart = Number(text.split("/")[0]);
+    
+        return Number.isFinite(firstPart) ? firstPart : 0;
+      };
+    
+      const value1 = parseBarValue(
+        player1BarValue !== null ? player1BarValue : player1Display
+      );
+    
+      const value2 = parseBarValue(
+        player2BarValue !== null ? player2BarValue : player2Display
+      );
+    
+      const total = value1 + value2;
+    
+      const width1 = total > 0 ? (value1 / total) * 100 : 50;
+      const width2 = total > 0 ? (value2 / total) * 100 : 50;
+    
+      return ` <div class="public-stat-detail-line"> <div class="public-stat-detail-values"> <span class="public-stat-value-player1"> ${U.escapeHtml(String(player1Display ?? 0))} </span> <span class="public-stat-value-label"> ${U.escapeHtml(label)} </span> <span class="public-stat-value-player2"> ${U.escapeHtml(String(player2Display ?? 0))} </span> </div> <div class="public-stat-comparison"> <div class="public-stat-comparison-p1" style="width:${width1}%" ></div> <div class="public-stat-comparison-p2" style="width:${width2}%" ></div> </div> </div> `;
+    }
+
+    function renderStatsPlayerHeader(match, playerPosition) {
+      const isPlayer1 = playerPosition === 1;
+      const teamClass = isPlayer1 ? "player1" : "player2";
+    
+      const players = isPlayer1
+        ? [
+            {
+              name: String(match?.player1 || match?.ownerName || "Jogador 1").trim(),
+              photo: getPlayerPhotoFromMatch(match, 1)
+            },
+            ...(isDoublesFormat(match)
+              ? [
+                  {
+                    name: String(match?.player2 || "Jogador 2").trim(),
+                    photo: state.opponentProfileCache[String(match?.player2 || "").trim()]?.photoSrc || ""
+                  }
+                ]
+              : [])
+          ]
+        : [
+            {
+              name: String(match?.player2 || "Jogador 2").trim(),
+              photo: getPlayerPhotoFromMatch(match, 2)
+            },
+            ...(isDoublesFormat(match)
+              ? [
+                  {
+                    name: String(match?.player4 || "Jogador 4").trim(),
+                    photo: state.opponentProfileCache[String(match?.player4 || "").trim()]?.photoSrc || ""
+                  }
+                ]
+              : [])
+          ];
+    
+      const playersHtml = players.map((player) => {
+        const safeName = U.escapeHtml(player.name);
+        const initial = U.escapeHtml(
+          String(player.name || "J").charAt(0).toUpperCase()
+        );
+    
+        const imageHtml = player.photo
+          ? ` <img class="public-stats-player-photo" src="${U.escapeHtml(player.photo)}" alt="${safeName}" /> `
+          : ` <div class="public-stats-player-photo-placeholder"> ${initial} </div> `;
+    
+        return ` <div class="public-stats-player-unit"> ${imageHtml} <div class="public-stats-player-name">${safeName}</div> </div> `;
+      }).join("");
+    
+      return ` <div class="public-stats-player-card ${teamClass}"> ${playersHtml} </div> `;   }
+    
+    function renderDetailedStats(match) {
+      const stats = match?.stats || match?.statistics || {};
+    
+      const player1 = stats.player1 || stats.p1 || {};
+      const player2 = stats.player2 || stats.p2 || {};
+    
+      const score = U.normalizeScore(match?.score || {});
+    
+      const numberStat = (player, aliases) => {
+        const value = getNumericStat(player, aliases);
+        const number = Number(value);
+    
+        return Number.isFinite(number) ? number : 0;
+      };
+    
+      const sumOrFallback = (player, totalAliases, partAliases) => {
+        const totalValue = getNestedStat(player, totalAliases, null);
+    
+        if (
+          totalValue !== null &&
+          totalValue !== undefined &&
+          totalValue !== ""
+        ) {
+          const totalNumber = Number(totalValue);
+    
+          if (Number.isFinite(totalNumber)) {
+            return totalNumber;
+          }
+        }
+    
+        return partAliases.reduce(
+          (total, aliases) => total + numberStat(player, aliases),
+          0
+        );
+      };
+    
+      const ratio = (won, attempts) => `${won}/${attempts}`;
+    
+      const p1Winners = sumOrFallback(
+        player1,
+        ["winners", "winner"],
+        [
+          ["forehandWinner", "forehandWinners", "winnerFH"],
+          ["backhandWinner", "backhandWinners", "winnerBH"]
+        ]
+      );
+    
+      const p2Winners = sumOrFallback(
+        player2,
+        ["winners", "winner"],
+        [
+          ["forehandWinner", "forehandWinners", "winnerFH"],
+          ["backhandWinner", "backhandWinners", "winnerBH"]
+        ]
+      );
+    
+      const p1UnforcedErrors = sumOrFallback(
+        player1,
+        ["unforcedErrors", "enf", "errosNaoForcados"],
+        [
+          ["enfFH", "unforcedErrorFH", "unforcedErrorsForehand", "forehandUnforcedError"],
+          ["enfBH", "unforcedErrorBH", "unforcedErrorsBackhand", "backhandUnforcedError"]
+        ]
+      );
+    
+      const p2UnforcedErrors = sumOrFallback(
+        player2,
+        ["unforcedErrors", "enf", "errosNaoForcados"],
+        [
+          ["enfFH", "unforcedErrorFH", "unforcedErrorsForehand", "forehandUnforcedError"],
+          ["enfBH", "unforcedErrorBH", "unforcedErrorsBackhand", "backhandUnforcedError"]
+        ]
+      );
+    
+      const p1ForcedErrors = sumOrFallback(
+        player1,
+        ["forcedError", "forcedErrors", "errosForcados"],
+        [
+          ["forcedErrorFH", "forcedErrorsFH", "errosForcadosFH", "forehandForcedError"],
+          ["forcedErrorBH", "forcedErrorsBH", "errosForcadosBH", "backhandForcedError"]
+        ]
+      );
+    
+      const p2ForcedErrors = sumOrFallback(
+        player2,
+        ["forcedError", "forcedErrors", "errosForcados"],
+        [
+          ["forcedErrorFH", "forcedErrorsFH", "errosForcadosFH", "forehandForcedError"],
+          ["forcedErrorBH", "forcedErrorsBH", "errosForcadosBH", "backhandForcedError"]
+        ]
+      );
+    
+      const p1FirstServeWon = numberStat(player1, [
+        "serve1Won",
+        "firstServeWon"
+      ]);
+    
+      const p2FirstServeWon = numberStat(player2, [
+        "serve1Won",
+        "firstServeWon"
+      ]);
+    
+      const p1FirstServeAttempts = numberStat(player1, [
+        "serve1Attempts",
+        "firstServeAttempts"
+      ]);
+    
+      const p2FirstServeAttempts = numberStat(player2, [
+        "serve1Attempts",
+        "firstServeAttempts"
+      ]);
+    
+      const p1SecondServeWon = numberStat(player1, [
+        "serve2Won",
+        "secondServeWon"
+      ]);
+    
+      const p2SecondServeWon = numberStat(player2, [
+        "serve2Won",
+        "secondServeWon"
+      ]);
+    
+      const p1SecondServeAttempts = numberStat(player1, [
+        "serve2Attempts",
+        "secondServeAttempts"
+      ]);
+    
+      const p2SecondServeAttempts = numberStat(player2, [
+        "serve2Attempts",
+        "secondServeAttempts"
+      ]);
+    
+      const p1BreakWon = Number(
+        score.breakPointsWon1 ??
+        player1.breakPointsWon ??
+        0
+      );
+    
+      const p2BreakWon = Number(
+        score.breakPointsWon2 ??
+        player2.breakPointsWon ??
+        0
+      );
+    
+      const p1BreakChances = Number(
+        score.breakPointsChances1 ??
+        player1.breakPointsChances ??
+        0
+      );
+    
+      const p2BreakChances = Number(
+        score.breakPointsChances2 ??
+        player2.breakPointsChances ??
+        0
+      );
+    
+      const p1Performance = numberStat(player1, [
+        "serveSuccessPct",
+        "performance"
+      ]);
+    
+      const p2Performance = numberStat(player2, [
+        "serveSuccessPct",
+        "performance"
+      ]);
+    
+      const p1TotalPoints = Number(
+        score.totalPoints1 ??
+        player1.totalPointsWon ??
+        0
+      );
+    
+      const p2TotalPoints = Number(
+        score.totalPoints2 ??
+        player2.totalPointsWon ??
+        0
+      );
+    
+      const rows = [
+        {
+          title: "Serviço",
+          rows: [
+            {
+              label: "Aces",
+              p1: numberStat(player1, ["ace", "aces"]),
+              p2: numberStat(player2, ["ace", "aces"])
+            },
+            {
+              label: "Duplas faltas",
+              p1: numberStat(player1, ["doubleFault", "doubleFaults", "duplasFaltas"]),
+              p2: numberStat(player2, ["doubleFault", "doubleFaults", "duplasFaltas"])
+            },
+            {
+              label: "1º serviço vencido",
+              p1: ratio(p1FirstServeWon, p1FirstServeAttempts),
+              p2: ratio(p2FirstServeWon, p2FirstServeAttempts),
+              p1Bar: p1FirstServeWon,
+              p2Bar: p2FirstServeWon
+            },
+            {
+              label: "2º serviço vencido",
+              p1: ratio(p1SecondServeWon, p1SecondServeAttempts),
+              p2: ratio(p2SecondServeWon, p2SecondServeAttempts),
+              p1Bar: p1SecondServeWon,
+              p2Bar: p2SecondServeWon
+            },
+            {
+              label: "Performance",
+              p1: `${p1Performance.toFixed(1)}%`,
+              p2: `${p2Performance.toFixed(1)}%`,
+              p1Bar: p1Performance,
+              p2Bar: p2Performance
+            }
+          ]
+        },
+        {
+          title: "Pontos na rede",
+          rows: [
+            {
+              label: "Pontos na rede vencidos",
+              p1: numberStat(player1, ["netWon", "netPointsWon", "pontosNaRedeVencidos"]),
+              p2: numberStat(player2, ["netWon", "netPointsWon", "pontosNaRedeVencidos"])
+            },
+            {
+              label: "Pontos na rede perdidos",
+              p1: numberStat(player1, ["netLost", "netPointsLost", "pontosNaRedePerdidos"]),
+              p2: numberStat(player2, ["netLost", "netPointsLost", "pontosNaRedePerdidos"])
+            }
+          ]
+        },
+        {
+          title: "Golpes e erros",
+          rows: [
+            {
+              label: "Winners",
+              p1: p1Winners,
+              p2: p2Winners
+            },
+            {
+              label: "Erros não forçados",
+              p1: p1UnforcedErrors,
+              p2: p2UnforcedErrors
+            },
+            {
+              label: "Erros forçados",
+              p1: p1ForcedErrors,
+              p2: p2ForcedErrors
+            },
+            {
+              label: "Dropshot winners",
+              p1: numberStat(player1, ["dropshotWinner", "dropShotWinner"]),
+              p2: numberStat(player2, ["dropshotWinner", "dropShotWinner"])
+            },
+            {
+              label: "Dropshot erros",
+              p1: numberStat(player1, ["dropshotError", "dropShotError"]),
+              p2: numberStat(player2, ["dropshotError", "dropShotError"])
+            }
+          ]
+        },
+        {
+          title: "Devolução",
+          rows: [
+            {
+              label: "Pontos de devolução vencidos",
+              p1: numberStat(player1, ["returnPoint", "returnPointsWon"]),
+              p2: numberStat(player2, ["returnPoint", "returnPointsWon"])
+            },
+            {
+              label: "Erros de devolução",
+              p1: numberStat(player1, ["returnError", "returnErrors"]),
+              p2: numberStat(player2, ["returnError", "returnErrors"])
+            },
+            {
+              label: "Break points vencidos",
+              p1: ratio(p1BreakWon, p1BreakChances),
+              p2: ratio(p2BreakWon, p2BreakChances),
+              p1Bar: p1BreakWon,
+              p2Bar: p2BreakWon
+            }
+          ]
+        },
+        {
+          title: "Linha de base",
+          rows: [
+            {
+              label: "Pontos vencidos na linha de base",
+              p1: numberStat(player1, ["baselinePoint", "baselinePointsWon"]),
+              p2: numberStat(player2, ["baselinePoint", "baselinePointsWon"])
+            },
+            {
+              label: "Erros na linha de base",
+              p1: numberStat(player1, ["baselineError", "baselineErrors"]),
+              p2: numberStat(player2, ["baselineError", "baselineErrors"])
+            }
+          ]
+        },
+        {
+          title: "Resumo",
+          rows: [
+            {
+              label: "Total de pontos vencidos",
+              p1: p1TotalPoints,
+              p2: p2TotalPoints
+            },
+            {
+              label: "Sets",
+              p1: score.sets1,
+              p2: score.sets2
+            }
+          ]
+        }
+      ];
+    
+      const sectionsHtml = rows.map((section) => {
+        const rowsHtml = section.rows.map((row) => {
+          return renderStatsRow(
+            row.label,
+            row.p1,
+            row.p2,
+            row.p1Bar ?? row.p1,
+            row.p2Bar ?? row.p2
+          );
+        }).join("");
+    
+        return ` <section class="public-stat-detail-section"> <h3>${U.escapeHtml(section.title)}</h3> ${rowsHtml} </section> `;
+      }).join("");
+    
+      return ` <div class="public-stats-player-header"> ${renderStatsPlayerHeader(match, 1)} ${renderStatsPlayerHeader(match, 2)} </div> ${sectionsHtml} `;
+    }
+    
+    function showStatsModal() {
+      ensureStatsModal();
+    
+      const modal =
+        document.getElementById(
+          "publicStatsModal"
+        );
+    
+      const body =
+        document.getElementById(
+          "publicStatsModalBody"
+        );
+    
+      const subtitle =
+        document.getElementById(
+          "publicStatsModalSubtitle"
+        );
+    
+      const match = getStatsTargetMatch();
+    
+      if (!match) {
+        body.innerHTML = ` <div class="public-stats-empty"> Nenhuma partida disponível para exibir estatísticas. </div> `;
+    
+        subtitle.textContent = "";
+      } else {
+        const dateText = match.matchDateTime
+          ? formatDateTime(match.matchDateTime)
+          : "";
+    
+        subtitle.textContent =
+          dateText
+            ? `${dateText} • ${getGameFormat(match)}`
+            : getGameFormat(match);
+    
+        body.innerHTML =
+          renderDetailedStats(match);
+      }
+    
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    
+      document.body.classList.add(
+        "public-stats-modal-open"
+      );
+    }
+    
+    function initStatsButton() {
+      const statsBtn =
+        document.getElementById("statsBtn");
+    
+      if (!statsBtn) {
+        return;
+      }
+    
+      statsBtn.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+    
+          showStatsModal();
+        }
+      );
+    }
+
+    function init() {
+      injectInlineStyles();
+
+      initFilter();
+
+      initStatsButton();
+
+      listenPublicMatches();
+
+      listenSingleMatch();
+
+      state.timer = setInterval(
+        refreshLiveDurations,
+        1000
+      );
+    }
+
+    return {
+      init
+    };
   })();
 
-  document.addEventListener("DOMContentLoaded", () => PublicApp.init());
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+      PublicApp.init();
+    }
+  );
 })();
+
