@@ -1,4 +1,4 @@
-const CACHE_NAME = "tennispro-v20";
+const CACHE_NAME = "tennispro-v25";
 
 const ASSETS_TO_CACHE = [
   "./",
@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   "./dashboard.html",
   "./perfil.html",
   "./public.html",
+  "./aovivo.html",
   "./users-admin.html",
   "./confronto.html",
   "./manifest.json",
@@ -24,6 +25,8 @@ const ASSETS_TO_CACHE = [
   "./css/admin.css",
   "./css/users-admin.css",
   "./css/confronto.css",
+  "./css/public.css?v=10",
+  "./css/aovivo.css",
 
   "./js/firebase.js",
   "./js/login.js",
@@ -37,7 +40,8 @@ const ASSETS_TO_CACHE = [
   "./js/admin.js",
   "./js/users-admin.js",
   "./js/dashboard.js",
-  "./js/public.js",
+  "./js/public.js?v=10",
+  "./js/aovivo.js",
   "./js/confronto.js",
   "./js/gemini.js",
 
@@ -55,12 +59,19 @@ self.addEventListener("install", (event) => {
 
       for (const url of ASSETS_TO_CACHE) {
         try {
-          const response = await fetch(url, { cache: "no-store" });
+          const response = await fetch(url, {
+            cache: "no-store"
+          });
+
           if (response && response.ok) {
             await cache.put(url, response.clone());
           }
         } catch (error) {
-          console.warn("Erro ao cachear:", url, error);
+          console.warn(
+            "Erro ao cachear:",
+            url,
+            error
+          );
         }
       }
 
@@ -79,6 +90,7 @@ self.addEventListener("activate", (event) => {
           if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
+
           return Promise.resolve();
         })
       );
@@ -89,11 +101,13 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  if (event.request.method !== "GET") {
+    return;
+  }
 
   const requestUrl = new URL(event.request.url);
 
-  // Ignora terceiros
+  /* * Ignora arquivos externos, Firebase e APIs. */
   if (
     requestUrl.origin !== self.location.origin ||
     requestUrl.pathname.includes("/firebase") ||
@@ -103,47 +117,95 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // HTML / navegação: rede primeiro, fallback cache
-  if (event.request.mode === "navigate" || event.request.destination === "document") {
+  /* * HTML: rede primeiro. * Se estiver offline, usa o cache. */
+  if (
+    event.request.mode === "navigate" ||
+    event.request.destination === "document"
+  ) {
     event.respondWith(
       (async () => {
         try {
-          const networkResponse = await fetch(event.request, { cache: "no-store" });
+          const networkResponse = await fetch(
+            event.request,
+            {
+              cache: "no-store"
+            }
+          );
 
-          if (networkResponse && networkResponse.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(event.request.url, networkResponse.clone());
+          if (
+            networkResponse &&
+            networkResponse.ok
+          ) {
+            const cache = await caches.open(
+              CACHE_NAME
+            );
+
+            await cache.put(
+              event.request.url,
+              networkResponse.clone()
+            );
           }
 
           return networkResponse;
         } catch (error) {
-          const cached = await caches.match(event.request.url);
-          if (cached) return cached;
+          const cached = await caches.match(
+            event.request.url
+          );
 
-          const fallback = await caches.match("./login.html");
-          if (fallback) return fallback;
+          if (cached) {
+            return cached;
+          }
 
-          return new Response("Offline", {
-            status: 503,
-            statusText: "Offline"
-          });
+          const fallback = await caches.match(
+            "./login.html"
+          );
+
+          if (fallback) {
+            return fallback;
+          }
+
+          return new Response(
+            "Offline",
+            {
+              status: 503,
+              statusText: "Offline"
+            }
+          );
         }
       })()
     );
+
     return;
   }
 
-  // CSS / JS / imagens: cache first, update in background
+  /* * CSS, JavaScript e imagens: * entrega o cache rapidamente e atualiza em segundo plano. */
   event.respondWith(
     (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(event.request.url);
+      const cache = await caches.open(
+        CACHE_NAME
+      );
 
-      const networkFetch = fetch(event.request, { cache: "no-store" })
+      const cachedResponse = await cache.match(
+        event.request.url
+      );
+
+      const networkFetch = fetch(
+        event.request,
+        {
+          cache: "no-store"
+        }
+      )
         .then(async (networkResponse) => {
-          if (networkResponse && networkResponse.ok) {
-            await cache.put(event.request.url, networkResponse.clone());
+          if (
+            networkResponse &&
+            networkResponse.ok
+          ) {
+            await cache.put(
+              event.request.url,
+              networkResponse.clone()
+            );
           }
+
           return networkResponse;
         })
         .catch(() => null);
@@ -153,13 +215,20 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      const networkResponse = await networkFetch;
-      if (networkResponse) return networkResponse;
+      const networkResponse =
+        await networkFetch;
 
-      return new Response("", {
-        status: 503,
-        statusText: "Offline"
-      });
+      if (networkResponse) {
+        return networkResponse;
+      }
+
+      return new Response(
+        "",
+        {
+          status: 503,
+          statusText: "Offline"
+        }
+      );
     })()
   );
 });
