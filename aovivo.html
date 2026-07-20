@@ -16,75 +16,117 @@
   <title>Ao Vivo - TennisPro</title>
 
   <link rel="manifest" href="manifest.json" />
+
   <link rel="icon" href="img/icon-192.png" />
+
   <link rel="apple-touch-icon" href="img/icon-192.png" />
 
+  <!-- Estilos gerais -->
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/public.css" />
-  <link rel="stylesheet" href="css/aovivo.css" />
 
-  <style> html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; background: #0f1726; color: #fff; font-family: Arial, sans-serif; } body.aovivo-page { overflow-x: hidden; } .live-page { min-height: 100vh; display: flex; flex-direction: column; gap: 12px; padding: 12px; box-sizing: border-box; } .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); box-sizing: border-box; } .status { font-weight: 900; font-size: 15px; margin-bottom: 4px; } .info { font-size: 12px; opacity: 0.85; } .actions { display: flex; gap: 10px; flex-wrap: wrap; } .btn { border: none; border-radius: 12px; padding: 11px 14px; font-weight: 800; cursor: pointer; color: #fff; transition: 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; } .btn:hover { transform: translateY(-1px); filter: brightness(1.05); } .btn.green { background: linear-gradient(135deg, #16a34a, #15803d); } .btn.gray { background: linear-gradient(135deg, #6b7280, #4b5563); } .btn.recording { background: linear-gradient(135deg, #dc2626, #991b1b); } .video-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); box-sizing: border-box; } #liveVideo { width: 100%; height: 100%; object-fit: cover; background: #000; display: block; } .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0, 0, 0, 0.25); color: #fff; font-weight: 900; text-align: center; padding: 16px; z-index: 5; box-sizing: border-box; } /* ============================================================ BOTÃO NORMAL NO MODO ESPECTADOR ============================================================ */ #telaInicial .btn { width: auto !important; min-width: auto !important; max-width: 220px !important; flex: 0 0 auto !important; padding: 9px 13px !important; border-radius: 9px !important; font-size: 13px !important; line-height: 1 !important; pointer-events: auto !important; } /* ============================================================ PLACAR DA TRANSMISSÃO ============================================================ */ .live-public-scoreboard { position: absolute !important; left: 10px !important; bottom: 10px !important; z-index: 30 !important; width: fit-content !important; max-width: calc(100% - 20px) !important; pointer-events: none !important; } .live-scoreboard-shell { width: fit-content !important; color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); } .live-scoreboard-status { display: none !important; } .live-scoreboard-content, #tvGridPlacar { width: fit-content !important; max-width: 100% !important; } .aovivo-compact-scoreboard { display: flex !important; flex-direction: column !important; gap: 1px !important; width: fit-content !important; max-width: calc(100vw - 20px) !important; padding: 4px 5px !important; border-radius: 5px !important; background: rgba(0, 0, 0, 0.72) !important; color: #fff !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important; box-sizing: border-box !important; } .aovivo-compact-row { display: grid !important; align-items: center !important; width: fit-content !important; min-width: 0 !important; min-height: 18px !important; gap: 0 !important; line-height: 1 !important; } .aovivo-compact-name { display: flex !important; align-items: center !important; min-width: 0 !important; width: 100% !important; overflow: hidden !important; white-space: nowrap !important; } .aovivo-compact-serve { display: inline-block !important; width: 6px !important; height: 6px !important; min-width: 6px !important; margin-right: 3px !important; border-radius: 50% !important; background: #d8ff63 !important; box-shadow: 0 0 5px rgba(216, 255, 99, 0.9) !important; flex: 0 0 6px !important; } .aovivo-compact-serve.hidden { visibility: hidden !important; } .aovivo-compact-player { display: block !important; min-width: 0 !important; width: 100% !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; font-size: 9px !important; line-height: 1 !important; font-weight: 800 !important; } .aovivo-compact-number { display: flex !important; align-items: center !important; justify-content: center !important; min-width: 18px !important; height: 17px !important; text-align: center !important; font-size: 10px !important; line-height: 1 !important; font-weight: 900 !important; color: #fff !important; } .aovivo-compact-number.current { color: #d8ff63 !important; } .aovivo-compact-number.empty { visibility: hidden !important; } .aovivo-compact-score-set { display: inline-flex !important; align-items: flex-start !important; justify-content: center !important; white-space: nowrap !important; } .aovivo-compact-score-main { line-height: 1 !important; } .aovivo-compact-score-tb { position: relative !important; top: -0.42em !important; margin-left: 1px !important; font-size: 0.58em !important; line-height: 1 !important; } /* ============================================================ ALINHAMENTO DAS COLUNAS ============================================================ */ .aovivo-compact-scoreboard.live.sets-1 .aovivo-compact-row { grid-template-columns: minmax(0, 145px) 20px 25px !important; } .aovivo-compact-scoreboard.live.sets-2 .aovivo-compact-row { grid-template-columns: minmax(0, 145px) 20px 20px 25px !important; } .aovivo-compact-scoreboard.live.sets-3 .aovivo-compact-row { grid-template-columns: minmax(0, 145px) 20px 20px 20px 25px !important; } .aovivo-compact-scoreboard.finished.sets-1 .aovivo-compact-row { grid-template-columns: minmax(0, 145px) 20px !important; } .aovivo-compact-scoreboard.finished.sets-2 .aovivo-compact-row { grid-template-columns: minmax(0, 145px) 20px 20px !important; } .aovivo-compact-scoreboard.finished.sets-3 .aovivo-compact-row { grid-template-columns: minmax(0, 145px) 20px 20px 20px !important; } /* ============================================================ ENCERRAMENTO ============================================================ */ .live-scoreboard-ending { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; text-align: center; background: rgba(0, 0, 0, 0.72); color: #fff; font-size: clamp(20px, 5vw, 42px); font-weight: 900; letter-spacing: 0.03em; box-sizing: border-box; } body.transmission-ended .btn { filter: grayscale(1); } body.transmission-ended .topbar { opacity: 0.6; } body.transmission-ended .live-scoreboard-ending { display: flex !important; } #cameraStatus, #cameraDebug { display: none !important; } #btnIniciarGravacao, #btnPararGravacao, #btnAtivarAudio, #btnAtualizarTela { display: none; } .livekit-audio-element { display: none !important; } /* ============================================================ MOBILE ============================================================ */ @media (max-width: 768px) { .live-page { padding: 8px; } .topbar { align-items: flex-start; } .actions { width: 100%; } .btn { flex: 1 1 100%; width: 100%; } #telaInicial .btn { width: auto !important; flex: 0 0 auto !important; max-width: 220px !important; font-size: 13px !important; padding: 9px 13px !important; } .live-public-scoreboard { left: 7px !important; bottom: 7px !important; max-width: calc(100% - 14px) !important; } .aovivo-compact-scoreboard { max-width: calc(100vw - 14px) !important; padding: 3px 4px !important; } .aovivo-compact-row { min-height: 16px !important; } .aovivo-compact-player { font-size: 10px !important; } .aovivo-compact-number { min-width: 15px !important; height: 15px !important; font-size: 9px !important; } .aovivo-compact-serve { width: 5px !important; height: 5px !important; min-width: 5px !important; flex-basis: 5px !important; margin-right: 3px !important; } .aovivo-compact-scoreboard.live.sets-1 .aovivo-compact-row { grid-template-columns: minmax(0, 120px) 18px 22px !important; } .aovivo-compact-scoreboard.live.sets-2 .aovivo-compact-row { grid-template-columns: minmax(0, 120px) 18px 18px 22px !important; } .aovivo-compact-scoreboard.live.sets-3 .aovivo-compact-row { grid-template-columns: minmax(0, 120px) 18px 18px 18px 22px !important; } .aovivo-compact-scoreboard.finished.sets-1 .aovivo-compact-row { grid-template-columns: minmax(0, 120px) 18px !important; } .aovivo-compact-scoreboard.finished.sets-2 .aovivo-compact-row { grid-template-columns: minmax(0, 120px) 18px 18px !important; } .aovivo-compact-scoreboard.finished.sets-3 .aovivo-compact-row { grid-template-columns: minmax(0, 120px) 18px 18px 18px !important; } } @media (max-width: 480px) { #telaInicial .btn { max-width: 200px !important; font-size: 12px !important; padding: 8px 11px !important; } .aovivo-compact-player { font-size: 7px !important; } .aovivo-compact-number { min-width: 14px !important; font-size: 8px !important; } .aovivo-compact-scoreboard.live.sets-1 .aovivo-compact-row { grid-template-columns: minmax(0, 105px) 17px 21px !important; } .aovivo-compact-scoreboard.live.sets-2 .aovivo-compact-row { grid-template-columns: minmax(0, 105px) 17px 17px 21px !important; } .aovivo-compact-scoreboard.live.sets-3 .aovivo-compact-row { grid-template-columns: minmax(0, 105px) 17px 17px 17px 21px !important; } } /* ============================================================ RETRATO ============================================================ */ @media screen and (max-width: 768px) and (orientation: portrait) { .aovivo-compact-scoreboard { padding: 5px 7px !important; } .aovivo-compact-row { min-height: 21px !important; } .aovivo-compact-player { font-size: 11px !important; line-height: 1.05 !important; } .aovivo-compact-number { min-width: 19px !important; height: 20px !important; font-size: 12px !important; } .aovivo-compact-serve { width: 7px !important; height: 7px !important; min-width: 7px !important; flex-basis: 7px !important; margin-right: 4px !important; } } @media screen and (max-width: 480px) and (orientation: portrait) { .aovivo-compact-scoreboard { padding: 5px 6px !important; } .aovivo-compact-row { min-height: 20px !important; } .aovivo-compact-player { font-size: 10px !important; line-height: 1.05 !important; } .aovivo-compact-number { min-width: 18px !important; height: 19px !important; font-size: 11px !important; } .aovivo-compact-serve { width: 6px !important; height: 6px !important; min-width: 6px !important; flex-basis: 6px !important; margin-right: 4px !important; } } /* ============================================================ FULLSCREEN API E FALLBACK MOBILE ============================================================ */ body.aovivo-fullscreen-body { overflow: hidden !important; width: 100% !important; height: 100% !important; background: #000 !important; } body.aovivo-fullscreen-body .live-page { width: 100vw !important; height: 100vh !important; height: 100dvh !important; min-height: 100vh !important; min-height: 100dvh !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; } body.aovivo-fullscreen-body .topbar { display: none !important; } #videoWrap.aovivo-fullscreen { position: fixed !important; inset: 0 !important; z-index: 99999 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important; max-width: 100vw !important; max-height: 100vh !important; max-height: 100dvh !important; aspect-ratio: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: #000 !important; overflow: hidden !important; } #videoWrap.aovivo-fullscreen #liveVideo { position: absolute !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important; max-width: 100vw !important; max-height: 100vh !important; max-height: 100dvh !important; object-fit: contain !important; background: #000 !important; } #videoWrap.aovivo-fullscreen .live-public-scoreboard { position: absolute !important; left: 3vw !important; bottom: 3vh !important; z-index: 100000 !important; max-width: 94vw !important; } #videoWrap.aovivo-fullscreen .live-scoreboard-ending { z-index: 100001 !important; } #videoWrap:fullscreen { width: 100vw; height: 100vh; height: 100dvh; aspect-ratio: auto; border: 0; border-radius: 0; background: #000; } #videoWrap:fullscreen #liveVideo { width: 100vw; height: 100vh; height: 100dvh; object-fit: contain; } #videoWrap:fullscreen .live-public-scoreboard { left: 3vw !important; bottom: 3vh !important; width: fit-content !important; } </style>
+  <!-- Estilos públicos -->
+  <link rel="stylesheet" href="css/public.css" />
+
+  <!-- Estilos exclusivos da transmissão -->
+  <link rel="stylesheet" href="css/aovivo.css?v=20260720-01" />
 </head>
 
 <body class="aovivo-page">
+
   <main class="live-page">
 
+    <!-- Barra superior -->
     <section class="topbar">
+
       <div>
-        <div class="status" id="tvStatus">
+        <div class="status" id="tvStatus" >
           Carregando...
         </div>
 
-        <div class="info" id="tvInfoBox">
+        <div class="info" id="tvInfoBox" >
           Inicializando transmissão
         </div>
       </div>
 
       <div class="actions">
+
+        <!-- Botão do transmissor -->
         <button class="btn green" id="btnAbrirCamera" type="button" >
-          <ion-icon name="videocam-outline"></ion-icon>
-          <span>Iniciar transmissão</span>
+          <ion-icon name="videocam-outline" ></ion-icon>
+
+          <span>
+            Iniciar transmissão
+          </span>
         </button>
 
-        <button class="btn gray" id="btnIniciarGravacao" type="button" style="display: none;" >
-          <ion-icon name="radio-outline"></ion-icon>
-          <span>Gravar vídeo</span>
+        <!-- Iniciar gravação -->
+        <button class="btn gray" id="btnIniciarGravacao" type="button" >
+          <ion-icon name="radio-outline" ></ion-icon>
+
+          <span>
+            Gravar vídeo
+          </span>
         </button>
 
-        <button class="btn recording" id="btnPararGravacao" type="button" style="display: none;" >
-          <ion-icon name="stop-circle-outline"></ion-icon>
-          <span>Parar e salvar</span>
+        <!-- Parar gravação -->
+        <button class="btn recording" id="btnPararGravacao" type="button" >
+          <ion-icon name="stop-circle-outline" ></ion-icon>
+
+          <span>
+            Parar e salvar
+          </span>
         </button>
 
-        <button class="btn gray" id="btnAtivarAudio" type="button" style="display: none;" >
-          <ion-icon name="play-outline"></ion-icon>
-          <span>Iniciar transmissão</span>
+        <!-- Ativar áudio -->
+        <button class="btn gray" id="btnAtivarAudio" type="button" >
+          <ion-icon name="play-outline" ></ion-icon>
+
+          <span>
+            Iniciar transmissão
+          </span>
         </button>
 
-        <button class="btn gray" id="btnAtualizarTela" type="button" style="display: none;" >
-          <ion-icon name="refresh-outline"></ion-icon>
-          <span>Atualizar tela</span>
+        <!-- Atualizar tela -->
+        <button class="btn gray" id="btnAtualizarTela" type="button" >
+          <ion-icon name="refresh-outline" ></ion-icon>
+
+          <span>
+            Atualizar tela
+          </span>
         </button>
 
+        <!-- Tela cheia -->
         <button class="btn gray" id="btnExpandirTela" type="button" >
-          <ion-icon name="expand-outline"></ion-icon>
-          <span>Expandir Tela</span>
+          <ion-icon name="expand-outline" ></ion-icon>
+
+          <span>
+            Expandir tela
+          </span>
         </button>
 
-        <button class="btn gray" id="btnTentarNovamente" type="button" style="display: none;" >
-          <ion-icon name="refresh-outline"></ion-icon>
-          <span>Tentar novamente</span>
+        <!-- Tentar novamente -->
+        <button class="btn gray" id="btnTentarNovamente" type="button" >
+          <ion-icon name="refresh-outline" ></ion-icon>
+
+          <span>
+            Tentar novamente
+          </span>
         </button>
+
       </div>
     </section>
 
+    <!-- Área do vídeo -->
     <section class="video-wrap" id="videoWrap" aria-label="Transmissão ao vivo" >
+
       <video id="liveVideo" autoplay muted playsinline webkit-playsinline ></video>
 
+      <!-- Tela inicial / carregamento -->
       <div class="overlay" id="telaInicial" >
         Aguardando vídeo...
       </div>
 
+      <!-- Placar -->
       <div class="live-public-scoreboard" id="livePublicScoreboard" aria-live="polite" >
         <div class="live-scoreboard-shell" id="liveScoreboardShell" >
           <div class="live-scoreboard-status" id="liveScoreboardStatus" ></div>
@@ -93,23 +135,28 @@
         </div>
       </div>
 
+      <!-- Mensagem de encerramento -->
       <div class="live-scoreboard-ending" id="liveEndingMessage" >
-        Encerrando Transmissão
+        Encerrando transmissão
       </div>
+
     </section>
 
+    <!-- Áreas de debug -->
     <section class="debug" id="cameraStatus" ></section>
 
     <section class="debug" id="cameraDebug" ></section>
 
   </main>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
+  <!-- Scripts do projeto -->
   <script src="js/firebase.js"></script>
 
   <script src="js/tennisRules.js"></script>
@@ -117,14 +164,16 @@
   <!-- SDK local do LiveKit -->
   <script src="js/livekit-client.umd.min.js"></script>
 
-  <!-- Usado para incorporar o placar na gravação -->
+  <!-- Usado para incluir o placar na gravação -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-  <!-- Seu arquivo principal deve ser carregado por último -->
-  <script src="js/aovivo.js?v=20260717-21"></script>
+  <!-- Arquivo principal da transmissão -->
+  <script src="js/aovivo.js?v=20260720-02"></script>
 
+  <!-- Ionicons -->
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js" ></script>
 
   <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js" ></script>
+
 </body>
 </html>
