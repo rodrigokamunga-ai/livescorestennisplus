@@ -178,7 +178,7 @@
             </div>
 
             <div class="menu-app-subtitle">
-              Tire dúvidas sobre tênis, partidas, regras e estatísticas.
+              Simplifique suas dúvidas de jogadores, partidas e estatísticas.
             </div>
           </div>
         </a>
@@ -441,7 +441,7 @@
           Digite sua pergunta
         </label>
 
-        <textarea id="geminiPrompt" rows="5" placeholder="Exemplo: explique a regra do tie-break no tênis" ></textarea>
+        <textarea id="geminiPrompt" rows="5" placeholder="Exemplo: quantos jogos eu realizei esse ano?" ></textarea>
 
         <div id="geminiLoading" class="gemini-loading" hidden aria-live="polite" >
           <span class="gemini-spinner"></span>
@@ -469,13 +469,15 @@
 
         <div class="gemini-modal-actions">
 
+          <button type="button" id="cancelGeminiBtn" class="gemini-secondary-btn" >
+            Fechar
+          </button>
+          
           <button type="button" id="clearGeminiBtn" class="gemini-secondary-btn" >
             Limpar consulta
           </button>
         
-          <button type="button" id="cancelGeminiBtn" class="gemini-secondary-btn" >
-            Fechar
-          </button>
+         
         
           <button type="submit" id="geminiSubmitBtn" class="gemini-primary-btn" >
             Perguntar ao Gemini
