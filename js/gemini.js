@@ -1,12 +1,16 @@
 (() => {
     "use strict";
   
- 
-  const GEMINI_BACKEND_URL =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? "http://localhost:3000/api/gemini"
-    : "https://tennispro-backend.onrender.com";
+    const GEMINI_BACKEND_URL =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+        ? "http://localhost:3000/api/gemini"
+        : "https://tennispro-backend.onrender.com/api/gemini";
+  
+    console.log(
+      "Backend Gemini utilizado:",
+      GEMINI_BACKEND_URL
+    );
   
     let ultimaInteractionId = null;
     let requisicaoGeminiAtual = null;
@@ -66,6 +70,7 @@
   
       function abrirModal() {
         geminiModal.classList.add("show");
+  
         geminiModal.setAttribute(
           "aria-hidden",
           "false"
@@ -80,6 +85,12 @@
           requisicaoGeminiAtual.abort();
           requisicaoGeminiAtual = null;
         }
+      }
+  
+      function aguardar(tempo) {
+        return new Promise((resolve) => {
+          setTimeout(resolve, tempo);
+        });
       }
   
       function obterCardResposta() {
@@ -107,7 +118,6 @@
       function fecharModal() {
         cancelarRequisicaoAtual();
   
-        /* * Limpa automaticamente a consulta ao sair. */
         ultimaInteractionId = null;
   
         geminiPrompt.value = "";
@@ -119,11 +129,13 @@
         esconderCardResposta();
   
         geminiLoading.hidden = true;
+  
         geminiSubmitBtn.disabled = false;
         geminiSubmitBtn.textContent =
           "Perguntar ao Gemini";
   
         geminiModal.classList.remove("show");
+  
         geminiModal.setAttribute(
           "aria-hidden",
           "true"
@@ -133,9 +145,8 @@
       function mostrarCarregando(estado) {
         geminiLoading.hidden = !estado;
   
-        /* * Desabilita o campo durante a consulta. */
+        /* * Impede nova edição enquanto o Gemini responde. */
         geminiPrompt.disabled = estado;
-  
         geminiSubmitBtn.disabled = estado;
   
         geminiSubmitBtn.textContent = estado
@@ -158,13 +169,13 @@
   
         let html = escaparHTML(texto);
   
-        /* * Converte **texto** em negrito. */
+        /* * Converte **texto** para negrito. */
         html = html.replace(
           /\*\*(.*?)\*\*/g,
           "<strong>$1</strong>"
         );
   
-        /* * Converte linhas iniciadas com "- " * em marcadores visuais. */
+        /* * Converte linhas com "- " em marcadores. */
         html = html.replace(
           /^- (.*)$/gm,
           "• $1"
@@ -529,12 +540,12 @@
           return "derrota";
         }
   
-        /* * O Firestore salva o resultado dentro de score. */
-        const placar = obterPlacarNumerico(data);
+        /* * O resultado é calculado pelo placar. */
+        const placar =
+          obterPlacarNumerico(data);
   
         let timeVencedor = null;
   
-        /* * Primeiro compara os sets. */
         if (placar.sets1 !== placar.sets2) {
           timeVencedor =
             placar.sets1 > placar.sets2
@@ -542,7 +553,6 @@
               : 2;
         }
   
-        /* * Para partidas de um set, compara os games. */
         if (
           timeVencedor === null &&
           placar.games1 !== placar.games2
@@ -553,7 +563,6 @@
               : 2;
         }
   
-        /* * Para super tie-break, compara os pontos. */
         if (
           timeVencedor === null &&
           placar.tieBreakPoints1 !==
@@ -881,83 +890,183 @@
       }
   
       async function consultarBackend( pergunta, contexto ) {
-        /* * Não existe mais limite automático de tempo. * * A requisição ainda pode ser cancelada pelos botões * Fechar, Limpar consulta ou pela tecla Escape. */
-        requisicaoGeminiAtual =
-          new AbortController();
+        const quantidadeTentativas = 3;
   
-        try {
-          const resposta = await fetch(
-            GEMINI_BACKEND_URL,
-            {
-              method: "POST",
-  
-              headers: {
-                "Content-Type": "application/json"
-              },
-  
-              signal:
-                requisicaoGeminiAtual.signal,
-  
-              body: JSON.stringify({
-                pergunta,
-                contexto,
-  
-                previousInteractionId:
-                  USAR_HISTORICO_CONVERSA
-                    ? ultimaInteractionId
-                    : null
-              })
-            }
-          );
-  
-          const textoResposta =
-            await resposta.text();
-  
-          let dados = {};
+        for (
+          let tentativa = 1;
+          tentativa <= quantidadeTentativas;
+          tentativa++
+        ) {
+          requisicaoGeminiAtual =
+            new AbortController();
   
           try {
-            dados = textoResposta
-              ? JSON.parse(textoResposta)
-              : {};
-          } catch (_) {
-            throw new Error(
-              "O backend retornou uma resposta inválida."
+            console.log(
+              `Tentativa ${tentativa}/${quantidadeTentativas}:`,
+              GEMINI_BACKEND_URL
             );
-          }
   
-          if (!resposta.ok) {
-            throw new Error(
-              dados?.error ||
-                `Erro HTTP ${resposta.status} ao consultar o backend.`
+            const resposta = await fetch(
+              GEMINI_BACKEND_URL,
+              {
+                method: "POST",
+  
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json"
+                },
+  
+                signal:
+                  requisicaoGeminiAtual.signal,
+  
+                body: JSON.stringify({
+                  pergunta,
+                  contexto,
+  
+                  previousInteractionId:
+                    USAR_HISTORICO_CONVERSA
+                      ? ultimaInteractionId
+                      : null
+                })
+              }
             );
-          }
   
-          if (
-            USAR_HISTORICO_CONVERSA &&
-            dados.interactionId
-          ) {
-            ultimaInteractionId =
-              dados.interactionId;
-          }
+            const textoResposta =
+              await resposta.text();
   
-          if (!dados.resposta) {
-            throw new Error(
-              "O backend não retornou uma resposta do Gemini."
+            const contentType =
+              resposta.headers.get(
+                "content-type"
+              ) || "";
+  
+            console.log(
+              "Status do backend:",
+              resposta.status
             );
-          }
   
-          return dados.resposta;
-        } catch (error) {
-          if (error.name === "AbortError") {
-            throw new Error(
-              "A consulta foi cancelada."
+            console.log(
+              "Content-Type:",
+              contentType
             );
-          }
   
-          throw error;
-        } finally {
-          requisicaoGeminiAtual = null;
+            if (!resposta.ok) {
+              const erroTemporario =
+                resposta.status === 502 ||
+                resposta.status === 503 ||
+                resposta.status === 504;
+  
+              if (
+                erroTemporario &&
+                tentativa < quantidadeTentativas
+              ) {
+                mostrarResposta(
+                  `O servidor está iniciando. Tentando novamente (${tentativa + 1}/${quantidadeTentativas})...`
+                );
+  
+                await aguardar(5000);
+  
+                continue;
+              }
+  
+              throw new Error(
+                `O backend respondeu HTTP ${resposta.status}. ` +
+                `Conteúdo recebido: ${textoResposta.slice( 0, 400 )}`
+              );
+            }
+  
+            if (
+              !contentType.includes(
+                "application/json"
+              )
+            ) {
+              if (
+                tentativa < quantidadeTentativas
+              ) {
+                mostrarResposta(
+                  `O servidor está preparando o serviço. Tentando novamente (${tentativa + 1}/${quantidadeTentativas})...`
+                );
+  
+                await aguardar(5000);
+  
+                continue;
+              }
+  
+              throw new Error(
+                "O backend não retornou JSON. " +
+                `Content-Type: ${contentType}. ` +
+                `Resposta: ${textoResposta.slice( 0, 400 )}`
+              );
+            }
+  
+            let dados;
+  
+            try {
+              dados = JSON.parse(
+                textoResposta
+              );
+            } catch (_) {
+              throw new Error(
+                "O backend retornou um JSON inválido."
+              );
+            }
+  
+            if (
+              USAR_HISTORICO_CONVERSA &&
+              dados.interactionId
+            ) {
+              ultimaInteractionId =
+                dados.interactionId;
+            }
+  
+            if (!dados.resposta) {
+              throw new Error(
+                dados.error ||
+                  "O backend não retornou a resposta do Gemini."
+              );
+            }
+  
+            return dados.resposta;
+          } catch (error) {
+            if (error.name === "AbortError") {
+              throw new Error(
+                "A consulta foi cancelada."
+              );
+            }
+  
+            const mensagem =
+              String(error.message || "")
+                .toLowerCase();
+  
+            const erroTemporario =
+              mensagem.includes("502") ||
+              mensagem.includes("503") ||
+              mensagem.includes("504") ||
+              mensagem.includes("failed to fetch") ||
+              mensagem.includes("networkerror") ||
+              mensagem.includes("não retornou json");
+  
+            if (
+              erroTemporario &&
+              tentativa < quantidadeTentativas
+            ) {
+              mostrarResposta(
+                `Aguardando o backend responder. Tentando novamente (${tentativa + 1}/${quantidadeTentativas})...`
+              );
+  
+              await aguardar(5000);
+  
+              continue;
+            }
+  
+            throw error;
+          } finally {
+            requisicaoGeminiAtual = null;
+          }
         }
+  
+        throw new Error(
+          "Não foi possível obter resposta do backend após várias tentativas."
+        );
       }
   
       geminiBtn.addEventListener(
@@ -1016,6 +1125,7 @@
             );
   
             geminiPrompt.focus();
+  
             return;
           }
   
@@ -1033,7 +1143,7 @@
               "Analisando os dados com o Gemini..."
             );
   
-            /* * Envia a pergunta original. * O prompt completo é montado somente no backend. */
+            /* * Envia somente a pergunta original. * O prompt completo é montado no backend. */
             const resposta =
               await consultarBackend(
                 pergunta,
