@@ -21,14 +21,15 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <!-- Ionicons -->
-  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js" ></script>
+
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js" ></script>
 </head>
 
 <body class="menu-page">
 
   <!-- NAVBAR FIXA NO TOPO -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top menu-fixed-top" aria-label="Menu principal" >
     <div class="container-xl menu-navbar-top">
 
       <!-- Botão do menu à esquerda -->
@@ -38,254 +39,374 @@
 
       <!-- Marca / título -->
       <a class="navbar-brand fw-bold d-flex align-items-center gap-2 order-2 order-lg-1">
-        <ion-icon name="tennisball-outline" style="font-size: 1.2rem;"></ion-icon>
+        <ion-icon name="tennisball-outline" style="font-size: 1.2rem;" ></ion-icon>
+
         <span>TennisPro</span>
       </a>
 
       <!-- Ações à direita -->
       <div class="menu-navbar-actions order-3 ms-auto d-flex align-items-center gap-2">
+
         <a href="perfil.html" class="header-btn menu-header-btn" id="profileBtnTop" aria-label="Perfil" title="Perfil" >
-          <ion-icon name="person-outline" class="header-icon"></ion-icon>
+          <ion-icon name="person-outline" class="header-icon" ></ion-icon>
         </a>
 
         <button type="button" id="alertBtnTop" class="header-btn menu-header-btn" aria-label="Alertas" title="Alertas" >
-          <ion-icon name="notifications-outline" class="header-icon"></ion-icon>
-          <span class="header-alert-badge" id="alertBadge" aria-hidden="true" style="display:none;">0</span>
+          <ion-icon name="notifications-outline" class="header-icon" ></ion-icon>
+
+          <span class="header-alert-badge" id="alertBadge" aria-hidden="true" style="display:none;" >
+            0
+          </span>
         </button>
+
       </div>
 
       <!-- Menu colapsável -->
-      <div class="collapse navbar-collapse order-4 w-100" id="navbarsExample08">
+      <div class="collapse navbar-collapse order-4 w-100" id="navbarsExample08" >
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2" href="menu.html">
-              <ion-icon name="home-outline" style="font-size: 1rem;"></ion-icon>
+            <a class="nav-link d-flex align-items-center gap-2" href="menu.html" >
+              <ion-icon name="home-outline" style="font-size: 1rem;" ></ion-icon>
+
               <span>Início</span>
             </a>
           </li>
 
-          
-
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2" href="#" id="aboutAppBtn">
-              <ion-icon name="information-circle-outline" style="font-size: 1rem;"></ion-icon>
+            <a class="nav-link d-flex align-items-center gap-2" href="#" id="aboutAppBtn" >
+              <ion-icon name="information-circle-outline" style="font-size: 1rem;" ></ion-icon>
+
               <span>Sobre o app</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2" href="#" id="supportBtn">
-              <ion-icon name="help-circle-outline" style="font-size: 1rem;"></ion-icon>
+            <a class="nav-link d-flex align-items-center gap-2" href="#" id="supportBtn" >
+              <ion-icon name="help-circle-outline" style="font-size: 1rem;" ></ion-icon>
+
               <span>Suporte</span>
             </a>
           </li>
 
           <li class="nav-item">
             <button type="button" class="nav-link d-flex align-items-center gap-2 bg-transparent border-0 text-danger" id="logoutBtnBottom" >
-              <ion-icon name="log-out-outline" style="font-size: 1rem;"></ion-icon>
+              <ion-icon name="log-out-outline" style="font-size: 1rem;" ></ion-icon>
+
               <span>Sair</span>
             </button>
           </li>
+
         </ul>
       </div>
+
     </div>
   </nav>
 
-  <main class="menu-shell" style="padding-top: 90px;">
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="menu-shell" style="padding-top: 90px;" >
     <section class="menu-hero">
+
       <div class="menu-top">
         <div class="menu-welcome">
-          <a href="perfil.html" class="menu-avatar-link" aria-label="Abrir perfil">
+
+          <a href="perfil.html" class="menu-avatar-link" aria-label="Abrir perfil" >
             <img id="menuProfileAvatar" class="menu-welcome-avatar" src="img/avatar-default.png" alt="Foto de perfil" />
           </a>
 
           <div class="menu-welcome-text">
             <span class="section-kicker">Acesso rápido</span>
-            <h1 id="welcomeTitle">Bem-vindo</h1>
-            <p id="welcomeText">Escolha uma área para abrir.</p>
+
+            <h1 id="welcomeTitle">
+              Bem-vindo
+            </h1>
+
+            <p id="welcomeText">
+              Escolha uma área para abrir.
+            </p>
           </div>
+
         </div>
       </div>
 
+      <!-- GRID PRINCIPAL -->
       <div class="menu-grid">
-        <a href="#" class="menu-app-btn" id="viewPublicBtn">
+
+        <!-- Visualizar partida -->
+        <a href="#" class="menu-app-btn" id="viewPublicBtn" >
           <div class="menu-app-icon">
             <ion-icon name="tv-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Visualizar Partida</div>
+            <div class="menu-app-title">
+              Visualizar Partida
+            </div>
+
             <div class="menu-app-subtitle">
               Tela pública com seus jogos do dia, em andamento e finalizados.
             </div>
           </div>
         </a>
 
-        <a href="admin.html" class="menu-app-btn">
+        <!-- Partida -->
+        <a href="admin.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="tennisball-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Partida</div>
+            <div class="menu-app-title">
+              Partida
+            </div>
+
             <div class="menu-app-subtitle">
               Cadastro e manutenção das partidas do sistema.
             </div>
           </div>
         </a>
 
-        <a href="#" class="menu-app-btn" id="sharePublicBtn" role="button">
+        <!-- Assistente Gemini -->
+        <a href="#" class="menu-app-btn" id="geminiBtn" >
+          <div class="menu-app-icon">
+            <ion-icon name="sparkles-outline"></ion-icon>
+          </div>
+
+          <div class="menu-app-content">
+            <div class="menu-app-title">
+              Assistente Gemini
+            </div>
+
+            <div class="menu-app-subtitle">
+              Tire dúvidas sobre tênis, partidas, regras e estatísticas.
+            </div>
+          </div>
+        </a>
+
+        <!-- Compartilhar -->
+        <a href="#" class="menu-app-btn" id="sharePublicBtn" role="button" >
           <div class="menu-app-icon">
             <ion-icon name="share-social-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Compartilhar</div>
+            <div class="menu-app-title">
+              Compartilhar
+            </div>
+
             <div class="menu-app-subtitle">
               Envie o link da sua tela pública por WhatsApp, e-mail ou outro app.
             </div>
           </div>
         </a>
 
-        <a href="carreira.html" class="menu-app-btn">
+        <!-- Carreira -->
+        <a href="carreira.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="trophy-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Carreira</div>
+            <div class="menu-app-title">
+              Carreira
+            </div>
+
             <div class="menu-app-subtitle">
               Conquistas, histórico, evolução por ano e comparação com adversários.
             </div>
           </div>
         </a>
 
-        <a href="dashboard.html" class="menu-app-btn">
+        <!-- Dashboard -->
+        <a href="dashboard.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="stats-chart-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Dashboard</div>
+            <div class="menu-app-title">
+              Dashboard
+            </div>
+
             <div class="menu-app-subtitle">
               Gráficos de vitórias e derrotas do jogador.
             </div>
           </div>
         </a>
 
-        <a href="perfil.html" class="menu-app-btn">
+        <!-- Perfil -->
+        <a href="perfil.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="person-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Perfil</div>
+            <div class="menu-app-title">
+              Perfil
+            </div>
+
             <div class="menu-app-subtitle">
               Edite seus dados, foto, senha e preferências.
             </div>
           </div>
         </a>
 
-        <a href="confronto.html" class="menu-app-btn">
+        <!-- Confrontos -->
+        <a href="confronto.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="flash-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Confrontos</div>
+            <div class="menu-app-title">
+              Confrontos
+            </div>
+
             <div class="menu-app-subtitle">
               Compare seus jogos e visualize o histórico contra adversários.
             </div>
           </div>
         </a>
 
-        <a href="relatorio.html" class="menu-app-btn">
+        <!-- Relatórios -->
+        <a href="relatorio.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="document-text-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Relatórios</div>
+            <div class="menu-app-title">
+              Relatórios
+            </div>
+
             <div class="menu-app-subtitle">
               Acesse o relatório completo das partidas finalizadas com estatísticas detalhadas.
             </div>
           </div>
         </a>
 
-        <a href="jogador.html" class="menu-app-btn">
+        <!-- Jogador -->
+        <a href="jogador.html" class="menu-app-btn" >
           <div class="menu-app-icon">
             <ion-icon name="search-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Jogador</div>
+            <div class="menu-app-title">
+              Jogador
+            </div>
+
             <div class="menu-app-subtitle">
               Busque jogadores e visualize o perfil completo do atleta.
             </div>
           </div>
         </a>
 
-
-
-        <a href="users-admin.html" id="usersAdminBtn" class="menu-app-btn" style="display:none;">
+        <!-- Usuários administrador -->
+        <a href="users-admin.html" id="usersAdminBtn" class="menu-app-btn" style="display:none;" >
           <div class="menu-app-icon">
             <ion-icon name="people-outline"></ion-icon>
           </div>
+
           <div class="menu-app-content">
-            <div class="menu-app-title">Usuários</div>
+            <div class="menu-app-title">
+              Usuários
+            </div>
+
             <div class="menu-app-subtitle">
               Gerenciar cadastros, bloqueios e acessos.
             </div>
           </div>
         </a>
+
       </div>
     </section>
   </main>
 
+  <!-- MENU INFERIOR -->
   <nav class="menu-bottom-nav">
-    <a href="menu.html" class="menu-bottom-btn">
+
+    <a href="menu.html" class="menu-bottom-btn" >
       <span class="menu-bottom-icon">
         <ion-icon name="home-outline"></ion-icon>
       </span>
-      <span class="menu-bottom-label">Início</span>
+
+      <span class="menu-bottom-label">
+        Início
+      </span>
     </a>
 
-    <a href="dashboard.html" class="menu-bottom-btn">
+    <a href="dashboard.html" class="menu-bottom-btn" >
       <span class="menu-bottom-icon">
         <ion-icon name="stats-chart-outline"></ion-icon>
       </span>
-      <span class="menu-bottom-label">Dashboard</span>
+
+      <span class="menu-bottom-label">
+        Dashboard
+      </span>
     </a>
 
-    <a href="admin.html" class="menu-bottom-btn">
+    <a href="admin.html" class="menu-bottom-btn" >
       <span class="menu-bottom-icon">
         <ion-icon name="tennisball-outline"></ion-icon>
       </span>
-      <span class="menu-bottom-label">Partida</span>
+
+      <span class="menu-bottom-label">
+        Partida
+      </span>
     </a>
 
-    <a href="confronto.html" class="menu-bottom-btn">
+    <a href="confronto.html" class="menu-bottom-btn" >
       <span class="menu-bottom-icon">
         <ion-icon name="flash-outline"></ion-icon>
       </span>
-      <span class="menu-bottom-label">Confrontos</span>
+
+      <span class="menu-bottom-label">
+        Confrontos
+      </span>
     </a>
 
-    <a href="carreira.html" class="menu-bottom-btn">
+    <a href="carreira.html" class="menu-bottom-btn" >
       <span class="menu-bottom-icon">
         <ion-icon name="trophy-outline"></ion-icon>
       </span>
-      <span class="menu-bottom-label">Carreira</span>
+
+      <span class="menu-bottom-label">
+        Carreira
+      </span>
     </a>
+
   </nav>
 
-  <div id="alertModalOverlay" class="alert-modal-overlay" aria-hidden="true">
-    <div class="alert-modal" role="dialog" aria-modal="true" aria-labelledby="alertModalTitle">
+  <!-- MODAL DE ALERTAS -->
+  <div id="alertModalOverlay" class="alert-modal-overlay" aria-hidden="true" >
+    <div class="alert-modal" role="dialog" aria-modal="true" aria-labelledby="alertModalTitle" >
       <div class="alert-modal-header">
+
         <div>
-          <div class="alert-modal-kicker">Avisos do dia</div>
-          <h2 class="alert-modal-title" id="alertModalTitle">Jogos de hoje</h2>
+          <div class="alert-modal-kicker">
+            Avisos do dia
+          </div>
+
+          <h2 class="alert-modal-title" id="alertModalTitle" >
+            Jogos de hoje
+          </h2>
         </div>
-        <button type="button" class="alert-modal-close" id="closeAlertModalBtn" aria-label="Fechar">✕</button>
+
+        <button type="button" class="alert-modal-close" id="closeAlertModalBtn" aria-label="Fechar" >
+          ✕
+        </button>
+
       </div>
 
-      <div class="alert-modal-body" id="alertModalBody">
-        <div class="alert-empty">Carregando avisos...</div>
+      <div class="alert-modal-body" id="alertModalBody" >
+        <div class="alert-empty">
+          Carregando avisos...
+        </div>
       </div>
 
       <div class="alert-modal-actions">
-        <button type="button" class="alert-modal-ok" id="closeAlertModalBtn2">
+        <button type="button" class="alert-modal-ok" id="closeAlertModalBtn2" >
           <ion-icon name="checkmark-outline"></ion-icon>
           <span>Entendi</span>
         </button>
@@ -293,14 +414,90 @@
     </div>
   </div>
 
+  <!-- MODAL DO GEMINI -->
+  <div id="geminiModal" class="gemini-modal-overlay" aria-hidden="true" >
+    <div class="gemini-modal" role="dialog" aria-modal="true" aria-labelledby="geminiModalTitle" >
+      <div class="gemini-modal-header">
+
+        <div>
+          <div class="gemini-modal-kicker">
+            Assistente inteligente
+          </div>
+
+          <h2 id="geminiModalTitle">
+            Pergunte ao Gemini
+          </h2>
+        </div>
+
+        <button type="button" id="closeGeminiBtn" class="gemini-close-btn" aria-label="Fechar" >
+          ✕
+        </button>
+
+      </div>
+
+      <form id="geminiForm">
+
+        <label for="geminiPrompt">
+          Digite sua pergunta
+        </label>
+
+        <textarea id="geminiPrompt" rows="5" placeholder="Exemplo: explique a regra do tie-break no tênis" ></textarea>
+
+        <div id="geminiLoading" class="gemini-loading" hidden aria-live="polite" >
+          <span class="gemini-spinner"></span>
+        
+          <span class="gemini-loading-text">
+            Analisando seus dados
+          </span>
+        
+          <span class="gemini-loading-dots">
+            <span>.</span>
+            <span>.</span>
+            <span>.</span>
+          </span>
+        </div>
+        
+        <div class="gemini-response-card" >
+          <div class="gemini-response-header">
+            <ion-icon name="sparkles-outline"></ion-icon>
+        
+            <span>Resposta do TennisPro</span>
+          </div>
+        
+          <div id="geminiResponse" class="gemini-response" aria-live="polite" ></div>
+        </div>
+
+        <div class="gemini-modal-actions">
+
+          <button type="button" id="clearGeminiBtn" class="gemini-secondary-btn" >
+            Limpar consulta
+          </button>
+        
+          <button type="button" id="cancelGeminiBtn" class="gemini-secondary-btn" >
+            Fechar
+          </button>
+        
+          <button type="submit" id="geminiSubmitBtn" class="gemini-primary-btn" >
+            Perguntar ao Gemini
+          </button>
+        
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
+  <!-- Scripts do aplicativo -->
   <script src="js/firebase.js"></script>
   <script src="js/menu.js"></script>
+  <script src="js/gemini.js"></script>
+
 </body>
 </html>
