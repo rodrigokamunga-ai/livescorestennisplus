@@ -911,3 +911,407 @@ body.admin-page .admin-back-link ion-icon {
 body.admin-page .admin-back-link:hover {
   opacity: 0.9;
 }
+
+/* ========================= GEMINI ========================= */
+
+.gemini-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(4, 8, 16, 0.76);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.gemini-modal-overlay.show {
+  display: flex;
+}
+
+.gemini-modal {
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 40, 60, 0.98),
+      rgba(15, 22, 36, 0.98)
+    );
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.48);
+  color: var(--text);
+}
+
+.gemini-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.gemini-modal-kicker {
+  margin-bottom: 6px;
+  color: #9bc0ff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gemini-modal h2 {
+  margin: 0;
+  color: #eef4ff;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.gemini-close-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef4ff;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.gemini-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.gemini-modal label {
+  display: block;
+  margin-bottom: 8px;
+  color: #eef4ff;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+#geminiPrompt {
+  width: 100%;
+  min-height: 120px;
+  box-sizing: border-box;
+  padding: 12px;
+  resize: vertical;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.07);
+  color: #eef4ff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+#geminiPrompt::placeholder {
+  color: rgba(232, 238, 252, 0.52);
+}
+
+#geminiPrompt:focus {
+  border-color: rgba(216, 255, 99, 0.50);
+  box-shadow: 0 0 0 3px rgba(216, 255, 99, 0.08);
+}
+
+.gemini-loading {
+  margin-top: 12px;
+  color: #d8ff63;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.gemini-response {
+  min-height: 30px;
+  max-height: 320px;
+  overflow-y: auto;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(232, 238, 252, 0.92);
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.gemini-response.error {
+  border-color: rgba(255, 100, 100, 0.40);
+  color: #ffb4b4;
+}
+
+.gemini-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.gemini-primary-btn,
+.gemini-secondary-btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.gemini-primary-btn {
+  border: 1px solid rgba(216, 255, 99, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(216, 255, 99, 0.22),
+    rgba(216, 255, 99, 0.10)
+  );
+  color: #eef4ff;
+}
+
+.gemini-primary-btn:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(216, 255, 99, 0.32),
+    rgba(216, 255, 99, 0.16)
+  );
+}
+
+.gemini-primary-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.gemini-secondary-btn {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef4ff;
+}
+
+.gemini-secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 480px) {
+  .gemini-modal {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .gemini-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .gemini-primary-btn,
+  .gemini-secondary-btn {
+    width: 100%;
+  }
+}
+
+#clearGeminiBtn {
+  color: #ffd3d3;
+  border-color: rgba(255, 123, 123, 0.24);
+}
+
+#clearGeminiBtn:hover {
+  background: rgba(255, 123, 123, 0.12);
+  border-color: rgba(255, 123, 123, 0.45);
+}
+
+.gemini-timeout-message {
+  color: #ffd166;
+}
+
+/* ========================= GEMINI - RESULTADO ========================= */
+
+.gemini-response-card {
+  display: none;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(216, 255, 99, 0.18);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(216, 255, 99, 0.08),
+      rgba(255, 255, 255, 0.04)
+    );
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+  animation: geminiResponseEnter 0.35s ease-out;
+}
+
+.gemini-response-card:has(.gemini-response:not(:empty)) {
+  display: block;
+}
+
+.gemini-response-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d8ff63;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.gemini-response-header ion-icon {
+  font-size: 1.1rem;
+}
+
+.gemini-response {
+  min-height: 30px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 16px;
+  color: rgba(238, 244, 255, 0.94);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.gemini-response:empty {
+  display: none;
+}
+
+.gemini-response.error {
+  color: #ffb4b4;
+}
+
+.gemini-response strong {
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+.gemini-response ul {
+  margin: 8px 0;
+  padding-left: 22px;
+}
+
+.gemini-response li {
+  margin-bottom: 5px;
+}
+
+/* ========================= GEMINI - CARREGAMENTO ========================= */
+
+.gemini-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(155, 192, 255, 0.20);
+  border-radius: 14px;
+  background: rgba(155, 192, 255, 0.08);
+  color: #cfe0ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.gemini-loading[hidden] {
+  display: none !important;
+}
+
+.gemini-spinner {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 3px solid rgba(216, 255, 99, 0.22);
+  border-top-color: #d8ff63;
+  border-radius: 50%;
+  animation: geminiSpin 0.8s linear infinite;
+}
+
+.gemini-loading-text {
+  white-space: nowrap;
+}
+
+.gemini-loading-dots {
+  display: inline-flex;
+  min-width: 22px;
+  color: #d8ff63;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.gemini-loading-dots span {
+  animation: geminiDot 1.2s infinite;
+}
+
+.gemini-loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.gemini-loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ========================= GEMINI - CAMPO DESABILITADO ========================= */
+
+#geminiPrompt:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#geminiPrompt:disabled::placeholder {
+  color: rgba(232, 238, 252, 0.35);
+}
+
+.gemini-primary-btn:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+/* ========================= ANIMAÇÕES ========================= */
+
+@keyframes geminiSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes geminiDot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes geminiResponseEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .gemini-loading-text {
+    font-size: 0.78rem;
+  }
+
+  .gemini-response {
+    max-height: 300px;
+    padding: 14px;
+    font-size: 0.9rem;
+  }
+}
