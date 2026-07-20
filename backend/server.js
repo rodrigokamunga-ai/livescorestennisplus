@@ -18,7 +18,6 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
 });
 
-/* * Durante os testes, permite chamadas do frontend local, * Firebase Hosting, GitHub Pages e Render. */
 app.use(
   cors({
     origin: true
@@ -31,7 +30,6 @@ app.use(
   })
 );
 
-/* * Rota principal para verificar se o backend está online. */
 app.get("/", (req, res) => {
   res.status(200).json({
     sucesso: true,
@@ -39,7 +37,6 @@ app.get("/", (req, res) => {
   });
 });
 
-/* * Rota adicional de saúde do servidor. */
 app.get("/health", (req, res) => {
   res.status(200).json({
     sucesso: true,
@@ -48,7 +45,6 @@ app.get("/health", (req, res) => {
   });
 });
 
-/* * Extrai o status do erro retornado pelo SDK. */
 function obterStatusDoErro(error) {
   return Number(
     error?.status ||
@@ -58,7 +54,6 @@ function obterStatusDoErro(error) {
   );
 }
 
-/* * Extrai o tempo sugerido pela API. * * Exemplo: * "Please retry in 16.500266233s." */
 function obterSegundosParaTentarNovamente(error) {
   const mensagem = String(
     error?.message || ""
@@ -81,7 +76,6 @@ function obterSegundosParaTentarNovamente(error) {
     : null;
 }
 
-/* * Identifica erros de limite de requisições. */
 function erroDeQuota(error) {
   const status = obterStatusDoErro(error);
 
@@ -95,11 +89,12 @@ function erroDeQuota(error) {
     mensagem.includes("rate limit") ||
     mensagem.includes("too many requests") ||
     mensagem.includes("exceeded your current quota") ||
-    mensagem.includes("generate_content_free_tier_requests")
+    mensagem.includes(
+      "generate_content_free_tier_requests"
+    )
   );
 }
 
-/* * Identifica indisponibilidade temporária do Gemini. */
 function erroTemporario(error) {
   const status = obterStatusDoErro(error);
 
@@ -120,7 +115,6 @@ function erroTemporario(error) {
   );
 }
 
-/* * Consulta o Gemini. */
 app.post("/api/gemini", async (req, res) => {
   const inicio = Date.now();
 
@@ -133,8 +127,6 @@ app.post("/api/gemini", async (req, res) => {
 
     if (!pergunta || !String(pergunta).trim()) {
       return res.status(400).json({
-        sucesso: false,
-        codigo: "PERGUNTA_VAZIA",
         error:
           "Digite uma pergunta antes de consultar o Gemini."
       });
@@ -151,7 +143,6 @@ app.post("/api/gemini", async (req, res) => {
       }
     };
 
-    /* * O histórico somente será usado se o frontend * enviar um interaction ID. */
     if (
       previousInteractionId &&
       String(previousInteractionId).trim()
@@ -183,8 +174,6 @@ app.post("/api/gemini", async (req, res) => {
 
     if (!resposta.trim()) {
       return res.status(502).json({
-        sucesso: false,
-        codigo: "RESPOSTA_VAZIA",
         error:
           "O Gemini não retornou uma resposta válida.",
         tempoMs: tempoTotal
@@ -215,37 +204,27 @@ app.post("/api/gemini", async (req, res) => {
       error
     );
 
-    /* * Limite de consultas da API. */
+    /* * Limite de consultas da API. * * O backend envia somente a mensagem amigável. */
     if (erroDeQuota(error)) {
       const mensagemQuota =
         segundosRetry !== null
           ? `Você atingiu o limite gratuito de consultas do Assistente Gemini. Aguarde aproximadamente ${segundosRetry} segundos e tente novamente.`
-          : "Você atingiu o limite gratuito de consultas do Assistente Gemini. Aguarde alguns segundos e tente novamente.";
+          : "Você atingiu o limite gratuito de consultas do Assistente Gemini. Aguarde aproximadamente alguns segundos e tente novamente.";
 
       return res.status(429).json({
-        sucesso: false,
-        codigo: "LIMITE_CONSULTAS",
-        error: mensagemQuota,
-        retryAfterSeconds:
-          segundosRetry,
-        tempoMs: tempoTotal
+        error: mensagemQuota
       });
     }
 
-    /* * Instabilidade ou alta demanda do Gemini. */
+    /* * Indisponibilidade temporária do Gemini. */
     if (erroTemporario(error)) {
       return res.status(503).json({
-        sucesso: false,
-        codigo: "GEMINI_INDISPONIVEL",
         error:
-          "O Assistente Gemini está temporariamente ocupado. Aguarde alguns instantes e tente novamente.",
-        retryAfterSeconds:
-          segundosRetry,
-        tempoMs: tempoTotal
+          "O Assistente Gemini está temporariamente ocupado. Aguarde alguns instantes e tente novamente."
       });
     }
 
-    /* * Modelo não disponível para a conta. */
+    /* * Modelo indisponível. */
     if (
       status === 404 ||
       String(error?.message || "")
@@ -253,11 +232,8 @@ app.post("/api/gemini", async (req, res) => {
         .includes("model")
     ) {
       return res.status(503).json({
-        sucesso: false,
-        codigo: "MODELO_INDISPONIVEL",
         error:
-          "O modelo configurado não está disponível para esta API key. Verifique o modelo ou a disponibilidade da conta.",
-        tempoMs: tempoTotal
+          "O modelo configurado não está disponível para esta API key."
       });
     }
 
@@ -267,26 +243,19 @@ app.post("/api/gemini", async (req, res) => {
       status === 403
     ) {
       return res.status(status).json({
-        sucesso: false,
-        codigo: "API_KEY_INVALIDA",
         error:
-          "A chave da API do Gemini é inválida, expirou ou não possui autorização para usar este modelo.",
-        tempoMs: tempoTotal
+          "A chave da API do Gemini é inválida ou não possui autorização para usar este modelo."
       });
     }
 
-    /* * Erro genérico para o usuário. * O erro técnico completo continua apenas no log. */
+    /* * Erro genérico. * * O erro técnico fica somente no log do servidor. */
     return res.status(500).json({
-      sucesso: false,
-      codigo: "ERRO_INTERNO",
       error:
-        "Não foi possível consultar o Assistente Gemini no momento. Tente novamente mais tarde.",
-      tempoMs: tempoTotal
+        "Não foi possível consultar o Assistente Gemini no momento. Tente novamente mais tarde."
     });
   }
 });
 
-/* * O endereço 0.0.0.0 permite que o Render, * Railway, Koyeb ou outro servidor externo * acesse a aplicação. */
 app.listen(
   port,
   "0.0.0.0",
