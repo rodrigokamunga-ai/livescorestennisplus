@@ -102,7 +102,239 @@
   <script src="js/firebase.js"></script>
   <script src="js/public.js?v=10"></script>
 
-  <script> document.addEventListener("DOMContentLoaded", () => { async function getCurrentUserLiveMatch() { try { if (!window.__auth || !window.__db) { return null; } const user = window.__auth.currentUser; if (!user) { return null; } const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) { return null; } const doc = snap.docs[0]; return { id: doc.id, data: doc.data() }; } catch (error) { console.error( "Erro ao buscar partida ao vivo:", error ); return null; } } async function buildViewerUrl() { const match = await getCurrentUserLiveMatch(); if (!match) { return null; } const url = new URL( "aovivo.html", window.location.href ); url.searchParams.set("id", match.id); url.searchParams.set("role", "viewer"); const shareToken = String( match.data?.shareToken || "" ).trim(); if (shareToken) { url.searchParams.set( "shareToken", shareToken ); } return url.toString(); } async function buildBroadcasterUrl() { const match = await getCurrentUserLiveMatch(); if (!match) { return null; } const url = new URL( "aovivo.html", window.location.href ); url.searchParams.set("id", match.id); url.searchParams.set("role", "broadcaster"); const shareToken = String( match.data?.shareToken || "" ).trim(); if (shareToken) { url.searchParams.set( "shareToken", shareToken ); } return url.toString(); } async function shareLiveMatch() { try { const shareUrl = await buildViewerUrl(); if (!shareUrl) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a transmissão ao vivo da partida.", url: shareUrl }); return; } if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText( shareUrl ); alert("Link copiado!"); return; } prompt( "Copie o link da transmissão:", shareUrl ); } catch (error) { console.error(error); alert( "Não foi possível compartilhar a partida." ); } } async function openBroadcaster() { try { const url = await buildBroadcasterUrl(); if (!url) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } window.open(url, "_blank"); } catch (error) { console.error(error); alert( "Não foi possível abrir o transmissor." ); } } async function openH2H() { try { const match = await getCurrentUserLiveMatch(); if (!match) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } const data = match.data || {}; const opponentName = String( data.player2 || data.player2Name || data.opponent || data.opponentName || data.away || data.awayName || data.player3 || data.player3Name || data.player4 || data.player4Name || "" ).trim(); const opponentId = String( data.opponentId || data.player2Id || data.playerId2 || data.awayId || data.player3Id || data.player4Id || "" ).trim(); if (!opponentName && !opponentId) { alert( "Não foi possível identificar o adversário da partida." ); return; } const url = new URL( "confronto.html", window.location.href ); if (opponentName) { url.searchParams.set( "player2", opponentName ); } if (opponentId) { url.searchParams.set( "opponentId", opponentId ); } window.open(url.toString(), "_blank"); } catch (error) { console.error(error); alert( "Não foi possível abrir o confronto." ); } } function openStats() { const statsButton = document.getElementById("statsBtn"); if (statsButton) { statsButton.click(); } } function createActionButtons() { const probabilityBlocks = document.querySelectorAll( ".win-probability-chart" ); probabilityBlocks.forEach((probabilityBlock) => { if ( probabilityBlock.nextElementSibling?.classList.contains( "public-actions-section" ) ) { return; } const actionsSection = document.createElement("section"); actionsSection.className = "public-actions-section"; actionsSection.innerHTML = ` <div class="public-actions-row" aria-label="Ações da partida"> <button type="button" class="action-btn public-action-btn" data-action="live"> <ion-icon name="share-social-outline"></ion-icon> <span>Live</span> </button> <button type="button" class="action-btn public-action-btn" data-action="stats"> <ion-icon name="stats-chart-outline"></ion-icon> <span>Stats</span> </button> <button type="button" class="action-btn public-action-btn" data-action="h2h"> <ion-icon name="people-outline"></ion-icon> <span>H2H</span> </button> <button type="button" class="action-btn public-action-btn" data-action="broadcast"> <ion-icon name="videocam-outline"></ion-icon> <span>Transmitir</span> </button> </div> `; probabilityBlock.insertAdjacentElement( "afterend", actionsSection ); }); } document.addEventListener("click", (event) => { const actionButton = event.target.closest( ".public-action-btn" ); if (!actionButton) { return; } event.preventDefault(); event.stopPropagation(); const action = actionButton.dataset.action || ""; if (action === "live") { shareLiveMatch(); return; } if (action === "stats") { openStats(); return; } if (action === "h2h") { openH2H(); return; } if (action === "broadcast") { openBroadcaster(); } }); const observer = new MutationObserver(() => { createActionButtons(); }); const liveList = document.getElementById("liveList"); if (liveList) { observer.observe(liveList, { childList: true, subtree: true }); } createActionButtons(); }); </script>
+  <script> document.addEventListener("DOMContentLoaded", () => { async function getCurrentUserLiveMatch() { try { if (!window.__auth || !window.__db) { return null; } const user = window.__auth.currentUser; if (!user) { return null; } const snap = await window.__db .collection("matches") .where("ownerId", "==", user.uid) .where("status", "==", "live") .limit(1) .get(); if (snap.empty) { return null; } const doc = snap.docs[0]; return { id: doc.id, data: doc.data() }; } catch (error) { console.error( "Erro ao buscar partida ao vivo:", error ); return null; } } async function buildViewerUrl() { const match = await getCurrentUserLiveMatch(); if (!match) { return null; } const url = new URL( "aovivo.html", window.location.href ); url.searchParams.set("id", match.id); url.searchParams.set("role", "viewer"); const shareToken = String( match.data?.shareToken || "" ).trim(); if (shareToken) { url.searchParams.set( "shareToken", shareToken ); } return url.toString(); } async function buildBroadcasterUrl() { const match = await getCurrentUserLiveMatch(); if (!match) { return null; } const url = new URL( "aovivo.html", window.location.href ); url.searchParams.set("id", match.id); url.searchParams.set("role", "broadcaster"); const shareToken = String( match.data?.shareToken || "" ).trim(); if (shareToken) { url.searchParams.set( "shareToken", shareToken ); } return url.toString(); } async function shareLiveMatch() { try { const shareUrl = await buildViewerUrl(); if (!shareUrl) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } if (navigator.share) { await navigator.share({ title: "Partida ao vivo - TennisPro", text: "Acesse a transmissão ao vivo da partida.", url: shareUrl }); return; } if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText( shareUrl ); alert("Link copiado!"); return; } prompt( "Copie o link da transmissão:", shareUrl ); } catch (error) { console.error(error); alert( "Não foi possível compartilhar a partida." ); } } async function openBroadcaster() { try { const url = await buildBroadcasterUrl(); if (!url) { alert( "Nenhuma partida ao vivo encontrada para este usuário." ); return; } window.open(url, "_blank"); } catch (error) { console.error(error); alert( "Não foi possível abrir o transmissor." ); } } 
+  
+  window.openConfrontoModal = function (url) {
+  let modal = document.getElementById(
+    "publicConfrontoModal"
+  );
+
+  if (!modal) {
+    modal = document.createElement("div");
+
+    modal.id = "publicConfrontoModal";
+    modal.className =
+      "public-confronto-modal-overlay";
+    modal.setAttribute("aria-hidden", "true");
+
+    modal.innerHTML = ` <div class="public-confronto-modal" role="dialog" aria-modal="true" aria-labelledby="publicConfrontoModalTitle" > <div class="public-confronto-modal-header"> <div> <div class="public-confronto-modal-kicker"> Análise da partida </div> <h2 id="publicConfrontoModalTitle"> Confronto direto </h2> </div> <button type="button" id="closePublicConfrontoModal" class="public-confronto-close" aria-label="Fechar confronto" > ✕ </button> </div> <div class="public-confronto-modal-body"> <iframe id="publicConfrontoFrame" title="Confronto direto entre jogadores" ></iframe> </div> </div> `;
+
+    document.body.appendChild(modal);
+
+    document
+      .getElementById("closePublicConfrontoModal")
+      ?.addEventListener(
+        "click",
+        window.closeConfrontoModal
+      );
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        window.closeConfrontoModal();
+      }
+    });
+  }
+
+  const frame = document.getElementById(
+    "publicConfrontoFrame"
+  );
+
+  if (!frame) {
+    console.error(
+      "Iframe do confronto não foi encontrado."
+    );
+    return;
+  }
+
+  frame.src = url;
+
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+
+  document.body.classList.add(
+    "public-confronto-modal-open"
+  );
+};
+
+window.closeConfrontoModal = function () {
+  const modal = document.getElementById(
+    "publicConfrontoModal"
+  );
+
+  const frame = document.getElementById(
+    "publicConfrontoFrame"
+  );
+
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+
+  document.body.classList.remove(
+    "public-confronto-modal-open"
+  );
+
+  if (frame) {
+    frame.src = "about:blank";
+  }
+};
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    window.closeConfrontoModal();
+  }
+});
+
+  function openH2H(actionButton) {
+  try {
+    /* * Localiza o card onde o botão H2H foi clicado. * * Exemplo: * botão H2H * └── public-actions-section * └── match-board */
+    const card = actionButton?.closest(".match-board");
+
+    if (!card) {
+      alert("Não foi possível identificar o card da partida.");
+      return;
+    }
+
+    /* * Dados gravados nos atributos data-* do card. * * Esses atributos precisam ter sido adicionados no passo 1. */
+    const matchId = String(
+      card.dataset.matchId || ""
+    ).trim();
+
+    const ownerId = String(
+      card.dataset.ownerId || ""
+    ).trim();
+
+    const player1 = String(
+      card.dataset.player1 || ""
+    ).trim();
+
+    const player2 = String(
+      card.dataset.player2 || ""
+    ).trim();
+
+    const player3 = String(
+      card.dataset.player3 || ""
+    ).trim();
+
+    const player4 = String(
+      card.dataset.player4 || ""
+    ).trim();
+
+    const opponentId = String(
+      card.dataset.opponentId || ""
+    ).trim();
+
+    /* * Recupera o shareToken da URL da public.html. * * Exemplo: * public.html?ownerId=ABC&shareToken=XYZ */
+    const pageParams = new URLSearchParams(
+      window.location.search
+    );
+
+    const shareToken = String(
+      pageParams.get("shareToken") || ""
+    ).trim();
+
+    /* * Sem matchId, o confronto ainda pode ser aberto * por nome, mas o ideal é sempre enviar o ID da partida. */
+    if (!matchId && !player2 && !player3) {
+      alert(
+        "Não foi possível identificar os jogadores da partida."
+      );
+      return;
+    }
+
+    /* * Monta a URL da tela de confronto. * * O parâmetro embedded=1 informa ao confronto.js * que ele está sendo exibido dentro de um popup. */
+    const url = new URL(
+      "confronto.html",
+      window.location.href
+    );
+
+    url.searchParams.set(
+      "embedded",
+      "1"
+    );
+
+    /* * O confronto.js já aceita id e matchId. * Enviamos os dois para manter compatibilidade. */
+    if (matchId) {
+      url.searchParams.set(
+        "id",
+        matchId
+      );
+
+      url.searchParams.set(
+        "matchId",
+        matchId
+      );
+    }
+
+    if (ownerId) {
+      url.searchParams.set(
+        "ownerId",
+        ownerId
+      );
+    }
+
+    if (player1) {
+      url.searchParams.set(
+        "player1",
+        player1
+      );
+    }
+
+    if (player2) {
+      url.searchParams.set(
+        "player2",
+        player2
+      );
+    }
+
+    /* * Estes parâmetros são importantes para partidas de duplas. */
+    if (player3) {
+      url.searchParams.set(
+        "player3",
+        player3
+      );
+    }
+
+    if (player4) {
+      url.searchParams.set(
+        "player4",
+        player4
+      );
+    }
+
+    if (opponentId) {
+      url.searchParams.set(
+        "opponentId",
+        opponentId
+      );
+    }
+
+    if (shareToken) {
+      url.searchParams.set(
+        "shareToken",
+        shareToken
+      );
+    }
+
+    /* * Em vez de window.open(), abrimos o modal. */
+    window.openConfrontoModal(
+  url.toString()
+);
+  } catch (error) {
+    console.error(
+      "Erro ao abrir confronto:",
+      error
+    );
+
+    alert(
+      "Não foi possível abrir o confronto."
+    );
+  }
+}  function openStats() { const statsButton = document.getElementById("statsBtn"); if (statsButton) { statsButton.click(); } } function createActionButtons() { const probabilityBlocks = document.querySelectorAll( ".win-probability-chart" ); probabilityBlocks.forEach((probabilityBlock) => { if ( probabilityBlock.nextElementSibling?.classList.contains( "public-actions-section" ) ) { return; } const actionsSection = document.createElement("section"); actionsSection.className = "public-actions-section"; actionsSection.innerHTML = ` <div class="public-actions-row" aria-label="Ações da partida"> <button type="button" class="action-btn public-action-btn" data-action="live"> <ion-icon name="share-social-outline"></ion-icon> <span>Live</span> </button> <button type="button" class="action-btn public-action-btn" data-action="stats"> <ion-icon name="stats-chart-outline"></ion-icon> <span>Stats</span> </button> <button type="button" class="action-btn public-action-btn" data-action="h2h"> <ion-icon name="people-outline"></ion-icon> <span>H2H</span> </button> <button type="button" class="action-btn public-action-btn" data-action="broadcast"> <ion-icon name="videocam-outline"></ion-icon> <span>Transmitir</span> </button> </div> `; probabilityBlock.insertAdjacentElement( "afterend", actionsSection ); }); } document.addEventListener("click", (event) => { const actionButton = event.target.closest( ".public-action-btn" ); if (!actionButton) { return; } event.preventDefault(); event.stopPropagation(); const action = actionButton.dataset.action || ""; if (action === "live") { shareLiveMatch(); return; } if (action === "stats") { openStats(); return; } if (action === "h2h") {
+  openH2H(actionButton);
+  return;
+} if (action === "broadcast") { openBroadcaster(); } }); const observer = new MutationObserver(() => { createActionButtons(); }); const liveList = document.getElementById("liveList"); if (liveList) { observer.observe(liveList, { childList: true, subtree: true }); } createActionButtons(); }); </script>
 
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js">
   </script>
