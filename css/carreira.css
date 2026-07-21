@@ -2097,3 +2097,227 @@ body.career-page .career-tournament-empty {
   background: rgba(134, 168, 255, 0.06) !important;
   color: rgba(232, 238, 252, 0.76) !important;
 }
+
+/* ========================================================= CARREIRA — FILTROS RESUMO EM GRID 1 + 3 COLUNAS ========================================================= */
+
+body.career-page .career-summary {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 18px;
+}
+
+/* Total de partidas ocupa a primeira linha inteira */
+body.career-page .career-summary-card.total.matches {
+  grid-column: 1 / -1;
+  min-height: 92px;
+  aspect-ratio: auto;
+}
+
+/* Demais cards ficam quadrados */
+body.career-page .career-summary-card {
+  position: relative;
+  min-width: 0;
+  min-height: 118px;
+  aspect-ratio: 1 / 1;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 40, 60, 0.96),
+      rgba(20, 28, 44, 0.98)
+    ) !important;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.16) !important;
+  color: #eef4ff;
+  overflow: hidden;
+}
+
+/* Remove as cores antigas das categorias */
+body.career-page .career-summary-card.tournament,
+body.career-page .career-summary-card.win,
+body.career-page .career-summary-card.loss,
+body.career-page .career-summary-card.champion,
+body.career-page .career-summary-card.runnerup,
+body.career-page .career-summary-card.ranking,
+body.career-page .career-summary-card.training,
+body.career-page .career-summary-card.simple,
+body.career-page .career-summary-card.doubles {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* Ícones Ionic dentro dos botões */
+body.career-page .career-summary-card .career-card-icon {
+  position: static !important;
+  width: 30px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  color: #86a8ff !important;
+  opacity: 1 !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transform: none !important;
+}
+
+/* Ícone maior no card Total */
+body.career-page
+.career-summary-card.total.matches
+.career-card-icon {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 32px !important;
+}
+
+/* Texto dos botões */
+body.career-page .career-summary-card span {
+  position: static !important;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  min-height: 0;
+  margin: 0 !important;
+  color: rgba(232, 238, 252, 0.82) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Número dos botões */
+body.career-page .career-summary-card strong {
+  position: static !important;
+  z-index: 1;
+  display: block;
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 1.25rem !important;
+  font-weight: 950 !important;
+  line-height: 1;
+}
+
+/* Card total com número maior */
+body.career-page
+.career-summary-card.total.matches strong {
+  font-size: 1.55rem !important;
+}
+
+/* Hover neutro */
+body.career-page .career-summary-card[data-filter]:hover {
+  transform: translateY(-2px);
+  border-color: rgba(134, 168, 255, 0.48) !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(38, 50, 76, 0.98),
+      rgba(20, 28, 44, 0.98)
+    ) !important;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.24) !important;
+}
+
+/* Filtro ativo sem as cores antigas */
+body.career-page
+.career-summary-card.career-card-filter-active {
+  opacity: 1 !important;
+  transform: translateY(-2px) !important;
+  border-color: rgba(134, 168, 255, 0.80) !important;
+  box-shadow:
+    0 0 0 2px rgba(134, 168, 255, 0.30),
+    0 12px 24px rgba(0, 0, 0, 0.24) !important;
+}
+
+/* Filtros inativos */
+body.career-page
+.career-summary-card.career-card-filter-inactive {
+  opacity: 0.42;
+  transform: scale(0.98);
+}
+
+/* ========================================================= RESPONSIVO ========================================================= */
+
+@media (max-width: 768px) {
+  body.career-page .career-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  body.career-page .career-summary-card {
+    min-height: 104px;
+    padding: 10px 6px !important;
+    border-radius: 14px !important;
+  }
+
+  body.career-page .career-summary-card.total.matches {
+    min-height: 82px;
+  }
+
+  body.career-page .career-summary-card .career-card-icon {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 25px !important;
+  }
+
+  body.career-page .career-summary-card span {
+    font-size: 0.62rem !important;
+    line-height: 1.08;
+  }
+
+  body.career-page .career-summary-card strong {
+    font-size: 1.08rem !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  .career-card-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 28px !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  strong {
+    font-size: 1.35rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.career-page .career-summary {
+    gap: 6px !important;
+  }
+
+  body.career-page .career-summary-card {
+    min-height: 94px;
+    padding: 8px 4px !important;
+  }
+
+  body.career-page .career-summary-card span {
+    font-size: 0.56rem !important;
+  }
+
+  body.career-page .career-summary-card strong {
+    font-size: 1rem !important;
+  }
+
+  body.career-page .career-summary-card .career-card-icon {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 22px !important;
+  }
+}
