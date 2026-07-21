@@ -2321,3 +2321,74 @@ body.career-page
     font-size: 22px !important;
   }
 }
+
+/* ========================================================= CARREIRA — AUMENTO DA FONTE DOS CARDS DE RESUMO ========================================================= */
+
+/* Texto dos cards */
+body.career-page .career-summary-card span {
+  font-size: 0.86rem !important;
+  line-height: 1.18 !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Números dos cards */
+body.career-page .career-summary-card strong {
+  font-size: 1.35rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+/* Card Total de partidas */
+body.career-page
+.career-summary-card.total.matches
+span {
+  font-size: 0.92rem !important;
+}
+
+body.career-page
+.career-summary-card.total.matches
+strong {
+  font-size: 1.60rem !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  body.career-page .career-summary-card span {
+    font-size: 0.76rem !important;
+    line-height: 1.15 !important;
+  }
+
+  body.career-page .career-summary-card strong {
+    font-size: 1.20rem !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  span {
+    font-size: 0.82rem !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  strong {
+    font-size: 1.42rem !important;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 380px) {
+  body.career-page .career-summary-card span {
+    font-size: 0.70rem !important;
+  }
+
+  body.career-page .career-summary-card strong {
+    font-size: 1.08rem !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  span {
+    font-size: 0.76rem !important;
+  }
+}
