@@ -50,6 +50,11 @@
       msg: document.getElementById("adminMsg"),
       dialog: document.getElementById("detailsDialog"),
       detailsContent: document.getElementById("detailsContent"),
+      adminStatsModal: null,
+      adminStatsModalBody: null,
+      adminStatsModalSubtitle: null,
+      adminStatsModalClose: null,
+      adminStatsModalCloseFooter: null,
       docId: document.getElementById("docId"),
       modality: document.getElementById("modality"),
       categoryName: document.getElementById("categoryName"),
@@ -316,6 +321,691 @@
       }
     };
     function setMsg(text) { if (el.msg) el.msg.textContent = text || ""; }
+    function ensureAdminStatsModal() {
+      let modal = document.getElementById("adminStatsModal");
+    
+      if (modal) {
+        el.adminStatsModal = modal;
+        el.adminStatsModalBody = modal.querySelector("#adminStatsModalBody");
+        el.adminStatsModalSubtitle = modal.querySelector("#adminStatsModalSubtitle");
+        el.adminStatsModalClose = modal.querySelector("#closeAdminStatsModal");
+        el.adminStatsModalCloseFooter = modal.querySelector("#closeAdminStatsModalFooter");
+        return modal;
+      }
+    
+      modal = document.createElement("div");
+    
+      modal.id = "adminStatsModal";
+      modal.className = "admin-stats-modal-overlay";
+      modal.setAttribute("aria-hidden", "true");
+    
+      modal.innerHTML = ` <div class="admin-stats-modal" role="dialog" aria-modal="true" aria-labelledby="adminStatsModalTitle" > <div class="admin-stats-modal-header"> <div> <div class="admin-stats-modal-kicker"> Análise completa </div> <h2 id="adminStatsModalTitle"> Estatísticas da partida </h2> <div id="adminStatsModalSubtitle" class="admin-stats-modal-subtitle" ></div> </div> <button type="button" id="closeAdminStatsModal" class="admin-stats-close" aria-label="Fechar análise" > ✕ </button> </div> <div id="adminStatsModalBody" class="admin-stats-modal-body" ></div> <div class="admin-stats-modal-footer"> <button type="button" id="closeAdminStatsModalFooter" class="admin-stats-close-footer" > Fechar </button> </div> </div> `;
+    
+      document.body.appendChild(modal);
+    
+      el.adminStatsModal = modal;
+      el.adminStatsModalBody = modal.querySelector("#adminStatsModalBody");
+      el.adminStatsModalSubtitle = modal.querySelector("#adminStatsModalSubtitle");
+      el.adminStatsModalClose = modal.querySelector("#closeAdminStatsModal");
+      el.adminStatsModalCloseFooter = modal.querySelector("#closeAdminStatsModalFooter");
+    
+      el.adminStatsModalClose?.addEventListener(
+        "click",
+        closeAdminStatsModal
+      );
+    
+      el.adminStatsModalCloseFooter?.addEventListener(
+        "click",
+        closeAdminStatsModal
+      );
+    
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeAdminStatsModal();
+        }
+      });
+    
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeAdminStatsModal();
+        }
+      });
+    
+      return modal;
+    }
+    
+    function closeAdminStatsModal() {
+      const modal =
+        el.adminStatsModal ||
+        document.getElementById("adminStatsModal");
+    
+      if (!modal) return;
+    
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    
+      document.body.classList.remove("admin-stats-modal-open");
+    }
+    
+    function getAdminStatsSubtitle(match = {}) {
+      const dateText = match.matchDateTime
+        ? new Date(match.matchDateTime).toLocaleString("pt-BR")
+        : "";
+    
+      const gameFormat = String(
+        match.gameFormat || "Simples"
+      ).trim();
+    
+      const stage = String(
+        match.tournamentStage || ""
+      ).trim();
+    
+      const parts = [];
+    
+      if (dateText) parts.push(dateText);
+      if (gameFormat) parts.push(gameFormat);
+      if (stage) parts.push(stage);
+    
+      return parts.join(" • ");
+    }
+
+    const adminPhotoCache = new Map();
+
+function adminNormalizePhotoSrc(photo = "") {
+  const value = String(photo || "").trim();
+
+  if (!value) return "";
+
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("data:image/")
+  ) {
+    return value;
+  }
+
+  if (value.length > 100) {
+    return `data:image/jpeg;base64,${value}`;
+  }
+
+  return value;
+}
+
+function adminGetProfileName(data = {}) {
+  return String(
+    data.displayName ||
+    data.name ||
+    data.fullName ||
+    data.nome ||
+    data.ownerName ||
+    data.playerName ||
+    ""
+  ).trim();
+}
+
+function adminGetProfilePhoto(data = {}) {
+  return adminNormalizePhotoSrc(
+    data.photoBase64 ||
+    data.photoURL ||
+    data.photoUrl ||
+    data.avatarUrl ||
+    data.profilePhoto ||
+    data.imageUrl ||
+    data.photo ||
+    ""
+  );
+}
+
+async function adminFindProfileByName(name = "") {
+  const searchName = U.normalizePlayerName(name);
+
+  if (!searchName || typeof __db === "undefined") {
+    return null;
+  }
+
+  const collections = ["profiles", "users"];
+
+  try {
+    for (const collectionName of collections) {
+      const snapshot = await __db
+        .collection(collectionName)
+        .get();
+
+      let exact = null;
+      let partial = null;
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() || {};
+        const profileName = adminGetProfileName(data);
+        const normalizedName = U.normalizePlayerName(profileName);
+
+        if (!normalizedName) return;
+
+        const result = {
+          id: docSnap.id,
+          ...data
+        };
+
+        if (normalizedName === searchName) {
+          exact = result;
+        } else if (!partial && normalizedName.includes(searchName)) {
+          partial = result;
+        }
+      });
+
+      if (exact) return exact;
+      if (partial) return partial;
+    }
+  } catch (err) {
+    console.error("Erro ao buscar perfil:", err);
+  }
+
+  return null;
+}
+
+async function adminLoadPlayerProfile(name = "", uid = "") {
+  const cacheKey = String(uid || name || "").trim();
+
+  if (adminPhotoCache.has(cacheKey)) {
+    return adminPhotoCache.get(cacheKey);
+  }
+
+  let profile = null;
+
+  try {
+    if (uid && typeof __db !== "undefined") {
+      const profileSnap = await __db
+        .collection("profiles")
+        .doc(uid)
+        .get();
+
+      if (profileSnap.exists) {
+        profile = profileSnap.data() || {};
+      }
+
+      if (!profile) {
+        const userSnap = await __db
+          .collection("users")
+          .doc(uid)
+          .get();
+
+        if (userSnap.exists) {
+          profile = userSnap.data() || {};
+        }
+      }
+    }
+
+    if (!profile && name) {
+      profile = await adminFindProfileByName(name);
+    }
+  } catch (err) {
+    console.error("Erro ao carregar dados do jogador:", err);
+  }
+
+  const result = {
+    name: adminGetProfileName(profile || {}) || name || "Jogador",
+    photo: adminGetProfilePhoto(profile || {})
+  };
+
+  adminPhotoCache.set(cacheKey, result);
+  return result;
+}
+
+function adminGetTeamPlayers(match, position) {
+  const doubles = U.isDoublesFormatValue(match.gameFormat);
+
+  if (position === 1) {
+    const players = [
+      {
+        name: String(match.player1 || match.ownerName || "Jogador 1").trim(),
+        uid: String(match.ownerId || "").trim()
+      }
+    ];
+
+    if (doubles) {
+      players.push({
+        name: String(match.player2 || "Jogador 2").trim(),
+        uid: String(match.player2Id || "").trim()
+      });
+    }
+
+    return players;
+  }
+
+  const players = [
+    {
+      name: String(match.player3 || match.player2 || "Jogador 2").trim(),
+      uid: String(match.player3Id || match.opponentId || "").trim()
+    }
+  ];
+
+  if (doubles) {
+    players.push({
+      name: String(match.player4 || "Jogador 4").trim(),
+      uid: String(match.player4Id || "").trim()
+    });
+  }
+
+  return players;
+}
+
+function adminInitial(name = "") {
+  return String(name || "J")
+    .trim()
+    .charAt(0)
+    .toUpperCase() || "J";
+}
+
+function adminRenderPlayerPhoto(profile) {
+  const name = profile?.name || "Jogador";
+  const photo = profile?.photo || "";
+
+  if (!photo) {
+    return ` <div class="admin-stats-player-photo-placeholder"> ${U.escapeHtml(adminInitial(name))} </div> `;
+  }
+
+  return ` <img class="admin-stats-player-photo" src="${U.escapeHtml(photo)}" alt="${U.escapeHtml(name)}" /> `;
+}
+
+async function adminRenderPlayerTeam(match, position) {
+  const players = adminGetTeamPlayers(match, position);
+
+  const profiles = await Promise.all(
+    players.map((player) =>
+      adminLoadPlayerProfile(player.name, player.uid)
+    )
+  );
+
+  return ` <div class="admin-stats-player-team"> ${profiles.map((profile) => ` <div class="admin-stats-player-unit"> ${adminRenderPlayerPhoto(profile)} <div class="admin-stats-player-name"> ${U.escapeHtml(profile.name)} </div> </div> `).join("")} </div> `;
+}
+
+function adminGetStat(stats, aliases = [], fallback = 0) {
+  const source = stats || {};
+
+  for (const alias of aliases) {
+    if (
+      source[alias] !== undefined &&
+      source[alias] !== null &&
+      source[alias] !== ""
+    ) {
+      return source[alias];
+    }
+  }
+
+  return fallback;
+}
+
+function adminNumberStat(stats, aliases = []) {
+  const value = Number(adminGetStat(stats, aliases, 0));
+  return Number.isFinite(value) ? value : 0;
+}
+
+function adminSumStat(stats, aliases = []) {
+  return aliases.reduce(
+    (total, group) => total + adminNumberStat(stats, group),
+    0
+  );
+}
+
+function adminRatio(won, attempts) {
+  return `${Number(won || 0)}/${Number(attempts || 0)}`;
+}
+
+function adminParseBarValue(value) {
+  const numeric = Number(value);
+
+  if (Number.isFinite(numeric)) {
+    return numeric;
+  }
+
+  const firstPart = Number(
+    String(value || "0").split("/")[0]
+  );
+
+  return Number.isFinite(firstPart) ? firstPart : 0;
+}
+
+function adminRenderComparisonBar(value1, value2) {
+  const p1 = adminParseBarValue(value1);
+  const p2 = adminParseBarValue(value2);
+  const total = p1 + p2;
+
+  const width1 = total > 0 ? (p1 / total) * 100 : 50;
+  const width2 = total > 0 ? (p2 / total) * 100 : 50;
+
+  return ` <div class="admin-stats-comparison"> <div class="admin-stats-comparison-p1" style="width:${width1}%" ></div> <div class="admin-stats-comparison-p2" style="width:${width2}%" ></div> </div> `;
+}
+
+function adminRenderStatRow( label, value1, value2, barValue1 = value1, barValue2 = value2 ) {
+  return ` <div class="admin-stats-detail-line"> <div class="admin-stats-detail-values"> <span class="admin-stats-value-player1"> ${U.escapeHtml(String(value1 ?? 0))} </span> <span class="admin-stats-value-label"> ${U.escapeHtml(label)} </span> <span class="admin-stats-value-player2"> ${U.escapeHtml(String(value2 ?? 0))} </span> </div> ${adminRenderComparisonBar(barValue1, barValue2)} </div> `;
+}
+
+function adminGetScoreText(match) {
+  const score = U.normalizeScore(match.score || {});
+  const history = Array.isArray(score.setHistory)
+    ? score.setHistory
+    : [];
+
+  const sets = history
+    .map((setObj) => getSetDisplayFromHistory(setObj).text)
+    .filter((value) => value && value !== "--");
+
+  const setText = sets.length
+    ? sets.join(" • ")
+    : "--";
+
+  return `${score.sets1} x ${score.sets2} • ${setText}`;
+}
+
+function adminGetDurationText(match) {
+  if (
+    match.durationSeconds &&
+    Number(match.durationSeconds) > 0
+  ) {
+    return U.formatDuration(match.durationSeconds);
+  }
+
+  return getMatchDuration(match);
+}
+
+function adminRenderMeta(match) {
+  const date = match.matchDateTime
+    ? new Date(match.matchDateTime).toLocaleString("pt-BR")
+    : "-";
+
+  const duration = adminGetDurationText(match);
+  const phase = match.tournamentStage || "-";
+  const gameFormat = match.gameFormat || "-";
+  const score = adminGetScoreText(match);
+
+  return ` <div class="admin-stats-meta-grid"> <div class="admin-stats-meta-item"> <ion-icon name="calendar-outline"></ion-icon> <span>Data e hora</span> <strong>${U.escapeHtml(date)}</strong> </div> <div class="admin-stats-meta-item"> <ion-icon name="time-outline"></ion-icon> <span>Duração</span> <strong>${U.escapeHtml(duration)}</strong> </div> <div class="admin-stats-meta-item"> <ion-icon name="flag-outline"></ion-icon> <span>Fase da partida</span> <strong>${U.escapeHtml(phase)}</strong> </div> <div class="admin-stats-meta-item"> <ion-icon name="tennisball-outline"></ion-icon> <span>Tipo de jogo</span> <strong>${U.escapeHtml(gameFormat)}</strong> </div> <div class="admin-stats-meta-item admin-stats-meta-score"> <ion-icon name="trophy-outline"></ion-icon> <span>Placar final</span> <strong>${U.escapeHtml(score)}</strong> </div> </div> `;
+}
+
+async function renderAdminDetailedStats(match) {
+  const stats = match.stats || match.statistics || {};
+  const player1 = stats.player1 || stats.p1 || {};
+  const player2 = stats.player2 || stats.p2 || {};
+  const score = U.normalizeScore(match.score || {});
+
+  const team1Html = await adminRenderPlayerTeam(match, 1);
+  const team2Html = await adminRenderPlayerTeam(match, 2);
+
+  const p1FirstServeWon = adminNumberStat(player1, [
+    "serve1Won",
+    "firstServeWon"
+  ]);
+
+  const p2FirstServeWon = adminNumberStat(player2, [
+    "serve1Won",
+    "firstServeWon"
+  ]);
+
+  const p1FirstServeAttempts = adminNumberStat(player1, [
+    "serve1Attempts",
+    "firstServeAttempts"
+  ]);
+
+  const p2FirstServeAttempts = adminNumberStat(player2, [
+    "serve1Attempts",
+    "firstServeAttempts"
+  ]);
+
+  const p1SecondServeWon = adminNumberStat(player1, [
+    "serve2Won",
+    "secondServeWon"
+  ]);
+
+  const p2SecondServeWon = adminNumberStat(player2, [
+    "serve2Won",
+    "secondServeWon"
+  ]);
+
+  const p1SecondServeAttempts = adminNumberStat(player1, [
+    "serve2Attempts",
+    "secondServeAttempts"
+  ]);
+
+  const p2SecondServeAttempts = adminNumberStat(player2, [
+    "serve2Attempts",
+    "secondServeAttempts"
+  ]);
+
+  const p1Winners = adminSumStat(player1, [
+    ["winner", "winners"],
+    ["forehandWinner", "forehandWinners"],
+    ["backhandWinner", "backhandWinners"],
+    ["dropshotWinner", "dropShotWinner"]
+  ]);
+
+  const p2Winners = adminSumStat(player2, [
+    ["winner", "winners"],
+    ["forehandWinner", "forehandWinners"],
+    ["backhandWinner", "backhandWinners"],
+    ["dropshotWinner", "dropShotWinner"]
+  ]);
+
+  const p1Unforced = adminSumStat(player1, [
+    ["unforcedError", "unforcedErrors", "enf"],
+    ["enfFH", "unforcedErrorFH"],
+    ["enfBH", "unforcedErrorBH"]
+  ]);
+
+  const p2Unforced = adminSumStat(player2, [
+    ["unforcedError", "unforcedErrors", "enf"],
+    ["enfFH", "unforcedErrorFH"],
+    ["enfBH", "unforcedErrorBH"]
+  ]);
+
+  const p1Forced = adminSumStat(player1, [
+    ["forcedError", "forcedErrors"],
+    ["forcedErrorFH"],
+    ["forcedErrorBH"]
+  ]);
+
+  const p2Forced = adminSumStat(player2, [
+    ["forcedError", "forcedErrors"],
+    ["forcedErrorFH"],
+    ["forcedErrorBH"]
+  ]);
+
+  const p1BreakWon = Number(
+    score.breakPointsWon1 ||
+    player1.breakPointsWon ||
+    0
+  );
+
+  const p2BreakWon = Number(
+    score.breakPointsWon2 ||
+    player2.breakPointsWon ||
+    0
+  );
+
+  const p1BreakChances = Number(
+    score.breakPointsChances1 ||
+    player1.breakPointsChances ||
+    0
+  );
+
+  const p2BreakChances = Number(
+    score.breakPointsChances2 ||
+    player2.breakPointsChances ||
+    0
+  );
+
+  const p1Performance = adminNumberStat(player1, [
+    "serveSuccessPct",
+    "performance"
+  ]);
+
+  const p2Performance = adminNumberStat(player2, [
+    "serveSuccessPct",
+    "performance"
+  ]);
+
+  const sections = [
+    {
+      title: "Serviço",
+      rows: [
+        ["Aces",
+          adminNumberStat(player1, ["ace", "aces"]),
+          adminNumberStat(player2, ["ace", "aces"])
+        ],
+        ["Duplas faltas",
+          adminNumberStat(player1, ["doubleFault", "doubleFaults"]),
+          adminNumberStat(player2, ["doubleFault", "doubleFaults"])
+        ],
+        ["1º serviço vencido",
+          adminRatio(p1FirstServeWon, p1FirstServeAttempts),
+          adminRatio(p2FirstServeWon, p2FirstServeAttempts),
+          p1FirstServeWon,
+          p2FirstServeWon
+        ],
+        ["2º serviço vencido",
+          adminRatio(p1SecondServeWon, p1SecondServeAttempts),
+          adminRatio(p2SecondServeWon, p2SecondServeAttempts),
+          p1SecondServeWon,
+          p2SecondServeWon
+        ],
+        ["Performance",
+          `${p1Performance.toFixed(1)}%`,
+          `${p2Performance.toFixed(1)}%`,
+          p1Performance,
+          p2Performance
+        ]
+      ]
+    },
+
+    {
+      title: "Pontos na rede",
+      rows: [
+        ["Pontos na rede vencidos",
+          adminNumberStat(player1, ["netWon", "netPointsWon"]),
+          adminNumberStat(player2, ["netWon", "netPointsWon"])
+        ],
+        ["Pontos na rede perdidos",
+          adminNumberStat(player1, ["netLost", "netPointsLost"]),
+          adminNumberStat(player2, ["netLost", "netPointsLost"])
+        ]
+      ]
+    },
+
+    {
+      title: "Golpes e erros",
+      rows: [
+        ["Winners", p1Winners, p2Winners],
+        ["Erros não forçados", p1Unforced, p2Unforced],
+        ["Erros forçados", p1Forced, p2Forced],
+        ["Dropshot winners",
+          adminNumberStat(player1, ["dropshotWinner", "dropShotWinner"]),
+          adminNumberStat(player2, ["dropshotWinner", "dropShotWinner"])
+        ],
+        ["Dropshot erros",
+          adminNumberStat(player1, ["dropshotError", "dropShotError"]),
+          adminNumberStat(player2, ["dropshotError", "dropShotError"])
+        ]
+      ]
+    },
+
+    {
+      title: "Devolução",
+      rows: [
+        ["Pontos de devolução vencidos",
+          adminNumberStat(player1, ["returnPoint", "returnPointsWon"]),
+          adminNumberStat(player2, ["returnPoint", "returnPointsWon"])
+        ],
+        ["Erros de devolução",
+          adminNumberStat(player1, ["returnError", "returnErrors"]),
+          adminNumberStat(player2, ["returnError", "returnErrors"])
+        ],
+        ["Break points vencidos",
+          adminRatio(p1BreakWon, p1BreakChances),
+          adminRatio(p2BreakWon, p2BreakChances),
+          p1BreakWon,
+          p2BreakWon
+        ]
+      ]
+    },
+
+    {
+      title: "Linha de base",
+      rows: [
+        ["Pontos vencidos na linha de base",
+          adminNumberStat(player1, ["baselinePoint", "baselinePointsWon"]),
+          adminNumberStat(player2, ["baselinePoint", "baselinePointsWon"])
+        ],
+        ["Erros na linha de base",
+          adminNumberStat(player1, ["baselineError", "baselineErrors"]),
+          adminNumberStat(player2, ["baselineError", "baselineErrors"])
+        ]
+      ]
+    },
+
+    {
+      title: "Resumo",
+      rows: [
+        ["Total de pontos vencidos",
+          Number(score.totalPoints1 || player1.totalPointsWon || 0),
+          Number(score.totalPoints2 || player2.totalPointsWon || 0)
+        ],
+        ["Sets", score.sets1, score.sets2],
+        ["Games", score.games1, score.games2]
+      ]
+    }
+  ];
+
+  const sectionsHtml = sections.map((section) => {
+    const rowsHtml = section.rows.map((row) => {
+      return adminRenderStatRow(
+        row[0],
+        row[1],
+        row[2],
+        row[3] ?? row[1],
+        row[4] ?? row[2]
+      );
+    }).join("");
+
+    return ` <section class="admin-stats-detail-section"> <h3>${U.escapeHtml(section.title)}</h3> ${rowsHtml} </section> `;
+  }).join("");
+
+  return ` <div class="admin-stats-player-header"> <div class="admin-stats-player-card player1"> ${team1Html} </div> <div class="admin-stats-player-card player2"> ${team2Html} </div> </div> ${adminRenderMeta(match)} ${sectionsHtml} `;
+}
+    
+    async function showAdminStatsModal(match) {
+      ensureAdminStatsModal();
+    
+      if (!el.adminStatsModalBody) return;
+    
+      if (!match) {
+        el.adminStatsModalBody.innerHTML = ` <div class="admin-stats-empty"> Nenhuma partida disponível para exibir estatísticas. </div> `;
+    
+        if (el.adminStatsModalSubtitle) {
+          el.adminStatsModalSubtitle.textContent = "";
+        }
+    
+        return;
+      }
+    
+      if (el.adminStatsModalSubtitle) {
+        el.adminStatsModalSubtitle.textContent =
+          getAdminStatsSubtitle(match);
+      }
+    
+      el.adminStatsModalBody.innerHTML = ` <div class="admin-stats-loading"> Carregando análise da partida... </div> `;
+    
+      el.adminStatsModal.classList.add("show");
+      el.adminStatsModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("admin-stats-modal-open");
+    
+      try {
+        el.adminStatsModalBody.innerHTML =
+          await renderAdminDetailedStats(match);
+      } catch (err) {
+        console.error("Erro ao montar análise completa:", err);
+    
+        el.adminStatsModalBody.innerHTML = ` <div class="admin-stats-empty"> Não foi possível carregar a análise da partida. </div> `;
+      }
+    }
+
     function goLogin() { window.location.replace("login.html"); }
     function hasAdminSession() { return localStorage.getItem(ADMIN_KEY) === "1"; }
     function hasBiometricSession() { return localStorage.getItem(BIOMETRIC_SESSION_KEY) === "1"; }
@@ -2239,19 +2929,17 @@ if (statusText === "wo") {
           }
 
           if (action === "detail") {
-            const snap = await ref.get();
-            if (snap.exists) {
-              try {
-                el.detailsContent.innerHTML = detailsHTML(snap.data());
-                if (el.dialog && typeof el.dialog.showModal === "function") el.dialog.showModal();
-                else alert("Não foi possível abrir a tela de detalhes.");
-              } catch (err) {
-                console.error("Erro ao abrir detalhes:", err);
-                setMsg("Erro ao abrir os detalhes da partida.");
-              }
-            }
-            return;
-          }
+  const snap = await ref.get();
+
+  if (snap.exists) {
+    showAdminStatsModal({
+      id: snap.id,
+      ...snap.data()
+    });
+  }
+
+  return;
+}
 
           if (action === "open") {
             window.location.href = buildPublicLink(id);
@@ -2275,6 +2963,8 @@ if (statusText === "wo") {
         }
       });
     }
+
+    
 
     function attachResponsiveListeners() {
       if (state.mobileMql.addEventListener) state.mobileMql.addEventListener("change", onResize);
