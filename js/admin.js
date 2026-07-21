@@ -55,6 +55,12 @@
       adminStatsModalSubtitle: null,
       adminStatsModalClose: null,
       adminStatsModalCloseFooter: null,
+
+      adminConfrontoModal: null,
+      adminConfrontoFrame: null,
+      adminConfrontoClose: null,
+
+      docId: document.getElementById("docId"),
       docId: document.getElementById("docId"),
       modality: document.getElementById("modality"),
       categoryName: document.getElementById("categoryName"),
@@ -1004,6 +1010,155 @@ async function renderAdminDetailedStats(match) {
     
         el.adminStatsModalBody.innerHTML = ` <div class="admin-stats-empty"> Não foi possível carregar a análise da partida. </div> `;
       }
+    }
+
+    function ensureAdminConfrontoModal() {
+      let modal = document.getElementById("adminConfrontoModal");
+    
+      if (modal) {
+        el.adminConfrontoModal = modal;
+        el.adminConfrontoFrame = modal.querySelector("#adminConfrontoFrame");
+        el.adminConfrontoClose = modal.querySelector("#closeAdminConfrontoModal");
+        return modal;
+      }
+    
+      modal = document.createElement("div");
+    
+      modal.id = "adminConfrontoModal";
+      modal.className = "admin-confronto-modal-overlay";
+      modal.setAttribute("aria-hidden", "true");
+    
+      modal.innerHTML = ` <div class="admin-confronto-modal" role="dialog" aria-modal="true" aria-labelledby="adminConfrontoModalTitle" > <div class="admin-confronto-modal-header"> <div> <div class="admin-confronto-modal-kicker"> Análise da partida </div> <h2 id="adminConfrontoModalTitle"> Confronto direto </h2> </div> <button type="button" id="closeAdminConfrontoModal" class="admin-confronto-close" aria-label="Fechar confronto" > ✕ </button> </div> <div class="admin-confronto-modal-body"> <iframe id="adminConfrontoFrame" title="Confronto direto entre jogadores" ></iframe> </div> </div> `;
+    
+      document.body.appendChild(modal);
+    
+      el.adminConfrontoModal = modal;
+      el.adminConfrontoFrame = modal.querySelector("#adminConfrontoFrame");
+      el.adminConfrontoClose = modal.querySelector("#closeAdminConfrontoModal");
+    
+      el.adminConfrontoClose?.addEventListener(
+        "click",
+        closeAdminConfrontoModal
+      );
+    
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeAdminConfrontoModal();
+        }
+      });
+    
+      return modal;
+    }
+    
+    function closeAdminConfrontoModal() {
+      const modal =
+        el.adminConfrontoModal ||
+        document.getElementById("adminConfrontoModal");
+    
+      const frame =
+        el.adminConfrontoFrame ||
+        document.getElementById("adminConfrontoFrame");
+    
+      if (!modal) return;
+    
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    
+      document.body.classList.remove(
+        "admin-confronto-modal-open"
+      );
+    
+      if (frame) {
+        frame.src = "about:blank";
+      }
+    }
+    
+    function buildAdminConfrontoUrl(matchId, data = {}) {
+      const url = new URL(
+        "confronto.html",
+        window.location.href
+      );
+    
+      url.searchParams.set("embedded", "1");
+    
+      if (matchId) {
+        url.searchParams.set("id", matchId);
+        url.searchParams.set("matchId", matchId);
+      }
+    
+      if (data.ownerId) {
+        url.searchParams.set(
+          "ownerId",
+          data.ownerId
+        );
+      }
+    
+      if (data.player1) {
+        url.searchParams.set(
+          "player1",
+          data.player1
+        );
+      }
+    
+      if (data.player2) {
+        url.searchParams.set(
+          "player2",
+          data.player2
+        );
+      }
+    
+      if (data.player3) {
+        url.searchParams.set(
+          "player3",
+          data.player3
+        );
+      }
+    
+      if (data.player4) {
+        url.searchParams.set(
+          "player4",
+          data.player4
+        );
+      }
+    
+      if (data.opponentId) {
+        url.searchParams.set(
+          "opponentId",
+          data.opponentId
+        );
+      }
+    
+      if (data.shareToken) {
+        url.searchParams.set(
+          "shareToken",
+          data.shareToken
+        );
+      }
+    
+      return url.toString();
+    }
+    
+    function showAdminConfrontoModal(matchId, data = {}) {
+      ensureAdminConfrontoModal();
+    
+      if (!el.adminConfrontoFrame) return;
+    
+      const url = buildAdminConfrontoUrl(
+        matchId,
+        data
+      );
+    
+      el.adminConfrontoFrame.src = url;
+    
+      el.adminConfrontoModal.classList.add("show");
+      el.adminConfrontoModal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+    
+      document.body.classList.add(
+        "admin-confronto-modal-open"
+      );
     }
 
     function goLogin() { window.location.replace("login.html"); }
@@ -2617,6 +2772,12 @@ if (statusText === "wo") {
       el.tbSuperPlayer1?.addEventListener("input", updateScoreFieldsVisibility);
       el.tbSuperPlayer2?.addEventListener("input", updateScoreFieldsVisibility);
 
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeAdminConfrontoModal();
+        }
+      });
+
       function onlyDigitsInput(e) {
         e.target.value = String(e.target.value || "").replace(/\D/g, "");
       }
@@ -2948,13 +3109,14 @@ if (statusText === "wo") {
 
           if (action === "confronto") {
             const snap = await ref.get();
+          
             if (snap.exists) {
-              const d = snap.data();
-              const player1 = encodeURIComponent(d.player1 || "");
-              const player2 = encodeURIComponent(d.player2 || "");
-              const ownerId = encodeURIComponent(d.ownerId || "");
-              window.location.href = `confronto.html?ownerId=${ownerId}&player1=${player1}&player2=${player2}`;
+              showAdminConfrontoModal(
+                snap.id,
+                snap.data()
+              );
             }
+          
             return;
           }
         } catch (err) {
