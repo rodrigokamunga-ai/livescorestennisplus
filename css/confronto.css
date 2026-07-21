@@ -1499,3 +1499,36 @@ body.confronto-page .confronto-summary-line {
   gap: 6px;
   flex-wrap: wrap;
 }
+
+/* ========================================================= CONFRONTO DENTRO DO POPUP ========================================================= */
+
+body.confronto-page.confronto-embedded {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 100%;
+}
+
+body.confronto-page.confronto-embedded .menu-fixed-top,
+body.confronto-page.confronto-embedded .menu-bottom-nav {
+  display: none !important;
+}
+
+body.confronto-page.confronto-embedded .confronto-container {
+  max-width: 1180px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+body.confronto-page.confronto-embedded .confronto-container > section {
+  margin-bottom: 14px;
+}
+
+body.confronto-page.confronto-embedded .confronto-search-modal {
+  z-index: 3000;
+}
+
+/* Oculta a busca quando o confronto é aberto pela public.html */
+body.confronto-page.confronto-embedded
+.confronto-search-wrap {
+  display: none !important;
+}
