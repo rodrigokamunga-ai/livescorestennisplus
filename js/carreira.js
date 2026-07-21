@@ -668,87 +668,323 @@
 
     function renderPagedHistory(matches) {
       if (!el.historyList) return;
-
-      const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
-      if (state.currentPage > totalPages) state.currentPage = totalPages;
-      if (state.currentPage < 1) state.currentPage = 1;
-
-      const start = (state.currentPage - 1) * PAGE_SIZE;
-      const pageItems = matches.slice(start, start + PAGE_SIZE);
-
-      const getFormatIconSvg = (gameFormatRaw = "") => {
-        const format = U.normalizeText(gameFormatRaw);
-
-        if (format === "simples") {
-          return ` <svg class="career-match-icon format" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/> <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
-        }
-
-        if (format === "duplas" || format === "duplas mistas") {
-          return ` <svg class="career-match-icon format" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/> <circle cx="16" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/> <path d="M3.8 20c0-2.5 2.1-4.5 4.7-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> <path d="M20.2 20c0-2.5-2.1-4.5-4.7-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/> </svg> `;
-        }
-
-        return "";
-      };
-
+    
+      const totalPages = Math.max(
+        1,
+        Math.ceil(matches.length / PAGE_SIZE)
+      );
+    
+      if (state.currentPage > totalPages) {
+        state.currentPage = totalPages;
+      }
+    
+      if (state.currentPage < 1) {
+        state.currentPage = 1;
+      }
+    
+      const start =
+        (state.currentPage - 1) * PAGE_SIZE;
+    
+      const pageItems = matches.slice(
+        start,
+        start + PAGE_SIZE
+      );
+    
       if (!pageItems.length) {
-        el.historyList.innerHTML = `<div class="empty-card">Nenhuma partida encontrada para os filtros selecionados.</div>`;
+        el.historyList.innerHTML = ` <div class="career-empty"> Nenhuma partida encontrada para os filtros selecionados. </div> `;
       } else {
         el.historyList.innerHTML = pageItems
-          .map((m) => {
-            const date = U.formatDate(m.matchDateTime);
-            const modality = U.escapeHtml(U.getModalidade(m));
-            const gameFormat = U.escapeHtml(U.getGameFormat(m));
-            const category = U.escapeHtml(m.categoryName || "-");
-            const tournament = U.escapeHtml(U.getTournamentName(m));
-            const surfaceTypeRaw =
-              U.getModalidade(m) === "Beach Tênis" ? "Areia" : U.getSurfaceType(m);
-            const surfaceType = U.escapeHtml(surfaceTypeRaw);
-            const court = U.escapeHtml(U.getCourt(m));
-            const stage = U.escapeHtml(m.tournamentStage || "-");
-            const score = U.escapeHtml(U.getScoreLabel(m));
-            const duration = U.escapeHtml(U.getMatchDuration(m));
-            const situation = U.getTournamentSituation(m);
-            const outcome = U.getLoggedUserOutcome(m);
+          .map((match) => {
+            const outcome =
+              U.getLoggedUserOutcome(match);
+    
             const isWinner = outcome === "win";
-            const isTreino = U.normalizeText(m.tournamentStage || "") === "treino";
-            const resultType = U.getResultType(m);
+    
+            const status =
+              U.normalizeText(match.status);
+    
+            const resultType =
+              U.getResultType(match);
+    
+            const stage =
+              String(match.tournamentStage || "").trim();
+    
+            const stageNormalized =
+              U.normalizeText(stage);
+    
+            const isTournament =
+              U.isTournamentMatch(match);
+    
+            const tournamentName =
+              U.getTournamentName(match);
 
+            const situation =
+              U.getTournamentSituation(match);
+
+            const outcomeIcon =
+              getOutcomeIconSvg(outcome, situation);
+    
+            const team1 =
+              U.getTeam1Line(match);
+    
+            const team2 =
+              U.getTeam2Line(match);
+    
+            const playersText =
+              `${team1} X ${team2}`;
+    
+            const modality =
+              U.getModalidade(match);
+    
+            const gameFormat =
+              U.getGameFormat(match);
+    
+            const date =
+              U.formatDate(match.matchDateTime);
+    
+            const court =
+              U.getCourt(match);
+    
+            const duration =
+              U.getMatchDuration(match);
+    
+            const score =
+              U.getScoreLabel(match);
+    
+            let resultLabel =
+              isWinner ? "VITÓRIA" : "DERROTA";
+    
+            if (resultType === "WO") {
+              resultLabel = isWinner
+                ? "VITÓRIA POR WO"
+                : "DERROTA POR WO";
+            }
+    
+            if (resultType === "RET") {
+              resultLabel = isWinner
+                ? "VITÓRIA POR ABANDONO"
+                : "DERROTA POR ABANDONO";
+            }
+    
+            if (status === "scheduled") {
+              resultLabel = "AGENDADA";
+            }
+    
             const cardClass = isWinner
               ? "career-card career-card-win"
               : "career-card career-card-loss";
-
-              const stageNorm = U.normalizeText(m.tournamentStage || "");
-              const isTournament = TOURNAMENT_STAGES.has(stageNorm);
-              
-              const situationLabel =
-                isTournament && stageNorm === "final"
-                  ? situation === "champion"
-                    ? "🏆 Campeão"
-                    : situation === "runnerup"
-                    ? "🥈 Vice-Campeão"
-                    : ""
-                  : "";
-              
-              const outcomeLabel =
-                resultType === "WO"
-                  ? (isWinner ? "VITÓRIA POR WO" : "DERROTA POR WO")
-                  : resultType === "RET"
-                  ? (isWinner ? "VITÓRIA POR ABANDONO" : "DERROTA POR ABANDONO")
-                  : (situationLabel || (isWinner ? "VITÓRIA" : "DERROTA"));
-
-            const teamDisplay = formatTeamName(m);
-            const stageIcon = getStageIconSvg(m.tournamentStage || "");
-            const outcomeIcon = getOutcomeIconSvg(outcome, situation);
-            const formatIcon = getFormatIconSvg(m.gameFormat || "");
-
-            return ` <article class="${cardClass}"> <div class="career-card-top-icons"> <span class="career-card-icon-slot outcome-slot">${outcomeIcon}</span> <span class="career-card-icon-slot stage-slot">${stageIcon}</span> ${formatIcon ? `<span class="career-card-icon-slot format-slot">${formatIcon}</span>` : ""} </div> <div class="career-card-top-status"> <div class="career-card-result">${outcomeLabel}</div> </div> <div class="career-card-head"> <div class="career-card-title">${teamDisplay}</div> </div> <div class="career-grid"> <div class="career-item"><span>Data</span><strong>${U.escapeHtml(date)}</strong></div> <div class="career-item"><span>Modalidade</span><strong>${modality}</strong></div> <div class="career-item"><span>Formato do jogo</span><strong>${gameFormat}</strong></div> ${!isTreino ? `<div class="career-item"><span>Categoria</span><strong>${category}</strong></div>` : ""} ${!isTreino ? `<div class="career-item"><span>Torneio</span><strong>${tournament}</strong></div>` : ""} <div class="career-item"><span>Fase</span><strong>${stage}</strong></div> <div class="career-item"><span>Tipo de piso</span><strong>${surfaceType}</strong></div> <div class="career-item"><span>Quadra</span><strong>${court}</strong></div> <div class="career-item"><span>Placar</span><strong>${score}</strong></div> <div class="career-item"><span>Duração</span><strong>${duration}</strong></div> </div> </article> `;
+    
+            const tournamentButton = isTournament
+              ? ` <button type="button" class="career-tournament-history-btn" data-tournament="${U.escapeHtml(tournamentName)}" data-tournament-year="${U.escapeHtml( U.toDate(match.matchDateTime)?.getFullYear() || "" )}" > <ion-icon name="trophy-outline"></ion-icon> <span>Histórico do torneio</span> </button> `
+              : "";
+    
+              return ` <article class="${cardClass}"> <div class="career-card-result-line"> <span class="career-card-result-icon"> ${outcomeIcon} </span> <span class="career-card-result"> ${U.escapeHtml(resultLabel)} </span> </div> <div class="career-card-match-title"> <ion-icon name="people-outline"></ion-icon> <span> ${U.escapeHtml(playersText)} </span> </div> <div class="career-card-meta-line"> <span> <ion-icon name="calendar-outline"></ion-icon> ${U.escapeHtml(date)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="tennisball-outline"></ion-icon> ${U.escapeHtml(modality)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="people-outline"></ion-icon> ${U.escapeHtml(gameFormat)} </span> </div> <div class="career-card-meta-line"> <span> <ion-icon name="flag-outline"></ion-icon> ${U.escapeHtml(stage || "-")} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="location-outline"></ion-icon> ${U.escapeHtml(court)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="time-outline"></ion-icon> ${U.escapeHtml(duration)} </span> </div> ${ isTournament ? ` <div class="career-card-tournament-line"> <ion-icon name="medal-outline"></ion-icon> <span> ${U.escapeHtml(tournamentName)} </span> </div> ` : "" } <div class="career-card-meta-line career-card-score-line">
+              <span> <ion-icon name="stats-chart-outline"></ion-icon> ${U.escapeHtml(score)} </span>
+            </div> ${tournamentButton} </article> `;
           })
           .join("");
       }
+    
+      if (el.pageInfo) {
+        el.pageInfo.textContent =
+          `Página ${state.currentPage} de ${totalPages}`;
+      }
+    
+      if (el.prevPageBtn) {
+        el.prevPageBtn.disabled =
+          state.currentPage <= 1;
+      }
+    
+      if (el.nextPageBtn) {
+        el.nextPageBtn.disabled =
+          state.currentPage >= totalPages;
+      }
+    }
 
-      if (el.pageInfo) el.pageInfo.textContent = `Página ${state.currentPage} de ${totalPages}`;
-      if (el.prevPageBtn) el.prevPageBtn.disabled = state.currentPage <= 1;
-      if (el.nextPageBtn) el.nextPageBtn.disabled = state.currentPage >= totalPages;
+    function ensureTournamentHistoryModal() {
+      let modal =
+        document.getElementById(
+          "careerTournamentHistoryModal"
+        );
+    
+      if (modal) return modal;
+    
+      modal = document.createElement("div");
+    
+      modal.id =
+        "careerTournamentHistoryModal";
+    
+      modal.className =
+        "career-tournament-modal-overlay";
+    
+      modal.setAttribute("aria-hidden", "true");
+    
+      modal.innerHTML = ` <div class="career-tournament-modal" role="dialog" aria-modal="true" aria-labelledby="careerTournamentModalTitle" > <div class="career-tournament-modal-header"> <div> <span class="career-tournament-modal-kicker"> Histórico do torneio </span> <h2 id="careerTournamentModalTitle"> Torneio </h2> </div> <button type="button" id="closeCareerTournamentModal" class="career-tournament-modal-close" aria-label="Fechar histórico" > ✕ </button> </div> <div id="careerTournamentModalBody" class="career-tournament-modal-body" ></div> <div class="career-tournament-modal-footer"> <button type="button" id="closeCareerTournamentModalFooter" class="career-tournament-modal-footer-btn" > Fechar </button> </div> </div> `;
+    
+      document.body.appendChild(modal);
+    
+      modal
+        .querySelector("#closeCareerTournamentModal")
+        ?.addEventListener(
+          "click",
+          closeTournamentHistoryModal
+        );
+    
+      modal
+        .querySelector("#closeCareerTournamentModalFooter")
+        ?.addEventListener(
+          "click",
+          closeTournamentHistoryModal
+        );
+    
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeTournamentHistoryModal();
+        }
+      });
+    
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeTournamentHistoryModal();
+        }
+      });
+    
+      return modal;
+    }
+    
+    function closeTournamentHistoryModal() {
+      const modal =
+        document.getElementById(
+          "careerTournamentHistoryModal"
+        );
+    
+      if (!modal) return;
+    
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    
+      document.body.classList.remove(
+        "career-tournament-modal-open"
+      );
+    }
+    
+    function renderTournamentHistoryItem(match) {
+      const team1 =
+        U.getTeam1Line(match);
+    
+      const team2 =
+        U.getTeam2Line(match);
+    
+      const players =
+        `${team1} X ${team2}`;
+    
+      const score =
+        U.getScoreLabel(match);
+    
+      const stage =
+        String(match.tournamentStage || "-").trim();
+    
+      const duration =
+        U.getMatchDuration(match);
+    
+      const date =
+        U.formatDate(match.matchDateTime);
+    
+      return ` <article class="career-tournament-match-item"> <div class="career-tournament-match-players"> <ion-icon name="people-outline"></ion-icon> <strong> ${U.escapeHtml(players)} </strong> </div> <div class="career-tournament-match-info"> <span> <ion-icon name="flag-outline"></ion-icon> <strong>Partida:</strong> ${U.escapeHtml(stage)} </span> <span> <ion-icon name="calendar-outline"></ion-icon> ${U.escapeHtml(date)} </span> <span> <ion-icon name="time-outline"></ion-icon> <strong>Duração:</strong> ${U.escapeHtml(duration)} </span> </div> <div class="career-tournament-match-score"> <ion-icon name="stats-chart-outline"></ion-icon> <span>Placar:</span> <strong>${U.escapeHtml(score)}</strong> </div> </article> `;
+    }
+    
+    function openTournamentHistory(tournamentName, year = "") {
+      const modal =
+        ensureTournamentHistoryModal();
+    
+      const title =
+        modal.querySelector(
+          "#careerTournamentModalTitle"
+        );
+    
+      const body =
+        modal.querySelector(
+          "#careerTournamentModalBody"
+        );
+    
+      const normalizedTournament =
+        U.normalizeText(tournamentName);
+    
+      const matches =
+        state.allMatches
+          .filter((match) => {
+            const currentTournament =
+              U.normalizeText(
+                String(match.tournamentName || "").trim()
+              );
+    
+            if (
+              !normalizedTournament ||
+              currentTournament !== normalizedTournament
+            ) {
+              return false;
+            }
+    
+            if (year) {
+              const currentYear =
+                String(
+                  U.toDate(match.matchDateTime)
+                    ?.getFullYear() || ""
+                );
+    
+              if (currentYear !== String(year)) {
+                return false;
+              }
+            }
+    
+            return U.isTournamentMatch(match);
+          })
+          .sort((a, b) => {
+            const dateA =
+              U.toDate(a.matchDateTime)?.getTime() || 0;
+    
+            const dateB =
+              U.toDate(b.matchDateTime)?.getTime() || 0;
+    
+            return dateA - dateB;
+          });
+    
+      if (title) {
+        title.textContent =
+          tournamentName || "Histórico do torneio";
+      }
+    
+      if (!matches.length) {
+        body.innerHTML = ` <div class="career-tournament-empty"> Nenhuma partida encontrada neste torneio. </div> `;
+      } else {
+        body.innerHTML = ` <div class="career-tournament-history-list"> ${matches .map(renderTournamentHistoryItem) .join("")} </div> `;
+      }
+    
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    
+      document.body.classList.add(
+        "career-tournament-modal-open"
+      );
+    }
+    
+    function bindTournamentHistoryButtons() {
+      el.historyList?.addEventListener("click", (event) => {
+        const button =
+          event.target.closest(
+            ".career-tournament-history-btn"
+          );
+    
+        if (!button) return;
+    
+        event.preventDefault();
+        event.stopPropagation();
+    
+        openTournamentHistory(
+          button.dataset.tournament || "",
+          button.dataset.tournamentYear || ""
+        );
+      });
     }
 
     function updateCardFilterUI() {
@@ -930,6 +1166,8 @@
         state.currentPage = 1;
         applyFiltersAndRender();
 
+       
+
         setTimeout(() => {
           const summary = document.querySelector(".career-summary");
           if (summary) {
@@ -972,6 +1210,7 @@
 
       bindToggleFilters();
       bindCardFilters();
+      bindTournamentHistoryButtons();
     }
 
     const logoutBtnBottom = document.getElementById("logoutBtnBottom");
