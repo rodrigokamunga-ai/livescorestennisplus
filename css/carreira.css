@@ -1080,3 +1080,1020 @@ body.career-page .menu-back-btn ion-icon {
   color: #14b8a6;
   opacity: 0.35;
 }
+
+/* ========================================================= NOVO LAYOUT DOS CARDS DA CARREIRA ========================================================= */
+
+body.career-page .career-card-match-title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+  word-break: break-word;
+  padding-right: 4px;
+}
+
+body.career-page .career-card-info-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 9px 10px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(232, 238, 252, 0.82);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+body.career-page .career-card-info-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+body.career-page .career-card-info-line span:not(:last-child)::after {
+  content: "|";
+  margin-left: 4px;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+body.career-page .career-card-info-line ion-icon {
+  color: #86a8ff;
+  font-size: 15px;
+  flex: 0 0 auto;
+}
+
+body.career-page .career-card-info-line strong {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+body.career-page .career-card-score-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 11px;
+  border-radius: 13px;
+  background: rgba(216, 255, 99, 0.08);
+  border: 1px solid rgba(216, 255, 99, 0.16);
+  color: rgba(232, 238, 252, 0.82);
+  font-size: 0.82rem;
+}
+
+body.career-page .career-card-score-line ion-icon {
+  color: #d8ff63;
+  font-size: 16px;
+}
+
+body.career-page .career-card-score-line strong {
+  color: #d8ff63;
+  font-size: 0.96rem;
+  font-weight: 900;
+}
+
+body.career-page .career-card-tournament-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(232, 238, 252, 0.76);
+  font-size: 0.80rem;
+  font-weight: 800;
+}
+
+body.career-page .career-card-tournament-line ion-icon {
+  color: #d8ff63;
+  font-size: 16px;
+}
+
+body.career-page .career-tournament-history-btn {
+  width: 100%;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 2px;
+  padding: 9px 12px;
+  border: 1px solid rgba(216, 255, 99, 0.24);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(216, 255, 99, 0.16),
+    rgba(216, 255, 99, 0.06)
+  );
+  color: #d8ff63;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+body.career-page .career-tournament-history-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(216, 255, 99, 0.22);
+  border-color: rgba(216, 255, 99, 0.42);
+}
+
+body.career-page .career-tournament-history-btn ion-icon {
+  font-size: 17px;
+}
+
+/* ========================================================= MODAL HISTÓRICO DE TORNEIOS ========================================================= */
+
+body.career-page.career-tournament-modal-open {
+  overflow: hidden;
+}
+
+body.career-page .career-tournament-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(3, 8, 18, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+body.career-page .career-tournament-modal-overlay.show {
+  display: flex;
+}
+
+body.career-page .career-tournament-modal {
+  width: min(720px, 100%);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(28, 39, 62, 0.99),
+      rgba(12, 19, 33, 0.99)
+    );
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+body.career-page .career-tournament-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+body.career-page .career-tournament-modal-kicker {
+  margin-bottom: 5px;
+  color: #9bc0ff;
+  font-size: 0.70rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.career-page .career-tournament-modal-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.16rem;
+  font-weight: 950;
+}
+
+body.career-page .career-tournament-modal-close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+body.career-page .career-tournament-modal-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+body.career-page .career-tournament-modal-body {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.career-page .career-tournament-history-list {
+  display: grid;
+  gap: 10px;
+}
+
+body.career-page .career-tournament-match-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+body.career-page .career-tournament-match-players {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 0.88rem;
+  line-height: 1.28;
+}
+
+body.career-page .career-tournament-match-players ion-icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #86a8ff;
+  font-size: 16px;
+}
+
+body.career-page .career-tournament-match-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: rgba(232, 238, 252, 0.76);
+  font-size: 0.76rem;
+}
+
+body.career-page .career-tournament-match-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body.career-page .career-tournament-match-info span:not(:last-child)::after {
+  content: "|";
+  margin-left: 4px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+body.career-page .career-tournament-match-info ion-icon {
+  color: #d8ff63;
+  font-size: 14px;
+}
+
+body.career-page .career-tournament-match-score {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(232, 238, 252, 0.78);
+  font-size: 0.80rem;
+}
+
+body.career-page .career-tournament-match-score ion-icon {
+  color: #d8ff63;
+  font-size: 16px;
+}
+
+body.career-page .career-tournament-match-score strong {
+  color: #d8ff63;
+  font-weight: 900;
+}
+
+body.career-page .career-tournament-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.career-page .career-tournament-modal-footer-btn {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+body.career-page .career-tournament-modal-footer-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+body.career-page .career-tournament-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: rgba(232, 238, 252, 0.72);
+  text-align: center;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  body.career-page .career-card-info-line {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  body.career-page .career-card-info-line span:not(:last-child)::after {
+    display: none;
+  }
+
+  body.career-page .career-tournament-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  body.career-page .career-tournament-modal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 24px 24px 0 0;
+  }
+
+  body.career-page .career-tournament-modal-header {
+    padding: 16px;
+  }
+
+  body.career-page .career-tournament-modal-body {
+    padding: 12px 14px 16px;
+  }
+
+  body.career-page .career-tournament-modal-footer {
+    padding: 12px 14px 16px;
+  }
+
+  body.career-page .career-tournament-modal-footer-btn {
+    width: 100%;
+  }
+}
+
+/* ========================================================= CARREIRA — CARD COMPACTO EM BLOCO ÚNICO ========================================================= */
+
+body.career-page .career-card {
+  gap: 8px;
+  padding: 13px 14px;
+}
+
+body.career-page .career-card-top-status {
+  padding-right: 0;
+}
+
+body.career-page .career-card-match-title {
+  padding-right: 0;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1.22;
+  word-break: break-word;
+}
+
+body.career-page .career-card-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: 100%;
+  color: rgba(232, 238, 252, 0.82);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+body.career-page .career-card-meta-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+body.career-page .career-card-meta-line ion-icon {
+  flex: 0 0 auto;
+  color: #86a8ff;
+  font-size: 14px;
+}
+
+body.career-page .career-meta-separator {
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 900;
+}
+
+body.career-page .career-card-score-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 0.76rem;
+}
+
+body.career-page .career-card-score-line ion-icon {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+body.career-page .career-card-score-line strong {
+  color: #ffffff !important;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+body.career-page .career-card-tournament-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(232, 238, 252, 0.74);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+body.career-page .career-card-tournament-line ion-icon {
+  color: #d8ff63;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  body.career-page .career-card {
+    padding: 12px;
+    gap: 7px;
+  }
+
+  body.career-page .career-card-match-title {
+    font-size: 0.86rem;
+  }
+
+  body.career-page .career-card-meta-line {
+    gap: 4px;
+    font-size: 0.68rem;
+  }
+
+  body.career-page .career-card-meta-line ion-icon {
+    font-size: 13px;
+  }
+
+  body.career-page .career-card-score-line {
+    font-size: 0.70rem;
+  }
+
+  body.career-page .career-card-score-line strong {
+    font-size: 0.76rem;
+  }
+
+  body.career-page .career-meta-separator {
+    font-size: 0.68rem;
+  }
+}
+
+/* ========================================================= CARREIRA — AJUSTE FINAL DOS CARDS ========================================================= */
+
+body.career-page .career-card {
+  gap: 9px;
+  padding: 14px 15px;
+}
+
+/* Resultado com ícone de vitória/derrota */
+body.career-page .career-card-result-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 26px;
+}
+
+body.career-page .career-card-result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+
+body.career-page .career-card-result-icon .career-match-icon {
+  width: 22px;
+  height: 22px;
+}
+
+body.career-page .career-card-win .career-card-result-icon {
+  color: #60a5fa;
+}
+
+body.career-page .career-card-loss .career-card-result-icon {
+  color: #f87171;
+}
+
+body.career-page .career-card-result {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+/* Linha dos jogadores com ícone */
+body.career-page .career-card-match-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+body.career-page .career-card-match-title ion-icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #86a8ff;
+  font-size: 20px;
+}
+
+/* Informações sem caixas individuais */
+body.career-page .career-card-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  width: 100%;
+  padding: 3px 0;
+  color: rgba(232, 238, 252, 0.90);
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+
+body.career-page .career-card-meta-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+body.career-page .career-card-meta-line ion-icon {
+  flex: 0 0 auto;
+  color: #86a8ff;
+  font-size: 17px;
+}
+
+body.career-page .career-meta-separator {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 900;
+}
+
+/* Nome do torneio */
+body.career-page .career-card-tournament-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-top: 3px;
+  color: #d8ff63;
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+body.career-page .career-card-tournament-line ion-icon {
+  color: #d8ff63;
+  font-size: 18px;
+}
+
+/* Placar abaixo dos campos, sem círculo */
+body.career-page .career-card-score-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 3px;
+  padding: 8px 0 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 0.84rem;
+}
+
+body.career-page .career-card-score-line ion-icon {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+body.career-page .career-card-score-line strong {
+  color: #ffffff !important;
+  font-size: 0.90rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* Botão do histórico */
+body.career-page .career-tournament-history-btn {
+  margin-top: 3px;
+  min-height: 42px;
+  font-size: 0.80rem;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  body.career-page .career-card {
+    gap: 8px;
+    padding: 13px;
+  }
+
+  body.career-page .career-card-match-title {
+    font-size: 0.96rem;
+  }
+
+  body.career-page .career-card-match-title ion-icon {
+    font-size: 18px;
+  }
+
+  body.career-page .career-card-meta-line {
+    gap: 5px;
+    font-size: 0.78rem;
+  }
+
+  body.career-page .career-card-meta-line ion-icon {
+    font-size: 15px;
+  }
+
+  body.career-page .career-card-score-line {
+    font-size: 0.76rem;
+  }
+
+  body.career-page .career-card-score-line strong {
+    font-size: 0.82rem;
+  }
+
+  body.career-page .career-card-result {
+    font-size: 0.70rem;
+  }
+
+  body.career-page .career-card-result-icon,
+  body.career-page .career-card-result-icon .career-match-icon {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* ========================================================= AJUSTE FINAL DOS CARDS DA CARREIRA ========================================================= */
+
+/* Cards com fundo neutro e somente borda colorida */
+body.career-page .career-card.career-card-win {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 40, 60, 0.96),
+      rgba(20, 28, 44, 0.98)
+    ) !important;
+  border: 1px solid rgba(96, 165, 250, 0.90) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+body.career-page .career-card.career-card-loss {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 40, 60, 0.96),
+      rgba(20, 28, 44, 0.98)
+    ) !important;
+  border: 1px solid rgba(248, 113, 113, 0.90) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Ícone de vitória */
+body.career-page .career-card-win
+.career-card-result-icon {
+  color: #60a5fa !important;
+}
+
+/* Ícone de derrota */
+body.career-page .career-card-loss
+.career-card-result-icon {
+  color: #f87171 !important;
+}
+
+/* Texto de vitória e derrota */
+body.career-page .career-card-win
+.career-card-result {
+  color: #93c5fd;
+}
+
+body.career-page .career-card-loss
+.career-card-result {
+  color: #fca5a5;
+}
+
+/* Nomes dos jogadores menores */
+body.career-page .career-card-match-title {
+  font-size: 0.91rem !important;
+  line-height: 1.18 !important;
+  font-weight: 850 !important;
+  padding: 0 !important;
+}
+
+body.career-page .career-card-match-title ion-icon {
+  font-size: 17px !important;
+  margin-top: 1px;
+}
+
+/* Campos no mesmo bloco, sem caixas individuais */
+body.career-page .career-card-meta-line {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(232, 238, 252, 0.86) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.22 !important;
+}
+
+body.career-page .career-card-meta-line span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  white-space: nowrap !important;
+}
+
+body.career-page .career-card-meta-line ion-icon {
+  color: #86a8ff !important;
+  font-size: 14px !important;
+}
+
+/* Separadores */
+body.career-page .career-meta-separator {
+  color: rgba(255, 255, 255, 0.40) !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+}
+
+/* Torneio com ícone azul */
+body.career-page .career-card-tournament-line {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  color: rgba(232, 238, 252, 0.84) !important;
+  font-size: 0.78rem !important;
+}
+
+body.career-page .career-card-tournament-line ion-icon {
+  color: #86a8ff !important;
+  font-size: 15px !important;
+}
+
+/* Histórico de torneios com azul */
+body.career-page .career-tournament-history-btn {
+  min-height: 38px !important;
+  margin-top: 3px !important;
+  padding: 7px 10px !important;
+  border: 1px solid rgba(134, 168, 255, 0.35) !important;
+  background: rgba(134, 168, 255, 0.08) !important;
+  color: #a9c6ff !important;
+  font-size: 0.74rem !important;
+}
+
+body.career-page .career-tournament-history-btn:hover {
+  background: rgba(134, 168, 255, 0.16) !important;
+  border-color: rgba(134, 168, 255, 0.60) !important;
+}
+
+body.career-page .career-tournament-history-btn ion-icon {
+  color: #86a8ff !important;
+  font-size: 15px !important;
+}
+
+/* Placar integrado ao bloco, sem círculo e sem separação */
+body.career-page .career-card-score-line {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  font-size: 0.76rem !important;
+}
+
+body.career-page .career-card-score-line span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: #ffffff !important;
+}
+
+body.career-page .career-card-score-line ion-icon {
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+
+body.career-page .career-card-score-line strong {
+  color: #ffffff !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+}
+
+/* Resultado sem fundo colorido */
+body.career-page .career-card-result-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  min-height: 22px !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  body.career-page .career-card-match-title {
+    font-size: 0.84rem !important;
+  }
+
+  body.career-page .career-card-match-title ion-icon {
+    font-size: 16px !important;
+  }
+
+  body.career-page .career-card-meta-line {
+    font-size: 0.70rem !important;
+    gap: 4px !important;
+  }
+
+  body.career-page .career-card-meta-line ion-icon {
+    font-size: 13px !important;
+  }
+
+  body.career-page .career-card-score-line,
+  body.career-page .career-card-score-line strong {
+    font-size: 0.70rem !important;
+  }
+
+  body.career-page .career-card-score-line ion-icon {
+    font-size: 13px !important;
+  }
+
+  body.career-page .career-card-tournament-line {
+    font-size: 0.70rem !important;
+  }
+}
+
+/* ========================================================= AJUSTE FINAL — PLACAR E POPUP DE HISTÓRICO ========================================================= */
+
+/* Ícone do placar azul e texto branco */
+body.career-page .career-card-score-line ion-icon {
+  color: #86a8ff !important;
+  font-size: 14px !important;
+}
+
+body.career-page .career-card-score-line,
+body.career-page .career-card-score-line span {
+  color: #ffffff !important;
+}
+
+body.career-page .career-card-score-line strong {
+  color: #ffffff !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+}
+
+/* ========================================================= POPUP DE HISTÓRICO — PADRÃO AZUL ========================================================= */
+
+body.career-page .career-tournament-modal {
+  border-color: rgba(134, 168, 255, 0.32) !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(28, 39, 62, 0.99),
+      rgba(12, 19, 33, 0.99)
+    ) !important;
+}
+
+body.career-page .career-tournament-modal-header {
+  border-bottom-color: rgba(134, 168, 255, 0.24) !important;
+  background: rgba(18, 27, 45, 0.96) !important;
+}
+
+body.career-page .career-tournament-modal-kicker {
+  color: #86a8ff !important;
+}
+
+body.career-page .career-tournament-modal-header h2 {
+  color: #ffffff !important;
+}
+
+body.career-page .career-tournament-modal-close {
+  border-color: rgba(134, 168, 255, 0.34) !important;
+  background: rgba(134, 168, 255, 0.08) !important;
+  color: #a9c6ff !important;
+}
+
+body.career-page .career-tournament-modal-close:hover {
+  background: rgba(134, 168, 255, 0.20) !important;
+  border-color: rgba(134, 168, 255, 0.62) !important;
+}
+
+/* Cards individuais do histórico */
+body.career-page .career-tournament-match-item {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 40, 60, 0.96),
+      rgba(20, 28, 44, 0.98)
+    ) !important;
+  border-color: rgba(134, 168, 255, 0.25) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
+}
+
+body.career-page .career-tournament-match-item:hover {
+  border-color: rgba(134, 168, 255, 0.52) !important;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(38, 50, 76, 0.98),
+      rgba(20, 28, 44, 0.98)
+    ) !important;
+}
+
+/* Ícone e nomes dos jogadores */
+body.career-page .career-tournament-match-players {
+  color: #ffffff !important;
+}
+
+body.career-page .career-tournament-match-players ion-icon {
+  color: #86a8ff !important;
+}
+
+/* Data, fase e duração */
+body.career-page .career-tournament-match-info {
+  color: rgba(232, 238, 252, 0.82) !important;
+}
+
+body.career-page .career-tournament-match-info ion-icon {
+  color: #86a8ff !important;
+}
+
+body.career-page .career-tournament-match-info strong {
+  color: #ffffff !important;
+}
+
+/* Ícone e placar do histórico */
+body.career-page .career-tournament-match-score {
+  color: #ffffff !important;
+}
+
+body.career-page .career-tournament-match-score ion-icon {
+  color: #86a8ff !important;
+}
+
+body.career-page .career-tournament-match-score span {
+  color: rgba(232, 238, 252, 0.82) !important;
+}
+
+body.career-page .career-tournament-match-score strong {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Rodapé do popup */
+body.career-page .career-tournament-modal-footer {
+  border-top-color: rgba(134, 168, 255, 0.24) !important;
+  background: rgba(18, 27, 45, 0.70) !important;
+}
+
+body.career-page .career-tournament-modal-footer-btn {
+  border-color: rgba(134, 168, 255, 0.36) !important;
+  background: rgba(134, 168, 255, 0.10) !important;
+  color: #a9c6ff !important;
+}
+
+body.career-page .career-tournament-modal-footer-btn:hover {
+  background: rgba(134, 168, 255, 0.22) !important;
+  border-color: rgba(134, 168, 255, 0.60) !important;
+}
+
+/* Estado vazio do popup */
+body.career-page .career-tournament-empty {
+  border-color: rgba(134, 168, 255, 0.30) !important;
+  background: rgba(134, 168, 255, 0.06) !important;
+  color: rgba(232, 238, 252, 0.76) !important;
+}
