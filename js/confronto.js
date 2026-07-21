@@ -936,7 +936,12 @@
       rightBackhandRaw;
 
     const leftName = leftProfile.displayName || leftProfile.name || leftProfile.fullName || "Jogador 1";
-    const rightName = rightProfile.displayName || rightProfile.name || rightProfile.fullName || "Jogador 2";
+    const rightName =
+  rightProfile.displayName ||
+  rightProfile.name ||
+  rightProfile.fullName ||
+  state.currentPlayer2 ||
+  "Jogador 2";
 
     const leftStats = getPlayerStatsFromMatches(leftName);
     const rightStats = getPlayerStatsFromMatches(rightName);
@@ -1215,22 +1220,112 @@
     });
   }
 
-  function calculateSimulationScore(stats = {}, h2hWins = 0, h2hTotal = 0) {
-    const titles = Number(stats.titles || 0);
+  function calculateWinRate(stats = {}) {
     const wins = Number(stats.wins || 0);
     const losses = Number(stats.losses || 0);
-    const total = Number(stats.total || 0);
-
-    const h2hFactor = h2hTotal > 0 ? (h2hWins / h2hTotal) : 0;
-
-    const score =
-      (titles * 10) +
-      (h2hFactor * 6) +
-      (wins * 3) +
-      (losses * -2) +
-      (total * 1);
-
-    return Math.max(0, score);
+  
+    const decidedMatches = wins + losses;
+  
+    if (decidedMatches <= 0) {
+      return 0.5;
+    }
+  
+    return wins / decidedMatches;
+  }
+  
+  function calculateSimulationChances( stats1 = {}, stats2 = {}, h2hWins1 = 0, h2hWins2 = 0 ) {
+    const winRate1 =
+      calculateWinRate(stats1);
+  
+    const winRate2 =
+      calculateWinRate(stats2);
+  
+    const h2hTotal =
+      Number(h2hWins1 || 0) +
+      Number(h2hWins2 || 0);
+  
+    /* * Sem histórico direto: * usa somente o aproveitamento geral. */
+    if (h2hTotal <= 0) {
+      const totalGeneral =
+        winRate1 + winRate2;
+  
+      if (totalGeneral <= 0) {
+        return {
+          chance1: 50,
+          chance2: 50
+        };
+      }
+  
+      const chance1 =
+        (winRate1 / totalGeneral) * 100;
+  
+      return {
+        chance1: Number(chance1.toFixed(1)),
+        chance2: Number((100 - chance1).toFixed(1))
+      };
+    }
+  
+    /* * Histórico direto normalizado. */
+    const h2hRate1 =
+      Number(h2hWins1 || 0) / h2hTotal;
+  
+    const h2hRate2 =
+      Number(h2hWins2 || 0) / h2hTotal;
+  
+    /* * 60% desempenho geral * 40% confronto direto */
+    const score1 =
+      (winRate1 * 0.60) +
+      (h2hRate1 * 0.40);
+  
+    const score2 =
+      (winRate2 * 0.60) +
+      (h2hRate2 * 0.40);
+  
+    const totalScore =
+      score1 + score2;
+  
+    if (totalScore <= 0) {
+      return {
+        chance1: 50,
+        chance2: 50
+      };
+    }
+  
+    let chance1 =
+      (score1 / totalScore) * 100;
+  
+    let chance2 =
+      (score2 / totalScore) * 100;
+  
+    /* * Evita resultados extremos quando há * pouca quantidade de partidas. */
+    const totalMatches1 =
+      Number(stats1.total || 0);
+  
+    const totalMatches2 =
+      Number(stats2.total || 0);
+  
+    const totalMatches =
+      totalMatches1 + totalMatches2;
+  
+    if (totalMatches < 4) {
+      chance1 =
+        (chance1 * 0.70) + (50 * 0.30);
+  
+      chance2 =
+        100 - chance1;
+    }
+  
+    chance1 = Math.max(
+      5,
+      Math.min(95, chance1)
+    );
+  
+    chance2 = 100 - chance1;
+  
+    return {
+      chance1: Number(chance1.toFixed(1)),
+      chance2: Number(chance2.toFixed(1))
+    };
   }
 
   function getSimulationVerdict(chance1, chance2, player1Name, player2Name) {
@@ -1278,15 +1373,21 @@
 
     const h2hWins1 = Number(h2h.wins1 || 0);
     const h2hWins2 = Number(h2h.wins2 || 0);
-    const h2hTotal = Math.max(1, h2hWins1 + h2hWins2);
+    
 
-    const score1 = calculateSimulationScore(stats1, h2hWins1, h2hTotal);
-    const score2 = calculateSimulationScore(stats2, h2hWins2, h2hTotal);
+    const chances =
+  calculateSimulationChances(
+    stats1,
+    stats2,
+    h2hWins1,
+    h2hWins2
+  );
 
-    const totalScore = Math.max(1, score1 + score2);
+const chance1 =
+  chances.chance1;
 
-    const chance1 = Number(((score1 / totalScore) * 100).toFixed(1));
-    const chance2 = Number(((score2 / totalScore) * 100).toFixed(1));
+const chance2 =
+  chances.chance2;
 
     const winnerIs1 = chance1 > chance2;
     const diff = Math.abs(chance1 - chance2);
@@ -1377,7 +1478,72 @@
     };
   }
 
+  function isFinishedMatch(match) {
+    const status = String(
+      match?.status || ""
+    ).trim().toLowerCase();
+  
+    return (
+      status === "finished" ||
+      status === "wo" ||
+      status === "ret"
+    );
+  }
+  
+  function sameDoublesTeams( team1A, team1B, team2A, team2B, targetTeam1A, targetTeam1B, targetTeam2A, targetTeam2B ) {
+    const pairMatches = ( a1, a2, b1, b2 ) => {
+      const currentA1 = normalize(a1);
+      const currentA2 = normalize(a2);
+      const targetA1 = normalize(b1);
+      const targetA2 = normalize(b2);
+  
+      return (
+        (
+          currentA1 === targetA1 &&
+          currentA2 === targetA2
+        ) ||
+        (
+          currentA1 === targetA2 &&
+          currentA2 === targetA1
+        )
+      );
+    };
+  
+    const normalOrder =
+      pairMatches(
+        team1A,
+        team1B,
+        targetTeam1A,
+        targetTeam1B
+      ) &&
+      pairMatches(
+        team2A,
+        team2B,
+        targetTeam2A,
+        targetTeam2B
+      );
+  
+    const reversedOrder =
+      pairMatches(
+        team1A,
+        team1B,
+        targetTeam2A,
+        targetTeam2B
+      ) &&
+      pairMatches(
+        team2A,
+        team2B,
+        targetTeam1A,
+        targetTeam1B
+      );
+  
+    return normalOrder || reversedOrder;
+  }
+
   async function init() {
+    if (getParam("embedded") === "1") {
+      document.body.classList.add("confronto-embedded");
+    }
     const player1 = getParam("player1");
     const player2 = getParam("player2");
     const opponentId = getParam("opponentId");
@@ -1474,10 +1640,28 @@
         ...doc.data()
       }));
 
-      let ownerProfile = await getLoggedUserProfile();
-      if (!ownerProfile && player1) {
-        ownerProfile = await findProfileByName(player1);
-      }
+      let ownerProfile =
+  await getLoggedUserProfile();
+
+if (!ownerProfile && player1) {
+  ownerProfile =
+    await findProfileByName(player1);
+}
+
+if (!ownerProfile && state.matchDataFromUrl) {
+  const matchPlayer1 =
+    state.matchDataFromUrl.player1 ||
+    state.matchDataFromUrl.player1Name ||
+    state.matchDataFromUrl.ownerName ||
+    "";
+
+  if (matchPlayer1) {
+    ownerProfile =
+      await findProfileByName(
+        matchPlayer1
+      );
+  }
+}
 
       const resolvedPlayer1Name =
         state.currentPlayer1 ||
@@ -1519,10 +1703,127 @@
       let opponentProfile = null;
       let resolvedPlayer2Name = "Pesquisar adversário";
 
-      if (state.h2hMode && state.matchDataFromUrl) {
-        const names = getNamesFromMatch(state.matchDataFromUrl);
-        resolvedPlayer2Name = names.player2 || "Jogador 2";
-        state.currentPlayer2 = resolvedPlayer2Name;
+      if (
+        state.h2hMode &&
+        state.matchDataFromUrl
+      ) {
+        const matchData =
+          state.matchDataFromUrl;
+      
+        const names =
+          getNamesFromMatch(matchData);
+      
+        resolvedPlayer2Name =
+          names.player2 || "Jogador 2";
+      
+        state.currentPlayer2 =
+          resolvedPlayer2Name;
+      
+        /* * Tenta obter o ID do adversário em todos * os nomes possíveis usados no Firestore. */
+        const opponentIdentifier =
+          opponentId ||
+          matchData.opponentId ||
+          matchData.player2Id ||
+          matchData.playerId2 ||
+          matchData.awayId ||
+          matchData.player3Id ||
+          matchData.player4Id ||
+          "";
+      
+        if (opponentIdentifier) {
+          opponentProfile =
+            await getOpponentProfile(
+              opponentIdentifier
+            );
+        }
+      
+        /* * Para partidas simples, procura o jogador 2 * pelo nome real gravado na partida. */
+        const matchPlayer2Name =
+          matchData.player2 ||
+          matchData.player2Name ||
+          matchData.opponent ||
+          matchData.opponentName ||
+          "";
+      
+        if (
+          !opponentProfile &&
+          matchPlayer2Name
+        ) {
+          opponentProfile =
+            await findProfileByName(
+              matchPlayer2Name
+            );
+        }
+      
+        /* * Também tenta pelo valor recebido na URL. */
+        if (
+          !opponentProfile &&
+          player2 &&
+          normalize(player2) !==
+            normalize(matchPlayer2Name)
+        ) {
+          opponentProfile =
+            await findProfileByName(player2);
+        }
+      
+        /* * Se o perfil não for encontrado, cria um * perfil mínimo usando os dados da partida. * * Isso garante que o nome, estatísticas, * comparação e título do jogador 2 apareçam. */
+        if (!opponentProfile) {
+          opponentProfile = {
+            displayName:
+              matchPlayer2Name ||
+              resolvedPlayer2Name,
+      
+            name:
+              matchPlayer2Name ||
+              resolvedPlayer2Name,
+      
+            fullName:
+              matchPlayer2Name ||
+              resolvedPlayer2Name,
+      
+            country:
+              matchData.player2Country ||
+              matchData.opponentCountry ||
+              matchData.country2 ||
+              "",
+      
+            city:
+              matchData.player2City ||
+              matchData.opponentCity ||
+              matchData.city2 ||
+              "",
+      
+            birthDate:
+              matchData.player2BirthDate ||
+              matchData.opponentBirthDate ||
+              null,
+      
+            height:
+              matchData.player2Height ||
+              matchData.opponentHeight ||
+              "",
+      
+            weight:
+              matchData.player2Weight ||
+              matchData.opponentWeight ||
+              "",
+      
+            forehand:
+              matchData.player2Forehand ||
+              matchData.opponentForehand ||
+              "",
+      
+            backhand:
+              matchData.player2Backhand ||
+              matchData.opponentBackhand ||
+              "",
+      
+            photoBase64:
+              matchData.player2PhotoBase64 ||
+              matchData.opponentPhotoBase64 ||
+              ""
+          };
+        }
       } else if (hasDefinedOpponent) {
         if (opponentId) {
           opponentProfile = await getOpponentProfile(opponentId);
@@ -1546,6 +1847,29 @@
 
       state.ownerProfile = ownerProfile;
       state.opponentProfile = opponentProfile;
+      if (
+        state.opponentProfile &&
+        !state.opponentProfile.displayName
+      ) {
+        state.opponentProfile.displayName =
+          state.currentPlayer2;
+      }
+      
+      if (
+        state.opponentProfile &&
+        !state.opponentProfile.name
+      ) {
+        state.opponentProfile.name =
+          state.currentPlayer2;
+      }
+      
+      if (
+        state.opponentProfile &&
+        !state.opponentProfile.fullName
+      ) {
+        state.opponentProfile.fullName =
+          state.currentPlayer2;
+      }
 
       state.ownerProfilePhoto = getPhotoFromProfile(ownerProfile);
       state.opponentProfilePhoto = getPhotoFromProfile(opponentProfile);
@@ -1561,7 +1885,12 @@
         photoURL: state.ownerProfilePhoto
       });
 
-      if (state.h2hMode && state.matchDataFromUrl) {
+      /* * Define os jogadores do confronto que devem * ser procurados no histórico. */
+
+      if (
+        state.h2hMode &&
+        state.matchDataFromUrl
+      ) {
         bindPlayerVisuals({
           name: resolvedPlayer2Name,
           sideImgEl: imgPlayer2Side,
@@ -1570,7 +1899,7 @@
           centerPlaceholderEl: ph2Center,
           sideNameId: "player2NameSide",
           centerNameId: "player2NameCenter",
-          photoURL: ""
+          photoURL: state.opponentProfilePhoto
         });
       } else if (hasDefinedOpponent) {
         bindPlayerVisuals({
@@ -1595,73 +1924,270 @@
           photoURL: ""
         });
       }
+let targetPlayer1 = resolvedPlayer1Name;
+let targetPlayer2 = resolvedPlayer2Name;
 
-      let items = [];
-      let wins1 = 0;
-      let wins2 = 0;
+let targetDoubles = false;
+let targetTeam1A = "";
+let targetTeam1B = "";
+let targetTeam2A = "";
+let targetTeam2B = "";
 
-      if (state.h2hMode && state.matchDataFromUrl) {
-        const d = state.matchDataFromUrl;
-        const status = String(d.status || "").trim().toLowerCase();
-        if (status === "finished" || status === "wo" || status === "ret") {
-          const winner = getWinner(d);
-          if (winner === 1) wins1++;
-          if (winner === 2) wins2++;
+if (
+  state.h2hMode &&
+  state.matchDataFromUrl
+) {
+  const targetMatch =
+    state.matchDataFromUrl;
 
-          items.push({
-            dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
-            html: buildMatchLine(d),
-            data: d
-          });
-        }
+  const targetFormat =
+    String(
+      targetMatch.gameFormat || ""
+    ).trim().toLowerCase();
+
+  targetDoubles =
+    targetFormat === "duplas" ||
+    targetFormat === "duplas mistas" ||
+    !!(
+      targetMatch.player3 ||
+      targetMatch.player4 ||
+      targetMatch.player3Name ||
+      targetMatch.player4Name
+    );
+
+  if (targetDoubles) {
+    targetTeam1A =
+      targetMatch.player1 ||
+      targetMatch.player1Name ||
+      "";
+
+    targetTeam1B =
+      targetMatch.player2 ||
+      targetMatch.player2Name ||
+      "";
+
+    targetTeam2A =
+      targetMatch.player3 ||
+      targetMatch.player3Name ||
+      "";
+
+    targetTeam2B =
+      targetMatch.player4 ||
+      targetMatch.player4Name ||
+      "";
+  } else {
+    targetPlayer1 =
+      targetMatch.player1 ||
+      targetMatch.player1Name ||
+      targetMatch.ownerName ||
+      resolvedPlayer1Name;
+
+    targetPlayer2 =
+      targetMatch.player2 ||
+      targetMatch.player2Name ||
+      targetMatch.opponentName ||
+      resolvedPlayer2Name;
+  }
+}
+
+let items = [];
+let wins1 = 0;
+let wins2 = 0;
+
+state.allOwnerMatches.forEach((match) => {
+  const data = match || {};
+
+  /* * O confronto deve mostrar apenas partidas * finalizadas, WO ou abandono. */
+  if (!isFinishedMatch(data)) {
+    return;
+  }
+
+  const format =
+    String(
+      data.gameFormat || ""
+    ).trim().toLowerCase();
+
+  const matchIsDoubles =
+    format === "duplas" ||
+    format === "duplas mistas" ||
+    !!(
+      data.player3 ||
+      data.player4 ||
+      data.player3Name ||
+      data.player4Name
+    );
+
+  let pairMatches = false;
+
+  if (
+    targetDoubles &&
+    matchIsDoubles
+  ) {
+    const matchTeam1A =
+      data.player1 ||
+      data.player1Name ||
+      "";
+
+    const matchTeam1B =
+      data.player2 ||
+      data.player2Name ||
+      "";
+
+    const matchTeam2A =
+      data.player3 ||
+      data.player3Name ||
+      "";
+
+    const matchTeam2B =
+      data.player4 ||
+      data.player4Name ||
+      "";
+
+    pairMatches = sameDoublesTeams(
+      matchTeam1A,
+      matchTeam1B,
+      matchTeam2A,
+      matchTeam2B,
+      targetTeam1A,
+      targetTeam1B,
+      targetTeam2A,
+      targetTeam2B
+    );
+  } else if (
+    !targetDoubles &&
+    !matchIsDoubles
+  ) {
+    const matchPlayer1 =
+      data.player1 ||
+      data.player1Name ||
+      data.ownerName ||
+      "";
+
+    const matchPlayer2 =
+      data.player2 ||
+      data.player2Name ||
+      data.opponentName ||
+      "";
+
+    pairMatches = samePair(
+      matchPlayer1,
+      matchPlayer2,
+      targetPlayer1,
+      targetPlayer2
+    );
+  }
+
+  if (!pairMatches) {
+    return;
+  }
+
+  const winner = getWinner(data);
+
+  /* * O vencedor precisa ser interpretado em relação * ao jogador-alvo do confronto. */
+  if (targetDoubles) {
+    const matchTeam1A =
+      normalize(
+        data.player1 ||
+        data.player1Name ||
+        ""
+      );
+
+    const matchTeam1B =
+      normalize(
+        data.player2 ||
+        data.player2Name ||
+        ""
+      );
+
+    const matchTeam2A =
+      normalize(
+        data.player3 ||
+        data.player3Name ||
+        ""
+      );
+
+    const matchTeam2B =
+      normalize(
+        data.player4 ||
+        data.player4Name ||
+        ""
+      );
+
+    const target1A =
+      normalize(targetTeam1A);
+
+    const target1B =
+      normalize(targetTeam1B);
+
+    const targetTeam1 =
+      (
+        matchTeam1A === target1A &&
+        matchTeam1B === target1B
+      ) ||
+      (
+        matchTeam1A === target1B &&
+        matchTeam1B === target1A
+      );
+
+    if (winner === 1) {
+      if (targetTeam1) {
+        wins1++;
       } else {
-        snap.forEach((doc) => {
-          const d = doc.data() || {};
-
-          const gameFormat = String(d.gameFormat || "").trim().toLowerCase();
-          const isDoublesMatch = gameFormat === "duplas" || gameFormat === "duplas mistas";
-
-          let pairMatches = false;
-
-          if (isDoublesMatch) {
-            const team1A = d.player1 || d.player1Name || "";
-            const team1B = d.player2 || d.player2Name || "";
-            const team2A = d.player3 || d.player3Name || "";
-            const team2B = d.player4 || d.player4Name || "";
-
-            const player1InTeam1 =
-              normalize(team1A) === normalize(resolvedPlayer1Name) ||
-              normalize(team1B) === normalize(resolvedPlayer1Name);
-
-            const player1InTeam2 =
-              normalize(team2A) === normalize(resolvedPlayer1Name) ||
-              normalize(team2B) === normalize(resolvedPlayer1Name);
-
-            pairMatches = player1InTeam1 || player1InTeam2;
-          } else {
-            const matchP1 = d.player1 || d.player1Name || d.ownerName || "";
-            const matchP2 = d.player2 || d.player2Name || d.opponentName || "";
-            pairMatches = samePair(matchP1, matchP2, resolvedPlayer1Name, resolvedPlayer2Name);
-          }
-
-          if (!pairMatches) return;
-
-          const status = String(d.status || "").trim().toLowerCase();
-          if (status !== "finished" && status !== "wo" && status !== "ret") return;
-
-          const winner = getWinner(d);
-          if (winner === 1) wins1++;
-          if (winner === 2) wins2++;
-
-          items.push({
-            dateMs: d.matchDateTime ? new Date(d.matchDateTime).getTime() : 0,
-            html: buildMatchLine(d),
-            data: d
-          });
-        });
-
-        items.sort((a, b) => b.dateMs - a.dateMs);
+        wins2++;
       }
+    }
+
+    if (winner === 2) {
+      if (targetTeam1) {
+        wins2++;
+      } else {
+        wins1++;
+      }
+    }
+  } else {
+    const matchPlayer1 =
+      normalize(
+        data.player1 ||
+        data.player1Name ||
+        data.ownerName ||
+        ""
+      );
+
+    const targetP1 =
+      normalize(targetPlayer1);
+
+    if (winner === 1) {
+      if (matchPlayer1 === targetP1) {
+        wins1++;
+      } else {
+        wins2++;
+      }
+    }
+
+    if (winner === 2) {
+      if (matchPlayer1 === targetP1) {
+        wins2++;
+      } else {
+        wins1++;
+      }
+    }
+  }
+
+  items.push({
+    dateMs: data.matchDateTime
+      ? new Date(
+          data.matchDateTime
+        ).getTime()
+      : 0,
+
+    html: buildMatchLine(data),
+    data
+  });
+});
+
+items.sort(
+  (a, b) => b.dateMs - a.dateMs
+);
 
       state.items = items;
       state.currentPage = 1;
