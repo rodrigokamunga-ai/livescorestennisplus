@@ -2253,3 +2253,426 @@ body.admin-page .detail-info-item strong {
     font-size: 0.84rem;
   }
 }
+
+/* ========================================================= ADMIN MOBILE — CARDS NO PADRÃO DA TELA JOGADOR Desktop permanece como tabela ========================================================= */
+
+@media (max-width: 768px) {
+  body.admin-page .mobile-match-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(31, 40, 60, 0.96),
+        rgba(20, 28, 44, 0.98)
+      );
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+    overflow: hidden;
+  }
+
+  body.admin-page .mobile-match-card::before {
+    display: none;
+  }
+
+  body.admin-page .mobile-match-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    color: rgba(232, 238, 252, 0.86);
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  body.admin-page .mobile-match-line ion-icon {
+    flex: 0 0 auto;
+    font-size: 16px;
+    color: #86a8ff;
+  }
+
+  body.admin-page .mobile-match-line > span,
+  body.admin-page .mobile-match-line > strong {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  body.admin-page .mobile-match-players-line {
+    align-items: flex-start;
+    padding-bottom: 3px;
+  }
+
+  body.admin-page .mobile-match-players-line ion-icon {
+    margin-top: 2px;
+  }
+
+  body.admin-page .mobile-match-players-name {
+    color: #f4f8ff;
+    font-size: 0.90rem;
+    font-weight: 900;
+    line-height: 1.28;
+  }
+
+  body.admin-page .mobile-match-players-name .vs-separator {
+    margin: 0 4px;
+    color: #d8ff63;
+    font-weight: 900;
+  }
+
+  body.admin-page .mobile-match-status-line {
+    margin-top: 2px;
+  }
+
+  body.admin-page .mobile-match-status-line strong {
+    font-weight: 900;
+  }
+
+  body.admin-page .mobile-match-card.status-finished
+    .mobile-match-status-line {
+    color: #b7f5c8;
+  }
+
+  body.admin-page .mobile-match-card.status-finished
+    .mobile-match-status-line ion-icon {
+    color: #86efac;
+  }
+
+  body.admin-page .mobile-match-card.status-scheduled
+    .mobile-match-status-line {
+    color: #d8ff63;
+  }
+
+  body.admin-page .mobile-match-card.status-scheduled
+    .mobile-match-status-line ion-icon {
+    color: #d8ff63;
+  }
+
+  body.admin-page .mobile-match-card.status-live
+    .mobile-match-status-line {
+    color: #93c5fd;
+  }
+
+  body.admin-page .mobile-match-card.status-live
+    .mobile-match-status-line ion-icon {
+    color: #93c5fd;
+  }
+
+  body.admin-page .mobile-match-card.status-wo
+    .mobile-match-status-line,
+  body.admin-page .mobile-match-card.status-ret
+    .mobile-match-status-line {
+    color: #fca5a5;
+  }
+
+  body.admin-page .mobile-match-card.status-wo
+    .mobile-match-status-line ion-icon,
+  body.admin-page .mobile-match-card.status-ret
+    .mobile-match-status-line ion-icon {
+    color: #fca5a5;
+  }
+
+  body.admin-page .mobile-match-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    width: 100%;
+    margin-top: 5px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 42px;
+    padding: 5px 2px;
+    border: none;
+    border-radius: 10px;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #eef4ff;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-icon ion-icon {
+    font-size: 17px;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-label {
+    margin-top: 3px;
+    font-size: 0.60rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn.danger {
+    color: #ffb6b6;
+  }
+}
+
+@media (max-width: 480px) {
+  body.admin-page .mobile-match-card {
+    padding: 12px;
+    border-radius: 15px;
+  }
+
+  body.admin-page .mobile-match-line {
+    font-size: 0.80rem;
+  }
+
+  body.admin-page .mobile-match-players-name {
+    font-size: 0.86rem;
+  }
+
+  body.admin-page .mobile-match-line ion-icon {
+    font-size: 15px;
+  }
+
+  body.admin-page .mobile-match-actions {
+    gap: 2px;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn {
+    min-height: 40px;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-label {
+    font-size: 0.56rem;
+  }
+}
+
+/* ========================================================= ADMIN MOBILE — LINHAS DO CARD NO PADRÃO JOGADOR ========================================================= */
+
+@media (max-width: 768px) {
+  body.admin-page .mobile-match-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(31, 40, 60, 0.96),
+        rgba(20, 28, 44, 0.98)
+      );
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+  }
+
+  body.admin-page .mobile-match-card::before {
+    display: none;
+  }
+
+  body.admin-page .mobile-match-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    color: rgba(232, 238, 252, 0.86);
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  body.admin-page .mobile-match-line ion-icon {
+    flex: 0 0 auto;
+    font-size: 16px;
+    color: #86a8ff;
+  }
+
+  body.admin-page .mobile-match-line span,
+  body.admin-page .mobile-match-line strong {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  body.admin-page .mobile-match-players-line {
+    align-items: flex-start;
+    padding-bottom: 3px;
+  }
+
+  body.admin-page .mobile-match-players-line ion-icon {
+    margin-top: 2px;
+  }
+
+  body.admin-page .mobile-match-players-name {
+    color: #f4f8ff;
+    font-size: 0.90rem;
+    font-weight: 900;
+    line-height: 1.28;
+  }
+
+  body.admin-page .mobile-match-players-name .vs-separator {
+    margin: 0 4px;
+    color: #d8ff63;
+    font-weight: 900;
+  }
+
+  /* * Esta linha permanece inteira: * Techset | Intermediário A | Final */
+  body.admin-page .mobile-match-info-line {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  body.admin-page .mobile-match-info-line span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.admin-page .mobile-match-winner-line {
+    margin-top: 2px;
+    padding-top: 3px;
+  }
+
+  body.admin-page .mobile-match-winner-line strong {
+    font-weight: 900;
+  }
+
+  body.admin-page .mobile-match-winner-line.winner {
+    color: #b7f5c8;
+  }
+
+  body.admin-page .mobile-match-winner-line.winner ion-icon {
+    color: #86efac;
+  }
+
+  body.admin-page .mobile-match-card.status-scheduled
+    .mobile-match-winner-line {
+    color: #d8ff63;
+  }
+
+  body.admin-page .mobile-match-card.status-scheduled
+    .mobile-match-winner-line ion-icon {
+    color: #d8ff63;
+  }
+
+  body.admin-page .mobile-match-card.status-live
+    .mobile-match-winner-line {
+    color: #93c5fd;
+  }
+
+  body.admin-page .mobile-match-card.status-live
+    .mobile-match-winner-line ion-icon {
+    color: #93c5fd;
+  }
+
+  body.admin-page .mobile-match-card.status-wo
+    .mobile-match-winner-line,
+  body.admin-page .mobile-match-card.status-ret
+    .mobile-match-winner-line {
+    color: #fca5a5;
+  }
+
+  body.admin-page .mobile-match-card.status-wo
+    .mobile-match-winner-line ion-icon,
+  body.admin-page .mobile-match-card.status-ret
+    .mobile-match-winner-line ion-icon {
+    color: #fca5a5;
+  }
+
+  body.admin-page .mobile-match-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    width: 100%;
+    margin-top: 5px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 42px;
+    padding: 5px 2px;
+    border: none;
+    border-radius: 10px;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #eef4ff;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-icon ion-icon {
+    font-size: 17px;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-label {
+    margin-top: 3px;
+    font-size: 0.60rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn.danger {
+    color: #ffb6b6;
+  }
+}
+
+@media (max-width: 480px) {
+  body.admin-page .mobile-match-card {
+    padding: 12px;
+    border-radius: 15px;
+  }
+
+  body.admin-page .mobile-match-line {
+    font-size: 0.80rem;
+  }
+
+  body.admin-page .mobile-match-players-name {
+    font-size: 0.86rem;
+  }
+
+  body.admin-page .mobile-match-info-line {
+    font-size: 0.78rem;
+  }
+
+  body.admin-page .mobile-match-line ion-icon {
+    font-size: 15px;
+  }
+
+  body.admin-page .mobile-match-actions {
+    gap: 2px;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-btn {
+    min-height: 40px;
+  }
+
+  body.admin-page .mobile-match-actions .admin-action-label {
+    font-size: 0.56rem;
+  }
+}
