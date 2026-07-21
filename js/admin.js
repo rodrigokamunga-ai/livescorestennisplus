@@ -276,8 +276,7 @@
         return !String(data?.ownerId || "").trim();
       },
       isDoublesFormatValue(gameFormat) {
-        const value = String(gameFormat || "").trim();
-        return value === "Duplas";
+        return U.normalizeText(gameFormat) === "duplas";
       },
       getTeam1NameFromData(d) {
         const gameFormat = String(d?.gameFormat || "Simples").trim();
@@ -1684,13 +1683,120 @@ if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? ""
 
     function mobileCardHTML(docSnap) {
       const d = docSnap.data();
-      const statusText = String(d.status || "scheduled").trim().toLowerCase();
-      const label = U.getStatusLabel(statusText);
-      const date = d.matchDateTime ? new Date(d.matchDateTime).toLocaleString("pt-BR") : "-";
-      const stageText = String(d.tournamentStage || "").trim().toLowerCase();
-      const showTournament = stageText !== "treino" && stageText !== "ranking";
     
-      return ` <tr class="mobile-match-row"> <td colspan="5"> <div class="mobile-match-card status-${statusText}"> <div class="mobile-match-card-top"> <span class="status-tag status-${statusText}">${U.escapeHtml(label)}</span> <span class="mobile-match-date">${U.escapeHtml(date)}</span> </div> <div class="mobile-match-players"> <strong>${U.getMatchDisplayHTMLMobile(d)}</strong> </div> <div class="mobile-match-meta"> ${showTournament ? `<div><strong>Torneio:</strong> ${U.escapeHtml(d.tournamentName || "-")}</div>` : ""} <div><strong>Formato:</strong> ${U.escapeHtml(d.gameFormat || "-")}</div> <div><strong>Partida:</strong> ${U.escapeHtml(d.tournamentStage || "-")}</div> <div><strong>Placar:</strong> ${U.escapeHtml(getResultadoPartida(d))}</div> </div> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo"> <span class="admin-action-icon"><ion-icon name="play-outline"></ion-icon></span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar"> <span class="admin-action-icon"><ion-icon name="reader-outline"></ion-icon></span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar"> <span class="admin-action-icon"><ion-icon name="pencil-outline"></ion-icon></span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto"> <span class="admin-action-icon"><ion-icon name="flash-outline"></ion-icon></span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir"> <span class="admin-action-icon"><ion-icon name="trash-outline"></ion-icon></span> <span class="admin-action-label">Excluir</span> </button> </div> </div> </td> </tr> `;
+      const statusText = String(d.status || "scheduled")
+        .trim()
+        .toLowerCase();
+    
+      const date = d.matchDateTime
+        ? new Date(d.matchDateTime).toLocaleString("pt-BR")
+        : "-";
+    
+      const stage = String(d.tournamentStage || "").trim();
+      const stageNormalized = U.normalizeText(stage);
+    
+      const tournamentName = String(d.tournamentName || "").trim();
+      const categoryName = String(d.categoryName || "").trim();
+    
+      /* * Monta a linha: * * Ranking | Categoria * Treino * Torneio | Categoria | Final */
+      const infoParts = [];
+    
+      if (stageNormalized === "treino") {
+        infoParts.push("Treino");
+      } else if (stageNormalized === "ranking") {
+        infoParts.push("Ranking");
+    
+        if (categoryName) {
+          infoParts.push(categoryName);
+        }
+      } else {
+        if (tournamentName) {
+          infoParts.push(tournamentName);
+        }
+    
+        if (categoryName) {
+          infoParts.push(categoryName);
+        }
+    
+        if (stage) {
+          infoParts.push(stage);
+        }
+      }
+    
+      const infoLine = infoParts.length
+        ? infoParts.join(" | ")
+        : "Partida";
+    
+      /* * Placar */
+      const scoreText = getResultadoPartida(d);
+    
+      /* * Identifica o vencedor */
+      const score = U.normalizeScore(d.score || {});
+      const winnerPosition = U.getWinnerPosition(score, d);
+    
+      const team1Name = U.getTeam1NameFromData(d);
+const team2Name = U.getTeam2NameFromData(d);
+
+const isDoubles = U.isDoublesFormatValue(d.gameFormat);
+
+const winnerVerb = isDoubles
+  ? "venceram"
+  : "venceu";
+
+const winnerPhrase = (teamName, complement = "") => {
+  return `${teamName} ${winnerVerb}${complement}`;
+};
+
+let winnerText = "Sem vencedor definido";
+let winnerClass = "";
+
+const winnerByWO = String(d.winnerByWO || "")
+  .trim()
+  .toLowerCase();
+
+const winnerByRet = String(d.winnerByRet || "")
+  .trim()
+  .toLowerCase();
+
+if (statusText === "wo") {
+  if (winnerByWO === "player1") {
+    winnerText = winnerPhrase(team1Name, " por WO");
+    winnerClass = "winner";
+  } else if (winnerByWO === "player2") {
+    winnerText = winnerPhrase(team2Name, " por WO");
+    winnerClass = "winner";
+  } else {
+    winnerText = "Finalizada por WO";
+  }
+} else if (statusText === "ret") {
+  if (winnerByRet === "player1") {
+    winnerText = winnerPhrase(team1Name, " por abandono");
+    winnerClass = "winner";
+  } else if (winnerByRet === "player2") {
+    winnerText = winnerPhrase(team2Name, " por abandono");
+    winnerClass = "winner";
+  } else if (winnerPosition === 1) {
+    winnerText = winnerPhrase(team1Name);
+    winnerClass = "winner";
+  } else if (winnerPosition === 2) {
+    winnerText = winnerPhrase(team2Name);
+    winnerClass = "winner";
+  } else {
+    winnerText = "Partida abandonada";
+  }
+} else if (winnerPosition === 1) {
+  winnerText = winnerPhrase(team1Name);
+  winnerClass = "winner";
+} else if (winnerPosition === 2) {
+  winnerText = winnerPhrase(team2Name);
+  winnerClass = "winner";
+} else if (statusText === "live") {
+  winnerText = "Partida em andamento";
+} else if (statusText === "scheduled") {
+  winnerText = "Aguardando resultado";
+}
+    
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <article class="mobile-match-card status-${statusText}"> <!-- Jogadores --> <div class="mobile-match-line mobile-match-players-line"> <ion-icon name="people-outline"></ion-icon> <strong class="mobile-match-players-name"> ${U.getMatchDisplayHTMLMobile(d)} </strong> </div> <!-- Data e hora --> <div class="mobile-match-line"> <ion-icon name="calendar-outline"></ion-icon> <span>${U.escapeHtml(date)}</span> </div> <!-- Torneio / categoria / fase --> <div class="mobile-match-line mobile-match-info-line"> <ion-icon name="medal-outline"></ion-icon> <span>${U.escapeHtml(infoLine)}</span> </div> <!-- Placar --> <div class="mobile-match-line"> <ion-icon name="stats-chart-outline"></ion-icon> <span>${U.escapeHtml(scoreText)}</span> </div> <!-- Vencedor --> <div class="mobile-match-line mobile-match-winner-line ${winnerClass}"> <ion-icon name="trophy-outline"></ion-icon> <strong>${U.escapeHtml(winnerText)}</strong> </div> <!-- Ações --> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo" > <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" > <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" > <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto" > <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" > <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </article> </td> </tr> `;
     }
 
     function renderCurrentPage() {
