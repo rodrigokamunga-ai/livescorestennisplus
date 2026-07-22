@@ -1,0 +1,356 @@
+/* ========================================================= TEMA GLOBAL DO TENNISPRO ========================================================= */
+
+:root {
+  --theme-bg-1: #121b2d;
+  --theme-bg-2: #0f1726;
+  --theme-surface: #1f283c;
+  --theme-surface-2: #141c2c;
+  --theme-card: #1c273c;
+  --theme-text: #e8eefc;
+  --theme-text-strong: #f4f8ff;
+  --theme-muted: rgba(232, 238, 252, 0.72);
+  --theme-border: rgba(255, 255, 255, 0.10);
+  --theme-input: rgba(12, 18, 30, 0.62);
+  --theme-bottom: rgba(10, 16, 28, 0.94);
+  --theme-overlay: rgba(5, 10, 18, 0.72);
+  --theme-shadow: rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="light"] {
+  --theme-bg-1: #f4f7fb;
+  --theme-bg-2: #e9eef5;
+  --theme-surface: #ffffff;
+  --theme-surface-2: #f8fafc;
+  --theme-card: #ffffff;
+  --theme-text: #1e293b;
+  --theme-text-strong: #0f172a;
+  --theme-muted: #64748b;
+  --theme-border: rgba(15, 23, 42, 0.12);
+  --theme-input: #ffffff;
+  --theme-bottom: rgba(255, 255, 255, 0.94);
+  --theme-overlay: rgba(15, 23, 42, 0.42);
+  --theme-shadow: rgba(15, 23, 42, 0.12);
+}
+
+/* ========================================================= BASE GLOBAL ========================================================= */
+
+html,
+body {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+body {
+  color: var(--theme-text);
+}
+
+/* ========================================================= MODO CLARO — MENU ========================================================= */
+
+html[data-theme="light"] body.menu-page {
+  color: var(--theme-text);
+  background:
+    radial-gradient(circle at top, rgba(96, 165, 250, 0.16), transparent 30%),
+    radial-gradient(circle at 78% 0%, rgba(132, 204, 22, 0.10), transparent 24%),
+    linear-gradient(180deg, var(--theme-bg-1) 0%, var(--theme-bg-2) 100%);
+}
+
+/* Navbar Bootstrap */
+html[data-theme="light"] .menu-page .navbar.bg-dark {
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+html[data-theme="light"] .menu-page .navbar-dark .navbar-brand,
+html[data-theme="light"] .menu-page .navbar-dark .navbar-nav .nav-link,
+html[data-theme="light"] .menu-page .navbar-dark .navbar-toggler {
+  color: var(--theme-text-strong) !important;
+}
+
+html[data-theme="light"] .menu-page .navbar-dark .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+/* Área principal */
+html[data-theme="light"] .menu-page .menu-hero {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(248, 250, 252, 0.98)
+  );
+  border-color: var(--theme-border);
+  box-shadow: 0 16px 36px var(--theme-shadow);
+}
+
+html[data-theme="light"] .menu-page .menu-app-btn {
+  color: var(--theme-text);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(241, 245, 249, 0.96)
+  );
+  border-color: var(--theme-border);
+  box-shadow: 0 10px 22px var(--theme-shadow);
+}
+
+html[data-theme="light"] .menu-page .menu-app-btn:hover,
+html[data-theme="light"] .menu-page .menu-app-btn:active {
+  background: linear-gradient(
+    180deg,
+    rgba(236, 252, 203, 0.96),
+    rgba(255, 255, 255, 0.98)
+  );
+  border-color: rgba(101, 163, 13, 0.35);
+}
+
+html[data-theme="light"] .menu-page .menu-app-subtitle,
+html[data-theme="light"] .menu-page .menu-top p {
+  color: var(--theme-muted);
+}
+
+html[data-theme="light"] .menu-page .menu-top h1,
+html[data-theme="light"] .menu-page .menu-app-title {
+  color: var(--theme-text-strong);
+}
+
+/* Botões superiores */
+html[data-theme="light"] .menu-page .menu-header-btn {
+  color: var(--theme-text-strong);
+}
+
+/* Rodapé */
+html[data-theme="light"] .menu-page .menu-bottom-nav {
+  background: var(--theme-bottom);
+  border-top-color: var(--theme-border);
+  box-shadow: 0 -8px 24px var(--theme-shadow);
+}
+
+html[data-theme="light"] .menu-page .menu-bottom-btn {
+  color: var(--theme-text-strong);
+  background: linear-gradient(
+    180deg,
+    rgba(241, 245, 249, 0.96),
+    rgba(255, 255, 255, 0.96)
+  );
+  border-color: var(--theme-border);
+}
+
+/* ========================================================= MODAIS ========================================================= */
+
+html[data-theme="light"] .alert-modal-overlay,
+html[data-theme="light"] .gemini-modal-overlay,
+html[data-theme="light"] .delete-modal-overlay {
+  background: var(--theme-overlay);
+}
+
+html[data-theme="light"] .alert-modal,
+html[data-theme="light"] .gemini-modal,
+html[data-theme="light"] .delete-modal {
+  color: var(--theme-text);
+  background: linear-gradient(
+    180deg,
+    #ffffff,
+    #f8fafc
+  );
+  border-color: var(--theme-border);
+  box-shadow: 0 26px 60px var(--theme-shadow);
+}
+
+html[data-theme="light"] .alert-modal-title,
+html[data-theme="light"] .gemini-modal h2 {
+  color: var(--theme-text-strong);
+}
+
+html[data-theme="light"] .alert-modal-close,
+html[data-theme="light"] .gemini-close-btn,
+html[data-theme="light"] .gemini-secondary-btn {
+  background: #f1f5f9;
+  color: var(--theme-text-strong);
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] .alert-game-item,
+html[data-theme="light"] .alert-empty,
+html[data-theme="light"] .gemini-response,
+html[data-theme="light"] #geminiPrompt {
+  background: #f8fafc;
+  color: var(--theme-text);
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] #geminiPrompt::placeholder {
+  color: #94a3b8;
+}
+
+/* ========================================================= ELEMENTOS GLOBAIS DAS OUTRAS PÁGINAS ========================================================= */
+
+html[data-theme="light"] body.admin-page,
+html[data-theme="light"] body.career-page,
+html[data-theme="light"] body.profile-page,
+html[data-theme="light"] body.player-page,
+html[data-theme="light"] body.conquistas-page,
+html[data-theme="light"] body.public-page,
+html[data-theme="light"] body.public-dashboard-page,
+html[data-theme="light"] body.players-page {
+  color: var(--theme-text);
+  background:
+    radial-gradient(circle at top, rgba(96, 165, 250, 0.12), transparent 30%),
+    linear-gradient(180deg, var(--theme-bg-1) 0%, var(--theme-bg-2) 100%);
+}
+
+/* Cards e painéis */
+html[data-theme="light"] .panel,
+html[data-theme="light"] .panel-glass,
+html[data-theme="light"] .profile-card,
+html[data-theme="light"] .career-card,
+html[data-theme="light"] .career-summary-card,
+html[data-theme="light"] .conquistas-card,
+html[data-theme="light"] .conquistas-summary-card,
+html[data-theme="light"] .players-card,
+html[data-theme="light"] .players-row-card {
+  color: var(--theme-text);
+  background: linear-gradient(
+    180deg,
+    #ffffff,
+    #f8fafc
+  );
+  border-color: var(--theme-border);
+  box-shadow: 0 12px 28px var(--theme-shadow);
+}
+
+/* Campos */
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea,
+html[data-theme="light"] .filter-select {
+  background: var(--theme-input);
+  color: var(--theme-text-strong);
+  border-color: var(--theme-border);
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Rodapés comuns */
+html[data-theme="light"] .admin-bottom-nav,
+html[data-theme="light"] .career-bottom-nav,
+html[data-theme="light"] .player-bottom-nav {
+  background: var(--theme-bottom);
+  border-top-color: var(--theme-border);
+}
+
+html[data-theme="light"] .admin-bottom-btn,
+html[data-theme="light"] .career-bottom-btn,
+html[data-theme="light"] .player-bottom-btn {
+  color: var(--theme-text-strong);
+  background: linear-gradient(
+    180deg,
+    #ffffff,
+    #f1f5f9
+  );
+  border-color: var(--theme-border);
+}
+
+/* Botão de tema */
+[data-theme-toggle] {
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+[data-theme-toggle]:hover {
+  transform: rotate(12deg);
+}
+
+/* ========================================================= AJUSTE FINAL DO MODO CLARO — MENU ========================================================= */
+
+/* Perfil e alertas com ícones pretos */
+html[data-theme="light"] .menu-page #profileBtnTop,
+html[data-theme="light"] .menu-page #alertBtnTop {
+  color: #000000 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+html[data-theme="light"] .menu-page #profileBtnTop ion-icon,
+html[data-theme="light"] .menu-page #alertBtnTop ion-icon {
+  color: #000000 !important;
+}
+
+/* Botão de trocar tema */
+html[data-theme="light"] .menu-page #themeToggle {
+  color: #000000 !important;
+}
+
+html[data-theme="light"] .menu-page #themeToggle ion-icon {
+  color: #000000 !important;
+}
+
+/* Botões das funcionalidades em azul claro */
+html[data-theme="light"] .menu-page .menu-app-btn {
+  color: #17324d !important;
+  background: linear-gradient(
+    180deg,
+    #eaf5ff 0%,
+    #d9edff 100%
+  ) !important;
+  border: 1px solid #b7d9f5 !important;
+  box-shadow: 0 10px 22px rgba(72, 132, 181, 0.16) !important;
+}
+
+/* Títulos dos botões */
+html[data-theme="light"] .menu-page .menu-app-title {
+  color: #17324d !important;
+}
+
+/* Descrições dos botões */
+html[data-theme="light"] .menu-page .menu-app-subtitle {
+  color: #52718d !important;
+}
+
+/* Blocos dos ícones das funcionalidades */
+html[data-theme="light"] .menu-page .menu-app-icon {
+  color: #ffffff !important;
+  background: linear-gradient(
+    180deg,
+    #655fbe 0%,
+    #3b82f6 100%
+  ) !important;
+  border: 1px solid #3b82f6 !important;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.24) !important;
+}
+
+html[data-theme="light"] .menu-page .menu-app-icon ion-icon {
+  color: #ffffff !important;
+}
+
+/* Efeito ao passar o mouse */
+html[data-theme="light"] .menu-page .menu-app-btn:hover,
+html[data-theme="light"] .menu-page .menu-app-btn:active {
+  background: linear-gradient(
+    180deg,
+    #d7ecff 0%,
+    #c4e2ff 100%
+  ) !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 16px 28px rgba(59, 130, 246, 0.20) !important;
+}
+
+/* Remove o efeito amarelo original */
+html[data-theme="light"] .menu-page .menu-app-btn::before {
+  background: linear-gradient(
+    180deg,
+    rgba(96, 165, 250, 0.16),
+    transparent 55%
+  ) !important;
+}
+
+/* Contorno da foto em preto */
+html[data-theme="light"] .menu-page .menu-welcome-avatar {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.12) !important;
+}
+
