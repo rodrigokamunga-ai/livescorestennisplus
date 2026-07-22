@@ -1483,28 +1483,82 @@ body.menu-page .menu-hero::after {
   box-shadow: none !important;
 }
 
-/* ========================================================= MENU.HTML — REMOVER ESPAÇO APÓS O ÚLTIMO BOTÃO ========================================================= */
+/* ========================================================= MENU.HTML — REDUZIR ESPAÇOS SUPERIOR E INFERIOR ========================================================= */
 
-body.menu-page .menu-shell,
-body.menu-page .menu-hero,
-body.menu-page .menu-grid {
-  margin-bottom: 0 !important;
+body.menu-page {
   padding-bottom: 0 !important;
+}
+
+/* Mantém apenas o espaço necessário para o cabeçalho fixo */
+body.menu-page main.menu-shell {
+  padding-top: 58px !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove o espaço interno ao redor da foto e dos botões */
+body.menu-page .menu-hero {
+  padding: 0 !important;
+  margin: 0 !important;
   min-height: auto !important;
 }
 
-/* Remove espaço extra do último item da grade */
-body.menu-page .menu-grid .menu-app-btn:last-of-type {
-  margin-bottom: 0 !important;
+/* Remove espaço extra entre a foto e a grade */
+body.menu-page .menu-top {
+  margin-bottom: 8px !important;
 }
 
-/* Evita espaço adicional criado pelo conteúdo principal */
-body.menu-page main.menu-shell {
+/* Remove espaço depois do último botão */
+body.menu-page .menu-grid {
+  margin-bottom: 0 !important;
   padding-bottom: 0 !important;
 }
 
-/* Evita rolagem vertical causada por sobra de altura */
+/* Garante que os botões não criem espaço externo */
+body.menu-page .menu-app-btn {
+  margin-bottom: 0 !important;
+}
+
+/* Evita altura mínima desnecessária */
+body.menu-page .menu-grid,
+body.menu-page .menu-hero,
+body.menu-page .menu-shell {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ========================================================= MENU.HTML — ESPAÇAMENTO FINAL AJUSTADO ========================================================= */
+
 body.menu-page {
-  overflow-y: auto;
-  overflow-x: hidden;
+  /* Espaço suficiente para os últimos botões não ficarem escondidos atrás do menu inferior */
+  padding-bottom: calc(var(--bottom-h) + var(--safe-bottom) + 8px) !important;
+}
+
+/* Pequeno espaço entre o cabeçalho e a foto */
+body.menu-page main.menu-shell {
+  padding-top: 70px !important;
+  padding-right: 8px !important;
+  padding-bottom: 8px !important;
+  padding-left: 8px !important;
+}
+
+/* Pequeno espaço interno superior e inferior */
+body.menu-page .menu-hero {
+  padding-top: 8px !important;
+  padding-right: 0 !important;
+  padding-bottom: 8px !important;
+  padding-left: 0 !important;
+}
+
+/* Espaço discreto entre a foto e os botões */
+body.menu-page .menu-top {
+  margin-bottom: 10px !important;
+}
+
+/* Mantém a grade sem espaço extra */
+body.menu-page .menu-grid {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
