@@ -301,6 +301,62 @@
         const p4 = d?.player4 || "Jogador 4";
         return U.isDoublesFormatValue(gameFormat) ? `${p3}/${p4}` : (d?.player2 || "Jogador 2");
       },
+
+      getShortPlayerName(name = "") {
+        const text = String(name || "")
+          .trim()
+          .replace(/\s+/g, " ");
+      
+        if (!text) return "";
+      
+        const parts = text.split(" ").filter(Boolean);
+      
+        // Nome único: mantém como está
+        if (parts.length === 1) {
+          return parts[0];
+        }
+      
+        const firstName = parts[0];
+        const lastName = parts[parts.length - 1];
+      
+        const initial = Array.from(firstName)[0].toUpperCase();
+      
+        return `${initial}. ${lastName}`;
+      },
+      
+      getShortTeamName(teamName = "") {
+        return String(teamName || "")
+          .split("/")
+          .map((playerName) => U.getShortPlayerName(playerName))
+          .join("/");
+      },
+      
+      getShortTeam1NameFromData(d) {
+        return U.getShortTeamName(U.getTeam1NameFromData(d));
+      },
+      
+      getShortTeam2NameFromData(d) {
+        return U.getShortTeamName(U.getTeam2NameFromData(d));
+      },
+      
+      getShortMatchDisplayHTML(d) {
+        const team1 = U.getShortTeam1NameFromData(d);
+        const team2 = U.getShortTeam2NameFromData(d);
+      
+        return `${U.escapeHtml(team1)} <span class="vs-separator">X</span> ${U.escapeHtml(team2)}`;
+      },
+      
+      getShortMatchDisplayHTMLMobile(d) {
+        const team1 = U.getShortTeam1NameFromData(d);
+        const team2 = U.getShortTeam2NameFromData(d);
+        const isDoubles = U.isDoublesFormatValue(d?.gameFormat);
+      
+        if (isDoubles) {
+          return `${U.escapeHtml(team1)} <span class="vs-separator">X</span><br>${U.escapeHtml(team2)}`;
+        }
+      
+        return `${U.escapeHtml(team1)} <span class="vs-separator">X</span> ${U.escapeHtml(team2)}`;
+      },
       getMatchDisplayHTML(d) {
         const team1 = U.getTeam1NameFromData(d);
         const team2 = U.getTeam2NameFromData(d);
@@ -2258,7 +2314,7 @@ if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? ""
     }
 
     function renderGeneralBlock(d) {
-      const teamHTML = U.getMatchDisplayHTML(d);
+      const teamHTML = U.getShortMatchDisplayHTML(d);
       const statusText = String(d?.status || "").trim().toLowerCase();
       const stageText = String(d?.tournamentStage || "").trim().toLowerCase();
       const situationLabel = statusText === "wo" ? "Finalizada por WO" : U.getStatusLabel(statusText);
@@ -2579,8 +2635,10 @@ if (el.tbSuperPlayer2) el.tbSuperPlayer2.value = superSet?.tieBreakPoints2 ?? ""
       const score = U.normalizeScore(d.score || {});
       const winnerPosition = U.getWinnerPosition(score, d);
     
-      const team1Name = U.getTeam1NameFromData(d);
-const team2Name = U.getTeam2NameFromData(d);
+      const team1Name = U.getShortTeam1NameFromData(d);
+      const team2Name = U.getShortTeam2NameFromData(d);
+
+
 
 const isDoubles = U.isDoublesFormatValue(d.gameFormat);
 
@@ -2641,7 +2699,7 @@ if (statusText === "wo") {
   winnerText = "Aguardando resultado";
 }
     
-      return ` <tr class="mobile-match-row"> <td colspan="5"> <article class="mobile-match-card status-${statusText}"> <!-- Jogadores --> <div class="mobile-match-line mobile-match-players-line"> <ion-icon name="people-outline"></ion-icon> <strong class="mobile-match-players-name"> ${U.getMatchDisplayHTMLMobile(d)} </strong> </div> <!-- Data e hora --> <div class="mobile-match-line"> <ion-icon name="calendar-outline"></ion-icon> <span>${U.escapeHtml(date)}</span> </div> <!-- Torneio / categoria / fase --> <div class="mobile-match-line mobile-match-info-line"> <ion-icon name="medal-outline"></ion-icon> <span>${U.escapeHtml(infoLine)}</span> </div> <!-- Placar --> <div class="mobile-match-line"> <ion-icon name="stats-chart-outline"></ion-icon> <span>${U.escapeHtml(scoreText)}</span> </div> <!-- Vencedor --> <div class="mobile-match-line mobile-match-winner-line ${winnerClass}"> <ion-icon name="trophy-outline"></ion-icon> <strong>${U.escapeHtml(winnerText)}</strong> </div> <!-- Ações --> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo" > <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" > <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" > <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto" > <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" > <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </article> </td> </tr> `;
+      return ` <tr class="mobile-match-row"> <td colspan="5"> <article class="mobile-match-card status-${statusText}"> <!-- Jogadores --> <div class="mobile-match-line mobile-match-players-line"> <ion-icon name="people-outline"></ion-icon> <strong class="mobile-match-players-name"> ${U.getShortMatchDisplayHTMLMobile(d)} </strong> </div> <!-- Data e hora --> <div class="mobile-match-line"> <ion-icon name="calendar-outline"></ion-icon> <span>${U.escapeHtml(date)}</span> </div> <!-- Torneio / categoria / fase --> <div class="mobile-match-line mobile-match-info-line"> <ion-icon name="medal-outline"></ion-icon> <span>${U.escapeHtml(infoLine)}</span> </div> <!-- Placar --> <div class="mobile-match-line"> <ion-icon name="stats-chart-outline"></ion-icon> <span>${U.escapeHtml(scoreText)}</span> </div> <!-- Vencedor --> <div class="mobile-match-line mobile-match-winner-line ${winnerClass}"> <ion-icon name="trophy-outline"></ion-icon> <strong>${U.escapeHtml(winnerText)}</strong> </div> <!-- Ações --> <div class="mobile-match-actions"> <button type="button" class="admin-action-btn icon-btn" data-action="open" data-id="${docSnap.id}" title="Jogo" > <span class="admin-action-icon"> <ion-icon name="play-outline"></ion-icon> </span> <span class="admin-action-label">Jogo</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="detail" data-id="${docSnap.id}" title="Detalhar" > <span class="admin-action-icon"> <ion-icon name="reader-outline"></ion-icon> </span> <span class="admin-action-label">Detalhar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="edit" data-id="${docSnap.id}" title="Editar" > <span class="admin-action-icon"> <ion-icon name="pencil-outline"></ion-icon> </span> <span class="admin-action-label">Editar</span> </button> <button type="button" class="admin-action-btn icon-btn" data-action="confronto" data-id="${docSnap.id}" title="Confronto" > <span class="admin-action-icon"> <ion-icon name="flash-outline"></ion-icon> </span> <span class="admin-action-label">Confronto</span> </button> <button type="button" class="admin-action-btn icon-btn danger" data-action="delete" data-id="${docSnap.id}" title="Excluir" > <span class="admin-action-icon"> <ion-icon name="trash-outline"></ion-icon> </span> <span class="admin-action-label">Excluir</span> </button> </div> </article> </td> </tr> `;
     }
 
     function renderCurrentPage() {
