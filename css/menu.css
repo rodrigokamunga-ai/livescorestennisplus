@@ -1482,3 +1482,29 @@ body.menu-page .menu-hero::after {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* ========================================================= MENU.HTML — REMOVER ESPAÇO APÓS O ÚLTIMO BOTÃO ========================================================= */
+
+body.menu-page .menu-shell,
+body.menu-page .menu-hero,
+body.menu-page .menu-grid {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: auto !important;
+}
+
+/* Remove espaço extra do último item da grade */
+body.menu-page .menu-grid .menu-app-btn:last-of-type {
+  margin-bottom: 0 !important;
+}
+
+/* Evita espaço adicional criado pelo conteúdo principal */
+body.menu-page main.menu-shell {
+  padding-bottom: 0 !important;
+}
+
+/* Evita rolagem vertical causada por sobra de altura */
+body.menu-page {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
