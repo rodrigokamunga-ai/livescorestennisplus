@@ -1,0 +1,1153 @@
+body.dashboard-page {
+  background:
+    radial-gradient(circle at top, rgba(72, 96, 136, 0.18), transparent 30%),
+    linear-gradient(180deg, #121b2d 0%, #0f1726 100%);
+  color: #e8eefc;
+  min-height: 100vh;
+  padding-top: 72px;
+  padding-bottom: 84px;
+  overflow-x: hidden;
+}
+
+body.dashboard-page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body.dashboard-page button,
+body.dashboard-page input,
+body.dashboard-page select,
+body.dashboard-page textarea {
+  font: inherit;
+}
+
+body.dashboard-page * {
+  box-sizing: border-box;
+}
+
+body.dashboard-page .muted {
+  color: rgba(232, 238, 252, 0.68);
+}
+
+/* ========================= CABEÇALHO ========================= */
+
+body.dashboard-page .menu-fixed-top,
+body.dashboard-page .menu-fixed-top.navbar-dark {
+  background-color: #212529 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dashboard-page .menu-navbar-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+body.dashboard-page .menu-fixed-top .container-xl {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+body.dashboard-page .menu-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  text-decoration: none;
+  color: #d8ff63;
+  border-radius: 10px;
+  transition: transform 0.16s ease, background 0.16s ease;
+  flex-shrink: 0;
+}
+
+body.dashboard-page .menu-back-btn:hover {
+  transform: none;
+  background: rgba(216, 255, 99, 0.1);
+}
+
+body.dashboard-page .menu-back-btn ion-icon {
+  font-size: 1.3rem;
+  color: #d8ff63;
+}
+
+body.dashboard-page .navbar-brand {
+  margin: 0;
+  color: #f4f8ff !important;
+}
+
+body.dashboard-page .navbar-brand span {
+  color: #f4f8ff;
+  text-align: left;
+}
+
+body.dashboard-page .dashboard-navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-align: left;
+  color: #f4f8ff !important;
+  flex: 0 0 auto;
+}
+
+.dashboard-brand-icon {
+  font-size: 1.2rem;
+}
+
+/* ========================= CONTEÚDO ========================= */
+
+.dashboard-hero {
+  padding: 22px;
+  border-radius: 24px;
+  background: linear-gradient(
+    180deg,
+    rgba(31, 40, 60, 0.94),
+    rgba(15, 22, 36, 0.98)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-header p {
+  margin: 8px 0 0;
+  color: rgba(232, 238, 252, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+/* ========================= FILTROS ========================= */
+
+.dashboard-filters.ionic-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(18, 27, 45, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.ionic-filter-card {
+  border-radius: 18px;
+  padding: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(44, 54, 74, 0.72),
+    rgba(30, 39, 58, 0.82)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+}
+
+.ionic-filter-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ionic-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 252, 0.72);
+}
+
+.ionic-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(12, 18, 30, 0.72);
+  color: #f4f8ff;
+  border-radius: 14px;
+  padding: 12px 34px 12px 14px;
+  outline: none;
+  font-size: 0.92rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.ionic-select:focus {
+  border-color: rgba(104, 166, 255, 0.62);
+  box-shadow: 0 0 0 3px rgba(104, 166, 255, 0.16);
+}
+
+.ionic-actions {
+  display: flex;
+  gap: 10px;
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.ionic-btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ionic-btn ion-icon {
+  font-size: 1.05rem;
+}
+
+.ionic-btn.primary {
+  background: linear-gradient(180deg, #d8ff63, #b9e84f);
+  color: #0f1726;
+}
+
+.ionic-btn.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f8ff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ionic-btn:hover {
+  transform: none;
+  opacity: 1;
+}
+
+.ionic-btn:active {
+  transform: scale(0.98);
+}
+
+/* ========================= CARDS ========================= */
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.dash-card {
+  border-radius: 22px;
+  padding: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(44, 54, 74, 0.92),
+    rgba(30, 39, 58, 0.95)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 48%);
+  pointer-events: none;
+}
+
+.dash-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.dash-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 0 0 auto;
+}
+
+.dash-card span {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(232, 238, 252, 0.62);
+  font-weight: 800;
+}
+
+.dash-card strong {
+  font-size: 2.9rem;
+  line-height: 1;
+  font-weight: 950;
+  color: #f4f8ff;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.dash-card.total {
+  border-top: 3px solid #60a5fa;
+}
+
+.dash-card.win {
+  border-top: 3px solid #d8ff63;
+}
+
+.dash-card.loss {
+  border-top: 3px solid #ff7b7b;
+}
+
+/* ========================= PAINÉIS ========================= */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.dashboard-panel {
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(
+    180deg,
+    rgba(44, 54, 74, 0.92),
+    rgba(30, 39, 58, 0.95)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.dashboard-panel h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #f4f8ff;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: rgba(232, 238, 252, 0.88);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.wins-dot {
+  background: #60a5fa;
+}
+
+.losses-dot {
+  background: #ff7b7b;
+}
+
+.chart-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 280px;
+}
+
+.chart-box canvas {
+  max-width: 100%;
+  max-height: 280px;
+}
+
+.dashboard-message {
+  margin-top: 14px;
+  color: rgba(232, 238, 252, 0.82);
+  font-size: 0.95rem;
+}
+
+/* ========================= RODAPÉ ========================= */
+
+.career-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(10, 16, 28, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
+}
+
+.career-bottom-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #eef4ff;
+  text-decoration: none;
+  border-radius: 0;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 800;
+  box-shadow: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 6px 4px;
+  transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+  opacity: 0.88;
+}
+
+.career-bottom-btn:hover {
+  transform: none;
+  opacity: 0.92;
+  background: transparent;
+  box-shadow: none;
+}
+
+.career-bottom-icon {
+  font-size: 1.22rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.career-bottom-icon ion-icon {
+  font-size: 1.22rem;
+}
+
+.career-bottom-label {
+  font-size: 0.74rem;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.career-bottom-btn.logout .career-bottom-icon {
+  color: #ff7b7b;
+}
+
+/* ========================= RESPONSIVIDADE ========================= */
+
+@media (max-width: 900px) {
+  .dashboard-cards,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-filters.ionic-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  body.dashboard-page {
+    padding-top: 68px;
+    padding-bottom: 84px;
+  }
+
+  .dashboard-hero {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+  }
+
+  .dash-card {
+    min-height: 118px;
+    padding: 16px;
+  }
+
+  .dash-card strong {
+    font-size: 2.2rem;
+  }
+
+  .dashboard-panel {
+    padding: 14px;
+  }
+
+  .chart-box {
+    min-height: 240px;
+  }
+
+  .chart-box canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .ionic-actions {
+    flex-direction: column;
+  }
+
+  .ionic-btn {
+    width: 100%;
+  }
+
+  .career-bottom-nav {
+    gap: 0;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .career-bottom-btn {
+    min-height: 60px;
+    border-radius: 0;
+    padding: 6px 4px;
+  }
+
+  .career-bottom-icon,
+  .career-bottom-icon ion-icon {
+    font-size: 1.22rem;
+  }
+
+  .career-bottom-label {
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .career-bottom-btn {
+    min-height: 60px;
+    padding: 6px 4px;
+  }
+
+  .career-bottom-icon,
+  .career-bottom-icon ion-icon {
+    font-size: 1.22rem;
+  }
+
+  .career-bottom-label {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .dashboard-hero {
+    padding: 14px;
+  }
+
+  .dash-card {
+    min-height: 112px;
+    padding: 14px;
+  }
+
+  .dash-card strong {
+    font-size: 2rem;
+  }
+
+  .dashboard-panel {
+    padding: 14px;
+  }
+}
+
+/* ========================= DASHBOARD NO PADRÃO IONIC ========================= */
+
+.ionic-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ionic-stat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 154px;
+  padding: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(50, 62, 86, 0.95), rgba(25, 34, 52, 0.98));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.ionic-stat-card::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  bottom: -34px;
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.08;
+}
+
+.ionic-stat-card.total {
+  color: #60a5fa;
+  border-top: 3px solid #60a5fa;
+}
+
+.ionic-stat-card.win {
+  color: #d8ff63;
+  border-top: 3px solid #d8ff63;
+}
+
+.ionic-stat-card.loss {
+  color: #ff7b7b;
+  border-top: 3px solid #ff7b7b;
+}
+
+.ionic-stat-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: rgba(232, 238, 252, 0.86);
+}
+
+.ionic-stat-header > span {
+  color: rgba(232, 238, 252, 0.72);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ionic-stat-icon,
+.ionic-card-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid currentColor;
+  border-radius: 14px;
+  background: currentColor;
+  color: #0f1726;
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.18);
+}
+
+.ionic-stat-icon ion-icon,
+.ionic-card-icon ion-icon {
+  font-size: 1.35rem;
+}
+
+.ionic-stat-card strong {
+  position: relative;
+  z-index: 1;
+  margin-top: 15px;
+  color: #f4f8ff;
+  font-size: 2.65rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.ionic-stat-card small {
+  position: relative;
+  z-index: 1;
+  margin-top: 9px;
+  color: rgba(232, 238, 252, 0.58);
+  font-size: 0.78rem;
+}
+
+.ionic-charts-grid {
+  align-items: stretch;
+}
+
+.ionic-chart-card {
+  position: relative;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(50, 62, 86, 0.95), rgba(25, 34, 52, 0.98));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.ionic-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.ionic-card-heading .ionic-card-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(96, 165, 250, 0.16);
+  color: #8fc4ff;
+  border-color: rgba(96, 165, 250, 0.32);
+}
+
+.ionic-card-heading h2 {
+  margin: 0;
+  color: #f4f8ff;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.ionic-card-heading p {
+  margin: 4px 0 0;
+  color: rgba(232, 238, 252, 0.58);
+  font-size: 0.8rem;
+}
+
+.ionic-chart-card .chart-legend {
+  margin-bottom: 10px;
+}
+
+.ionic-chart-card .legend-item {
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ionic-chart-card .chart-box {
+  min-height: 270px;
+  padding: 8px 0;
+}
+
+.ionic-chart-card canvas {
+  max-height: 270px;
+}
+
+@media (max-width: 900px) {
+  .ionic-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .ionic-stat-card {
+    min-height: 138px;
+    padding: 16px;
+  }
+
+  .ionic-stat-card strong {
+    font-size: 2.25rem;
+  }
+
+  .ionic-chart-card {
+    padding: 16px;
+  }
+
+  .ionic-chart-card .chart-box {
+    min-height: 235px;
+  }
+}
+
+/* ========================= CORREÇÃO DOS ÍCONES DOS CARDS ========================= */
+
+.ionic-stat-icon,
+.ionic-card-icon,
+.ionic-stat-icon ion-icon,
+.ionic-card-icon ion-icon {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.ionic-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f1726 !important;
+  background: #60a5fa;
+}
+
+.ionic-stat-card.win .ionic-stat-icon {
+  color: #102000 !important;
+  background: #d8ff63;
+}
+
+.ionic-stat-card.loss .ionic-stat-icon {
+  color: #3a1010 !important;
+  background: #ff7b7b;
+}
+
+.ionic-stat-icon ion-icon {
+  display: block !important;
+  width: 1.35rem;
+  height: 1.35rem;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  color: inherit !important;
+  font-size: 1.35rem !important;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ionic-stat-icon ion-icon::part(native) {
+  color: inherit !important;
+}
+
+.ionic-stat-card.total .ionic-stat-icon ion-icon {
+  color: #0f1726 !important;
+}
+
+.ionic-stat-card.win .ionic-stat-icon ion-icon {
+  color: #102000 !important;
+}
+
+.ionic-stat-card.loss .ionic-stat-icon ion-icon {
+  color: #3a1010 !important;
+}
+
+/* ========================= ÍCONES DOS CARDS — SVG LOCAL ========================= */
+
+.ionic-stat-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  color: #0f1726 !important;
+  background: #60a5fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  line-height: 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.ionic-stat-card.win .ionic-stat-icon {
+  color: #102000 !important;
+  background: #d8ff63 !important;
+}
+
+.ionic-stat-card.loss .ionic-stat-icon {
+  color: #3a1010 !important;
+  background: #ff7b7b !important;
+}
+
+.ionic-stat-icon svg {
+  display: block !important;
+  width: 25px !important;
+  height: 25px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.9 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   DIVISÃO DOS CARDS POR CATEGORIA
+   ========================================================= */
+
+.ionic-stat-card > strong {
+  margin-bottom: 14px;
+}
+
+.ionic-stat-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.ionic-stat-breakdown > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 7px 4px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.ionic-stat-breakdown span {
+  display: block;
+  margin: 0;
+  color: rgba(232, 238, 252, 0.62);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.ionic-stat-breakdown strong {
+  display: block;
+  margin-top: 5px;
+  color: #f4f8ff;
+  font-size: 1.15rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.ionic-stat-card.total .ionic-stat-breakdown strong {
+  color: #60a5fa;
+}
+
+.ionic-stat-card.win .ionic-stat-breakdown strong {
+  color: #d8ff63;
+}
+
+.ionic-stat-card.loss .ionic-stat-breakdown strong {
+  color: #ff7b7b;
+}
+
+@media (max-width: 480px) {
+  .ionic-stat-breakdown {
+    gap: 4px;
+  }
+
+  .ionic-stat-breakdown > div {
+    min-height: 48px;
+    padding: 6px 2px;
+  }
+
+  .ionic-stat-breakdown span {
+    font-size: 0.56rem;
+  }
+
+  .ionic-stat-breakdown strong {
+    font-size: 1rem;
+  }
+}
+
+/* =========================================================
+   CÍRCULOS DE CATEGORIA — TORNEIOS, RANKING E TREINO
+   ========================================================= */
+
+.ionic-circle-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.ionic-category-circle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 7px 16px rgba(0, 0, 0, 0.16);
+}
+
+.ionic-category-circle::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.ionic-category-circle strong {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: #f4f8ff;
+  font-size: 1.28rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.ionic-category-circle span {
+  position: relative;
+  z-index: 1;
+  margin-top: 5px;
+  color: rgba(232, 238, 252, 0.72);
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ionic-stat-card.total .ionic-category-circle {
+  border-color: rgba(96, 165, 250, 0.65);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(96, 165, 250, 0.24),
+    rgba(96, 165, 250, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.ionic-stat-card.total .ionic-category-circle strong {
+  color: #60a5fa;
+}
+
+.ionic-stat-card.win .ionic-category-circle {
+  border-color: rgba(216, 255, 99, 0.68);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(216, 255, 99, 0.24),
+    rgba(216, 255, 99, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.ionic-stat-card.win .ionic-category-circle strong {
+  color: #d8ff63;
+}
+
+.ionic-stat-card.loss .ionic-category-circle {
+  border-color: rgba(255, 123, 123, 0.68);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(255, 123, 123, 0.24),
+    rgba(255, 123, 123, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.ionic-stat-card.loss .ionic-category-circle strong {
+  color: #ff7b7b;
+}
+
+@media (max-width: 480px) {
+  .ionic-circle-breakdown {
+    gap: 4px;
+  }
+
+  .ionic-category-circle {
+    width: 64px;
+    height: 64px;
+  }
+
+  .ionic-category-circle strong {
+    font-size: 1.08rem;
+  }
+
+  .ionic-category-circle span {
+    font-size: 0.47rem;
+  }
+}
+
+/* ========================= GARANTIAS FINAIS DO DASHBOARD ========================= */
+
+body.dashboard-page {
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
+}
+
+.dashboard-hero {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-grid,
+.ionic-charts-grid,
+.ionic-chart-card,
+.chart-box {
+  position: relative;
+  z-index: 1;
+}
+
+.chart-box {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.chart-box canvas {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto;
+  max-width: 100%;
+}
+
+.career-bottom-nav {
+  display: grid !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2000 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 768px) {
+  body.dashboard-page {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .chart-box canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
