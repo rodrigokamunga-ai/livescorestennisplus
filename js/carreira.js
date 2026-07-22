@@ -583,27 +583,62 @@
       const total = matches.length;
       const stats = computeStats(matches);
       const tStats = computeTournamentStats(matches);
-
-      const totalPlayed = stats.wins + stats.losses;
-      const winPct = totalPlayed > 0 ? Math.round((stats.wins / totalPlayed) * 100) : 0;
-      const lossPct = totalPlayed > 0 ? Math.round((stats.losses / totalPlayed) * 100) : 0;
-
-      if (el.totalMatches) el.totalMatches.textContent = String(total);
-      if (el.totalWins) el.totalWins.textContent = `${stats.wins} - ${winPct}%`;
-      if (el.totalLosses) el.totalLosses.textContent = `${stats.losses} - ${lossPct}%`;
-      if (el.totalWo) el.totalWo.textContent = String(stats.wo);
-      if (el.totalTournaments) el.totalTournaments.textContent = String(tStats.tournaments);
-      if (el.totalChampion) el.totalChampion.textContent = String(tStats.champion);
-      if (el.totalRunnerup) el.totalRunnerup.textContent = String(tStats.runnerup);
-      if (el.totalRanking) el.totalRanking.textContent = String(stats.ranking);
-      if (el.totalTraining) el.totalTraining.textContent = String(stats.training);
-      if (el.totalSimple) el.totalSimple.textContent = String(stats.simple);
-      if (el.totalDoubles) el.totalDoubles.textContent = String(stats.doubles);
-
+    
+      if (el.totalMatches) {
+        el.totalMatches.textContent = String(total);
+      }
+    
+      if (el.totalWins) {
+        el.totalWins.textContent = String(stats.wins);
+      }
+    
+      if (el.totalLosses) {
+        el.totalLosses.textContent = String(stats.losses);
+      }
+    
+      if (el.totalWo) {
+        el.totalWo.textContent = String(stats.wo);
+      }
+    
+      if (el.totalTournaments) {
+        el.totalTournaments.textContent = String(tStats.tournaments);
+      }
+    
+      if (el.totalChampion) {
+        el.totalChampion.textContent = String(tStats.champion);
+      }
+    
+      if (el.totalRunnerup) {
+        el.totalRunnerup.textContent = String(tStats.runnerup);
+      }
+    
+      if (el.totalRanking) {
+        el.totalRanking.textContent = String(stats.ranking);
+      }
+    
+      if (el.totalTraining) {
+        el.totalTraining.textContent = String(stats.training);
+      }
+    
+      if (el.totalSimple) {
+        el.totalSimple.textContent = String(stats.simple);
+      }
+    
+      if (el.totalDoubles) {
+        el.totalDoubles.textContent = String(stats.doubles);
+      }
+    
       const player = state.currentProfileName || "Usuário";
-      if (el.pageTitle) el.pageTitle.textContent = `Carreira - ${player}`;
-      if (el.subtitle) el.subtitle.textContent = "Histórico de partidas finalizadas do usuário";
-
+    
+      if (el.pageTitle) {
+        el.pageTitle.textContent = `Carreira - ${player}`;
+      }
+    
+      if (el.subtitle) {
+        el.subtitle.textContent =
+          "Histórico de partidas finalizadas do usuário";
+      }
+    
       if (el.summaryMessage) {
         el.summaryMessage.textContent = total
           ? `Exibindo ${total} partidas finalizadas de ${player}.`
