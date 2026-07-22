@@ -32,6 +32,9 @@
     const getAuth = () =>
       typeof __auth !== "undefined" ? __auth : firebase.auth();
 
+    let dashboardPieChart = null;
+    let dashboardYearChart = null;
+
     const el = {
       yearFilter: document.getElementById("yearFilter"),
       modalityFilter: document.getElementById("modalityFilter"),
@@ -488,75 +491,330 @@
       }
     }
 
+    function updatePieClickDetails(wins, losses, opened = false) {
+      const details = document.getElementById("pieClickDetails");
+      const lossValue = document.getElementById("pieLossValue");
+      const winValue = document.getElementById("pieWinValue");
+
+      if (!details || !lossValue || !winValue) return;
+
+      const total = Number(wins || 0) + Number(losses || 0);
+
+      const winsPercentage = total > 0
+        ? ((Number(wins || 0) / total) * 100).toFixed(1)
+        : "0.0";
+
+      const lossesPercentage = total > 0
+        ? ((Number(losses || 0) / total) * 100).toFixed(1)
+        : "0.0";
+
+      /*
+       * Derrotas ficam à direita.
+       * Vitórias ficam à esquerda.
+       */
+      lossValue.textContent =
+        `Derrotas: ${Number(losses || 0)} (${lossesPercentage}%)`;
+
+      winValue.textContent =
+        `Vitórias: ${Number(wins || 0)} (${winsPercentage}%)`;
+
+      details.classList.toggle("is-open", Boolean(opened));
+      details.setAttribute("aria-hidden", opened ? "false" : "true");
+    }
+
     function drawPieChart(wins, losses) {
       if (!el.pieChart) return;
 
-      const canvas = el.pieChart;
-      const ctx = canvas.getContext("2d");
-
-      if (!ctx) return;
-
-      const width = canvas.width;
-      const height = canvas.height;
-      const cx = width / 2;
-      const cy = height / 2;
-      const radius = Math.min(width, height) * 0.36;
-      const total = wins + losses;
-
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = "#0f1726";
-      ctx.fillRect(0, 0, width, height);
-
-      if (!total) {
-        ctx.fillStyle = "rgba(232,238,252,0.78)";
-        ctx.font = "700 17px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("Sem dados", cx, cy - 8);
-
-        ctx.fillStyle = "rgba(232,238,252,0.55)";
-        ctx.font = "600 12px Arial";
-        ctx.fillText("aguardando partidas", cx, cy + 17);
+      if (typeof Chart === "undefined") {
+        console.error("[Dashboard] Chart.js não foi carregado.");
         return;
       }
 
-      const slices = [
-        { value: wins, color: "#60a5fa" },
-        { value: losses, color: "#ff7b7b" }
-      ];
+      const total =
+        Number(wins || 0) +
+        Number(losses || 0);
 
-      let start = -Math.PI / 2;
+      let opened = false;
 
-      slices.forEach((slice) => {
-        if (!slice.value) return;
+      if (dashboardPieChart) {
+        dashboardPieChart.destroy();
+        dashboardPieChart = null;
+      }
 
-        const end =
-          start + (slice.value / total) * Math.PI * 2;
+      updatePieClickDetails(wins, losses, false);
 
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, start, end);
-        ctx.closePath();
-        ctx.fillStyle = slice.color;
-        ctx.fill();
+      dashboardPieChart = new Chart(el.pieChart, {
+        type: "doughnut",
 
-        start = end;
+        data: {
+          labels: ["Derrotas", "Vitórias"],
+
+          datasets: [
+            {
+              data: [
+                Number(losses || 0),
+                Number(wins || 0)
+              ],
+
+              backgroundColor: [
+                "rgba(248, 113, 113, 0.92)",
+                "rgba(190, 242, 100, 0.92)"
+              ],
+
+              borderColor: "#0b1220",
+              borderWidth: 3,
+              hoverOffset: 12,
+              spacing: 3
+            }
+          ]
+        },
+
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "60%",
+
+          animation: {
+            duration: 700
+          },
+
+          /*
+           * Desativa tooltip e interação nas metades.
+           * Os valores só aparecem ao clicar no centro.
+           */
+          events: ["click"],
+
+          plugins: {
+            legend: {
+              display: false
+            },
+
+            tooltip: {
+              enabled: false
+            }
+          },
+
+          onClick(event, activeElements, chart) {
+            const canvasRect = chart.canvas.getBoundingClientRect();
+
+            const clickX =
+              event.native?.clientX ??
+              event.x ??
+              0;
+
+            const clickY =
+              event.native?.clientY ??
+              event.y ??
+              0;
+
+            const x = clickX - canvasRect.left;
+            const y = clickY - canvasRect.top;
+
+            const meta =
+              chart.getDatasetMeta(0);
+
+            const arc = meta?.data?.[0];
+
+            if (!arc) return;
+
+            const centerX = arc.x;
+            const centerY = arc.y;
+            const innerRadius = arc.innerRadius;
+
+            const distance = Math.sqrt(
+              Math.pow(x - centerX, 2) +
+              Math.pow(y - centerY, 2)
+            );
+
+            /*
+             * Só abre quando o clique estiver dentro
+             * do círculo central do gráfico.
+             */
+            const clickedCenter =
+              distance <= innerRadius;
+
+            if (!clickedCenter) {
+              opened = false;
+              updatePieClickDetails(wins, losses, false);
+              return;
+            }
+
+            opened = !opened;
+            updatePieClickDetails(wins, losses, opened);
+          }
+        },
+
+        plugins: [
+          {
+            id: "dashboardCenterText",
+
+            afterDraw(chart) {
+              const { ctx, chartArea } = chart;
+
+              if (!chartArea) return;
+
+              const centerX =
+                (chartArea.left + chartArea.right) / 2;
+
+              const centerY =
+                (chartArea.top + chartArea.bottom) / 2;
+
+              ctx.save();
+
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+
+              ctx.fillStyle = "#f8fafc";
+              ctx.font = "900 16px Inter, Arial, sans-serif";
+              ctx.fillText(
+                "Resultados",
+                centerX,
+                centerY - 10
+              );
+
+              ctx.fillStyle = "#94a3b8";
+              ctx.font = "700 12px Inter, Arial, sans-serif";
+              ctx.fillText(
+                `Total: ${total}`,
+                centerX,
+                centerY + 13
+              );
+
+              ctx.restore();
+            }
+          }
+        ]
+      });
+    }
+
+    function drawYearComparisonChart(matches) {
+      const canvas = document.getElementById("yearComparisonChart");
+
+      if (!canvas || typeof Chart === "undefined") return;
+
+      if (dashboardYearChart) {
+        dashboardYearChart.destroy();
+        dashboardYearChart = null;
+      }
+
+      const byYear = {};
+
+      matches.forEach((match) => {
+        const year = U.getMatchYear(match);
+        if (!year) return;
+
+        if (!byYear[year]) {
+          byYear[year] = {
+            wins: 0,
+            losses: 0
+          };
+        }
+
+        const result = U.getCurrentUserResult(match);
+
+        if (result === "win") {
+          byYear[year].wins += 1;
+        }
+
+        if (result === "loss") {
+          byYear[year].losses += 1;
+        }
       });
 
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius * 0.54, 0, Math.PI * 2);
-      ctx.fillStyle = "#0f1726";
-      ctx.fill();
+      const years = Object.keys(byYear)
+        .sort((a, b) => Number(b) - Number(a))
+        .slice(0, 2)
+        .sort((a, b) => Number(a) - Number(b));
 
-      ctx.fillStyle = "#f4f8ff";
-      ctx.font = "900 34px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(String(total), cx, cy - 8);
+      const labels = years.length
+        ? years
+        : ["Sem dados"];
 
-      ctx.fillStyle = "rgba(232,238,252,0.72)";
-      ctx.font = "700 12px Arial";
-      ctx.fillText("partidas", cx, cy + 18);
+      const wins = years.length
+        ? years.map((year) => byYear[year].wins)
+        : [0];
+
+      const losses = years.length
+        ? years.map((year) => byYear[year].losses)
+        : [0];
+
+      dashboardYearChart = new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Vitórias",
+              data: wins,
+              backgroundColor: "rgba(190, 242, 100, 0.88)",
+              borderColor: "#bef264",
+              borderWidth: 1,
+              borderRadius: 10,
+              barPercentage: 0.7,
+              categoryPercentage: 0.62
+            },
+            {
+              label: "Derrotas",
+              data: losses,
+              backgroundColor: "rgba(248, 113, 113, 0.88)",
+              borderColor: "#f87171",
+              borderWidth: 1,
+              borderRadius: 10,
+              barPercentage: 0.7,
+              categoryPercentage: 0.62
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: "#cbd5e1",
+                font: {
+                  weight: "700"
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0,
+                color: "#cbd5e1"
+              },
+              grid: {
+                color: "rgba(255,255,255,0.08)"
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "#e8eefc",
+                usePointStyle: true,
+                pointStyle: "circle",
+                padding: 18
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return `${context.dataset.label}: ${context.raw}`;
+                }
+              }
+            }
+          }
+        }
+      });
     }
 
     function drawBarChart(wins, losses) {
@@ -682,7 +940,7 @@
 
       updateCategoryCards(stats);
       drawPieChart(stats.totalWins, stats.totalLosses);
-      drawBarChart(stats.totalWins, stats.totalLosses);
+      drawYearComparisonChart(filtered);
 
       console.log("[Dashboard] partidas filtradas:", filtered);
       console.log("[Dashboard] estatísticas calculadas:", stats);
