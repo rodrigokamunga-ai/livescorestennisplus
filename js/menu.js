@@ -26,6 +26,7 @@
       alertModalBody: document.getElementById("alertModalBody"),
       closeAlertModalBtn: document.getElementById("closeAlertModalBtn"),
       closeAlertModalBtn2: document.getElementById("closeAlertModalBtn2"),
+      alertNotificationSound: document.getElementById("alertNotificationSound"),
       logoutBtnBottom: document.getElementById("logoutBtnBottom"),
       sharePublicBtn: document.getElementById("sharePublicBtn"),
       profileAvatar: document.getElementById("menuProfileAvatar"),
@@ -42,6 +43,10 @@
 
     let currentAlertsSignature = "";
     let menuDropdownOpen = false;
+    let alertsUnsubscribe = null;
+    let previousAlertIds = new Set();
+    let alertsBaselineReady = false;
+    let notificationSoundUnlocked = false;
 
     // ─── Helpers gerais ──────────────────────────────────────────────────
 
@@ -514,6 +519,90 @@
       el.alertBadge.textContent = count > 9 ? "9+" : String(count);
     }
 
+    function unlockNotificationSound() {
+      const audio = el.alertNotificationSound;
+    
+      if (!audio || notificationSoundUnlocked) return;
+    
+      try {
+        audio.muted = true;
+    
+        const playPromise = audio.play();
+    
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise
+            .then(() => {
+              audio.pause();
+              audio.currentTime = 0;
+              audio.muted = false;
+              notificationSoundUnlocked = true;
+            })
+            .catch(() => {
+              audio.muted = false;
+            });
+        }
+      } catch (error) {
+        console.warn("Não foi possível preparar o som de alerta:", error);
+      }
+    }
+    
+    function playAlertNotificationSound() {
+      const audio = el.alertNotificationSound;
+    
+      if (!audio) return;
+    
+      try {
+        audio.currentTime = 0;
+        audio.volume = 1;
+    
+        const playPromise = audio.play();
+    
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch((error) => {
+            console.warn(
+              "O navegador bloqueou o som automático. Toque na tela para liberar o áudio.",
+              error
+            );
+          });
+        }
+      } catch (error) {
+        console.warn("Erro ao reproduzir som de alerta:", error);
+      }
+    }
+    
+    function vibrateForNewAlert() {
+      if (!("vibrate" in navigator)) return;
+    
+      try {
+        navigator.vibrate([250, 100, 250]);
+      } catch (error) {
+        console.warn("Vibração não disponível:", error);
+      }
+    }
+    
+    function notifyNewAlert() {
+      vibrateForNewAlert();
+      playAlertNotificationSound();
+    }
+    
+    function bindNotificationSoundUnlock() {
+      const unlockEvents = ["pointerdown", "touchstart", "keydown"];
+    
+      const unlock = () => {
+        unlockNotificationSound();
+    
+        unlockEvents.forEach((eventName) => {
+          document.removeEventListener(eventName, unlock);
+        });
+      };
+    
+      unlockEvents.forEach((eventName) => {
+        document.addEventListener(eventName, unlock, {
+          passive: true
+        });
+      });
+    }
+
     // ─── Data/Hora ───────────────────────────────────────────────────────
 
     function normalizeTime(value) {
@@ -667,60 +756,103 @@
       el.alertModalBody.innerHTML = `<div class="alert-game-list">${html}</div>`;
     }
 
-    async function loadTodayAlerts(user) {
+    function loadTodayAlerts(user) {
       if (!el.alertBadge || !el.alertModalBody || !user?.uid) return;
-
-      try {
-        const db = getDb();
-        if (!db) {
-          renderAlerts([]);
-          return;
-        }
-
-        const now = new Date();
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-
-        const matches = [];
-
-        const snapshot = await db.collection(COLLECTION_NAME)
-          .where("ownerId", "==", user.uid)
-          .get();
-
-        snapshot.forEach((doc) => {
-          const data = doc.data() || {};
-
-          const rawDate = pickDate(data);
-          if (normalizeDateOnly(rawDate) !== today) return;
-
-          const normalizedTime = normalizeTime(
-            pickTime(data) || (rawDate ? String(rawDate).slice(11, 16) : "")
-          );
-
-          matches.push({
-            id: doc.id,
-            jogador1: pickPlayer1(data),
-            jogador2: pickPlayer2(data),
-            jogador3: pickPlayer3(data),
-            jogador4: pickPlayer4(data),
-            horaPartida: normalizedTime,
-            dateTimeLabel: getMatchDateTimeLabel(data),
-            tournamentName: pickTournamentName(data),
-            categoryName: data.categoryName || "",
-            tournamentStage: data.tournamentStage || "",
-            gameFormat: data.gameFormat || "",
-            playersHTML: formatPlayersLine(data)
-          });
-        });
-
-        matches.sort((a, b) => a.horaPartida.localeCompare(b.horaPartida));
-        currentAlertsSignature = getAlertsSignature(matches);
-        renderAlerts(matches);
-        updateBadgeVisibility(matches.length);
-      } catch (err) {
-        console.error("Erro ao carregar alertas:", err);
-        if (el.alertBadge) el.alertBadge.style.display = "none";
+    
+      const db = getDb();
+    
+      if (!db) {
         renderAlerts([]);
+        return;
       }
+    
+      // Cancela o listener anterior, evitando duplicidade
+      if (alertsUnsubscribe) {
+        alertsUnsubscribe();
+        alertsUnsubscribe = null;
+      }
+    
+      previousAlertIds = new Set();
+      alertsBaselineReady = false;
+    
+      const now = new Date();
+    
+      const today =
+        `${now.getFullYear()}-` +
+        `${String(now.getMonth() + 1).padStart(2, "0")}-` +
+        `${String(now.getDate()).padStart(2, "0")}`;
+    
+      const query = db
+        .collection(COLLECTION_NAME)
+        .where("ownerId", "==", user.uid);
+    
+      alertsUnsubscribe = query.onSnapshot(
+        (snapshot) => {
+          const matches = [];
+    
+          snapshot.forEach((doc) => {
+            const data = doc.data() || {};
+    
+            const rawDate = pickDate(data);
+    
+            if (normalizeDateOnly(rawDate) !== today) {
+              return;
+            }
+    
+            const normalizedTime = normalizeTime(
+              pickTime(data) ||
+              (rawDate ? String(rawDate).slice(11, 16) : "")
+            );
+    
+            matches.push({
+              id: doc.id,
+              jogador1: pickPlayer1(data),
+              jogador2: pickPlayer2(data),
+              jogador3: pickPlayer3(data),
+              jogador4: pickPlayer4(data),
+              horaPartida: normalizedTime,
+              dateTimeLabel: getMatchDateTimeLabel(data),
+              tournamentName: pickTournamentName(data),
+              categoryName: data.categoryName || "",
+              tournamentStage: data.tournamentStage || "",
+              gameFormat: data.gameFormat || "",
+              playersHTML: formatPlayersLine(data)
+            });
+          });
+    
+          matches.sort((a, b) =>
+            a.horaPartida.localeCompare(b.horaPartida)
+          );
+    
+          const currentIds = new Set(matches.map((item) => item.id));
+    
+          /* * Não notifica na primeira leitura da tela. * Notifica somente quando aparecer um novo documento/partida. */
+          const hasNewAlert =
+            alertsBaselineReady &&
+            matches.some((item) => !previousAlertIds.has(item.id));
+    
+          currentAlertsSignature = getAlertsSignature(matches);
+    
+          renderAlerts(matches);
+          updateBadgeVisibility(matches.length);
+    
+          if (hasNewAlert) {
+            notifyNewAlert();
+          }
+    
+          previousAlertIds = currentIds;
+          alertsBaselineReady = true;
+        },
+        (err) => {
+          console.error("Erro ao acompanhar alertas em tempo real:", err);
+    
+          if (el.alertBadge) {
+            el.alertBadge.style.display = "none";
+          }
+    
+          renderAlerts([]);
+        }
+      );
     }
 
     // ─── Eventos ──────────────────────────────────────────────────────────
@@ -749,6 +881,7 @@
     async function init() {
       bindEvents();
       bindDropdownEvents();
+      bindNotificationSoundUnlock();
       setDefaultAvatar();
       closeMenuDropdown();
 
