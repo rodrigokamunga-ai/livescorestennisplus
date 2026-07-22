@@ -29,6 +29,10 @@
   <!-- Ionicons -->
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+
+  
+
+
 </head>
 
 <body class="dashboard-page">
@@ -194,61 +198,64 @@
 
       </div>
 
-      <div class="dashboard-grid ionic-charts-grid">
-        <article class="dashboard-panel ionic-chart-card">
-          <div class="ionic-card-heading">
-            <div class="ionic-card-icon">
-              <ion-icon name="pie-chart-outline"></ion-icon>
-            </div>
-            <div>
-              <h2>Resumo de resultados</h2>
-              <p>Distribuição entre vitórias e derrotas</p>
-            </div>
-          </div>
+      <!-- Substitua o bloco atual .dashboard-grid ionic-charts-grid por este -->
 
-          <div class="chart-legend">
-            <span class="legend-item wins-legend">
-              <span class="legend-dot wins-dot"></span>
-              Vitórias
-            </span>
-            <span class="legend-item losses-legend">
-              <span class="legend-dot losses-dot"></span>
-              Derrotas
-            </span>
-          </div>
+<div class="dashboard-grid ionic-charts-grid">
 
-          <div class="chart-box">
-            <canvas id="pieChart" width="320" height="320"></canvas>
-          </div>
-        </article>
-
-        <article class="dashboard-panel ionic-chart-card">
-          <div class="ionic-card-heading">
-            <div class="ionic-card-icon">
-              <ion-icon name="bar-chart-outline"></ion-icon>
-            </div>
-            <div>
-              <h2>Desempenho por resultado</h2>
-              <p>Comparativo das partidas filtradas</p>
-            </div>
-          </div>
-
-          <div class="chart-legend">
-            <span class="legend-item wins-legend">
-              <span class="legend-dot wins-dot"></span>
-              Vitórias
-            </span>
-            <span class="legend-item losses-legend">
-              <span class="legend-dot losses-dot"></span>
-              Derrotas
-            </span>
-          </div>
-
-          <div class="chart-box">
-            <canvas id="barChart" width="520" height="320"></canvas>
-          </div>
-        </article>
+  <!-- GRÁFICO DE PIZZA -->
+  <article class="dashboard-panel ionic-chart-card">
+    <div class="ionic-card-heading">
+      <div class="ionic-card-icon">
+        <ion-icon name="pie-chart-outline"></ion-icon>
       </div>
+
+      <div>
+        <h2>Resumo de resultados</h2>
+        <p>Clique no gráfico para abrir os valores</p>
+      </div>
+    </div>
+
+    <div class="pie-chart-stage">
+      <div
+        id="pieClickDetails"
+        class="pie-click-details"
+        aria-hidden="true"
+      >
+        <div id="pieLossValue" class="pie-click-value pie-loss-value">
+          Derrotas: 0
+        </div>
+
+        <div id="pieWinValue" class="pie-click-value pie-win-value">
+          Vitórias: 0
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+  </article>
+
+  <!-- COMPARATIVO DOS ÚLTIMOS DOIS ANOS -->
+  <article class="dashboard-panel ionic-chart-card">
+    <div class="ionic-card-heading">
+      <div class="ionic-card-icon">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+      </div>
+
+      <div>
+        <h2>Comparativo anual</h2>
+        <p>Vitórias e derrotas nos últimos dois anos</p>
+      </div>
+    </div>
+
+    <div class="chart-box annual-chart-box">
+      <canvas id="yearComparisonChart"></canvas>
+    </div>
+  </article>
+
+</div>
+
 
       <div id="dashboardMessage" class="dashboard-message"></div>
     </section>
@@ -295,26 +302,16 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <script src="js/firebase.js"></script>
   <script src="js/dashboard.js"></script>
+  
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("./service-worker.js")
-          .then((registration) => {
-            console.log("Service Worker registrado:", registration);
-          })
-          .catch((error) => {
-            console.error("Erro ao registrar Service Worker:", error);
-          });
-      });
-    }
-  </script>
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", async () => { try { const registration = await navigator.serviceWorker.register( "./service-worker.js", { updateViaCache: "none" } ); await registration.update(); console.log( "Service Worker registrado:", registration ); } catch (error) { console.error( "Erro ao registrar Service Worker:", error ); } }); } </script>
 </body>
 </html>
