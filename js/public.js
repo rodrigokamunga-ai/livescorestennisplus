@@ -525,47 +525,57 @@
 
     async function findProfileByName(name) {
       if (!name) return null;
-
-      const query = normalizeTextForSearch(name);
-      const collections = ["profiles", "users"];
-
+    
+      const searchText = normalizeTextForSearch(name);
+    
       try {
-        for (const col of collections) {
-          const snap = await db.collection(col).get();
-
-          let exact = null;
-          let partial = null;
-
-          snap.forEach((doc) => {
-            const d = doc.data() || {};
-
-            const displayName =
-              d.displayName ||
-              d.name ||
-              d.fullName ||
-              d.nome ||
-              d.ownerName ||
-              d.playerName ||
-              "";
-
-            const norm = normalizeTextForSearch(displayName);
-            if (!norm) return;
-
-            if (norm === query) {
-              exact = { id: doc.id, collection: col, ...d };
-            } else if (!partial && norm.includes(query)) {
-              partial = { id: doc.id, collection: col, ...d };
-            }
-          });
-
-          if (exact) return exact;
-          if (partial) return partial;
-        }
+        const snap = await db.collection("profiles")
+          .where("publicProfile", "==", true)
+          .get();
+    
+        let exact = null;
+        let partial = null;
+    
+        snap.forEach((doc) => {
+          const data = doc.data() || {};
+    
+          const displayName =
+            data.displayName ||
+            data.name ||
+            data.fullName ||
+            data.ownerName ||
+            "";
+    
+          const normalizedName =
+            normalizeTextForSearch(displayName);
+    
+          if (!normalizedName) return;
+    
+          const profile = {
+            id: doc.id,
+            collection: "profiles",
+            ...data
+          };
+    
+          if (normalizedName === searchText) {
+            exact = profile;
+          } else if (
+            !partial &&
+            normalizedName.includes(searchText)
+          ) {
+            partial = profile;
+          }
+        });
+    
+        return exact || partial;
       } catch (err) {
-        console.error("Erro ao buscar perfil por nome:", err);
+        console.error(
+          "Erro ao buscar perfil público por nome:",
+          err
+        );
+    
+        return null;
       }
-
-      return null;
     }
 
     function getPlayerPhotoFromMatch(match, which) {
