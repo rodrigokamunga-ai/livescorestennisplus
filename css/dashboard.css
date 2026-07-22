@@ -1151,3 +1151,91 @@ body.dashboard-page {
     height: auto !important;
   }
 }
+
+/* ========================================================= NÚMERO PRINCIPAL NO CANTO SUPERIOR DIREITO ========================================================= */
+
+.ionic-stat-card {
+  position: relative;
+  padding: 18px;
+}
+
+/* Evita que o título encoste no número */
+.ionic-stat-card .ionic-stat-header {
+  padding-right: 68px;
+}
+
+/* Número total de partidas, vitórias ou derrotas */
+.ionic-stat-card > strong {
+  position: absolute;
+  top: 17px;
+  right: 18px;
+  z-index: 3;
+
+  margin: 0 !important;
+  font-size: 1.75rem !important;
+  line-height: 1;
+  font-weight: 900;
+
+  text-align: right;
+}
+
+/* Cores dos números principais */
+.ionic-stat-card.total > strong {
+  color: #60a5fa !important;
+}
+
+.ionic-stat-card.win > strong {
+  color: #d8ff63 !important;
+}
+
+.ionic-stat-card.loss > strong {
+  color: #ff7b7b !important;
+}
+
+/* Mantém os números dos círculos centralizados */
+.ionic-category-circle strong {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+
+  margin: 0 !important;
+  font-size: 1.28rem !important;
+  text-align: center;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 768px) {
+  .ionic-stat-card {
+    padding: 16px;
+  }
+
+  .ionic-stat-card .ionic-stat-header {
+    padding-right: 58px;
+  }
+
+  .ionic-stat-card > strong {
+    top: 16px;
+    right: 16px;
+    font-size: 1.55rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ionic-stat-card {
+    padding: 14px;
+  }
+
+  .ionic-stat-card .ionic-stat-header {
+    padding-right: 52px;
+  }
+
+  .ionic-stat-card > strong {
+    top: 14px;
+    right: 14px;
+    font-size: 1.4rem !important;
+  }
+
+  .ionic-category-circle strong {
+    font-size: 1.08rem !important;
+  }
+}
