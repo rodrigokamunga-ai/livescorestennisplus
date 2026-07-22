@@ -1239,3 +1239,171 @@ body.dashboard-page {
     font-size: 1.08rem !important;
   }
 }
+/* ========================================================= GRÁFICO DE PIZZA NO PADRÃO DO RELATÓRIO ========================================================= */
+
+.ionic-chart-card .chart-box {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  min-height: 300px;
+  padding: 10px 0;
+}
+
+.ionic-chart-card .chart-box canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: none;
+}
+
+@media (max-width: 768px) {
+  .ionic-chart-card .chart-box {
+    height: 270px;
+    min-height: 270px;
+  }
+}
+
+/* =========================================================
+   PIZZA: VALORES ABERTOS PARA ESQUERDA E DIREITA
+   ========================================================= */
+
+   .pie-chart-stage {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .pie-chart-stage .chart-box {
+    position: relative;
+    width: min(100%, 320px);
+    height: 300px;
+    min-height: 300px;
+    z-index: 1;
+  }
+  
+  .pie-chart-stage .chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .pie-click-details {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .pie-click-details.is-open {
+    opacity: 1;
+  }
+  
+  .pie-click-value {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 104px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 900;
+    white-space: nowrap;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+  
+  .pie-loss-value {
+    left: 0;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.82);
+    border: 1px solid rgba(248, 113, 113, 0.55);
+  }
+  
+  .pie-win-value {
+    right: 0;
+    color: #ecfccb;
+    background: rgba(63, 98, 18, 0.82);
+    border: 1px solid rgba(190, 242, 100, 0.55);
+  }
+  
+  /* =========================================================
+     GRÁFICO ANUAL
+     ========================================================= */
+  
+  .annual-chart-box {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    min-height: 300px;
+  }
+  
+  .annual-chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  @media (max-width: 768px) {
+    .pie-chart-stage {
+      min-height: 285px;
+    }
+  
+    .pie-chart-stage .chart-box {
+      height: 260px;
+      min-height: 260px;
+    }
+  
+    .pie-click-value {
+      min-width: 88px;
+      padding: 8px 7px;
+      font-size: 0.68rem;
+    }
+  
+    .pie-loss-value {
+      left: -6px;
+    }
+  
+    .pie-win-value {
+      right: -6px;
+    }
+  
+    .annual-chart-box {
+      height: 260px;
+      min-height: 260px;
+    }
+  }
+
+  /* =========================================================
+   AJUSTES FINAIS DO GRÁFICO DE PIZZA
+   ========================================================= */
+
+/*
+ * Derrotas à direita.
+ * Vitórias à esquerda.
+ */
+
+.pie-loss-value {
+  left: auto !important;
+  right: 0 !important;
+}
+
+.pie-win-value {
+  left: 0 !important;
+  right: auto !important;
+}
+
+@media (max-width: 768px) {
+  .pie-loss-value {
+    left: auto !important;
+    right: -6px !important;
+  }
+
+  .pie-win-value {
+    left: -6px !important;
+    right: auto !important;
+  }
+}
