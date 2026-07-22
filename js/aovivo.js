@@ -1988,7 +1988,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const remaining = Math.max(
         0,
-        5 * 60 * 1000 - elapsed
+        1 * 60 * 1000 - elapsed
       );
 
       if (remaining <= 0) {
