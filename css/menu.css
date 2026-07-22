@@ -1315,3 +1315,152 @@ body.admin-page .admin-back-link:hover {
     font-size: 0.9rem;
   }
 }
+
+/* ========================================================= CABEÇALHO MOBILE EM UMA ÚNICA LINHA Menu | TennisPro | Tema | Perfil | Alertas ========================================================= */
+
+@media (max-width: 991.98px) {
+  .menu-fixed-top {
+    min-height: 58px;
+  }
+
+  .menu-navbar-top {
+    position: relative;
+
+    display: flex !important;
+    align-items: center !important;
+
+    flex-wrap: nowrap !important;
+    width: 100%;
+    min-width: 0;
+
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  /* Botão Menu */
+  .menu-navbar-toggler {
+    flex: 0 0 auto !important;
+    width: 38px;
+    height: 38px;
+
+    padding: 4px !important;
+    margin: 0 !important;
+  }
+
+  /* Texto TennisPro */
+  .menu-navbar-top .navbar-brand {
+    display: flex !important;
+    align-items: center !important;
+
+    flex: 1 1 auto !important;
+    min-width: 0;
+
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+
+    padding: 0 !important;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    font-size: 1rem;
+  }
+
+  .menu-navbar-top .navbar-brand span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Grupo: modo claro/escuro, perfil e alertas */
+  .menu-navbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end;
+
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+
+    gap: 3px !important;
+    margin-left: auto !important;
+  }
+
+  .menu-navbar-actions .menu-header-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto !important;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 4px !important;
+    margin: 0 !important;
+  }
+
+  .menu-navbar-actions .header-icon,
+  .menu-navbar-actions ion-icon {
+    font-size: 19px;
+  }
+
+  /* Badge dos alertas */
+  .menu-navbar-actions .header-alert-badge {
+    top: -2px;
+    right: -2px;
+
+    min-width: 15px;
+    height: 15px;
+
+    padding: 0 3px;
+    font-size: 9px;
+    line-height: 15px;
+  }
+
+  /* * O menu expandido aparece abaixo do cabeçalho, * sem empurrar os botões para outra linha. */
+  .menu-navbar-top .navbar-collapse {
+    position: absolute;
+    top: 58px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
+    width: 100% !important;
+    padding: 10px 14px;
+
+    background: var(--bs-dark, #212529);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* Ajuste para telas muito pequenas */
+@media (max-width: 360px) {
+  .menu-navbar-top {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .menu-navbar-toggler {
+    width: 34px;
+  }
+
+  .menu-navbar-top .navbar-brand {
+    margin-left: 3px !important;
+    margin-right: 3px !important;
+    font-size: 0.92rem;
+  }
+
+  .menu-navbar-actions {
+    gap: 1px !important;
+  }
+
+  .menu-navbar-actions .menu-header-btn {
+    width: 31px;
+    height: 31px;
+  }
+
+  .menu-navbar-actions ion-icon {
+    font-size: 17px;
+  }
+}
