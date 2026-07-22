@@ -492,93 +492,136 @@
     return null;
   }
 
-  async function getOpponentProfile(identifier) {
-    if (!identifier || typeof __db === "undefined") return null;
-
-    try {
-      const id = String(identifier).trim();
-      const collections = ["profiles", "users"];
-
-      for (const col of collections) {
-        const snap = await __db.collection(col).get();
-        let found = null;
-
-        snap.forEach((doc) => {
-          if (found) return;
-
-          const d = doc.data() || {};
-          const docId = String(doc.id || "").trim();
-          const uid = String(d.uid || "").trim();
-          const ownerId = String(d.ownerId || "").trim();
-          const email = String(d.email || "").trim().toLowerCase();
-          const displayName = String(d.displayName || d.name || d.fullName || "").trim();
-          const playerId = String(d.playerId || "").trim();
-
-          const matches =
-            docId === id ||
-            uid === id ||
-            ownerId === id ||
-            playerId === id ||
-            normalize(displayName) === normalize(id) ||
-            normalize(email) === normalize(id);
-
-          if (matches) {
-            found = { id: doc.id, collection: col, ...d };
-          }
-        });
-
-        if (found) return found;
-      }
-    } catch (err) {
-      console.error("Erro ao buscar perfil do adversário:", err);
+  async function getPublicProfileById(profileId) {
+    if (!profileId || typeof __db === "undefined") {
+      return null;
     }
-
-    return null;
+  
+    try {
+      const snap = await __db
+        .collection("profiles")
+        .doc(String(profileId).trim())
+        .get();
+  
+      if (!snap.exists) {
+        return null;
+      }
+  
+      const data = snap.data() || {};
+  
+      if (data.publicProfile !== true) {
+        return null;
+      }
+  
+      return {
+        id: snap.id,
+        collection: "profiles",
+        ...data
+      };
+    } catch (err) {
+      console.error("Erro ao carregar perfil público por ID:", err);
+      return null;
+    }
   }
 
-  async function findProfileByName(name) {
-    if (!name || typeof __db === "undefined") return null;
-
-    try {
-      const query = normalize(name);
-      const collections = ["profiles", "users"];
-
-      for (const col of collections) {
-        const snap = await __db.collection(col).get();
-
-        let exact = null;
-        let partial = [];
-
-        snap.forEach((doc) => {
-          const d = doc.data() || {};
-
-          const displayName =
-            d.displayName ||
-            d.name ||
-            d.fullName ||
-            d.nome ||
-            d.ownerName ||
-            d.playerName ||
-            "";
-
-          const norm = normalize(displayName);
-          if (!norm) return;
-
-          if (norm === query) {
-            exact = { id: doc.id, collection: col, ...d };
-          } else if (norm.includes(query)) {
-            partial.push({ id: doc.id, collection: col, ...d });
-          }
-        });
-
-        if (exact) return exact;
-        if (partial.length) return partial[0];
-      }
-    } catch (err) {
-      console.error("Erro ao buscar perfil por nome:", err);
+  async function getOpponentProfile(identifier) {
+    if (!identifier || typeof __db === "undefined") {
+      return null;
     }
-
-    return null;
+  
+    const id = String(identifier).trim();
+  
+    try {
+      // Primeiro tenta pelo ID do documento do perfil
+      const profileById = await getPublicProfileById(id);
+  
+      if (profileById) {
+        return profileById;
+      }
+  
+      // Caso o ID esteja salvo em algum campo interno
+      const fields = ["uid", "playerId", "ownerId"];
+  
+      for (const field of fields) {
+        const snap = await __db
+          .collection("profiles")
+          .where("publicProfile", "==", true)
+          .where(field, "==", id)
+          .limit(1)
+          .get();
+  
+        if (!snap.empty) {
+          const doc = snap.docs[0];
+  
+          return {
+            id: doc.id,
+            collection: "profiles",
+            ...doc.data()
+          };
+        }
+      }
+  
+      // Por último tenta pelo nome ou e-mail
+      return await findProfileByName(id);
+    } catch (err) {
+      console.error("Erro ao buscar perfil público do adversário:", err);
+      return null;
+    }
+  }
+  async function findProfileByName(name) {
+    if (!name || typeof __db === "undefined") {
+      return null;
+    }
+  
+    try {
+      const queryText = normalize(name);
+  
+      const snap = await __db
+        .collection("profiles")
+        .where("publicProfile", "==", true)
+        .get();
+  
+      let exact = null;
+      let partial = null;
+  
+      snap.forEach((doc) => {
+        const data = doc.data() || {};
+  
+        const displayName =
+          data.displayName ||
+          data.name ||
+          data.fullName ||
+          data.ownerName ||
+          data.playerName ||
+          "";
+  
+        const normalizedName = normalize(displayName);
+  
+        if (!normalizedName) {
+          return;
+        }
+  
+        const profile = {
+          id: doc.id,
+          collection: "profiles",
+          ...data
+        };
+  
+        if (normalizedName === queryText) {
+          exact = profile;
+        } else if (
+          !partial &&
+          normalizedName.includes(queryText)
+        ) {
+          partial = profile;
+        }
+      });
+  
+      return exact || partial;
+    } catch (err) {
+      console.error("Erro ao buscar perfil público por nome:", err);
+      return null;
+    }
   }
 
   async function getPlayersFromMatches() {
@@ -587,9 +630,18 @@
     const map = new Map();
 
     try {
-      const snap = await __db.collection("matches")
-        .where("ownerId", "==", state.currentOwnerId)
-        .get();
+      let matchesQuery = __db.collection("matches")
+  .where("ownerId", "==", state.currentOwnerId);
+
+if (!state.currentUser) {
+  matchesQuery = matchesQuery.where(
+    "shareEnabled",
+    "==",
+    true
+  );
+}
+
+const snap = await matchesQuery.get();
 
       snap.forEach((doc) => {
         const d = doc.data() || {};
@@ -632,77 +684,48 @@
   }
 
   async function searchProfilesByName(term) {
-    if (!term || typeof __db === "undefined") return [];
-
-    const query = normalize(term);
+    if (!term || typeof __db === "undefined") {
+      return [];
+    }
+  
+    const queryText = normalize(term);
     const results = [];
-
+  
     try {
-      const collections = ["profiles", "users"];
-
-      for (const col of collections) {
-        const snap = await __db.collection(col).get();
-
-        snap.forEach((doc) => {
-          const d = doc.data() || {};
-
-          const displayName =
-            d.displayName ||
-            d.name ||
-            d.fullName ||
-            d.nome ||
-            d.ownerName ||
-            d.playerName ||
-            "";
-
-          const norm = normalize(displayName);
-          if (!norm) return;
-
-          if (norm.includes(query) || query.includes(norm)) {
-            results.push({
-              id: doc.id,
-              collection: col,
-              ...d
-            });
-          }
-        });
-      }
-
-      const historical = await getPlayersFromMatches();
-
-      historical.forEach((p) => {
-        const displayName = p.displayName || p.name || "";
-        const norm = normalize(displayName);
-        if (!norm) return;
-
-        if (norm.includes(query) || query.includes(norm)) {
-          results.push(p);
+      const snap = await __db
+        .collection("profiles")
+        .where("publicProfile", "==", true)
+        .get();
+  
+      snap.forEach((doc) => {
+        const data = doc.data() || {};
+  
+        const displayName =
+          data.displayName ||
+          data.name ||
+          data.fullName ||
+          data.ownerName ||
+          data.playerName ||
+          "";
+  
+        const normalizedName = normalize(displayName);
+  
+        if (
+          normalizedName.includes(queryText) ||
+          queryText.includes(normalizedName)
+        ) {
+          results.push({
+            id: doc.id,
+            collection: "profiles",
+            ...data
+          });
         }
       });
     } catch (err) {
-      console.error("Erro ao pesquisar perfis:", err);
+      console.error("Erro ao pesquisar perfis públicos:", err);
     }
-
-    const seen = new Map();
-
-    for (const item of results) {
-      const displayName = normalize(item.displayName || item.name || item.ownerName || "");
-      if (!displayName) continue;
-
-      if (!seen.has(displayName)) {
-        seen.set(displayName, item);
-      } else {
-        const current = seen.get(displayName);
-        const currentScore = Object.keys(current || {}).length;
-        const newScore = Object.keys(item || {}).length;
-
-        if (newScore > currentScore) {
-          seen.set(displayName, item);
-        }
-      }
-    }
-
-    return Array.from(seen.values());
+  
+    return dedupeProfilesByName(results);
   }
 
   function calculateAge(birthDate) {
@@ -1629,23 +1652,61 @@ const chance2 =
         }
       }
 
-      const snap = state.currentOwnerId
-        ? await __db.collection("matches")
-            .where("ownerId", "==", state.currentOwnerId)
-            .get()
-        : await __db.collection("matches").get();
+      let matchesQuery = __db.collection("matches");
+
+if (state.currentOwnerId) {
+  matchesQuery = matchesQuery.where(
+    "ownerId",
+    "==",
+    state.currentOwnerId
+  );
+}
+
+if (!authUser) {
+  matchesQuery = matchesQuery.where(
+    "shareEnabled",
+    "==",
+    true
+  );
+}
+
+const snap = await matchesQuery.get();
 
       state.allOwnerMatches = snap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
       }));
 
-      let ownerProfile =
-  await getLoggedUserProfile();
+      let ownerProfile = null;
 
+// No modo compartilhado, carrega diretamente pelo ownerId
+if (!authUser && state.currentOwnerId) {
+  ownerProfile = await getPublicProfileById(
+    state.currentOwnerId
+  );
+}
+
+// No modo autenticado, mantém o comportamento atual
+if (!ownerProfile && authUser) {
+  ownerProfile = await getLoggedUserProfile();
+}
+
+// Fallback pelo nome do jogador
 if (!ownerProfile && player1) {
-  ownerProfile =
-    await findProfileByName(player1);
+  ownerProfile = await findProfileByName(player1);
+}
+
+if (!ownerProfile && state.matchDataFromUrl) {
+  const matchPlayer1 =
+    state.matchDataFromUrl.player1 ||
+    state.matchDataFromUrl.player1Name ||
+    state.matchDataFromUrl.ownerName ||
+    "";
+
+  if (matchPlayer1) {
+    ownerProfile =
+      await findProfileByName(matchPlayer1);
+  }
 }
 
 if (!ownerProfile && state.matchDataFromUrl) {
