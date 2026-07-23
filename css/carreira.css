@@ -2392,3 +2392,177 @@ strong {
     font-size: 0.76rem !important;
   }
 }
+
+/* ========================================================= CARD TOTAL DE PARTIDAS — TEXTO À ESQUERDA E NÚMERO À DIREITA ========================================================= */
+
+body.career-page
+.career-summary-card.total.matches {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px;
+  width: 100%;
+  min-height: 88px;
+  padding: 18px 22px !important;
+  aspect-ratio: auto !important;
+}
+
+body.career-page
+.career-summary-card.total.matches
+.career-summary-card-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+body.career-page
+.career-summary-card.total.matches
+.career-summary-card-label
+.career-card-icon {
+  position: static !important;
+  flex: 0 0 auto;
+  width: 32px !important;
+  height: 32px !important;
+  margin: 0 !important;
+  color: #86a8ff !important;
+  opacity: 1 !important;
+  font-size: 32px !important;
+}
+
+body.career-page
+.career-summary-card.total.matches
+.career-summary-card-label
+span {
+  width: auto !important;
+  margin: 0 !important;
+  color: #e8eefc !important;
+  font-size: 0.95rem !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  text-align: left !important;
+  white-space: nowrap;
+}
+
+body.career-page
+.career-summary-card.total.matches
+strong {
+  flex: 0 0 auto;
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 2rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+}
+
+@media (max-width: 768px) {
+  body.career-page
+  .career-summary-card.total.matches {
+    min-height: 78px;
+    padding: 14px 16px !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  .career-summary-card-label
+  .career-card-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 28px !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  .career-summary-card-label
+  span {
+    font-size: 0.82rem !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  strong {
+    font-size: 1.65rem !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body.career-page
+  .career-summary-card.total.matches {
+    gap: 10px;
+    padding: 12px 14px !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  .career-summary-card-label
+  span {
+    font-size: 0.76rem !important;
+  }
+
+  body.career-page
+  .career-summary-card.total.matches
+  strong {
+    font-size: 1.45rem !important;
+  }
+}
+
+/* ========================================================= HISTÓRICO DO TORNEIO — INFORMAÇÕES COM ÍCONES ========================================================= */
+
+body.career-page
+.career-tournament-match-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+body.career-page
+.career-tournament-match-info
+span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(232, 238, 252, 0.82);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+body.career-page
+.career-tournament-match-info
+span::after {
+  display: none !important;
+}
+
+body.career-page
+.career-tournament-match-info
+ion-icon {
+  color: #86a8ff;
+  font-size: 16px;
+}
+
+body.career-page
+.career-tournament-match-score {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.career-page
+.career-tournament-match-score
+ion-icon {
+  color: #86a8ff;
+  font-size: 17px;
+}
+
+body.career-page
+.career-tournament-match-score
+strong {
+  color: #ffffff;
+  font-weight: 900;
+}
+
