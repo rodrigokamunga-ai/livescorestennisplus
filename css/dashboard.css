@@ -1669,3 +1669,168 @@ body.dashboard-page {
 .dashboard-filters {
   scroll-margin-top: 82px;
 }
+
+/* ========================================================= CARDS DE WO E ABANDONO ========================================================= */
+
+.ionic-circle-breakdown.two-circles {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ionic-stat-card.wo {
+  color: #fbbf24;
+  border-top: 3px solid #fbbf24;
+}
+
+.ionic-stat-card.abandonment {
+  color: #c084fc;
+  border-top: 3px solid #c084fc;
+}
+
+.ionic-stat-card.wo .ionic-stat-icon {
+  color: #3b2600 !important;
+  background: #fbbf24 !important;
+}
+
+.ionic-stat-card.abandonment .ionic-stat-icon {
+  color: #260b3d !important;
+  background: #c084fc !important;
+}
+
+.wo-win-circle {
+  color: #d8ff63;
+  border-color: rgba(216, 255, 99, 0.7);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(216, 255, 99, 0.24),
+    rgba(216, 255, 99, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.wo-loss-circle {
+  color: #ff7b7b;
+  border-color: rgba(255, 123, 123, 0.7);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(255, 123, 123, 0.24),
+    rgba(255, 123, 123, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.abandonment-win-circle {
+  color: #d8ff63;
+  border-color: rgba(216, 255, 99, 0.7);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(216, 255, 99, 0.24),
+    rgba(216, 255, 99, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.abandonment-loss-circle {
+  color: #ff7b7b;
+  border-color: rgba(255, 123, 123, 0.7);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(255, 123, 123, 0.24),
+    rgba(255, 123, 123, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+@media (max-width: 768px) {
+  .ionic-circle-breakdown.two-circles {
+    max-width: 230px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ========================================================= CÍRCULOS DE PARTIDAS, VITÓRIAS E DERROTAS ========================================================= */
+
+.activity-summary-circles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-result-circle {
+  display: none;
+}
+
+.activity-result-circle strong {
+  color: #ffffff;
+}
+
+.activity-result-circle:nth-child(3) {
+  border-color: rgba(216, 255, 99, 0.7);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(216, 255, 99, 0.24),
+    rgba(216, 255, 99, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.activity-result-circle:nth-child(3) strong {
+  color: #d8ff63;
+}
+
+.activity-result-circle:nth-child(4) {
+  border-color: rgba(255, 123, 123, 0.7);
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(255, 123, 123, 0.24),
+    rgba(255, 123, 123, 0.06) 68%,
+    rgba(255, 255, 255, 0.03)
+  );
+}
+
+.activity-result-circle:nth-child(4) strong {
+  color: #ff7b7b;
+}
+
+@media (max-width: 768px) {
+  .activity-summary-circles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .activity-summary-circles
+  .tournament-report-circle {
+    width: 88px;
+    height: 88px;
+  }
+
+  .activity-summary-circles
+  .tournament-report-circle strong {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .activity-summary-circles {
+    gap: 4px;
+  }
+
+  .activity-summary-circles
+  .tournament-report-circle {
+    width: 78px;
+    height: 78px;
+  }
+
+  .activity-summary-circles
+  .tournament-report-circle strong {
+    font-size: 1.1rem;
+  }
+
+  .activity-summary-circles
+  .tournament-report-circle span {
+    font-size: 0.48rem;
+  }
+}
