@@ -331,54 +331,268 @@
       },
 
       getScoreLabel(match) {
-        const score = U.normalizeScore(match.score || {});
-        const status = U.normalizeText(match.status);
-
-        if (status === "wo") return "WO";
-        if (status === "ret") return "RET";
-
-        const history = U.cleanSetHistory(score.setHistory);
-
-        const getSetText = (setObj) => {
-          if (!setObj) return "";
-
-          const g1 = Number(setObj?.games1 || 0);
-          const g2 = Number(setObj?.games2 || 0);
-          const tb1 = Number(setObj?.tieBreakPoints1 || 0);
-          const tb2 = Number(setObj?.tieBreakPoints2 || 0);
-          const mode = String(setObj?.tieBreakMode || "").trim();
-          const finalLabel = String(setObj?.finalLabel || "").trim();
-
-          if (finalLabel) return finalLabel;
-
-          if (mode === "super10" && (tb1 > 0 || tb2 > 0)) {
-            return `${tb1}-${tb2}`;
-          }
-
-          if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
-            const winnerIs1 = tb1 > tb2;
-            return `${winnerIs1 ? "7x6" : "6x7"} (${tb1}-${tb2})`;
-          }
-
-          if (g1 > 0 || g2 > 0) {
-            return `${g1}x${g2}`;
-          }
-
-          return "";
-        };
-
-        const parts = history.map(getSetText).filter((t) => t && t !== "--");
-
-        if (parts.length) {
-          return parts.join(" • ");
+        const score = U.normalizeScore(
+          match.score || {}
+        );
+      
+        const status = U.normalizeText(
+          match.status
+        );
+      
+        if (status === "wo") {
+          return "WO";
         }
-
-        if (score.sets1 > 0 || score.sets2 > 0) {
-          return `${score.sets1}x${score.sets2}`;
+      
+        if (status === "ret") {
+          return "RET";
         }
+      
+        const history = Array.isArray(score.setHistory)
+          ? score.setHistory
+          : [];
 
-        return "--";
+          console.log("[Carreira] placar recebido:", {
+            score,
+            setHistory: score.setHistory,
+            match
+          });
+      
+        const entries = [];
+        const tieBreakEntries = new Map();
+      
+        function addNormalScore(text) {
+          const normalized = String(text || "")
+            .replace(/\s+/g, " ")
+            .trim();
+      
+          if (!normalized || normalized === "--") {
+            return;
+          }
+      
+          const alreadyExists = entries.some(
+            (item) => item.text === normalized
+          );
+      
+          if (!alreadyExists) {
+            entries.push({
+              text: normalized,
+              tieBreakKey: null,
+              isSuper: false
+            });
+          }
+        }
+      
+        function addTieBreakScore( text, tieBreakKey, isSuper ) {
+          const normalized = String(text || "")
+            .replace(/\s+/g, " ")
+            .trim();
+      
+          if (!normalized || !tieBreakKey) {
+            return;
+          }
+      
+          const existing =
+            tieBreakEntries.get(tieBreakKey);
+      
+          /* * Se o mesmo tie-break aparecer como: * * 10-3 * 7x6 10-3 * * mantém somente a versão correta. */
+          if (existing) {
+            if (isSuper && !existing.isSuper) {
+              entries[existing.index] = {
+                text: normalized,
+                tieBreakKey,
+                isSuper: true
+              };
+      
+              tieBreakEntries.set(tieBreakKey, {
+                index: existing.index,
+                isSuper: true
+              });
+            }
+      
+            return;
+          }
+      
+          const index = entries.length;
+      
+          entries.push({
+            text: normalized,
+            tieBreakKey,
+            isSuper
+          });
+      
+          tieBreakEntries.set(tieBreakKey, {
+            index,
+            isSuper
+          });
+        }
+      
+        history.forEach((setObj) => {
+          if (!setObj) return;
+      
+          const games1 = Number(
+            setObj.games1 || 0
+          );
+      
+          const games2 = Number(
+            setObj.games2 || 0
+          );
+      
+          const tb1 = Number(
+            setObj.tieBreakPoints1 || 0
+          );
+      
+          const tb2 = Number(
+            setObj.tieBreakPoints2 || 0
+          );
+      
+          const tieBreakTotal = tb1 + tb2;
+      
+          const mode = U.normalizeText(
+            setObj.tieBreakMode || ""
+          );
+      
+          const finalLabel = String(
+            setObj.finalLabel || ""
+          )
+            .replace(/\s+/g, " ")
+            .trim();
+      
+          /* * Tenta identificar o placar dentro do finalLabel. * * Exemplos reconhecidos: * * 10-4 * 7x6 10-4 * 7x6 (10-4) * 6x7 (4-10) */
+          const labelMatch = finalLabel.match(
+            /(\d+)\s*[xX]\s*(\d+)\s*\(?\s*(\d+)\s*-\s*(\d+)\s*\)?/
+          );
+      
+          const simpleTieBreakMatch =
+            finalLabel.match(
+              /^(\d+)\s*-\s*(\d+)$/
+            );
+      
+          const detectedGames1 = labelMatch
+            ? Number(labelMatch[1])
+            : games1;
+      
+          const detectedGames2 = labelMatch
+            ? Number(labelMatch[2])
+            : games2;
+      
+          const detectedTb1 = labelMatch
+            ? Number(labelMatch[3])
+            : simpleTieBreakMatch
+              ? Number(simpleTieBreakMatch[1])
+              : tb1;
+      
+          const detectedTb2 = labelMatch
+            ? Number(labelMatch[4])
+            : simpleTieBreakMatch
+              ? Number(simpleTieBreakMatch[2])
+              : tb2;
+      
+          const detectedTieBreakTotal =
+            detectedTb1 + detectedTb2;
+      
+          const tieBreakKey =
+            detectedTieBreakTotal > 0
+              ? `${detectedTb1}-${detectedTb2}`
+              : null;
+      
+              const normalTieBreakByGames =
+              (
+                detectedGames1 === 7 &&
+                detectedGames2 === 6
+              ) ||
+              (
+                detectedGames1 === 6 &&
+                detectedGames2 === 7
+              );
+            
+            const normalTieBreakByPoints =
+              detectedTb1 <= 7 &&
+              detectedTb2 <= 7;
+            
+            const isNormalTieBreak =
+              mode === "tb7" ||
+              normalTieBreakByGames ||
+              (
+                simpleTieBreakMatch &&
+                normalTieBreakByPoints
+              ) ||
+              Boolean(labelMatch);
+            
+            /* * Tie-break normal * * Exemplos: * 7-3 -> 7x6 (7-3) * 10-4 -> 7x6 (10-4), se os games forem 7x6 */
+            if (
+              isNormalTieBreak &&
+              tieBreakKey
+            ) {
+              const baseScore =
+                detectedGames1 === 6 &&
+                detectedGames2 === 7
+                  ? "6x7"
+                  : "7x6";
+            
+              addTieBreakScore(
+                `${baseScore} (${detectedTb1}-${detectedTb2})`,
+                tieBreakKey,
+                false
+              );
+            
+              return;
+            }
+            
+            /* * Super tie-break * * Exemplo: * 10-3 */
+            if (
+              mode === "super10" &&
+              tieBreakKey
+            ) {
+              addTieBreakScore(
+                `${detectedTb1}-${detectedTb2}`,
+                tieBreakKey,
+                true
+              );
+            
+              return;
+            }
+      
+          /* * Caso o finalLabel seja somente 10-4, * mas o modo seja tie-break normal. */
+          
+      
+          /* * Placar normal salvo em finalLabel. */
+          if (finalLabel) {
+            addNormalScore(finalLabel);
+            return;
+          }
+      
+          /* * Set normal. */
+          if (games1 > 0 || games2 > 0) {
+            addNormalScore(
+              `${games1}x${games2}`
+            );
+          }
+        });
+      
+        /* * Fallback quando o setHistory está vazio. */
+        if (!entries.length) {
+          if (
+            score.sets1 > 0 ||
+            score.sets2 > 0
+          ) {
+            return `${score.sets1}x${score.sets2}`;
+          }
+      
+          if (
+            score.games1 > 0 ||
+            score.games2 > 0
+          ) {
+            return `${score.games1}x${score.games2}`;
+          }
+      
+          return "--";
+        }
+      
+        return entries
+          .map((entry) => entry.text)
+          .join(" • ");
       },
+
 
       isMatchForLoggedUser(match, currentUser) {
         const ownerId = String(match.ownerId || "").trim();
@@ -412,6 +626,30 @@
         return String(name || "").trim() || "-";
       },
 
+      getShortPlayerName(name = "") {
+        const fullName = String(name || "").trim();
+      
+        if (!fullName || fullName === "-") {
+          return "-";
+        }
+      
+        const parts = fullName
+          .split(/\s+/)
+          .filter(Boolean);
+      
+        if (parts.length === 1) {
+          return parts[0];
+        }
+      
+        const firstInitial =
+          parts[0].charAt(0).toUpperCase();
+      
+        const lastName =
+          parts[parts.length - 1];
+      
+        return `${firstInitial}. ${lastName}`;
+      },
+
       resolvePlayerName(name, match) {
         const ownerName = U.normalizeText(U.getOwnerNameInMatch(match));
         const currentName = state.currentProfileName || "";
@@ -424,22 +662,70 @@
       },
 
       getTeam1Line(match) {
-        const p1 = U.resolvePlayerName(match.player1, match);
-        const p2 = U.resolvePlayerName(match.player2, match);
+        const p1 = U.resolvePlayerName(
+          match.player1,
+          match
+        );
+      
+        const p2 = U.resolvePlayerName(
+          match.player2,
+          match
+        );
+      
+        const shortP1 =
+          U.getShortPlayerName(p1);
+      
+        const shortP2 =
+          U.getShortPlayerName(p2);
+      
         return U.isDoubles(match)
-          ? `${U.formatPlayerName(p1)} / ${U.formatPlayerName(p2)}`
-          : U.formatPlayerName(p1);
+          ? `${shortP1} / ${shortP2}`
+          : shortP1;
       },
+      
 
       getTeam2Line(match) {
-        const p3 = U.resolvePlayerName(match.player3, match);
-        const p4 = U.resolvePlayerName(match.player4, match);
+        const p2 = U.resolvePlayerName(
+          match.player2,
+          match
+        );
+      
+        const p3 = U.resolvePlayerName(
+          match.player3,
+          match
+        );
+      
+        const p4 = U.resolvePlayerName(
+          match.player4,
+          match
+        );
+      
         if (U.isDoubles(match)) {
-          return `${U.formatPlayerName(p3)} / ${U.formatPlayerName(p4)}`;
+          return `${U.getShortPlayerName(p3)} / ${U.getShortPlayerName(p4)}`;
         }
-        return U.formatPlayerName(U.resolvePlayerName(match.player2, match));
-      }
-    };
+      
+        return U.getShortPlayerName(p2);
+},
+
+getCategoryName(match) {
+  const found = [
+    match?.categoryName,
+    match?.categoriaNome,
+    match?.category,
+    match?.categoria,
+    match?.cat
+  ].find((value) => String(value || "").trim());
+
+  return found
+    ? String(found).trim()
+    : "-";
+}
+
+};
+
+
+      
+      
 
     const TOURNAMENT_STAGES = new Set([
       "primeira rodada",
@@ -753,6 +1039,19 @@
             const tournamentName =
               U.getTournamentName(match);
 
+            const categoryName =
+              U.getCategoryName(match);
+
+            const tournamentInfo =
+              isTournament &&
+                tournamentName !== "-"
+                ? categoryName && categoryName !== "-"
+                  ? `${tournamentName} - ${categoryName}`
+                  : tournamentName
+                : "";
+
+              
+
             const situation =
               U.getTournamentSituation(match);
 
@@ -809,11 +1108,11 @@
               ? "career-card career-card-win"
               : "career-card career-card-loss";
     
-            const tournamentButton = isTournament
+              const tournamentButton = isTournament
               ? ` <button type="button" class="career-tournament-history-btn" data-tournament="${U.escapeHtml(tournamentName)}" data-tournament-year="${U.escapeHtml( U.toDate(match.matchDateTime)?.getFullYear() || "" )}" > <ion-icon name="trophy-outline"></ion-icon> <span>Histórico do torneio</span> </button> `
               : "";
     
-              return ` <article class="${cardClass}"> <div class="career-card-result-line"> <span class="career-card-result-icon"> ${outcomeIcon} </span> <span class="career-card-result"> ${U.escapeHtml(resultLabel)} </span> </div> <div class="career-card-match-title"> <ion-icon name="people-outline"></ion-icon> <span> ${U.escapeHtml(playersText)} </span> </div> <div class="career-card-meta-line"> <span> <ion-icon name="calendar-outline"></ion-icon> ${U.escapeHtml(date)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="tennisball-outline"></ion-icon> ${U.escapeHtml(modality)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="people-outline"></ion-icon> ${U.escapeHtml(gameFormat)} </span> </div> <div class="career-card-meta-line"> <span> <ion-icon name="flag-outline"></ion-icon> ${U.escapeHtml(stage || "-")} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="location-outline"></ion-icon> ${U.escapeHtml(court)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="time-outline"></ion-icon> ${U.escapeHtml(duration)} </span> </div> ${ isTournament ? ` <div class="career-card-tournament-line"> <ion-icon name="medal-outline"></ion-icon> <span> ${U.escapeHtml(tournamentName)} </span> </div> ` : "" } <div class="career-card-meta-line career-card-score-line">
+              return ` <article class="${cardClass}"> <div class="career-card-result-line"> <span class="career-card-result-icon"> ${outcomeIcon} </span> <span class="career-card-result"> ${U.escapeHtml(resultLabel)} </span> </div> <div class="career-card-match-title"> <ion-icon name="people-outline"></ion-icon> <span> ${U.escapeHtml(playersText)} </span> </div> <div class="career-card-meta-line"> <span> <ion-icon name="calendar-outline"></ion-icon> ${U.escapeHtml(date)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="tennisball-outline"></ion-icon> ${U.escapeHtml(modality)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="people-outline"></ion-icon> ${U.escapeHtml(gameFormat)} </span> </div> <div class="career-card-meta-line"> <span> <ion-icon name="flag-outline"></ion-icon> ${U.escapeHtml(stage || "-")} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="location-outline"></ion-icon> ${U.escapeHtml(court)} </span> <span class="career-meta-separator">-</span> <span> <ion-icon name="time-outline"></ion-icon> ${U.escapeHtml(duration)} </span> </div> ${ isTournament ? `  <div class="career-card-tournament-line"> <ion-icon name="medal-outline"></ion-icon> <span> ${U.escapeHtml(tournamentInfo)} </span> </div> ` : "" } <div class="career-card-meta-line career-card-score-line">
               <span> <ion-icon name="stats-chart-outline"></ion-icon> ${U.escapeHtml(score)} </span>
             </div> ${tournamentButton} </article> `;
           })
@@ -925,7 +1224,13 @@
       const date =
         U.formatDate(match.matchDateTime);
     
-      return ` <article class="career-tournament-match-item"> <div class="career-tournament-match-players"> <ion-icon name="people-outline"></ion-icon> <strong> ${U.escapeHtml(players)} </strong> </div> <div class="career-tournament-match-info"> <span> <ion-icon name="flag-outline"></ion-icon> <strong>Partida:</strong> ${U.escapeHtml(stage)} </span> <span> <ion-icon name="calendar-outline"></ion-icon> ${U.escapeHtml(date)} </span> <span> <ion-icon name="time-outline"></ion-icon> <strong>Duração:</strong> ${U.escapeHtml(duration)} </span> </div> <div class="career-tournament-match-score"> <ion-icon name="stats-chart-outline"></ion-icon> <span>Placar:</span> <strong>${U.escapeHtml(score)}</strong> </div> </article> `;
+      const tournamentName =
+        U.getTournamentName(match);
+    
+      const categoryName =
+        U.getCategoryName(match);
+    
+      return ` <article class="career-tournament-match-item"> <!-- Jogadores --> <div class="career-tournament-match-players"> <ion-icon name="people-outline"></ion-icon> <strong> ${U.escapeHtml(players)} </strong> </div> <!-- Fase, data e duração sem textos fixos --> <div class="career-tournament-match-info"> <span title="Fase"> <ion-icon name="flag-outline"></ion-icon> ${U.escapeHtml(stage)} </span> <span title="Data"> <ion-icon name="calendar-outline"></ion-icon> ${U.escapeHtml(date)} </span> <span title="Duração"> <ion-icon name="time-outline"></ion-icon> ${U.escapeHtml(duration)} </span> </div> <!-- Torneio e categoria --> <div class="career-tournament-match-info"> <span title="Torneio"> <ion-icon name="trophy-outline"></ion-icon> ${U.escapeHtml(tournamentName)} </span> ${ categoryName && categoryName !== "-" ? ` <span title="Categoria"> <ion-icon name="ribbon-outline"></ion-icon> ${U.escapeHtml(categoryName)} </span> ` : "" } </div> <!-- Placar sem texto fixo --> <div class="career-tournament-match-score" title="Placar" > <ion-icon name="stats-chart-outline"></ion-icon> <strong> ${U.escapeHtml(score)} </strong> </div> </article> `;
     }
     
     function openTournamentHistory(tournamentName, year = "") {
@@ -1034,19 +1339,38 @@
     }
 
     function applyCardFilter(filterType) {
-      state.activeCardFilter = state.activeCardFilter === filterType ? null : filterType;
+      /* * O card "Total de partidas" usa data-filter="all". * Nesse caso, removemos qualquer filtro ativo. */
+      if (filterType === "all") {
+        state.activeCardFilter = null;
+      } else {
+        state.activeCardFilter =
+          state.activeCardFilter === filterType
+            ? null
+            : filterType;
+      }
+    
       state.showMatches = true;
-
+    
       updateCardFilterUI();
-
+    
       state.currentPage = 1;
+    
       applyFiltersAndRender();
-
+    
       setTimeout(() => {
-        const list = document.getElementById("historyList");
+        const list =
+          document.getElementById("historyList");
+    
         if (list) {
-          const y = list.getBoundingClientRect().top + window.scrollY - 20;
-          window.scrollTo({ top: y, behavior: "smooth" });
+          const y =
+            list.getBoundingClientRect().top +
+            window.scrollY -
+            20;
+    
+          window.scrollTo({
+            top: y,
+            behavior: "smooth"
+          });
         }
       }, 80);
     }
