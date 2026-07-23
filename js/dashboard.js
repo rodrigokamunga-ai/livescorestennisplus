@@ -35,11 +35,22 @@
     let dashboardPieChart = null;
     let dashboardYearChart = null;
 
+    let tournamentReportPieChart = null;
+    let tournamentAnnualChart = null;
+
     const el = {
       yearFilter: document.getElementById("yearFilter"),
       modalityFilter: document.getElementById("modalityFilter"),
       gameFormatFilter: document.getElementById("gameFormatFilter"),
       player2Filter: document.getElementById("player2Filter"),
+
+      yearFilter: document.getElementById("yearFilter"),
+      reportTypeFilter: document.getElementById("reportTypeFilter"),
+      modalityFilter: document.getElementById("modalityFilter"),
+      gameFormatFilter: document.getElementById("gameFormatFilter"),
+
+      partidasReportSection: document.getElementById("partidasReportSection"),
+      tournamentReportSection: document.getElementById("tournamentReportSection"),
 
       totalMatches: document.getElementById("totalMatches"),
       totalWins: document.getElementById("totalWins"),
@@ -61,10 +72,51 @@
       pieChart: document.getElementById("pieChart"),
       barChart: document.getElementById("barChart"),
 
+      tournamentCount: document.getElementById("tournamentCount"),
+      tournamentMatchCount: document.getElementById("tournamentMatchCount"),
+
+      tournamentSetsWon: document.getElementById("tournamentSetsWon"),
+      tournamentSetsLost: document.getElementById("tournamentSetsLost"),
+
+      tournamentGamesWon: document.getElementById("tournamentGamesWon"),
+      tournamentGamesLost: document.getElementById("tournamentGamesLost"),
+
+      tournamentTieBreakWon: document.getElementById("tournamentTieBreakWon"),
+      tournamentTieBreakLost: document.getElementById("tournamentTieBreakLost"),
+
+      tournamentSuperTieBreakWon: document.getElementById("tournamentSuperTieBreakWon"),
+      tournamentSuperTieBreakLost: document.getElementById("tournamentSuperTieBreakLost"),
+
+      tournamentSetsTotal:
+        document.getElementById("tournamentSetsTotal"),
+
+      tournamentGamesTotal:
+        document.getElementById("tournamentGamesTotal"),
+
+      tournamentTieBreakTotal:
+        document.getElementById("tournamentTieBreakTotal"),
+
+      tournamentSuperTieBreakTotal:
+        document.getElementById("tournamentSuperTieBreakTotal"),
+
+      tournamentReportPieChart:
+        document.getElementById("tournamentReportPieChart"),
+
+      tournamentAnnualChart:
+        document.getElementById("tournamentAnnualChart"),
+
+      partidasReportSection:
+        document.getElementById("partidasReportSection"),
+
+      tournamentReportSection:
+        document.getElementById("tournamentReportSection"),
+
       toggleFiltersBtn: document.getElementById("toggleFiltersBtn"),
       applyFilterBtn: document.getElementById("applyFilterBtn"),
       clearFilterBtn: document.getElementById("clearFilterBtn"),
       filtersWrap: document.querySelector(".dashboard-filters")
+
+      
     };
 
     const U = {
@@ -817,6 +869,295 @@
       });
     }
 
+    function drawTournamentReportPieChart(stats) {
+      const canvas = document.getElementById(
+        "tournamentReportPieChart"
+      );
+    
+      if (!canvas || typeof Chart === "undefined") {
+        return;
+      }
+    
+      if (tournamentReportPieChart) {
+        tournamentReportPieChart.destroy();
+        tournamentReportPieChart = null;
+      }
+    
+      const labels = [
+        "Torneios",
+        "Sets vencidos",
+        "Sets perdidos",
+        "Games vencidos",
+        "Games perdidos",
+        "Tie-break vencidos",
+        "Tie-break perdidos",
+        "Super tie-break vencidos",
+        "Super tie-break perdidos"
+      ];
+    
+      const values = [
+        stats.tournaments,
+        stats.setsWon,
+        stats.setsLost,
+        stats.gamesWon,
+        stats.gamesLost,
+        stats.tieBreakWon,
+        stats.tieBreakLost,
+        stats.superTieBreakWon,
+        stats.superTieBreakLost
+      ];
+    
+      const colors = [
+        "#d8ff63",
+        "#60a5fa",
+        "#ff7b7b",
+        "#a78bfa",
+        "#f472b6",
+        "#fbbf24",
+        "#fb923c",
+        "#34d399",
+        "#f43f5e"
+      ];
+    
+      tournamentReportPieChart = new Chart(canvas, {
+        type: "doughnut",
+    
+        data: {
+          labels,
+          datasets: [
+            {
+              data: values,
+              backgroundColor: colors,
+              borderColor: "#0b1220",
+              borderWidth: 3,
+              spacing: 2,
+              hoverOffset: 10
+            }
+          ]
+        },
+    
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "58%",
+    
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "#e8eefc",
+                usePointStyle: true,
+                pointStyle: "circle",
+                padding: 12,
+                font: {
+                  size: 11,
+                  weight: "700"
+                }
+              }
+            },
+    
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  const value = Number(context.raw || 0);
+                  const total = context.dataset.data.reduce(
+                    (sum, item) => sum + Number(item || 0),
+                    0
+                  );
+    
+                  const percentage = total > 0
+                    ? ((value / total) * 100).toFixed(1)
+                    : "0.0";
+    
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        },
+    
+        plugins: [
+          {
+            id: "tournamentReportCenterText",
+    
+            afterDraw(chart) {
+              const { ctx, chartArea } = chart;
+    
+              if (!chartArea) return;
+    
+              const x =
+                (chartArea.left + chartArea.right) / 2;
+    
+              const y =
+                (chartArea.top + chartArea.bottom) / 2;
+    
+              ctx.save();
+    
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+    
+              ctx.fillStyle = "#f8fafc";
+              ctx.font = "900 16px Inter, Arial, sans-serif";
+              ctx.fillText("Torneios", x, y - 10);
+    
+              ctx.fillStyle = "#94a3b8";
+              ctx.font = "700 12px Inter, Arial, sans-serif";
+              ctx.fillText(
+                `Total: ${stats.tournaments}`,
+                x,
+                y + 13
+              );
+    
+              ctx.restore();
+            }
+          }
+        ]
+      });
+    }
+
+    function drawTournamentAnnualChart(matches) {
+      const canvas = document.getElementById(
+        "tournamentAnnualChart"
+      );
+    
+      if (!canvas || typeof Chart === "undefined") {
+        return;
+      }
+    
+      if (tournamentAnnualChart) {
+        tournamentAnnualChart.destroy();
+        tournamentAnnualChart = null;
+      }
+    
+      const byYear = {};
+      const tournamentKeysByYear = {};
+    
+      matches.forEach((match) => {
+        if (U.getCategory(match) !== "torneios") {
+          return;
+        }
+    
+        const year = U.getMatchYear(match);
+    
+        if (!year) return;
+    
+        if (!byYear[year]) {
+          byYear[year] = {
+            matches: 0
+          };
+    
+          tournamentKeysByYear[year] = new Set();
+        }
+    
+        byYear[year].matches += 1;
+    
+        const tournamentName = U.normalizeText(
+          match.tournamentName || "sem nome"
+        );
+    
+        tournamentKeysByYear[year].add(
+          `${tournamentName}-${year}`
+        );
+      });
+    
+      const years = Object.keys(byYear)
+        .sort((a, b) => Number(b) - Number(a))
+        .slice(0, 2)
+        .sort((a, b) => Number(a) - Number(b));
+    
+      const labels = years.length ? years : ["Sem dados"];
+    
+      const tournamentValues = years.length
+        ? years.map((year) =>
+            tournamentKeysByYear[year].size
+          )
+        : [0];
+    
+      const matchValues = years.length
+        ? years.map((year) =>
+            byYear[year].matches
+          )
+        : [0];
+    
+      tournamentAnnualChart = new Chart(canvas, {
+        type: "bar",
+    
+        data: {
+          labels,
+    
+          datasets: [
+            {
+              label: "Torneios",
+              data: tournamentValues,
+              backgroundColor: "rgba(216, 255, 99, 0.88)",
+              borderColor: "#d8ff63",
+              borderWidth: 1,
+              borderRadius: 10
+            },
+    
+            {
+              label: "Partidas",
+              data: matchValues,
+              backgroundColor: "rgba(96, 165, 250, 0.88)",
+              borderColor: "#60a5fa",
+              borderWidth: 1,
+              borderRadius: 10
+            }
+          ]
+        },
+    
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+    
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: "#cbd5e1",
+                font: {
+                  weight: "700"
+                }
+              }
+            },
+    
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0,
+                color: "#cbd5e1"
+              },
+              grid: {
+                color: "rgba(255,255,255,0.08)"
+              }
+            }
+          },
+    
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "#e8eefc",
+                usePointStyle: true,
+                pointStyle: "circle",
+                padding: 16
+              }
+            },
+    
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return `${context.dataset.label}: ${context.raw}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
     function drawBarChart(wins, losses) {
       if (!el.barChart) return;
 
@@ -883,7 +1224,306 @@
       });
     }
 
+    function getTournamentSide(match) {
+      const ownerName = U.normalizeText(
+        match.ownerName || state.currentUserName
+      );
+    
+      const p1 = U.normalizeText(match.player1 || "");
+      const p2 = U.normalizeText(match.player2 || "");
+      const p3 = U.normalizeText(match.player3 || "");
+      const p4 = U.normalizeText(match.player4 || "");
+    
+      if (!U.isDoubles(match)) {
+        if (ownerName === p1) return 1;
+        if (ownerName === p2) return 2;
+    
+        if (U.normalizeText(state.currentUserName) === p1) return 1;
+        if (U.normalizeText(state.currentUserName) === p2) return 2;
+    
+        return 1;
+      }
+    
+      if (
+        ownerName === p1 ||
+        ownerName === p2 ||
+        U.normalizeText(state.currentUserName) === p1 ||
+        U.normalizeText(state.currentUserName) === p2
+      ) {
+        return 1;
+      }
+    
+      if (
+        ownerName === p3 ||
+        ownerName === p4 ||
+        U.normalizeText(state.currentUserName) === p3 ||
+        U.normalizeText(state.currentUserName) === p4
+      ) {
+        return 2;
+      }
+    
+      return 1;
+    }
+    
+    function getSetHistory(match) {
+      const history = match?.score?.setHistory;
+    
+      return Array.isArray(history) ? history : [];
+    }
+    
+    function getSetResult(games1, games2, tieBreakPoints1 = 0, tieBreakPoints2 = 0) {
+      if (games1 > games2) return 1;
+      if (games2 > games1) return 2;
+    
+      if (tieBreakPoints1 > tieBreakPoints2) return 1;
+      if (tieBreakPoints2 > tieBreakPoints1) return 2;
+    
+      return null;
+    }
+    
+    function updateTournamentReportCards(stats) {
+      const values = {
+        tournamentCount: stats.tournaments,
+        tournamentMatchCount: stats.matches,
+    
+        tournamentSetsTotal: stats.setsTotal,
+        tournamentSetsWon: stats.setsWon,
+        tournamentSetsLost: stats.setsLost,
+    
+        tournamentGamesTotal: stats.gamesTotal,
+        tournamentGamesWon: stats.gamesWon,
+        tournamentGamesLost: stats.gamesLost,
+    
+        tournamentTieBreakTotal: stats.tieBreakTotal,
+        tournamentTieBreakWon: stats.tieBreakWon,
+        tournamentTieBreakLost: stats.tieBreakLost,
+    
+        tournamentSuperTieBreakTotal:
+          stats.superTieBreakTotal,
+    
+        tournamentSuperTieBreakWon:
+          stats.superTieBreakWon,
+    
+        tournamentSuperTieBreakLost:
+          stats.superTieBreakLost
+      };
+    
+      Object.entries(values).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+    
+        if (element) {
+          element.textContent = String(value);
+        }
+      });
+    }
+    
+    function computeTournamentReport(matches) {
+      const stats = {
+        tournaments: 0,
+        matches: 0,
+      
+        setsTotal: 0,
+        setsWon: 0,
+        setsLost: 0,
+      
+        gamesTotal: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+      
+        tieBreakTotal: 0,
+        tieBreakWon: 0,
+        tieBreakLost: 0,
+      
+        superTieBreakTotal: 0,
+        superTieBreakWon: 0,
+        superTieBreakLost: 0
+      };
+    
+      const tournamentKeys = new Set();
+    
+      matches.forEach((match) => {
+        if (U.getCategory(match) !== "torneios") {
+          return;
+        }
+    
+        const tournamentName = U.normalizeText(
+          match.tournamentName || "sem nome"
+        );
+    
+        const year = U.getMatchYear(match);
+    
+        const tournamentKey =
+          `${tournamentName}-${year}`;
+    
+        tournamentKeys.add(tournamentKey);
+        stats.matches += 1;
+    
+        const side = getTournamentSide(match);
+        const score = match.score || {};
+        const history = getSetHistory(match);
+    
+        /* * Se houver histórico detalhado dos sets, * utiliza o histórico para calcular sets e games. */
+        if (history.length) {
+          history.forEach((set) => {
+            const games1 = Number(set.games1 || 0);
+            const games2 = Number(set.games2 || 0);
+    
+            const tieBreakPoints1 = Number(
+              set.tieBreakPoints1 || 0
+            );
+    
+            const tieBreakPoints2 = Number(
+              set.tieBreakPoints2 || 0
+            );
+    
+            const userGames = side === 1 ? games1 : games2;
+            const opponentGames = side === 1 ? games2 : games1;
+    
+            stats.gamesTotal += userGames + opponentGames;
+            stats.gamesWon += userGames;
+            stats.gamesLost += opponentGames;
+
+            stats.setsTotal += 1;
+    
+            const result = getSetResult(
+              games1,
+              games2,
+              tieBreakPoints1,
+              tieBreakPoints2
+            );
+    
+            if (result === side) {
+              stats.setsWon += 1;
+            } else if (result) {
+              stats.setsLost += 1;
+            }
+    
+            const tieBreakMode = U.normalizeText(
+              set.tieBreakMode || ""
+            );
+    
+            const tieBreakTotal =
+              tieBreakPoints1 + tieBreakPoints2;
+    
+              if (tieBreakTotal > 0 && tieBreakMode === "tb7") {
+                const tieBreakWinner =
+                  tieBreakPoints1 > tieBreakPoints2 ? 1 : 2;
+              
+                stats.tieBreakTotal += 1;
+              
+                if (tieBreakWinner === side) {
+                  stats.tieBreakWon += 1;
+                } else {
+                  stats.tieBreakLost += 1;
+                }
+              }
+    
+              if (tieBreakTotal > 0 && tieBreakMode === "super10") {
+                const superTieBreakWinner =
+                  tieBreakPoints1 > tieBreakPoints2 ? 1 : 2;
+              
+                stats.superTieBreakTotal += 1;
+              
+                if (superTieBreakWinner === side) {
+                  stats.superTieBreakWon += 1;
+                } else {
+                  stats.superTieBreakLost += 1;
+                }
+              }
+          });
+        } else {
+          /* * Fallback para partidas sem setHistory. */
+          const games1 = Number(score.games1 || 0);
+          const games2 = Number(score.games2 || 0);
+    
+          const sets1 = Number(score.sets1 || 0);
+          const sets2 = Number(score.sets2 || 0);
+    
+          if (side === 1) {
+            stats.gamesTotal += games1 + games2;
+            stats.gamesWon += games1;
+            stats.gamesLost += games2;
+          
+            stats.setsTotal += sets1 + sets2;
+            stats.setsWon += sets1;
+            stats.setsLost += sets2;
+          } else {
+            stats.gamesTotal += games1 + games2;
+            stats.gamesWon += games2;
+            stats.gamesLost += games1;
+          
+            stats.setsTotal += sets1 + sets2;
+            stats.setsWon += sets2;
+            stats.setsLost += sets1;
+          }
+    
+          const lastTieBreakMode = U.normalizeText(
+            score.lastTieBreakMode || ""
+          );
+    
+          const tieBreakPoints1 = Number(
+            score.lastTieBreakPoints1 || 0
+          );
+    
+          const tieBreakPoints2 = Number(
+            score.lastTieBreakPoints2 || 0
+          );
+    
+          if (
+            lastTieBreakMode === "tb7" &&
+            tieBreakPoints1 + tieBreakPoints2 > 0
+          ) {
+            const winner =
+              tieBreakPoints1 > tieBreakPoints2 ? 1 : 2;
+
+              stats.tieBreakTotal += 1;
+    
+            if (winner === side) {
+              stats.tieBreakWon += 1;
+            } else {
+              stats.tieBreakLost += 1;
+            }
+          }
+    
+          if (
+            lastTieBreakMode === "super10" &&
+            tieBreakPoints1 + tieBreakPoints2 > 0
+          ) {
+            const winner =
+              tieBreakPoints1 > tieBreakPoints2 ? 1 : 2;
+    
+              stats.superTieBreakTotal += 1;
+
+              if (winner === side) {
+              stats.superTieBreakWon += 1;
+            } else {
+              stats.superTieBreakLost += 1;
+            }
+          }
+        }
+      });
+    
+      stats.tournaments = tournamentKeys.size;
+    
+      return stats;
+    }
+    
+    function showReportMode(mode) {
+      const isTournament = mode === "torneio";
+    
+      if (el.partidasReportSection) {
+        el.partidasReportSection.hidden = isTournament;
+      }
+    
+      if (el.tournamentReportSection) {
+        el.tournamentReportSection.hidden = !isTournament;
+      }
+    }
+
     function applyFilters() {
+      const reportType = String(
+        el.reportTypeFilter?.value || "partidas"
+      ).trim();
       const year = String(el.yearFilter?.value || "").trim();
       const modality = U.normalizeText(
         el.modalityFilter?.value || ""
@@ -936,47 +1576,81 @@
        */
       state.filteredMatches = filtered;
 
-      const stats = computeStats(filtered);
+showReportMode(reportType);
 
-      updateCategoryCards(stats);
-      drawPieChart(stats.totalWins, stats.totalLosses);
-      drawYearComparisonChart(filtered);
+if (reportType === "torneio") {
+  const tournamentMatches = filtered.filter(
+    (match) => U.getCategory(match) === "torneios"
+  );
 
-      console.log("[Dashboard] partidas filtradas:", filtered);
-      console.log("[Dashboard] estatísticas calculadas:", stats);
+  const tournamentStats =
+    computeTournamentReport(tournamentMatches);
 
-      setMessage(
-        filtered.length
-          ? `Exibindo ${filtered.length} partidas filtradas.`
-          : "Nenhuma partida encontrada para os filtros aplicados."
-      );
+  updateTournamentReportCards(tournamentStats);
+
+  drawTournamentReportPieChart(tournamentStats);
+  drawTournamentAnnualChart(tournamentMatches);
+
+} else {
+  const stats = computeStats(filtered);
+
+  updateCategoryCards(stats);
+
+  drawPieChart(
+    stats.totalWins,
+    stats.totalLosses
+  );
+
+  drawYearComparisonChart(filtered);
+}
+
+setMessage(
+  filtered.length
+    ? `Exibindo ${filtered.length} registros filtrados.`
+    : "Nenhum registro encontrado para os filtros aplicados."
+);
     }
 
     function clearFilters() {
-      if (el.yearFilter) el.yearFilter.value = "";
-      if (el.modalityFilter) el.modalityFilter.value = "";
-      if (el.gameFormatFilter) el.gameFormatFilter.value = "";
-      if (el.player2Filter) el.player2Filter.value = "";
-
+      if (el.yearFilter) {
+        el.yearFilter.value = "";
+      }
+    
+      if (el.reportTypeFilter) {
+        el.reportTypeFilter.value = "partidas";
+      }
+    
+      if (el.modalityFilter) {
+        el.modalityFilter.value = "";
+      }
+    
+      if (el.gameFormatFilter) {
+        el.gameFormatFilter.value = "";
+      }
+    
+      if (el.player2Filter) {
+        el.player2Filter.value = "";
+      }
+    
       applyFilters();
     }
 
     function toggleFilters() {
       state.filtersCollapsed = !state.filtersCollapsed;
-
+    
       if (el.filtersWrap) {
         el.filtersWrap.style.display =
           state.filtersCollapsed ? "none" : "grid";
       }
-
+    
       const icon = el.toggleFiltersBtn?.querySelector(
         ".career-bottom-icon ion-icon"
       );
-
+    
       const label = el.toggleFiltersBtn?.querySelector(
         ".career-bottom-label"
       );
-
+    
       if (icon) {
         icon.setAttribute(
           "name",
@@ -985,11 +1659,30 @@
             : "close-outline"
         );
       }
-
+    
       if (label) {
         label.textContent = state.filtersCollapsed
           ? "Filtros"
           : "Fechar";
+      }
+    
+      /* * Quando abrir os filtros, direciona a tela * automaticamente para a área de pesquisa. */
+      if (!state.filtersCollapsed && el.filtersWrap) {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const offsetTop = 82;
+    
+            const targetPosition =
+              el.filtersWrap.getBoundingClientRect().top +
+              window.scrollY -
+              offsetTop;
+    
+            window.scrollTo({
+              top: Math.max(0, targetPosition),
+              behavior: "smooth"
+            });
+          }, 100);
+        });
       }
     }
 
@@ -1053,6 +1746,11 @@
     }
 
     function bindEvents() {
+      el.reportTypeFilter?.addEventListener(
+        "change",
+        applyFilters
+      );
+      
       el.toggleFiltersBtn?.addEventListener(
         "click",
         toggleFilters
