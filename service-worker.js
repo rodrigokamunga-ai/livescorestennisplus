@@ -1,4 +1,4 @@
-const CACHE_NAME = "tennispro-v27";
+const CACHE_NAME = "tennispro-v32";
 
 const ASSETS_TO_CACHE = [
   "./",
