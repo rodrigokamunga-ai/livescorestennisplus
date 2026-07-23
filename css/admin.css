@@ -3335,3 +3335,20 @@ body.admin-page .admin-confronto-modal-body iframe {
     font-size: 0.98rem;
   }
 }
+
+/* ========================================================= BOTÃO JOGO DESABILITADO PARA PARTIDAS FINALIZADAS ========================================================= */
+
+.admin-action-btn.action-disabled,
+.admin-action-btn:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  filter: grayscale(0.7);
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.admin-action-btn.action-disabled .admin-action-icon,
+.admin-action-btn:disabled .admin-action-icon {
+  opacity: 0.55;
+}
