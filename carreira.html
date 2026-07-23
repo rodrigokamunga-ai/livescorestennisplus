@@ -73,9 +73,12 @@
 
         <!-- LINHA 1 — CARD PRINCIPAL -->
         <div class="career-summary-card total matches" data-filter="all" >
-          <ion-icon name="calendar-outline" class="career-card-icon" ></ion-icon>
-
-          <span>Total de partidas</span>
+          <div class="career-summary-card-label">
+            <ion-icon name="calendar-outline" class="career-card-icon" ></ion-icon>
+        
+            <span>Total de partidas</span>
+          </div>
+        
           <strong id="totalMatches">0</strong>
         </div>
 
@@ -350,10 +353,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 
   <script src="js/firebase.js"></script>
-  <script src="js/carreira.js?v=20260721-6"></script>
+  <script src="js/carreira.js?v=20260723-1"></script>
 
   <!-- Service Worker -->
-  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker .register("./service-worker.js") .then((registration) => { console.log( "Service Worker registrado:", registration ); }) .catch((error) => { console.error( "Erro ao registrar Service Worker:", error ); }); }); } </script>
-
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", async () => { try { const registration = await navigator.serviceWorker.register( "./service-worker.js", { updateViaCache: "none" } ); await registration.update(); console.log( "Service Worker atualizado:", registration ); } catch (error) { console.error( "Erro ao atualizar Service Worker:", error ); } }); } </script>
 </body>
 </html>
