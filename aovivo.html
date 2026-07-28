@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="css/public.css" />
 
   <!-- Estilos exclusivos da transmissão -->
-  <link rel="stylesheet" href="css/aovivo.css?v=20260720-01" />
+  <link rel="stylesheet" href="css/aovivo.css?v=20260728-01" />
 </head>
 
 <body class="aovivo-page">
@@ -38,30 +38,31 @@
     <!-- Barra superior -->
     <section class="topbar">
 
-      <div>
-        <div class="status" id="tvStatus" >
+      <div class="topbar-info">
+        <div class="status" id="tvStatus">
           Carregando...
         </div>
 
-        <div class="info" id="tvInfoBox" >
+        <div class="info" id="tvInfoBox">
           Inicializando transmissão
         </div>
       </div>
 
+      <!-- Botões da transmissão -->
       <div class="actions">
 
-        <!-- Botão do transmissor -->
+        <!-- Iniciar transmissão -->
         <button class="btn green" id="btnAbrirCamera" type="button" >
-          <ion-icon name="videocam-outline" ></ion-icon>
+          <ion-icon name="videocam-outline"></ion-icon>
 
           <span>
             Iniciar transmissão
           </span>
         </button>
 
-        <!-- Iniciar gravação -->
+        <!-- Gravar vídeo -->
         <button class="btn gray" id="btnIniciarGravacao" type="button" >
-          <ion-icon name="radio-outline" ></ion-icon>
+          <ion-icon name="radio-outline"></ion-icon>
 
           <span>
             Gravar vídeo
@@ -69,35 +70,35 @@
         </button>
 
         <!-- Parar gravação -->
-        <button class="btn recording" id="btnPararGravacao" type="button" >
-          <ion-icon name="stop-circle-outline" ></ion-icon>
+        <button class="btn recording" id="btnPararGravacao" type="button" hidden >
+          <ion-icon name="stop-circle-outline"></ion-icon>
 
           <span>
-            Parar e salvar
+            Parar gravação
           </span>
         </button>
 
         <!-- Ativar áudio -->
         <button class="btn gray" id="btnAtivarAudio" type="button" >
-          <ion-icon name="play-outline" ></ion-icon>
+          <ion-icon name="play-outline"></ion-icon>
 
           <span>
-            Iniciar transmissão
+            Ativar áudio
           </span>
         </button>
 
         <!-- Atualizar tela -->
         <button class="btn gray" id="btnAtualizarTela" type="button" >
-          <ion-icon name="refresh-outline" ></ion-icon>
+          <ion-icon name="refresh-outline"></ion-icon>
 
           <span>
             Atualizar tela
           </span>
         </button>
 
-        <!-- Tela cheia -->
+        <!-- Expandir tela -->
         <button class="btn gray" id="btnExpandirTela" type="button" >
-          <ion-icon name="expand-outline" ></ion-icon>
+          <ion-icon name="expand-outline"></ion-icon>
 
           <span>
             Expandir tela
@@ -106,7 +107,7 @@
 
         <!-- Tentar novamente -->
         <button class="btn gray" id="btnTentarNovamente" type="button" >
-          <ion-icon name="refresh-outline" ></ion-icon>
+          <ion-icon name="refresh-outline"></ion-icon>
 
           <span>
             Tentar novamente
@@ -114,6 +115,7 @@
         </button>
 
       </div>
+
     </section>
 
     <!-- Área do vídeo -->
@@ -165,10 +167,10 @@
   <script src="js/livekit-client.umd.min.js"></script>
 
   <!-- Usado para incluir o placar na gravação -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" ></script>
 
   <!-- Arquivo principal da transmissão -->
-  <script src="js/aovivo.js?v=20260720-02"></script>
+  <script src="js/aovivo.js?v=20260728-05"></script>
 
   <!-- Ionicons -->
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js" ></script>
