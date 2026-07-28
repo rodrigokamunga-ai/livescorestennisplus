@@ -192,32 +192,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let viewerStartButton = null;
 
-    const state = {
-      match: null,
+    let ultimoToque = 0;
 
-      liveKitRoom: null,
-      liveKitLocalTracks: [],
-      liveKitAudioElements: [],
+const intervaloToqueDuplo = 350;
 
-      localStream: null,
-      unsubMatch: null,
+const state = {
+  match: null,
 
-      started: false,
-      transmissionEnded: false,
-      refreshLock: false,
-      finishTimer: null,
+  liveKitRoom: null,
+  liveKitLocalTracks: [],
+  liveKitAudioElements: [],
 
-      mediaRecorder: null,
-      recordedChunks: [],
-      recordingMimeType: "",
-      isRecording: false,
+  localStream: null,
+  unsubMatch: null,
 
-      recordingCanvas: null,
-      recordingContext: null,
-      recordingStream: null,
-      recordingAnimationFrame: null,
-      scoreboardSnapshotCanvas: null
-    };
+  started: false,
+  transmissionEnded: false,
+  refreshLock: false,
+  finishTimer: null,
+
+  mediaRecorder: null,
+  recordedChunks: [],
+  recordingMimeType: "",
+  isRecording: false,
+
+  recordingCanvas: null,
+  recordingContext: null,
+  recordingStream: null,
+  recordingAnimationFrame: null
+};
 
     function escapeHtml(value = "") {
       return String(value)
@@ -1035,49 +1038,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateRecordingButtons() {
-      const broadcaster =
+      const isBroadcaster =
         role === "broadcaster";
-
+    
+      const canStartRecording =
+        isBroadcaster &&
+        !state.isRecording &&
+        !state.transmissionEnded;
+    
+      const canStopRecording =
+        isBroadcaster &&
+        state.isRecording &&
+        !state.transmissionEnded;
+    
       if (btnIniciarGravacao) {
-        btnIniciarGravacao.style.display =
-          broadcaster &&
-          !state.isRecording
-            ? "inline-flex"
-            : "none";
-      }
-
-      if (btnPararGravacao) {
-        btnPararGravacao.style.display =
-          broadcaster &&
+        btnIniciarGravacao.hidden =
+          !canStartRecording;
+    
+        btnIniciarGravacao.disabled =
+          !canStartRecording;
+    
+        btnIniciarGravacao.setAttribute(
+          "aria-hidden",
+          canStartRecording ? "false" : "true"
+        );
+    
+        btnIniciarGravacao.classList.toggle(
+          "is-recording",
           state.isRecording
-            ? "inline-flex"
-            : "none";
+        );
+      }
+    
+      if (btnPararGravacao) {
+        btnPararGravacao.hidden =
+          !canStopRecording;
+    
+        btnPararGravacao.disabled =
+          !canStopRecording;
+    
+        btnPararGravacao.setAttribute(
+          "aria-hidden",
+          canStopRecording ? "false" : "true"
+        );
       }
     }
-
-    async function updateScoreboardRecordingSnapshot() {
-      if (
-        typeof html2canvas ===
-          "undefined" ||
-        !tvGridPlacar ||
-        !state.recordingCanvas
-      ) {
-        return;
-      }
-
-      try {
-        state.scoreboardSnapshotCanvas =
-          await html2canvas(
-            tvGridPlacar,
-            {
-              backgroundColor: null,
-              scale: 1,
-              useCORS: true,
-              logging: false
-            }
-          );
-      } catch (_) {}
-    }
+    
 
     function getRecordingCanvasSize() {
       return {
@@ -1104,23 +1109,24 @@ document.addEventListener("DOMContentLoaded", () => {
           requestAnimationFrame(
             drawRecordingFrame
           );
-
+    
         return;
       }
-
+    
       const canvas =
         state.recordingCanvas;
-
+    
       const context =
         state.recordingContext;
-
+    
       context.clearRect(
         0,
         0,
         canvas.width,
         canvas.height
       );
-
+    
+      /* * Desenha somente o vídeo. * O placar não é desenhado no canvas * da gravação. */
       context.drawImage(
         videoEl,
         0,
@@ -1128,50 +1134,12 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.width,
         canvas.height
       );
-
-      if (
-        state.scoreboardSnapshotCanvas &&
-        videoWrap &&
-        tvGridPlacar
-      ) {
-        const videoRect =
-          videoWrap.getBoundingClientRect();
-
-        const scoreRect =
-          tvGridPlacar.getBoundingClientRect();
-
-        if (
-          videoRect.width > 0 &&
-          videoRect.height > 0
-        ) {
-          const scaleX =
-            canvas.width /
-            videoRect.width;
-
-          const scaleY =
-            canvas.height /
-            videoRect.height;
-
-          context.drawImage(
-            state.scoreboardSnapshotCanvas,
-            (scoreRect.left -
-              videoRect.left) *
-              scaleX,
-            (scoreRect.top -
-              videoRect.top) *
-              scaleY,
-            scoreRect.width * scaleX,
-            scoreRect.height * scaleY
-          );
-        }
-      }
-
+    
       state.recordingAnimationFrame =
         requestAnimationFrame(
           drawRecordingFrame
         );
     }
-
     function createRecordingStream() {
       const size =
         getRecordingCanvasSize();
@@ -1215,11 +1183,11 @@ document.addEventListener("DOMContentLoaded", () => {
         cancelAnimationFrame(
           state.recordingAnimationFrame
         );
-
+    
         state.recordingAnimationFrame =
           null;
       }
-
+    
       if (state.recordingStream) {
         state.recordingStream
           .getVideoTracks()
@@ -1229,29 +1197,173 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (_) {}
           });
       }
-
+    
       state.recordingStream = null;
       state.recordingCanvas = null;
       state.recordingContext = null;
-      state.scoreboardSnapshotCanvas =
-        null;
+    }
+
+    async function saveRecordedVideo() {
+      if (
+        !state.recordedChunks ||
+        !state.recordedChunks.length
+      ) {
+        setInfo(
+          "Nenhum conteúdo foi gravado."
+        );
+    
+        logLine(
+          "A gravação foi encerrada, mas não possui dados.",
+          true
+        );
+    
+        return;
+      }
+    
+      try {
+        const mimeType =
+          state.recordingMimeType ||
+          "video/webm";
+    
+        const extension =
+          mimeType.includes("mp4")
+            ? "mp4"
+            : "webm";
+    
+        const blob = new Blob(
+          state.recordedChunks,
+          {
+            type: mimeType
+          }
+        );
+    
+        const fileName =
+          `tennispro-gravacao-${Date.now()}.${extension}`;
+    
+        const file = new File(
+          [blob],
+          fileName,
+          {
+            type: mimeType
+          }
+        );
+    
+        /* * Em celulares compatíveis, abre o menu * de compartilhamento. */
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare({
+            files: [file]
+          })
+        ) {
+          try {
+            await navigator.share({
+              title: "Gravação da partida",
+              text:
+                "Vídeo gravado pelo TennisPro",
+              files: [file]
+            });
+    
+            setInfo(
+              "Gravação compartilhada com sucesso."
+            );
+    
+            logLine(
+              "Gravação compartilhada."
+            );
+    
+            state.recordedChunks = [];
+    
+            return;
+          } catch (error) {
+            /* * O usuário pode ter cancelado o compartilhamento. * Nesse caso, continua para o download. */
+            if (
+              error &&
+              error.name === "AbortError"
+            ) {
+              setInfo(
+                "Compartilhamento cancelado."
+              );
+    
+              state.recordedChunks = [];
+    
+              return;
+            }
+    
+            console.warn(
+              "Compartilhamento não disponível:",
+              error
+            );
+          }
+        }
+    
+        /* * Download automático para computadores * e navegadores que não suportam share. */
+        const url =
+          URL.createObjectURL(blob);
+    
+        const link =
+          document.createElement("a");
+    
+        link.href = url;
+        link.download = fileName;
+        link.style.display = "none";
+    
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 3000);
+    
+        setInfo(
+          "Gravação salva com sucesso."
+        );
+    
+        logLine(
+          `Vídeo salvo: ${fileName}`
+        );
+    
+        state.recordedChunks = [];
+    
+      } catch (error) {
+        console.error(
+          "Erro ao salvar gravação:",
+          error
+        );
+    
+        setInfo(
+          "Não foi possível salvar a gravação."
+        );
+    
+        logLine(
+          `Erro ao salvar vídeo: ${ error?.message || error }`,
+          true
+        );
+      }
     }
 
     async function startRecording() {
       if (role !== "broadcaster") {
         return;
       }
-
-      if (
-        !state.liveKitLocalTracks.length
-      ) {
+    
+      if (state.transmissionEnded) {
+        return;
+      }
+    
+      if (state.isRecording) {
+        return;
+      }
+    
+      if (!state.liveKitLocalTracks.length) {
         alert(
           "A câmera ainda não foi iniciada."
         );
-
+    
         return;
       }
-
+    
       if (
         typeof MediaRecorder ===
         "undefined"
@@ -1259,21 +1371,28 @@ document.addEventListener("DOMContentLoaded", () => {
         alert(
           "Este navegador não suporta gravação."
         );
-
+    
         return;
       }
-
+    
       try {
         state.recordedChunks = [];
-
+    
         state.recordingMimeType =
           getSupportedRecordingMimeType();
-
-        await updateScoreboardRecordingSnapshot();
-
+    
+        /* * Primeiro cria o canvas. * Depois captura o placar. */
         const stream =
           createRecordingStream();
-
+    
+        if (!stream) {
+          throw new Error(
+            "Não foi possível criar o fluxo da gravação."
+          );
+        }
+    
+        
+    
         const options =
           state.recordingMimeType
             ? {
@@ -1285,13 +1404,13 @@ document.addEventListener("DOMContentLoaded", () => {
                   128000
               }
             : {};
-
+    
         state.mediaRecorder =
           new MediaRecorder(
             stream,
             options
           );
-
+    
         state.mediaRecorder.ondataavailable =
           (event) => {
             if (
@@ -1303,134 +1422,178 @@ document.addEventListener("DOMContentLoaded", () => {
               );
             }
           };
-
+    
         state.mediaRecorder.onstart = () => {
           state.isRecording = true;
+    
           updateRecordingButtons();
+    
           setStatus(
             "TRANSMITINDO E GRAVANDO"
           );
+    
+          setInfo(
+            "A gravação está em andamento."
+          );
+    
+          logLine(
+            "Gravação iniciada."
+          );
         };
-
-        state.mediaRecorder.onstop = () => {
-          state.isRecording = false;
-          updateRecordingButtons();
-          stopRecordingCanvas();
-          saveRecordedVideo();
-        };
-
+    
+        state.mediaRecorder.onstop =
+          async () => {
+            state.isRecording = false;
+    
+            
+    
+            updateRecordingButtons();
+    
+            stopRecordingCanvas();
+    
+            setStatus(
+              "TRANSMITINDO AO VIVO"
+            );
+    
+            /* * Não exibe o nome do arquivo na tela. */
+            setInfo(
+              "Gravação finalizada."
+            );
+    
+            logLine(
+              "Gravação finalizada."
+            );
+    
+            await saveRecordedVideo();
+    
+            state.mediaRecorder = null;
+            state.recordingMimeType = "";
+          };
+    
         state.mediaRecorder.onerror =
           (event) => {
             console.error(
               "Erro MediaRecorder:",
               event.error
             );
-
+    
+            
+    
             state.isRecording = false;
+    
             updateRecordingButtons();
             stopRecordingCanvas();
+    
+            setStatus(
+              "ERRO NA GRAVAÇÃO"
+            );
+    
+            setInfo(
+              "Ocorreu um erro durante a gravação."
+            );
+    
+            logLine(
+              "Erro no MediaRecorder.",
+              true
+            );
+    
+            state.mediaRecorder = null;
           };
-
+    
         state.mediaRecorder.start(1000);
+    
       } catch (error) {
         console.error(
           "Erro ao iniciar gravação:",
           error
         );
-
+    
+       
+        state.isRecording = false;
+    
+        updateRecordingButtons();
         stopRecordingCanvas();
-
+    
+        state.mediaRecorder = null;
+    
         alert(
           "Não foi possível iniciar a gravação."
+        );
+    
+        logLine(
+          `Erro ao iniciar gravação: ${ error?.message || error }`,
+          true
         );
       }
     }
 
     function stopRecording() {
+      if (!state.mediaRecorder) {
+        return;
+      }
+    
       if (
-        !state.mediaRecorder ||
-        state.mediaRecorder.state ===
-          "inactive"
+        state.mediaRecorder.state !==
+        "recording"
       ) {
         return;
       }
-
-      state.mediaRecorder.stop();
+    
+      try {
+        setInfo(
+          "Finalizando gravação..."
+        );
+    
+        state.mediaRecorder.stop();
+    
+      } catch (error) {
+        console.error(
+          "Erro ao parar gravação:",
+          error
+        );
+    
+        state.isRecording = false;
+    
+        updateRecordingButtons();
+    
+        stopRecordingCanvas();
+    
+        setStatus(
+          "TRANSMITINDO AO VIVO"
+        );
+    
+        setInfo(
+          "Não foi possível finalizar a gravação."
+        );
+      }
     }
 
-    async function saveRecordedVideo() {
-      if (!state.recordedChunks.length) {
-        return;
+    function validateMediaEnvironment() {
+      if (!window.isSecureContext) {
+        throw new Error(
+          "A câmera e o microfone exigem HTTPS. Abra esta página usando https:// ou localhost."
+        );
       }
-
-      const mimeType =
-        state.recordingMimeType ||
-        "video/webm";
-
-      const extension =
-        mimeType.includes("mp4")
-          ? "mp4"
-          : "webm";
-
-      const blob =
-        new Blob(
-          state.recordedChunks,
-          {
-            type: mimeType
-          }
+    
+      if (!navigator.mediaDevices) {
+        throw new Error(
+          "navigator.mediaDevices não está disponível neste navegador ou contexto."
         );
-
-      const fileName =
-        `tennispro-${Date.now()}.${extension}`;
-
-      const file =
-        new File(
-          [blob],
-          fileName,
-          {
-            type: mimeType
-          }
-        );
-
+      }
+    
       if (
-        navigator.share &&
-        navigator.canShare &&
-        navigator.canShare({
-          files: [file]
-        })
+        typeof navigator.mediaDevices.getUserMedia !==
+        "function"
       ) {
-        try {
-          await navigator.share({
-            title: "Gravação da partida",
-            text:
-              "Vídeo gravado pelo TennisPro",
-            files: [file]
-          });
-
-          return;
-        } catch (_) {}
+        throw new Error(
+          "getUserMedia não está disponível neste navegador."
+        );
       }
-
-      const url =
-        URL.createObjectURL(blob);
-
-      const anchor =
-        document.createElement("a");
-
-      anchor.href = url;
-      anchor.download = fileName;
-      anchor.style.display = "none";
-
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 3000);
     }
 
     async function connectBroadcaster() {
+      validateMediaEnvironment();
+    
       const credentials =
         await getLiveKitCredentials();
 
@@ -1716,53 +1879,82 @@ document.addEventListener("DOMContentLoaded", () => {
         setStatus("SEM ID DE PARTIDA");
         return;
       }
-
+    
       setStatus(
         "CONECTANDO TRANSMISSOR..."
       );
-
+    
       try {
         await connectBroadcaster();
       } catch (error) {
-        console.error(error);
-
+        console.error(
+          "[Ao Vivo] Erro completo do transmissor:",
+          error
+        );
+    
+        const mensagem =
+          error?.message ||
+          String(error);
+    
         logLine(
-          `Erro transmissor LiveKit: ${ error?.message || error }`,
+          `Erro transmissor LiveKit: ${mensagem}`,
           true
         );
-
+    
+        const mensagemNormalizada =
+          mensagem.toLowerCase();
+    
+        if (
+          !window.isSecureContext ||
+          !navigator.mediaDevices
+        ) {
+          setStatus(
+            "CÂMERA EXIGE HTTPS"
+          );
+    
+          setInfo(
+            "Abra o TennisPro usando HTTPS e permita acesso à câmera e ao microfone."
+          );
+    
+          showInitialScreen(
+            "A câmera exige uma conexão HTTPS. Abra o sistema usando https://."
+          );
+    
+          return;
+        }
+    
+        if (
+          mensagemNormalizada.includes(
+            "permission"
+          ) ||
+          mensagemNormalizada.includes(
+            "notallowed"
+          ) ||
+          mensagemNormalizada.includes(
+            "permission denied"
+          )
+        ) {
+          setStatus(
+            "ACESSO À CÂMERA BLOQUEADO"
+          );
+    
+          setInfo(
+            "Permita o uso da câmera e do microfone nas configurações do navegador."
+          );
+    
+          showInitialScreen(
+            "Permita o acesso à câmera e ao microfone para iniciar a transmissão."
+          );
+    
+          return;
+        }
+    
         setStatus(
           "ERRO AO CONECTAR TRANSMISSOR"
         );
-      }
-    }
-
-    async function startViewer() {
-      if (!matchId) {
-        setStatus("SEM ID DE PARTIDA");
-        return;
-      }
-
-      setStatus(
-        "CONECTANDO TRANSMISSÃO..."
-      );
-
-      try {
-        await connectViewer();
-      } catch (error) {
-        console.error(error);
-
-        logLine(
-          `Erro espectador LiveKit: ${ error?.message || error }`,
-          true
-        );
-
-        setStatus(
-          "ERRO AO CONECTAR TRANSMISSÃO"
-        );
-
-        showInitialScreen(
-          "Erro ao conectar transmissão."
+    
+        setInfo(
+          "Não foi possível acessar a câmera e o microfone."
         );
       }
     }
@@ -1865,10 +2057,18 @@ document.addEventListener("DOMContentLoaded", () => {
       ) {
         try {
           state.mediaRecorder.stop();
-        } catch (_) {}
+        } catch (error) {
+          console.warn(
+            "Erro ao parar gravação ao encerrar transmissão:",
+            error
+          );
+        }
+      } else {
+        stopRecordingCanvas();
       }
-
-      stopRecordingCanvas();
+      
+      state.isRecording = false;
+      updateRecordingButtons();
 
       if (viewerStartButton) {
         viewerStartButton.disabled = true;
@@ -1900,12 +2100,20 @@ document.addEventListener("DOMContentLoaded", () => {
       ) {
         try {
           state.mediaRecorder.stop();
+        } catch (error) {
+          console.warn(
+            "Erro ao parar gravação durante limpeza:",
+            error
+          );
+        }
+      } else {
+        try {
+          stopRecordingCanvas();
         } catch (_) {}
       }
-
-      try {
-        stopRecordingCanvas();
-      } catch (_) {}
+      
+      state.isRecording = false;
+      updateRecordingButtons();
 
       try {
         stopCamera();
@@ -2190,17 +2398,41 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    function clearFullscreenInlineStyles() {
+      if (!videoWrap) {
+        return;
+      }
+    
+      videoWrap.style.width = "";
+      videoWrap.style.height = "";
+      videoWrap.style.minWidth = "";
+      videoWrap.style.minHeight = "";
+      videoWrap.style.maxWidth = "";
+      videoWrap.style.maxHeight = "";
+    
+      if (videoEl) {
+        videoEl.style.width = "";
+        videoEl.style.height = "";
+        videoEl.style.minWidth = "";
+        videoEl.style.minHeight = "";
+        videoEl.style.maxWidth = "";
+        videoEl.style.maxHeight = "";
+      }
+    }
+
     function removeFullscreenClass() {
       if (videoWrap) {
         videoWrap.classList.remove(
           "aovivo-fullscreen"
         );
       }
-
+    
       document.body.classList.remove(
         "aovivo-fullscreen-body"
       );
-
+    
+      clearFullscreenInlineStyles();
+    
       requestAnimationFrame(() => {
         window.dispatchEvent(
           new Event("resize")
@@ -2247,8 +2479,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function exitFullscreen() {
-      removeFullscreenClass();
-
       try {
         if (document.fullscreenElement) {
           await document.exitFullscreen();
@@ -2264,7 +2494,7 @@ document.addEventListener("DOMContentLoaded", () => {
           error
         );
       }
-
+    
       try {
         if (
           screen.orientation &&
@@ -2273,6 +2503,25 @@ document.addEventListener("DOMContentLoaded", () => {
           screen.orientation.unlock();
         }
       } catch (_) {}
+    
+      removeFullscreenClass();
+    
+      /* * Aguarda a remoção da classe antes de limpar * novamente os estilos definidos durante a tela cheia. */
+      requestAnimationFrame(() => {
+        clearFullscreenInlineStyles();
+    
+        if (videoWrap) {
+          videoWrap.style.aspectRatio = "16 / 9";
+        }
+    
+        window.dispatchEvent(
+          new Event("resize")
+        );
+      });
+    
+      setInfo(
+        "Transmissão em modo normal."
+      );
     }
 
     async function toggleFullscreen() {
@@ -2294,6 +2543,50 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         await enterFullscreen();
       }
+    }
+
+    function isVideoFullscreen() {
+      return Boolean(
+        videoWrap &&
+        (
+          videoWrap.classList.contains(
+            "aovivo-fullscreen"
+          ) ||
+          document.fullscreenElement ||
+          document.webkitFullscreenElement
+        )
+      );
+    }
+    
+    async function handleDoubleTapToExitFullscreen( event ) {
+      if (!isVideoFullscreen()) {
+        return;
+      }
+    
+      const agora = Date.now();
+    
+      const intervalo =
+        agora - ultimoToque;
+    
+      if (
+        intervalo > 0 &&
+        intervalo <= intervaloToqueDuplo
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+    
+        ultimoToque = 0;
+    
+        await exitFullscreen();
+    
+        setInfo(
+          "Modo normal ativado."
+        );
+    
+        return;
+      }
+    
+      ultimoToque = agora;
     }
 
     function handleFullscreenChange() {
@@ -2345,19 +2638,21 @@ document.addEventListener("DOMContentLoaded", () => {
       "resize",
       () => {
         if (
-          videoWrap &&
-          videoWrap.classList.contains(
+          !videoWrap ||
+          !videoWrap.classList.contains(
             "aovivo-fullscreen"
           )
         ) {
-          requestAnimationFrame(() => {
-            videoWrap.style.width =
-              `${window.innerWidth}px`;
-
-            videoWrap.style.height =
-              `${window.innerHeight}px`;
-          });
+          return;
         }
+    
+        requestAnimationFrame(() => {
+          videoWrap.style.width =
+            `${window.innerWidth}px`;
+    
+          videoWrap.style.height =
+            `${window.innerHeight}px`;
+        });
       }
     );
 
@@ -2419,14 +2714,36 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnIniciarGravacao) {
       btnIniciarGravacao.addEventListener(
         "click",
-        startRecording
+        async (event) => {
+          event.preventDefault();
+    
+          if (
+            btnIniciarGravacao.disabled ||
+            state.isRecording
+          ) {
+            return;
+          }
+    
+          await startRecording();
+        }
       );
     }
-
+    
     if (btnPararGravacao) {
       btnPararGravacao.addEventListener(
         "click",
-        stopRecording
+        (event) => {
+          event.preventDefault();
+    
+          if (
+            btnPararGravacao.disabled ||
+            !state.isRecording
+          ) {
+            return;
+          }
+    
+          stopRecording();
+        }
       );
     }
 
@@ -2473,6 +2790,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (videoWrap) {
       videoWrap.addEventListener(
+        "touchend",
+        handleDoubleTapToExitFullscreen,
+        {
+          passive: false
+        }
+      );
+    
+      videoWrap.addEventListener(
         "click",
         async (event) => {
           if (
@@ -2480,7 +2805,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ) {
             return;
           }
-
+    
           if (
             role === "viewer" &&
             videoEl &&
@@ -2488,11 +2813,11 @@ document.addEventListener("DOMContentLoaded", () => {
           ) {
             await activateViewerAudio();
           }
-
+    
           const isFullscreen =
             document.fullscreenElement ||
             document.webkitFullscreenElement;
-
+    
           if (
             isFullscreen &&
             !videoWrap.classList.contains(
