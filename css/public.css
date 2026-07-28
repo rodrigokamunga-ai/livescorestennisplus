@@ -3718,3 +3718,193 @@ body.public-dashboard-page .public-action-btn span {
     font-size: 1.55rem;
   }
 }
+
+/* ============================================================ BOTÃO VOLTAR COM TAMANHO DO FILTRO NO MOBILE ============================================================ */
+
+.public-back-wrapper {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.public-back-btn {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.09),
+    rgba(255, 255, 255, 0.04)
+  );
+  color: #eef4ff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    transform 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.public-back-btn ion-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.public-back-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(216, 255, 99, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(216, 255, 99, 0.16),
+    rgba(216, 255, 99, 0.07)
+  );
+  color: #d8ff63;
+}
+
+.public-back-btn:active {
+  transform: scale(0.98);
+}
+
+/* ============================================================ MOBILE ============================================================ */
+
+@media (max-width: 600px) {
+  .public-back-wrapper {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .public-back-btn {
+    width: 100%;
+    min-height: 48px;
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+
+  .public-back-btn ion-icon {
+    font-size: 1.2rem;
+  }
+}
+
+/* ============================================================ PUBLIC.HTML — REMOVER FRAMES DOS JOGOS AO VIVO ============================================================ */
+
+/* Remove o frame externo de cada partida */
+.public-page .match-board {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Remove o frame do cabeçalho do jogo */
+.public-page .match-board-top {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Remove os frames das linhas dos jogadores */
+.public-page .match-player-row {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Remove qualquer fundo aplicado ao nome do jogador */
+.public-page .player-name,
+.public-page .team-name-compact,
+.public-page .team-name-compact-content {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Mantém apenas o alinhamento do placar */
+.public-page .match-player-row {
+  border-radius: 0 !important;
+}
+
+/* Remove linhas divisórias dos jogadores, caso existam */
+.public-page .match-player-row::before,
+.public-page .match-player-row::after,
+.public-page .match-board::before,
+.public-page .match-board::after {
+  display: none !important;
+}
+
+/* Remove o frame da área do placar */
+.public-page .match-table-head,
+.public-page .compact-head,
+.public-page .compact-row {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* ============================================================ AJUSTE DO ESPAÇAMENTO DOS JOGADORES ============================================================ */
+
+.public-page .match-board-top {
+  margin-bottom: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+.public-page .match-table-head {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.public-page .match-player-row {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  min-height: 32px !important;
+  line-height: 1.05 !important;
+}
+
+.public-page .match-player-row + .match-player-row {
+  margin-top: -2px !important;
+}
+
+.public-page .player-name {
+  line-height: 1.05 !important;
+}
+
+.public-page .team-name-compact,
+.public-page .team-name-compact-content {
+  line-height: 1.05 !important;
+}
+
+/* Reduz o espaço entre a duração e os jogadores */
+.public-page .live-meta-right {
+  margin-bottom: 0 !important;
+}
+
+.public-page .duration-with-icon {
+  line-height: 1 !important;
+}
+
+.public-page .live-feed {
+  margin-top: 2px !important;
+  margin-bottom: 3px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.public-page .suspended-badge {
+  margin-bottom: 2px !important;
+}
+
+.public-page .suspended-duration {
+  padding-top: 0 !important;
+  padding-bottom: 2px !important;
+}
+
