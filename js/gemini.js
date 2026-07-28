@@ -19,7 +19,10 @@
   
     document.addEventListener("DOMContentLoaded", () => {
       const geminiBtn =
-        document.getElementById("geminiBtn");
+  document.getElementById("geminiBtn");
+
+const geminiTopBtn =
+  document.getElementById("geminiTopBtn");
   
       const geminiModal =
         document.getElementById("geminiModal");
@@ -48,9 +51,9 @@
       const geminiSubmitBtn =
         document.getElementById("geminiSubmitBtn");
   
-      if (
-        !geminiBtn ||
-        !geminiModal ||
+        if (
+          (!geminiBtn && !geminiTopBtn) ||
+          !geminiModal ||
         !closeGeminiBtn ||
         !cancelGeminiBtn ||
         !clearGeminiBtn ||
@@ -1083,7 +1086,15 @@
         );
       }
   
-      geminiBtn.addEventListener(
+      geminiBtn?.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          abrirModal();
+        }
+      );
+      
+      geminiTopBtn?.addEventListener(
         "click",
         (event) => {
           event.preventDefault();
