@@ -3160,3 +3160,74 @@ body.public-modern-page .public-stats-close-footer:hover {
   padding: 0 !important;
   content: none !important;
 }
+
+/* ========================================================= MOBILE — NOMES NA MESMA LINHA E PLACAR MAIS COMPACTO PARTIDAS EM ANDAMENTO E FINALIZADAS ========================================================= */
+
+@media (max-width: 600px) {
+    .tp-column-live .match-player-row .player-with-avatar,
+    .tp-column-finished .match-player-row .player-with-avatar {
+      display: inline-flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      min-width: 0;
+      max-width: 100%;
+      white-space: nowrap;
+    }
+  
+    .tp-column-live .match-player-row .name-line,
+    .tp-column-finished .match-player-row .name-line {
+      display: block;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.1;
+    }
+  
+    /* Partidas com 3 sets */
+    .tp-column-live .three-set-row,
+    .tp-column-live .three-set-head,
+    .tp-column-finished .three-set-row,
+    .tp-column-finished .three-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        14px
+        14px
+        14px
+        22px;
+      column-gap: 2px;
+    }
+  
+    /* Partidas com 2 sets */
+    .tp-column-live .two-set-row,
+    .tp-column-live .two-set-head,
+    .tp-column-finished .two-set-row,
+    .tp-column-finished .two-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        15px
+        15px
+        22px;
+      column-gap: 2px;
+    }
+  
+    /* Partidas com 1 set */
+    .tp-column-live .one-set-row,
+    .tp-column-live .one-set-head,
+    .tp-column-finished .one-set-row,
+    .tp-column-finished .one-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        15px
+        22px;
+      column-gap: 2px;
+    }
+  
+    .tp-column-live .match-player-row .score,
+    .tp-column-finished .match-player-row .score {
+      min-width: 0;
+      font-size: 11px;
+      line-height: 1;
+    }
+  }
