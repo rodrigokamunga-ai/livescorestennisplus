@@ -3238,3 +3238,239 @@ body.public-modern-page
     font-size: 0.64rem !important;
   }
 }
+
+/* ========================================================= AJUSTE FINAL DO PLACAR AO VIVO NO CELULAR ========================================================= */
+
+/* Números do ao vivo com o mesmo tamanho dos nomes */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.green {
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+  font-weight: 750 !important;
+}
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.gray {
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+  font-weight: 750 !important;
+}
+
+/* Nomes do jogador no mesmo tamanho dos números */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-name,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.team-name-compact,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.name-line {
+  font-size: 0.75rem !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Mantém o nome R. Camara em uma única linha */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-with-avatar {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 4px !important;
+}
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-with-avatar
+.name-line {
+  display: block !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Coluna do jogador ocupa o espaço restante */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.match-player-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.match-table-head {
+  column-gap: 0 !important;
+}
+
+/* Reduz o espaço das colunas dos sets */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.one-set-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.one-set-head {
+  grid-template-columns:
+    minmax(0, 1fr)
+    18px
+    25px !important;
+}
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.two-set-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.two-set-head {
+  grid-template-columns:
+    minmax(0, 1fr)
+    17px
+    17px
+    25px !important;
+}
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.three-set-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.three-set-head {
+  grid-template-columns:
+    minmax(0, 1fr)
+    16px
+    16px
+    16px
+    25px !important;
+}
+
+/* Reduz o tamanho do avatar para liberar espaço ao nome */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-avatar,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-avatar-placeholder {
+  width: 27px !important;
+  height: 27px !important;
+  min-width: 27px !important;
+  min-height: 27px !important;
+  max-width: 27px !important;
+  max-height: 27px !important;
+}
+
+/* Indicador do sacador mais compacto */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.serve-ball,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.serve-ball-placeholder {
+  width: 6px !important;
+  height: 6px !important;
+  min-width: 6px !important;
+  margin-right: 3px !important;
+}
+
+/* Ajuste adicional para celulares */
+@media (max-width: 600px) {
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score.green,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score.gray,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .player-name,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .team-name-compact,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .name-line {
+    font-size: 0.72rem !important;
+  }
+
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .one-set-row,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .one-set-head {
+    grid-template-columns:
+      minmax(0, 1fr)
+      17px
+      24px !important;
+  }
+
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .two-set-row,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .two-set-head {
+    grid-template-columns:
+      minmax(0, 1fr)
+      16px
+      16px
+      24px !important;
+  }
+
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .three-set-row,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .three-set-head {
+    grid-template-columns:
+      minmax(0, 1fr)
+      15px
+      15px
+      15px
+      24px !important;
+  }
+}
