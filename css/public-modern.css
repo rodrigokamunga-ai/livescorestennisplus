@@ -3329,6 +3329,162 @@ body.public-modern-page .public-stats-close-footer:hover {
       justify-content: flex-end !important;
       text-align: right !important;
       min-width: 0 !important;
-      font-size: 10px !important;
+      font-size: 12px !important;
+    }
+  }
+
+  /* ========================================================= AJUSTE FINAL — NOMES, PLACARES E BOTÕES NO MOBILE ========================================================= */
+
+@media (max-width: 600px) {
+    /* Nomes maiores e sem corte */
+    .tp-column-live .match-player-row .player-name,
+    .tp-column-live .match-player-row .team-name-compact,
+    .tp-column-live .match-player-row .team-name-compact-content,
+    .tp-column-live .match-player-row .player-with-avatar,
+    .tp-column-live .match-player-row .name-line,
+  
+    .tp-column-finished .match-player-row .player-name,
+    .tp-column-finished .match-player-row .team-name-compact,
+    .tp-column-finished .match-player-row .team-name-compact-content,
+    .tp-column-finished .match-player-row .player-with-avatar,
+    .tp-column-finished .match-player-row .name-line {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere !important;
+      word-break: normal !important;
+      line-height: 1.15 !important;
+    }
+  
+    .tp-column-live .match-player-row .player-name,
+    .tp-column-live .match-player-row .name-line {
+      font-size: 13px !important;
+      font-weight: 700 !important;
+    }
+  
+    .tp-column-finished .match-player-row .player-name,
+    .tp-column-finished .match-player-row .name-line {
+      font-size: 15px !important;
+      font-weight: 900 !important;
+    }
+  
+    .tp-column-live .match-player-row .player-with-avatar,
+    .tp-column-finished .match-player-row .player-with-avatar {
+      display: inline-flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 4px !important;
+    }
+  
+    /* Linhas com altura automática para nomes maiores */
+    .tp-column-live .match-player-row,
+    .tp-column-finished .match-player-row {
+      min-height: 44px !important;
+      height: auto !important;
+      align-items: center !important;
+    }
+  
+    /* Placar maior e alinhado à direita */
+    .tp-column-live .match-player-row .score,
+    .tp-column-live .match-player-row .score.green,
+    .tp-column-live .match-player-row .score.gray,
+    .tp-column-finished .match-player-row .score,
+    .tp-column-finished .match-player-row .score.green,
+    .tp-column-finished .match-player-row .score.gray {
+      min-width: 0 !important;
+      padding: 0 !important;
+      justify-content: flex-end !important;
+      text-align: right !important;
+      font-size: 12px !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+  
+    /* Espaçamento equilibrado para partidas com 3 sets */
+    .tp-column-live .three-set-row,
+    .tp-column-live .three-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        18px
+        18px
+        18px
+        24px !important;
+      column-gap: 4px !important;
+    }
+  
+    .tp-column-finished .three-set-row,
+    .tp-column-finished .three-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        22px
+        22px
+        22px
+        28px !important;
+      column-gap: 6px !important;
+    }
+  
+    /* Espaçamento para partidas com 2 sets */
+    .tp-column-live .two-set-row,
+    .tp-column-live .two-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        18px
+        18px
+        24px !important;
+      column-gap: 4px !important;
+    }
+  
+    .tp-column-finished .two-set-row,
+    .tp-column-finished .two-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        22px
+        22px
+        28px !important;
+      column-gap: 6px !important;
+    }
+  
+    /* Botões Live, Stats, H2H e Transmitir em uma única linha */
+    .tp-match-list .public-actions-row {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 4px !important;
+    }
+  
+    .tp-match-list .public-action-btn,
+    .tp-match-list .action-btn {
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-wrap: nowrap !important;
+      gap: 3px !important;
+      min-width: 0 !important;
+      min-height: 38px !important;
+      padding: 0 3px !important;
+      white-space: nowrap !important;
+      font-size: 9px !important;
+      line-height: 1 !important;
+    }
+  
+    .tp-match-list .public-action-btn ion-icon,
+    .tp-match-list .action-btn ion-icon {
+      flex: 0 0 auto !important;
+      width: 14px !important;
+      height: 14px !important;
+      font-size: 14px !important;
+    }
+  
+    .tp-match-list .public-action-btn span,
+    .tp-match-list .action-btn span {
+      display: inline-block !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      font-size: 9px !important;
     }
   }
