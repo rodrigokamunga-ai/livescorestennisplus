@@ -203,9 +203,12 @@ const state = {
   liveKitLocalTracks: [],
   liveKitAudioElements: [],
 
+  audioTrackSids: new Set(),
+  videoTrackSid: null,
+  videoLoadVersion: 0,
+
   localStream: null,
   unsubMatch: null,
-
   started: false,
   transmissionEnded: false,
   refreshLock: false,
@@ -1698,105 +1701,295 @@ const state = {
       if (!track) {
         return;
       }
-
-      if (
-        track.kind ===
-        LivekitClient.Track.Kind.Video
-      ) {
+    
+      const videoKind =
+        LivekitClient.Track.Kind.Video;
+    
+      const audioKind =
+        LivekitClient.Track.Kind.Audio;
+    
+      const trackId = String(
+        track.sid ||
+        track.mediaStreamTrack?.id ||
+        ""
+      );
+    
+      if (track.kind === videoKind) {
+        if (!videoEl) {
+          return;
+        }
+    
+        if (
+          state.videoTrackSid &&
+          state.videoTrackSid === trackId &&
+          videoEl.srcObject
+        ) {
+          return;
+        }
+    
+        state.videoTrackSid = trackId;
+    
+        state.videoLoadVersion =
+          Number(state.videoLoadVersion || 0) + 1;
+    
+        const currentVersion =
+          state.videoLoadVersion;
+    
+        try {
+          videoEl.pause();
+        } catch (_) {}
+    
         try {
           track.detach();
         } catch (_) {}
-
-        track.attach(videoEl);
-
+    
+        try {
+          track.attach(videoEl);
+        } catch (error) {
+          console.error(
+            "[Ao Vivo] Erro ao anexar vídeo:",
+            error
+          );
+    
+          return;
+        }
+    
         videoEl.autoplay = true;
         videoEl.playsInline = true;
-        videoEl.muted = false;
-        videoEl.removeAttribute("muted");
-
+        videoEl.setAttribute(
+          "playsinline",
+          ""
+        );
+    
+        /* * O vídeo inicia mudo. * O áudio será liberado somente após * uma ação do usuário. */
+        videoEl.muted = true;
+        videoEl.setAttribute(
+          "muted",
+          ""
+        );
+    
         ensureVideoVisible();
-
-        videoEl
-          .play()
-          .then(() => {
-            if (btnAtivarAudio) {
-              btnAtivarAudio.style.display =
-                "none";
+    
+        const playVideo = async () => {
+          if (
+            currentVersion !==
+            state.videoLoadVersion
+          ) {
+            return;
+          }
+    
+          try {
+            await videoEl.play();
+    
+            if (
+              currentVersion !==
+              state.videoLoadVersion
+            ) {
+              return;
             }
-
+    
             hideInitialScreen();
-          })
-          .catch(() => {
-            showInitialScreen(
-              "Toque na tela para iniciar a transmissão"
+    
+            setStatus(
+              "ASSISTINDO AO VIVO"
             );
-
+    
+            setInfo(
+              "Transmissão conectada. Toque para ativar o áudio."
+            );
+    
             if (btnAtivarAudio) {
               btnAtivarAudio.style.display =
                 "inline-flex";
-
-              const label =
-                btnAtivarAudio.querySelector(
-                  "span"
-                );
-
-              if (label) {
-                label.textContent =
-                  "Iniciar transmissão";
-              }
             }
-          });
-
-        setStatus("ASSISTINDO AO VIVO");
+          } catch (error) {
+            if (
+              error?.name === "AbortError"
+            ) {
+              return;
+            }
+    
+            if (
+              error?.name === "NotAllowedError"
+            ) {
+              showInitialScreen(
+                "Toque na tela para iniciar a transmissão"
+              );
+    
+              if (btnAtivarAudio) {
+                btnAtivarAudio.style.display =
+                  "inline-flex";
+              }
+    
+              return;
+            }
+    
+            console.error(
+              "[Ao Vivo] Erro ao reproduzir vídeo:",
+              error
+            );
+    
+            setStatus(
+              "ERRO AO REPRODUZIR TRANSMISSÃO"
+            );
+    
+            setInfo(
+              "Não foi possível reproduzir o vídeo."
+            );
+          }
+        };
+    
+        if (videoEl.readyState >= 2) {
+          playVideo();
+        } else {
+          videoEl.addEventListener(
+            "loadedmetadata",
+            playVideo,
+            {
+              once: true
+            }
+          );
+        }
+    
         return;
       }
-
-      if (
-        track.kind ===
-        LivekitClient.Track.Kind.Audio
-      ) {
-        const audioElement =
-          track.attach();
-
-        audioElement.autoplay = true;
+    
+      if (track.kind === audioKind) {
+        const audioTrackId = String(
+          track.sid ||
+          track.mediaStreamTrack?.id ||
+          ""
+        );
+    
+        if (
+          audioTrackId &&
+          state.audioTrackSids.has(audioTrackId)
+        ) {
+          return;
+        }
+    
+        if (audioTrackId) {
+          state.audioTrackSids.add(
+            audioTrackId
+          );
+        }
+    
+        let audioElement = null;
+    
+        try {
+          audioElement = track.attach();
+        } catch (error) {
+          console.error(
+            "[Ao Vivo] Erro ao anexar áudio:",
+            error
+          );
+    
+          return;
+        }
+    
+        if (!audioElement) {
+          return;
+        }
+    
+        audioElement.autoplay = false;
+        audioElement.playsInline = true;
+        audioElement.muted = true;
+        audioElement.volume = 1;
         audioElement.className =
           "livekit-audio-element";
-
+    
         document.body.appendChild(
           audioElement
         );
-
+    
         state.liveKitAudioElements.push(
           audioElement
         );
-
-        audioElement.play().catch(() => {
-          if (btnAtivarAudio) {
-            btnAtivarAudio.style.display =
-              "inline-flex";
-          }
-        });
+    
+        /* * Não chama play() automaticamente. * O play será executado depois do clique * em Ativar áudio. */
       }
     }
-
     function detachLiveKitTrack(track) {
       if (!track) {
         return;
       }
-
+    
+      state.videoLoadVersion += 1;
+    
       try {
         track.detach();
       } catch (_) {}
-
-      state.liveKitAudioElements
-        .forEach((element) => {
+    
+      if (
+        state.videoTrackSid ===
+        String(
+          track.sid ||
+          track.mediaStreamTrack?.id ||
+          ""
+        )
+      ) {
+        state.videoTrackSid = null;
+      }
+    
+      state.liveKitAudioElements.forEach(
+        (element) => {
           try {
+            element.pause();
             element.remove();
           } catch (_) {}
-        });
-
+        }
+      );
+    
       state.liveKitAudioElements = [];
     }
+    
+    
+    async function startViewer() {
+      if (role !== "viewer") {
+        return;
+      }
+    
+      if (!matchId) {
+        setStatus("SEM ID DE PARTIDA");
+        setInfo("Não foi informado o ID da partida.");
+        return;
+      }
+    
+      if (state.transmissionEnded) {
+        setStatus("TRANSMISSÃO ENCERRADA");
+        setInfo("A transmissão desta partida foi encerrada.");
+        return;
+      }
+    
+      setStatus("CONECTANDO À TRANSMISSÃO...");
+      setInfo("Aguarde enquanto o vídeo ao vivo é carregado.");
+    
+      try {
+        await connectViewer();
+    
+        setStatus("ASSISTINDO AO VIVO");
+        setInfo("Transmissão conectada.");
+      } catch (error) {
+        console.error(
+          "[Ao Vivo] Erro ao iniciar espectador:",
+          error
+        );
+    
+        logLine(
+          `Erro ao conectar espectador: ${ error?.message || error }`,
+          true
+        );
+    
+        setStatus("ERRO AO CONECTAR À TRANSMISSÃO");
+        setInfo("Não foi possível conectar ao vídeo ao vivo.");
+    
+        showInitialScreen(
+          "Não foi possível carregar a transmissão."
+        );
+      }
+    }
+    
+    
 
     async function connectViewer() {
       const credentials =
@@ -1959,32 +2152,71 @@ const state = {
       }
     }
 
-    async function stopLiveKit() {
-      if (state.liveKitRoom) {
-        try {
-          await state.liveKitRoom.disconnect();
-        } catch (_) {}
-
-        state.liveKitRoom = null;
-      }
-
-      state.liveKitAudioElements
+    function cleanupMediaElements() {
+      state.videoLoadVersion += 1;
+      state.videoTrackSid = null;
+    
+      document
+        .querySelectorAll(".livekit-audio-element")
         .forEach((element) => {
           try {
+            element.pause();
+            element.srcObject = null;
             element.remove();
           } catch (_) {}
         });
-
+    
+      if (videoEl) {
+        try {
+          videoEl.pause();
+        } catch (_) {}
+    
+        try {
+          videoEl.removeAttribute("src");
+          videoEl.load();
+        } catch (_) {}
+      }
+    
       state.liveKitAudioElements = [];
+    
+      if (state.audioTrackSids) {
+        state.audioTrackSids.clear();
+      }
+    }
 
-      state.liveKitLocalTracks
-        .forEach((track) => {
+    async function stopLiveKit() {
+      cleanupMediaElements();
+    
+      if (state.liveKitRoom) {
+        try {
+          await state.liveKitRoom.disconnect();
+        } catch (error) {
+          console.warn(
+            "[Ao Vivo] Erro ao desconectar LiveKit:",
+            error
+          );
+        }
+    
+        state.liveKitRoom = null;
+      }
+    
+      state.liveKitLocalTracks.forEach(
+        (localTrack) => {
           try {
-            track.stop();
+            localTrack.stop();
           } catch (_) {}
-        });
-
+        }
+      );
+    
       state.liveKitLocalTracks = [];
+    
+      state.liveKitAudioElements = [];
+    
+      if (state.audioTrackSids) {
+        state.audioTrackSids.clear();
+      }
+    
+      state.videoTrackSid = null;
     }
 
     function stopCamera() {
@@ -1997,13 +2229,19 @@ const state = {
             } catch (_) {}
           });
       }
-
+    
       state.localStream = null;
-
+    
       if (videoEl) {
         try {
-          videoEl.srcObject = null;
+          videoEl.pause();
         } catch (_) {}
+    
+        if (role === "broadcaster") {
+          try {
+            videoEl.srcObject = null;
+          } catch (_) {}
+        }
       }
     }
 
@@ -2317,8 +2555,6 @@ const state = {
           try {
             videoEl.pause();
           } catch (_) {}
-
-          videoEl.srcObject = null;
         }
 
         state.started = false;
@@ -2355,25 +2591,42 @@ const state = {
     }
 
     async function activateViewerAudio() {
-      if (!videoEl) {
-        return;
-      }
-
       try {
-        videoEl.muted = false;
-        videoEl.removeAttribute("muted");
-
-        await videoEl.play();
-
-        if (btnAtivarAudio) {
-          btnAtivarAudio.style.display =
-            "none";
+        if (window.LivekitClient?.RoomAudio) {
+          await window.LivekitClient.RoomAudio.resumeAudioContext();
         }
-
+      } catch (_) {}
+    
+      try {
+        if (videoEl) {
+          videoEl.muted = false;
+          videoEl.removeAttribute("muted");
+          await videoEl.play();
+        }
+    
+        state.liveKitAudioElements.forEach(
+          (audioElement) => {
+            audioElement.muted = false;
+            audioElement.volume = 1;
+    
+            audioElement.play().catch(() => {});
+          }
+        );
+    
+        if (btnAtivarAudio) {
+          btnAtivarAudio.style.display = "none";
+        }
+    
         hideInitialScreen();
         setStatus("ASSISTINDO AO VIVO");
+        setInfo("Áudio ativado.");
       } catch (error) {
-        console.error(error);
+        if (error?.name !== "AbortError") {
+          console.error(
+            "[Ao Vivo] Erro ao ativar áudio:",
+            error
+          );
+        }
       }
     }
 
