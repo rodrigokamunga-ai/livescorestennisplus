@@ -723,7 +723,7 @@ const p2Raw = isDoublesFormat(match)
 const p1Name = U.escapeHtml(abbreviateName(p1Raw));
 const p2Name = U.escapeHtml(abbreviateName(p2Raw));
 
-      return ` <div class="win-probability-chart"> <div class="win-probability-title">Probabilidade de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%">${p1 > 12 ? `${p1}%` : ""}</div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%">${p2 > 12 ? `${p2}%` : ""}</div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div> `;
+      return ` <div class="win-probability-chart"> <div class="win-probability-title">Chances de vitória</div> <div class="win-probability-bar"> <div class="win-probability-segment win-probability-p1" style="width:${p1}%" title="${p1Name} ${p1}%">${p1 > 12 ? `${p1}%` : ""}</div> <div class="win-probability-segment win-probability-p2" style="width:${p2}%" title="${p2Name} ${p2}%">${p2 > 12 ? `${p2}%` : ""}</div> </div> <div class="win-probability-legend"> <span class="legend-item legend-item-p1">${p1Name} ${p1}%</span> <span class="legend-item legend-item-p2">${p2Name} ${p2}%</span> </div> </div> `;
     }
 
     function renderLastPointsLine(match) {
@@ -743,7 +743,7 @@ const p2Name = U.escapeHtml(abbreviateName(p2Raw));
         balls.push(`<span class="last-point-ball ${cls}" title="Ponto do Jogador ${point.winnerPos}"></span>`);
       }
 
-      return ` <div class="last-points-block"> <div class="last-points-title">Últimos 10 pontos Jogados</div> <div class="last-points-balls">${balls.join("")}</div> </div> `;
+      return ` <div class="last-points-block"> <div class="last-points-title"> 10 pontos Jogados</div> <div class="last-points-balls">${balls.join("")}</div> </div> `;
     }
 
     function getCurrentSetNumber(match, score) {
