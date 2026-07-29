@@ -3969,3 +3969,84 @@ body.public-modern-page
     min-height: 12px !important;
   }
 }
+
+/* ========================================================= AJUSTE FINAL — NÚMEROS DOS JOGOS EM ANDAMENTO ========================================================= */
+
+/* Números das colunas com o mesmo tamanho dos nomes */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.green,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.gray {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+}
+
+/* Mantém os números centralizados */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ========================================================= ÚLTIMOS 10 PONTOS Bolinhas um pouco mais próximas ========================================================= */
+
+body.public-modern-page
+.tp-match-list
+.last-points-balls,
+body.public-modern-page
+.tp-insight-last-points
+.last-points-balls {
+  gap: 3px !important;
+}
+
+/* ========================================================= AJUSTE SOMENTE NO CELULAR Números do ao vivo iguais ao tamanho dos nomes ========================================================= */
+
+@media (max-width: 600px) {
+    body.public-modern-page
+    .tp-column-live
+    .tp-match-list
+    .score,
+    body.public-modern-page
+    .tp-column-live
+    .tp-match-list
+    .score.green,
+    body.public-modern-page
+    .tp-column-live
+    .tp-match-list
+    .score.gray {
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 12px !important;
+      line-height: 1.1 !important;
+      font-weight: 700 !important;
+    }
+  
+    body.public-modern-page
+    .tp-column-live
+    .tp-match-list
+    .score {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+  
+    /* Aproxima as bolinhas dos últimos 10 pontos */
+    body.public-modern-page
+    .tp-column-live
+    .tp-match-list
+    .last-points-balls {
+      gap: 3px !important;
+    }
+  }
