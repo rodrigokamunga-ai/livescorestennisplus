@@ -2870,26 +2870,111 @@ body.public-modern-page .public-stats-close-footer:hover {
 
 
 /* =========================================================
-   AJUSTE FINAL SOLICITADO
+   AJUSTES FINAIS — LAYOUT DA TELA PÚBLICA
    ========================================================= */
 
-/* Ao vivo: nomes um pouco maiores, sem alterar o placar */
-@media (max-width: 600px) {
-  .tp-column-live .match-player-row .player-name,
-  .tp-column-live .match-player-row .team-name-compact,
-  .tp-column-live .match-player-row .team-name-compact-content,
-  .tp-column-live .match-player-row .player-with-avatar,
-  .tp-column-live .match-player-row .name-line {
-    font-size: 13px;
-  }
-
-  .tp-column-live .match-player-row .name-line {
-    line-height: 1.1;
-    white-space: nowrap;
-  }
+/* Números das colunas alinhados à direita nos finalizados */
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  justify-content: flex-end;
+  text-align: right;
 }
 
-/* Finalizados: +2px no nome e na pontuação */
+/* Números das colunas alinhados à direita no ao vivo */
+.tp-column-live .match-player-row .score,
+.tp-column-live .match-player-row .score.green,
+.tp-column-live .match-player-row .score.gray {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+/* Nomes sem quebra dentro da linha */
+.tp-column-finished .match-player-row .player-name,
+.tp-column-finished .match-player-row .team-name-compact,
+.tp-column-finished .match-player-row .team-name-compact-content,
+.tp-column-finished .match-player-row .player-with-avatar,
+.tp-column-finished .match-player-row .name-line,
+.tp-column-live .match-player-row .player-name,
+.tp-column-live .match-player-row .team-name-compact,
+.tp-column-live .match-player-row .team-name-compact-content,
+.tp-column-live .match-player-row .player-with-avatar,
+.tp-column-live .match-player-row .name-line {
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Remove qualquer indicador de vencedor em bolinha/check */
+.tp-column-finished .match-player-row .player-name::after,
+.tp-column-live .match-player-row .player-name::after {
+  display: none;
+  content: none;
+}
+
+/* Botões: ícone em cima e texto embaixo, permanecendo na mesma linha */
+.tp-match-list .public-actions-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tp-match-list .public-action-btn,
+.tp-match-list .action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 5px 3px;
+  line-height: 1;
+  white-space: normal;
+}
+
+.tp-match-list .public-action-btn ion-icon,
+.tp-match-list .action-btn ion-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  font-size: 18px;
+}
+
+.tp-match-list .public-action-btn span,
+.tp-match-list .action-btn span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.60rem;
+  line-height: 1.1;
+}
+
+/* Cabeçalho da coluna ao vivo um pouco menor */
+.tp-column-live .tp-section-title-content h2 {
+  font-size: 0.88rem;
+}
+
+/* Metadados: fase, partida, torneio e duração maiores */
+.tp-column-live .match-chip,
+.tp-column-live .live-meta-left,
+.tp-column-live .live-meta-right,
+.tp-column-live .duration-with-icon,
+.tp-column-live .duration-with-icon strong,
+.tp-column-live .match-status {
+  font-size: 0.74rem;
+}
+
+.tp-column-live .match-status {
+  min-height: 26px;
+}
+
+/* Finalizados continuam com nomes e placar maiores */
 .tp-column-finished .match-player-row .player-name,
 .tp-column-finished .match-player-row .team-name-compact,
 .tp-column-finished .match-player-row .team-name-compact-content,
@@ -2902,9 +2987,65 @@ body.public-modern-page .public-stats-close-footer:hover {
   line-height: 1.1;
 }
 
-.tp-column-finished .match-player-row .set-tb {
-  font-size: 9px;
+/* Ao vivo no celular: nome um pouco maior e placar permanece em 12px */
+@media (max-width: 600px) {
+  .tp-column-live .match-player-row .player-name,
+  .tp-column-live .match-player-row .team-name-compact,
+  .tp-column-live .match-player-row .team-name-compact-content,
+  .tp-column-live .match-player-row .player-with-avatar,
+  .tp-column-live .match-player-row .name-line {
+    font-size: 13px;
+  }
+
+  .tp-column-live .match-player-row .score,
+  .tp-column-live .match-player-row .score.green,
+  .tp-column-live .match-player-row .score.gray {
+    font-size: 12px;
+  }
+
+  .tp-column-live .match-chip,
+  .tp-column-live .live-meta-left,
+  .tp-column-live .live-meta-right,
+  .tp-column-live .duration-with-icon,
+  .tp-column-live .duration-with-icon strong,
+  .tp-column-live .match-status {
+    font-size: 0.70rem;
+  }
+
+  .tp-column-live .tp-section-title-content h2 {
+    font-size: 0.84rem;
+  }
+
+  .tp-match-list .public-actions-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .tp-match-list .public-action-btn,
+  .tp-match-list .action-btn {
+    min-height: 50px;
+  }
+
+  .tp-match-list .public-action-btn span,
+  .tp-match-list .action-btn span {
+    font-size: 0.58rem;
+  }
 }
+
+/* Finalizados no celular */
+@media (max-width: 600px) {
+  .tp-column-finished .match-player-row .player-name,
+  .tp-column-finished .match-player-row .team-name-compact,
+  .tp-column-finished .match-player-row .team-name-compact-content,
+  .tp-column-finished .match-player-row .player-with-avatar,
+  .tp-column-finished .match-player-row .name-line,
+  .tp-column-finished .match-player-row .score,
+  .tp-column-finished .match-player-row .score.green,
+  .tp-column-finished .match-player-row .score.gray {
+    font-size: 14px;
+  }
+}
+
 
 /* Finalizados: indicador de vencedor à direita do nome */
 .tp-column-finished .match-player-row.winner-row .player-name::after {
@@ -2919,27 +3060,4 @@ body.public-modern-page .public-stats-close-footer:hover {
   font-size: 16px;
   font-weight: 900;
   line-height: 1;
-}
-
-/* Mantém o indicador dentro da mesma linha do nome */
-.tp-column-finished .match-player-row.winner-row .player-name {
-  display: flex;
-  align-items: center;
-}
-
-@media (max-width: 600px) {
-  .tp-column-finished .match-player-row .player-name,
-  .tp-column-finished .match-player-row .team-name-compact,
-  .tp-column-finished .match-player-row .team-name-compact-content,
-  .tp-column-finished .match-player-row .player-with-avatar,
-  .tp-column-finished .match-player-row .name-line,
-  .tp-column-finished .match-player-row .score,
-  .tp-column-finished .match-player-row .score.green,
-  .tp-column-finished .match-player-row .score.gray {
-    font-size: 14px;
-  }
-
-  .tp-column-finished .match-player-row .set-tb {
-    font-size: 9px;
-  }
 }
