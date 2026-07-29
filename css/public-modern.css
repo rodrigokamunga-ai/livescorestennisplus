@@ -2503,1550 +2503,443 @@ body.public-modern-page .public-stats-close-footer:hover {
     }
   }
 
-  /* ========================================================= INSIGHTS DA PARTIDA EM TRÊS COLUNAS ========================================================= */
-
-.tp-match-insights-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    width: 100%;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #e2e7ed;
-  }
   
-  .tp-insight-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-    min-height: 116px;
-    padding: 11px 10px;
-    border: 1px solid #d9e1e8;
-    border-radius: 12px;
-    background: #ffffff;
-  }
-  
-  .tp-insight-card .last-points-block,
-  .tp-insight-card .break-points-block,
-  .tp-insight-card .win-probability-chart {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-  
-  .tp-insight-card .last-points-title,
-  .tp-insight-card .break-points-title,
-  .tp-insight-card .win-probability-title {
-    min-height: 30px;
-    margin: 0 0 9px;
-    color: #60718d;
-    font-size: 0.63rem;
-    font-weight: 900;
-    letter-spacing: 0.04em;
-    line-height: 1.15;
-    text-align: center;
-    text-transform: uppercase;
-  }
-  
-  .tp-insight-last-points {
-    border-top: 3px solid #17853a;
-  }
-  
-  .tp-insight-break-points {
-    border-top: 3px solid #ad7a00;
-  }
-  
-  .tp-insight-probability {
-    border-top: 3px solid #05649a;
-  }
-
-  .tp-insight-last-points .last-points-balls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    max-width: 140px;
-    margin: 0 auto;
-  }
-  
-  .tp-insight-last-points .last-point-ball {
-    width: 10px;
-    height: 10px;
-  }
-  
-  .tp-insight-last-points .last-points-title {
-    color: #17853a;
-  }
-
-  .tp-insight-break-points .break-points-balls {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 7px 5px;
-    width: 100%;
-  }
-  
-  .tp-insight-break-points .break-point-number {
-    color: #718198;
-    font-size: 0.62rem;
-    font-weight: 850;
-  }
-  
-  .tp-insight-break-points .break-point-ball {
-    width: 10px;
-    height: 10px;
-  }
-  
-  .tp-insight-break-points .break-points-title {
-    color: #ad7a00;
-  }
-
-  .tp-insight-probability .win-probability-title {
-    color: #05649a;
-  }
-  
-  .tp-insight-probability .win-probability-bar {
-    height: 9px;
-    margin-top: 2px;
-    border-radius: 999px;
-  }
-  
-  .tp-insight-probability .win-probability-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 9px;
-    font-size: 0.65rem;
-    text-align: center;
-  }
-  
-  .tp-insight-probability .legend-item {
-    overflow: visible;
-    text-overflow: unset;
-    white-space: normal;
-  }
-  
-  .tp-insight-probability .legend-item-p1 {
-    color: #17853a;
-  }
-  
-  .tp-insight-probability .legend-item-p2 {
-    color: #05649a;
-  }
-
-  /* =========================================================
-   AJUSTES DEFINITIVOS DA TELA PÚBLICA
+/* =========================================================
+   INSIGHTS DA PARTIDA — VERSÃO CONSOLIDADA
    ========================================================= */
 
-/* Título Jogos de tênis */
-body.public-modern-page .tp-hero h1 {
-    font-size: 2.15rem !important;
-    line-height: 1.05 !important;
-    letter-spacing: -0.03em !important;
-  }
-  
-  /* Mobile */
-  @media (max-width: 760px) {
-    body.public-modern-page .tp-hero h1 {
-      font-size: 1.75rem !important;
-    }
-  }
-  
-  /* =========================================================
-     PLACAR MAIS COMPACTO
-     ========================================================= */
-  
-  /* Reduz o espaço entre nome e placar */
-  body.public-modern-page .tp-match-list .match-table-head,
-  body.public-modern-page .tp-match-list .match-player-row {
-    column-gap: 2px !important;
-  }
-  
-  /* Números do jogo em andamento do tamanho aproximado do nome */
-  body.public-modern-page .tp-column-live .tp-match-list .score,
-  body.public-modern-page .tp-column-live .tp-match-list .score.green,
-  body.public-modern-page .tp-column-live .tp-match-list .score.gray {
-    font-size: 0.76rem !important;
-    line-height: 1 !important;
-    font-weight: 700 !important;
-  }
-  
-  /* Números dos jogos finalizados */
-  body.public-modern-page .tp-column-finished .tp-match-list .score,
-  body.public-modern-page .tp-column-finished .tp-match-list .score.green,
-  body.public-modern-page .tp-column-finished .tp-match-list .score.gray {
-    font-size: 0.78rem !important;
-    line-height: 1 !important;
-    font-weight: 750 !important;
-  }
-  
-  /* Colunas do placar mais estreitas */
-  body.public-modern-page .tp-match-list .one-set-head,
-  body.public-modern-page .tp-match-list .one-set-row {
-    grid-template-columns: minmax(0, 1fr) 25px 32px !important;
-  }
-  
-  body.public-modern-page .tp-match-list .two-set-head,
-  body.public-modern-page .tp-match-list .two-set-row {
-    grid-template-columns: minmax(0, 1fr) 23px 23px 32px !important;
-  }
-  
-  body.public-modern-page .tp-match-list .three-set-head,
-  body.public-modern-page .tp-match-list .three-set-row {
-    grid-template-columns: minmax(0, 1fr) 22px 22px 22px 32px !important;
-  }
-  
-  /* Remove espaço lateral excessivo dos cards */
-  body.public-modern-page .tp-match-list .public-card,
-  body.public-modern-page .tp-match-list .match-board {
-    padding-left: 9px !important;
-    padding-right: 9px !important;
-  }
-  
-  /* Jogos do dia */
-  body.public-modern-page .tp-match-list .scheduled-player-line {
-    gap: 2px !important;
-  }
-  
-  /* =========================================================
-     BREAK POINTS: NÚMEROS 1 ATÉ 12 EM UMA ÚNICA LINHA
-     ========================================================= */
-  
-  body.public-modern-page .tp-match-list .break-points-balls,
-  body.public-modern-page .tp-insight-break-points .break-points-balls {
-    display: grid !important;
-    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
-    grid-auto-flow: column !important;
-    gap: 3px !important;
-    width: 100% !important;
-    overflow: visible !important;
-  }
-  
-  body.public-modern-page .break-point-ball-wrap {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 0 !important;
-    gap: 2px !important;
-  }
-  
-  body.public-modern-page .break-point-number {
-    font-size: 0.42rem !important;
-    line-height: 1 !important;
-  }
-  
-  body.public-modern-page .break-point-ball {
-    width: 8px !important;
-    height: 8px !important;
-  }
-  
-  /* Em telas pequenas, mantém os 12 números na mesma linha */
-  @media (max-width: 600px) {
-    body.public-modern-page .tp-match-list .break-points-balls,
-    body.public-modern-page .tp-insight-break-points .break-points-balls {
-      grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
-      gap: 1px !important;
-    }
-  
-    body.public-modern-page .break-point-number {
-      font-size: 0.36rem !important;
-    }
-  
-    body.public-modern-page .break-point-ball {
-      width: 7px !important;
-      height: 7px !important;
-    }
-  }
-  
-  /* =========================================================
-     4 BOTÕES: ÍCONE EM CIMA E TEXTO EMBAIXO
-     ========================================================= */
-  
-  body.public-modern-page .tp-match-list .public-action-btn,
-  body.public-modern-page .tp-match-list .action-btn {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 3px !important;
-    min-height: 52px !important;
-    padding: 5px 3px !important;
-    line-height: 1 !important;
-    white-space: normal !important;
-  }
-  
-  body.public-modern-page .tp-match-list .public-action-btn ion-icon,
-  body.public-modern-page .tp-match-list .action-btn ion-icon {
-    display: block !important;
-    width: 18px !important;
-    height: 18px !important;
-    margin: 0 !important;
-    font-size: 18px !important;
-  }
-  
-  body.public-modern-page .tp-match-list .public-action-btn span,
-  body.public-modern-page .tp-match-list .action-btn span {
-    display: block !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    font-size: 0.56rem !important;
-    line-height: 1.1 !important;
-  }
-  
-  @media (max-width: 430px) {
-    body.public-modern-page .tp-match-list .public-actions-row {
-      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-      gap: 4px !important;
-    }
-  
-    body.public-modern-page .tp-match-list .public-action-btn,
-    body.public-modern-page .tp-match-list .action-btn {
-      min-height: 49px !important;
-    }
-  }
-
-  body.public-modern-page
-.public-action-btn[data-action="live"].is-sharing {
-  opacity: 0.65 !important;
-  cursor: wait !important;
-  transform: none !important;
-}
-
-body.public-modern-page
-.public-action-btn[data-action="live"]:disabled {
-  pointer-events: none !important;
-}
-
-/* ========================================================= AJUSTE FINAL DOS INSIGHTS DA PARTIDA ========================================================= */
-
-/* ========================================================= BREAK POINT Números e bolinhas próximos do tamanho dos últimos pontos ========================================================= */
-
-body.public-modern-page .tp-match-list .break-point-number,
-body.public-modern-page .tp-insight-break-points .break-point-number {
-  font-size: 0.58rem !important;
-  line-height: 1 !important;
-  font-weight: 850 !important;
-  color: #718198 !important;
-}
-
-body.public-modern-page .tp-match-list .break-point-ball,
-body.public-modern-page .tp-insight-break-points .break-point-ball {
-  width: 10px !important;
-  height: 10px !important;
-  min-width: 10px !important;
-  min-height: 10px !important;
-  border-width: 1px !important;
-}
-
-body.public-modern-page .tp-match-list .break-point-ball-wrap,
-body.public-modern-page .tp-insight-break-points .break-point-ball-wrap {
-  gap: 4px !important;
-}
-
-/* Mantém os números de 1 a 12 em uma única linha */
-body.public-modern-page .tp-match-list .break-points-balls,
-body.public-modern-page .tp-insight-break-points .break-points-balls {
-  display: grid !important;
-  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
-  grid-auto-flow: column !important;
-  align-items: center !important;
-  gap: 4px !important;
-  width: 100% !important;
-}
-
-/* ========================================================= CHANCES DE VITÓRIA Linha e textos maiores ========================================================= */
-
-body.public-modern-page .tp-match-list .win-probability-title,
-body.public-modern-page .tp-insight-probability .win-probability-title {
-  margin-bottom: 10px !important;
-  font-size: 0.72rem !important;
-  line-height: 1.2 !important;
-  font-weight: 900 !important;
-}
-
-body.public-modern-page .tp-match-list .win-probability-bar,
-body.public-modern-page .tp-insight-probability .win-probability-bar {
-  height: 13px !important;
-  min-height: 13px !important;
-  margin-top: 3px !important;
-  border-radius: 999px !important;
-}
-
-body.public-modern-page .tp-match-list .win-probability-segment,
-body.public-modern-page .tp-insight-probability .win-probability-segment {
-  font-size: 0.65rem !important;
-  font-weight: 900 !important;
-}
-
-body.public-modern-page .tp-match-list .win-probability-legend,
-body.public-modern-page .tp-insight-probability .win-probability-legend {
-  gap: 7px !important;
-  margin-top: 10px !important;
-  font-size: 0.72rem !important;
-  font-weight: 800 !important;
-}
-
-body.public-modern-page .tp-insight-probability .legend-item {
-  font-size: 0.72rem !important;
-  line-height: 1.2 !important;
-}
-
-/* Aumenta também os botões com os nomes e percentuais */
-body.public-modern-page .tp-insight-probability
-.legend-item-p1,
-body.public-modern-page .tp-insight-probability
-.legend-item-p2 {
-  font-weight: 850 !important;
-}
-
-/* ========================================================= PLACAR EM ANDAMENTO Redução adicional dos números ========================================================= */
-
-body.public-modern-page .tp-column-live
-.tp-match-list .score,
-body.public-modern-page .tp-column-live
-.tp-match-list .score.green {
-  font-size: 0.70rem !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
-}
-
-body.public-modern-page .tp-column-live
-.tp-match-list .score.gray {
-  font-size: 0.72rem !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
-}
-
-/* Mantém o placar compacto sem afastar do nome */
-body.public-modern-page .tp-column-live
-.tp-match-list .match-player-row,
-body.public-modern-page .tp-column-live
-.tp-match-list .match-table-head {
-  column-gap: 2px !important;
-}
-
-/* ========================================================= AJUSTES PARA TELAS PEQUENAS ========================================================= */
-
-@media (max-width: 600px) {
-  body.public-modern-page .tp-match-list .break-point-number,
-  body.public-modern-page .tp-insight-break-points .break-point-number {
-    font-size: 0.52rem !important;
-  }
-
-  body.public-modern-page .tp-match-list .break-point-ball,
-  body.public-modern-page .tp-insight-break-points .break-point-ball {
-    width: 9px !important;
-    height: 9px !important;
-    min-width: 9px !important;
-    min-height: 9px !important;
-  }
-
-  body.public-modern-page .tp-match-list .break-points-balls,
-  body.public-modern-page .tp-insight-break-points .break-points-balls {
-    gap: 2px !important;
-  }
-
-  body.public-modern-page .tp-match-list .win-probability-bar,
-  body.public-modern-page .tp-insight-probability .win-probability-bar {
-    height: 12px !important;
-    min-height: 12px !important;
-  }
-
-  body.public-modern-page .tp-match-list .win-probability-legend,
-  body.public-modern-page .tp-insight-probability .win-probability-legend,
-  body.public-modern-page .tp-insight-probability .legend-item {
-    font-size: 0.66rem !important;
-  }
-
-  body.public-modern-page .tp-column-live
-  .tp-match-list .score,
-  body.public-modern-page .tp-column-live
-  .tp-match-list .score.green {
-    font-size: 0.66rem !important;
-  }
-
-  body.public-modern-page .tp-column-live
-  .tp-match-list .score.gray {
-    font-size: 0.68rem !important;
-  }
-}
-
-/* ========================================================= AJUSTES FINAIS DA TELA PÚBLICA ========================================================= */
-
-/* ========================================================= JOGOS FINALIZADOS Jogadores e pontuação maiores ========================================================= */
-
-/* Nomes dos jogadores finalizados */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.player-name,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.team-name-compact,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.team-name-compact-content,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.name-line {
-  font-size: 0.88rem !important;
-  line-height: 1.15 !important;
-  font-weight: 800 !important;
-}
-
-/* Pontuação dos jogos finalizados */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score.green {
-  font-size: 0.90rem !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-/* Pontuação final em cinza */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score.gray {
-  font-size: 0.92rem !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-/* Tie-break acima do placar */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.set-tb {
-  position: relative !important;
-  top: -0.52em !important;
-  margin-left: 2px !important;
-  font-size: 0.70em !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-/* Remove a bolinha/indicador adicional criado pelo vencedor */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.winner-row
-.player-name::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* Mantém somente o indicador já existente no nome */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.winner-row
-.player-name
-.serve-ball {
-  display: inline-block !important;
-}
-
-
-/* ========================================================= TELAS PEQUENAS ========================================================= */
-
-@media (max-width: 760px) {
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .player-name,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .team-name-compact,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .name-line {
-    font-size: 0.82rem !important;
-  }
-
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .score,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .score.gray {
-    font-size: 0.84rem !important;
-  }
-
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .score,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .score.green {
-    font-size: 0.62rem !important;
-  }
-
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .score.gray {
-    font-size: 0.64rem !important;
-  }
-}
-
-/* ========================================================= AJUSTE ÚNICO E FINAL DOS TAMANHOS ========================================================= */
-
-/* ========================================================= JOGOS FINALIZADOS Nome e pontuação exatamente com 12px ========================================================= */
-
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.player-name,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.team-name-compact,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.team-name-compact-content,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.player-with-avatar,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.name-line,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score.green,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score.gray {
-  font-size: 12px !important;
-  line-height: 1.1 !important;
-}
-
-/* Tie-break dos jogos finalizados */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.set-tb {
-  font-size: 8px !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-/* Remove o indicador adicional de vencedor */
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.winner-row
-.player-name::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* ========================================================= JOGOS EM ANDAMENTO Nome e números exatamente com 12px ========================================================= */
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-name,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.team-name-compact,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.team-name-compact-content,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-with-avatar,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.name-line,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score.green,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score.gray {
-  font-size: 12px !important;
-  line-height: 1.1 !important;
-}
-
-/* Mantém os nomes em uma linha */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-with-avatar {
-  display: inline-flex !important;
-  align-items: center !important;
-  flex-wrap: nowrap !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.name-line {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-/* Placar centralizado */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-weight: 750 !important;
-}
-
-/* ========================================================= COLUNAS MAIS COMPACTAS NO CELULAR ========================================================= */
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.match-player-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.match-table-head {
-  column-gap: 0 !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.one-set-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.one-set-head {
-  grid-template-columns:
-    minmax(0, 1fr)
-    18px
-    25px !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.two-set-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.two-set-head {
-  grid-template-columns:
-    minmax(0, 1fr)
-    17px
-    17px
-    25px !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.three-set-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.three-set-head {
-  grid-template-columns:
-    minmax(0, 1fr)
-    16px
-    16px
-    16px
-    25px !important;
-}
-
-/* ========================================================= FOTOS E INDICADOR DO SACADOR ========================================================= */
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-avatar,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-avatar-placeholder {
-  width: 27px !important;
-  height: 27px !important;
-  min-width: 27px !important;
-  min-height: 27px !important;
-  max-width: 27px !important;
-  max-height: 27px !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.serve-ball,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.serve-ball-placeholder {
-  width: 6px !important;
-  height: 6px !important;
-  min-width: 6px !important;
-  min-height: 6px !important;
-  margin-right: 3px !important;
-}
-
-/* ========================================================= X DOS JOGOS DO DIA ========================================================= */
-
-body.public-modern-page
-.tp-column-scheduled
-.tp-match-list
-.vs-separator {
-  color: #000000 !important;
-}
-
-/* ========================================================= BREAK POINTS ========================================================= */
-
-body.public-modern-page
-.tp-match-list
-.break-points-balls,
-body.public-modern-page
-.tp-insight-break-points
-.break-points-balls {
-  grid-template-columns:
-    repeat(12, minmax(0, 1fr)) !important;
-  grid-auto-flow: column !important;
-  gap: 4px !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.break-point-number,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-number {
-  font-size: 0.58rem !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.break-point-ball,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-ball {
-  width: 10px !important;
-  height: 10px !important;
-}
-
-/* ========================================================= CHANCES DE VITÓRIA ========================================================= */
-
-body.public-modern-page
-.tp-match-list
-.win-probability-bar,
-body.public-modern-page
-.tp-insight-probability
-.win-probability-bar {
-  height: 13px !important;
-  min-height: 13px !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.win-probability-segment {
-  font-size: 0.65rem !important;
-  font-weight: 900 !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.win-probability-legend {
-  font-size: 0.72rem !important;
-}
-
-/* ========================================================= AJUSTES MOBILE ========================================================= */
-
-@media (max-width: 600px) {
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .player-name,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .team-name-compact,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .name-line,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .score,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .score.green,
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .score.gray,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .player-name,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .team-name-compact,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .name-line,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .score,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .score.green,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .score.gray {
-    font-size: 12px !important;
-  }
-
-  body.public-modern-page
-  .tp-column-finished
-  .tp-match-list
-  .set-tb {
-    font-size: 8px !important;
-  }
-
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .one-set-row,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .one-set-head {
-    grid-template-columns:
-      minmax(0, 1fr)
-      17px
-      24px !important;
-  }
-
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .two-set-row,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .two-set-head {
-    grid-template-columns:
-      minmax(0, 1fr)
-      16px
-      16px
-      24px !important;
-  }
-
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .three-set-row,
-  body.public-modern-page
-  .tp-column-live
-  .tp-match-list
-  .three-set-head {
-    grid-template-columns:
-      minmax(0, 1fr)
-      15px
-      15px
-      15px
-      24px !important;
-  }
-}
-/* ========================================================= CORREÇÃO DEFINITIVA DOS JOGOS FINALIZADOS NOMES E NÚMEROS COM EXATAMENTE 12PX ========================================================= */
-
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.player-name,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.team-name-compact,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.team-name-compact-content,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.player-with-avatar,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.name-line,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.score,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.score.green,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.score.gray {
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 12px !important;
-  line-height: 1.1 !important;
-}
-
-/* Nome interno do jogador */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.name-line {
-  display: inline-block !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1.1 !important;
-  white-space: nowrap !important;
-}
-
-/* Container do nome */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.player-with-avatar {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  font-size: 12px !important;
-  line-height: 1.1 !important;
-}
-
-/* Nome vencedor */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.player-name.winner,
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.player-name.winner
-.name-line {
-  font-size: 12px !important;
-  font-weight: 900 !important;
-}
-
-/* Número dos sets */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.score.green {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-}
-
-/* Pontuação final */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.score.gray {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-}
-
-/* Tie-break acima do número */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.match-player-row
-.set-tb {
-  font-size: 8px !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-/* Remove o indicador adicional do vencedor */
-body.public-modern-page
-.tp-column-finished
-.match-board
-.winner-row
-.player-name::after {
-  display: none !important;
-  content: none !important;
-}
-
-
-/* ========================================================= AJUSTE FINAL DOS INSIGHTS DA PARTIDA ========================================================= */
-
-/* Títulos dos insights */
-body.public-modern-page
-.tp-match-list
-.last-points-title,
-body.public-modern-page
-.tp-match-list
-.break-points-title,
-body.public-modern-page
-.tp-match-list
-.win-probability-title {
-  font-size: 0.72rem !important;
-  line-height: 1.2 !important;
-  font-weight: 900 !important;
-}
-
-/* ========================================================= ÚLTIMOS 10 PONTOS JOGADOS ========================================================= */
-
-body.public-modern-page
-.tp-match-list
-.last-points-balls,
-body.public-modern-page
-.tp-insight-last-points
-.last-points-balls {
-  display: grid !important;
-  grid-template-columns:
-    repeat(10, minmax(0, 1fr)) !important;
-  align-items: center !important;
-  justify-items: center !important;
-  width: 100% !important;
-  max-width: none !important;
-  gap: 5px !important;
-  margin: 0 !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.last-point-ball,
-body.public-modern-page
-.tp-insight-last-points
-.last-point-ball {
-  width: 14px !important;
-  height: 14px !important;
-  min-width: 14px !important;
-  min-height: 14px !important;
-  margin: 0 auto !important;
+.tp-match-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e7ed;
 }
-
-/* ========================================================= BREAK POINT 1 ATÉ 12 EM UMA ÚNICA LINHA ========================================================= */
-
-body.public-modern-page
-.tp-match-list
-.break-points-balls,
-body.public-modern-page
-.tp-insight-break-points
-.break-points-balls {
-  display: grid !important;
-  grid-template-columns:
-    repeat(12, minmax(0, 1fr)) !important;
-  grid-auto-flow: column !important;
-  align-items: center !important;
-  justify-items: center !important;
-  width: 100% !important;
-  gap: 4px !important;
-  margin: 0 !important;
-  overflow: visible !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.break-point-ball-wrap,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-ball-wrap {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  gap: 4px !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.break-point-number,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-number {
-  font-size: 0.66rem !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.break-point-ball,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-ball {
-  width: 13px !important;
-  height: 13px !important;
-  min-width: 13px !important;
-  min-height: 13px !important;
-  margin: 0 auto !important;
-}
-
-/* ========================================================= CHANCES DE VITÓRIA ========================================================= */
-
-body.public-modern-page
-.tp-match-list
-.win-probability-chart,
-body.public-modern-page
-.tp-insight-probability
-.win-probability-chart {
-  width: 100% !important;
-  margin-top: 14px !important;
-  padding-top: 12px !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.win-probability-bar,
-body.public-modern-page
-.tp-insight-probability
-.win-probability-bar {
-  display: flex !important;
-  width: 100% !important;
-  height: 16px !important;
-  min-height: 16px !important;
-  margin: 0 !important;
-  border-radius: 999px !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.win-probability-segment,
-body.public-modern-page
-.tp-insight-probability
-.win-probability-segment {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 0 !important;
-  font-size: 0.68rem !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.win-probability-legend,
-body.public-modern-page
-.tp-insight-probability
-.win-probability-legend {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100% !important;
-  gap: 10px !important;
-  margin-top: 10px !important;
-  font-size: 0.72rem !important;
-  font-weight: 850 !important;
-}
-
-body.public-modern-page
-.tp-match-list
-.win-probability-legend
-.legend-item,
-body.public-modern-page
-.tp-insight-probability
-.win-probability-legend
-.legend-item {
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-/* ========================================================= CARDS DE INSIGHTS ========================================================= */
 
-body.public-modern-page
 .tp-insight-card {
-  width: 100% !important;
-  min-width: 0 !important;
-  padding-left: 8px !important;
-  padding-right: 8px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  min-height: 116px;
+  padding: 11px 10px;
+  border: 1px solid #d9e1e8;
+  border-radius: 12px;
+  background: #ffffff;
 }
 
-body.public-modern-page
-.tp-insight-card
-.last-points-block,
-body.public-modern-page
-.tp-insight-card
-.break-points-block,
-body.public-modern-page
-.tp-insight-card
-.win-probability-chart {
-  width: 100% !important;
-  min-width: 0 !important;
+.tp-insight-card .last-points-block,
+.tp-insight-card .break-points-block,
+.tp-insight-card .win-probability-chart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-/* ========================================================= AJUSTE MOBILE Mantém tudo em uma única linha ========================================================= */
+.tp-insight-card .last-points-title,
+.tp-insight-card .break-points-title,
+.tp-insight-card .win-probability-title {
+  min-height: 30px;
+  margin: 0 0 9px;
+  color: #60718d;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tp-insight-last-points {
+  border-top: 3px solid #17853a;
+}
+
+.tp-insight-break-points {
+  border-top: 3px solid #ad7a00;
+}
+
+.tp-insight-probability {
+  border-top: 3px solid #05649a;
+}
+
+/* Últimos 10 pontos: uma linha, preenchendo a largura */
+.tp-match-list .last-points-balls,
+.tp-insight-last-points .last-points-balls {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: none;
+  gap: 3px;
+  margin: 0;
+}
+
+.tp-match-list .last-point-ball,
+.tp-insight-last-points .last-point-ball {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  margin: 0 auto;
+}
+
+/* Break Point: posições 1 a 12 em uma única linha */
+.tp-match-list .break-points-balls,
+.tp-insight-break-points .break-points-balls {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-flow: column;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  gap: 3px;
+  margin: 0;
+  overflow: visible;
+}
+
+.tp-match-list .break-point-ball-wrap,
+.tp-insight-break-points .break-point-ball-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  gap: 4px;
+}
+
+.tp-match-list .break-point-number,
+.tp-insight-break-points .break-point-number {
+  color: #718198;
+  font-size: 0.66rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.tp-match-list .break-point-ball,
+.tp-insight-break-points .break-point-ball {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  margin: 0 auto;
+}
+
+/* Chances de vitória */
+.tp-match-list .win-probability-chart,
+.tp-insight-probability .win-probability-chart {
+  width: 100%;
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+.tp-match-list .win-probability-bar,
+.tp-insight-probability .win-probability-bar {
+  display: flex;
+  width: 100%;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  border-radius: 999px;
+}
+
+.tp-match-list .win-probability-segment,
+.tp-insight-probability .win-probability-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.tp-match-list .win-probability-legend,
+.tp-insight-probability .win-probability-legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.tp-match-list .win-probability-legend .legend-item,
+.tp-insight-probability .win-probability-legend .legend-item {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* X dos jogos do dia */
+.tp-column-scheduled .vs-separator {
+  color: #000000;
+}
+
+/* Retira o indicador adicional do vencedor */
+.tp-column-finished .winner-row .player-name::after {
+  display: none;
+  content: none;
+}
+
+/* =========================================================
+   PLACAR FINALIZADO — NOME E NÚMEROS COM 12PX
+   ========================================================= */
+
+.tp-column-finished .match-player-row .player-name,
+.tp-column-finished .match-player-row .team-name-compact,
+.tp-column-finished .match-player-row .team-name-compact-content,
+.tp-column-finished .match-player-row .player-with-avatar,
+.tp-column-finished .match-player-row .name-line,
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.tp-column-finished .match-player-row .player-name,
+.tp-column-finished .match-player-row .name-line,
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  font-weight: 900;
+}
+
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tp-column-finished .match-player-row .set-tb {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+/* =========================================================
+   AO VIVO NO CELULAR — NOMES E NÚMEROS COM 12PX
+   ========================================================= */
 
 @media (max-width: 600px) {
-  body.public-modern-page
-  .tp-match-list
-  .last-points-balls,
-  body.public-modern-page
-  .tp-insight-last-points
-  .last-points-balls {
-    grid-template-columns:
-      repeat(10, minmax(0, 1fr)) !important;
-    gap: 2px !important;
+  .tp-column-live .match-player-row .player-name,
+  .tp-column-live .match-player-row .team-name-compact,
+  .tp-column-live .match-player-row .team-name-compact-content,
+  .tp-column-live .match-player-row .player-with-avatar,
+  .tp-column-live .match-player-row .name-line,
+  .tp-column-live .match-player-row .score,
+  .tp-column-live .match-player-row .score.green,
+  .tp-column-live .match-player-row .score.gray {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.1;
   }
 
-  body.public-modern-page
-  .tp-match-list
-  .last-point-ball,
-  body.public-modern-page
-  .tp-insight-last-points
-  .last-point-ball {
-    width: 12px !important;
-    height: 12px !important;
-    min-width: 12px !important;
-    min-height: 12px !important;
+  .tp-column-live .match-player-row .player-name,
+  .tp-column-live .match-player-row .name-line,
+  .tp-column-live .match-player-row .score,
+  .tp-column-live .match-player-row .score.green,
+  .tp-column-live .match-player-row .score.gray {
+    font-weight: 700;
   }
 
-  body.public-modern-page
-  .tp-match-list
-  .break-points-balls,
-  body.public-modern-page
-  .tp-insight-break-points
-  .break-points-balls {
-    grid-template-columns:
-      repeat(12, minmax(0, 1fr)) !important;
-    gap: 1px !important;
+  .tp-column-live .match-player-row .player-with-avatar {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    min-width: 0;
+    max-width: 100%;
+    gap: 4px;
   }
 
-  body.public-modern-page
-  .tp-match-list
-  .break-point-number,
-  body.public-modern-page
-  .tp-insight-break-points
-  .break-point-number {
-    font-size: 0.54rem !important;
+  .tp-column-live .match-player-row .name-line {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  body.public-modern-page
-  .tp-match-list
-  .break-point-ball,
-  body.public-modern-page
-  .tp-insight-break-points
-  .break-point-ball {
-    width: 11px !important;
-    height: 11px !important;
-    min-width: 11px !important;
-    min-height: 11px !important;
+  .tp-column-live .match-player-row .score,
+  .tp-column-live .match-player-row .score.green,
+  .tp-column-live .match-player-row .score.gray {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  body.public-modern-page
-  .tp-match-list
-  .win-probability-bar,
-  body.public-modern-page
-  .tp-insight-probability
-  .win-probability-bar {
-    height: 14px !important;
-    min-height: 14px !important;
+  .tp-column-live .match-player-row,
+  .tp-column-live .match-table-head {
+    column-gap: 0;
   }
 
-  body.public-modern-page
-  .tp-match-list
-  .win-probability-legend,
-  body.public-modern-page
-  .tp-insight-probability
-  .win-probability-legend {
-    gap: 5px !important;
-    font-size: 0.64rem !important;
+  .tp-column-live .one-set-row,
+  .tp-column-live .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 17px 24px;
+  }
+
+  .tp-column-live .two-set-row,
+  .tp-column-live .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 16px 16px 24px;
+  }
+
+  .tp-column-live .three-set-row,
+  .tp-column-live .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 15px 15px 15px 24px;
+  }
+
+  /* Aproxima as bolinhas dos últimos 10 pontos */
+  .tp-match-list .last-points-balls,
+  .tp-insight-last-points .last-points-balls {
+    gap: 2px;
+  }
+
+  .tp-match-list .last-point-ball,
+  .tp-insight-last-points .last-point-ball {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+  }
+
+  .tp-match-list .break-points-balls,
+  .tp-insight-break-points .break-points-balls {
+    gap: 1px;
+  }
+
+  .tp-match-list .break-point-number,
+  .tp-insight-break-points .break-point-number {
+    font-size: 0.54rem;
+  }
+
+  .tp-match-list .break-point-ball,
+  .tp-insight-break-points .break-point-ball {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+  }
+
+  .tp-match-list .win-probability-bar,
+  .tp-insight-probability .win-probability-bar {
+    height: 14px;
+    min-height: 14px;
+  }
+
+  .tp-match-list .win-probability-legend,
+  .tp-insight-probability .win-probability-legend {
+    gap: 5px;
+    font-size: 0.64rem;
   }
 }
 
-/* Break Point com o mesmo tamanho das bolinhas dos últimos 10 pontos */
-body.public-modern-page
-.tp-match-list
-.break-point-ball,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-ball {
-  width: 14px !important;
-  height: 14px !important;
-  min-width: 14px !important;
-  min-height: 14px !important;
+@media (max-width: 430px) {
+  .tp-match-list .last-point-ball,
+  .tp-insight-last-points .last-point-ball {
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    min-height: 11px;
+  }
+
+  .tp-match-list .break-point-ball,
+  .tp-insight-break-points .break-point-ball {
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    min-height: 11px;
+  }
 }
 
-/* Break Point igual aos últimos 10 pontos */
-body.public-modern-page
-.tp-match-list
-.break-point-ball,
-body.public-modern-page
-.tp-insight-break-points
-.break-point-ball {
-  width: 14px !important;
-  height: 14px !important;
-  min-width: 14px !important;
-  min-height: 14px !important;
+
+/* =========================================================
+   AJUSTE FINAL SOLICITADO
+   ========================================================= */
+
+/* Ao vivo: nomes um pouco maiores, sem alterar o placar */
+@media (max-width: 600px) {
+  .tp-column-live .match-player-row .player-name,
+  .tp-column-live .match-player-row .team-name-compact,
+  .tp-column-live .match-player-row .team-name-compact-content,
+  .tp-column-live .match-player-row .player-with-avatar,
+  .tp-column-live .match-player-row .name-line {
+    font-size: 13px;
+  }
+
+  .tp-column-live .match-player-row .name-line {
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+}
+
+/* Finalizados: +2px no nome e na pontuação */
+.tp-column-finished .match-player-row .player-name,
+.tp-column-finished .match-player-row .team-name-compact,
+.tp-column-finished .match-player-row .team-name-compact-content,
+.tp-column-finished .match-player-row .player-with-avatar,
+.tp-column-finished .match-player-row .name-line,
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.tp-column-finished .match-player-row .set-tb {
+  font-size: 9px;
+}
+
+/* Finalizados: indicador de vencedor à direita do nome */
+.tp-column-finished .match-player-row.winner-row .player-name::after {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  color: var(--tp-green);
+  content: "✓";
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Mantém o indicador dentro da mesma linha do nome */
+.tp-column-finished .match-player-row.winner-row .player-name {
+  display: flex;
+  align-items: center;
 }
 
 @media (max-width: 600px) {
-  body.public-modern-page
-  .tp-match-list
-  .break-point-ball,
-  body.public-modern-page
-  .tp-insight-break-points
-  .break-point-ball {
-    width: 12px !important;
-    height: 12px !important;
-    min-width: 12px !important;
-    min-height: 12px !important;
+  .tp-column-finished .match-player-row .player-name,
+  .tp-column-finished .match-player-row .team-name-compact,
+  .tp-column-finished .match-player-row .team-name-compact-content,
+  .tp-column-finished .match-player-row .player-with-avatar,
+  .tp-column-finished .match-player-row .name-line,
+  .tp-column-finished .match-player-row .score,
+  .tp-column-finished .match-player-row .score.green,
+  .tp-column-finished .match-player-row .score.gray {
+    font-size: 14px;
+  }
+
+  .tp-column-finished .match-player-row .set-tb {
+    font-size: 9px;
   }
 }
-
-/* ========================================================= AJUSTE FINAL — NÚMEROS DOS JOGOS EM ANDAMENTO ========================================================= */
-
-/* Números das colunas com o mesmo tamanho dos nomes */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score.green,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score.gray {
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 12px !important;
-  line-height: 1.1 !important;
-  font-weight: 700 !important;
-}
-
-/* Mantém os números centralizados */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* ========================================================= ÚLTIMOS 10 PONTOS Bolinhas um pouco mais próximas ========================================================= */
-
-body.public-modern-page
-.tp-match-list
-.last-points-balls,
-body.public-modern-page
-.tp-insight-last-points
-.last-points-balls {
-  gap: 3px !important;
-}
-
-/* ========================================================= AJUSTE SOMENTE NO CELULAR Números do ao vivo iguais ao tamanho dos nomes ========================================================= */
-
-@media (max-width: 600px) {
-    body.public-modern-page
-    .tp-column-live
-    .tp-match-list
-    .score,
-    body.public-modern-page
-    .tp-column-live
-    .tp-match-list
-    .score.green,
-    body.public-modern-page
-    .tp-column-live
-    .tp-match-list
-    .score.gray {
-      font-family: Arial, Helvetica, sans-serif !important;
-      font-size: 12px !important;
-      line-height: 1.1 !important;
-      font-weight: 700 !important;
-    }
-  
-    body.public-modern-page
-    .tp-column-live
-    .tp-match-list
-    .score {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-  
-    /* Aproxima as bolinhas dos últimos 10 pontos */
-    body.public-modern-page
-    .tp-column-live
-    .tp-match-list
-    .last-points-balls {
-      gap: 3px !important;
-    }
-  }
