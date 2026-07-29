@@ -3161,73 +3161,174 @@ body.public-modern-page .public-stats-close-footer:hover {
   content: none !important;
 }
 
-/* ========================================================= MOBILE — NOMES NA MESMA LINHA E PLACAR MAIS COMPACTO PARTIDAS EM ANDAMENTO E FINALIZADAS ========================================================= */
+/* ========================================================= AJUSTE FINAL — AO VIVO E FINALIZADOS NO MOBILE NOMES NA MESMA LINHA E PLACAR COMPACTO À DIREITA ========================================================= */
 
 @media (max-width: 600px) {
+    /* Mantém o conteúdo do jogador em uma única linha */
+    .tp-column-live .match-player-row .player-name,
+    .tp-column-finished .match-player-row .player-name,
+    .tp-column-live .match-player-row .player-with-avatar,
+    .tp-column-finished .match-player-row .player-with-avatar,
+    .tp-column-live .match-player-row .name-line,
+    .tp-column-finished .match-player-row .name-line {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      flex-wrap: nowrap !important;
+      white-space: nowrap !important;
+      line-height: 1 !important;
+    }
+  
     .tp-column-live .match-player-row .player-with-avatar,
     .tp-column-finished .match-player-row .player-with-avatar {
-      display: inline-flex;
-      flex-wrap: nowrap;
-      align-items: center;
-      min-width: 0;
-      max-width: 100%;
-      white-space: nowrap;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 3px !important;
+      overflow: hidden !important;
     }
   
     .tp-column-live .match-player-row .name-line,
     .tp-column-finished .match-player-row .name-line {
-      display: block;
-      min-width: 0;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      line-height: 1.1;
+      display: block !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      font-size: 11px !important;
     }
   
-    /* Partidas com 3 sets */
+    /* Avatar menor para liberar espaço ao nome */
+    .tp-column-live .match-player-row .player-avatar,
+    .tp-column-live .match-player-row .player-avatar-placeholder,
+    .tp-column-finished .match-player-row .player-avatar,
+    .tp-column-finished .match-player-row .player-avatar-placeholder {
+      width: 27px !important;
+      height: 27px !important;
+      flex: 0 0 27px !important;
+    }
+  
+    /* Indicador de saque menor */
+    .tp-column-live .match-player-row .serve-ball,
+    .tp-column-finished .match-player-row .serve-ball {
+      width: 6px !important;
+      height: 6px !important;
+      margin-right: 2px !important;
+    }
+  
+    /* Placar reduzido e alinhado à direita */
+    .tp-column-live .match-player-row .score,
+    .tp-column-live .match-player-row .score.green,
+    .tp-column-live .match-player-row .score.gray,
+    .tp-column-finished .match-player-row .score,
+    .tp-column-finished .match-player-row .score.green,
+    .tp-column-finished .match-player-row .score.gray {
+      min-width: 0 !important;
+      padding: 0 !important;
+      justify-content: flex-end !important;
+      text-align: right !important;
+      font-size: 10px !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+  
+    /* Jogos com 3 sets */
     .tp-column-live .three-set-row,
     .tp-column-live .three-set-head,
     .tp-column-finished .three-set-row,
     .tp-column-finished .three-set-head {
       grid-template-columns:
         minmax(0, 1fr)
-        14px
-        14px
-        14px
-        22px;
-      column-gap: 2px;
+        12px
+        12px
+        12px
+        19px !important;
+      column-gap: 2px !important;
     }
   
-    /* Partidas com 2 sets */
+    /* Jogos com 2 sets */
     .tp-column-live .two-set-row,
     .tp-column-live .two-set-head,
     .tp-column-finished .two-set-row,
     .tp-column-finished .two-set-head {
       grid-template-columns:
         minmax(0, 1fr)
-        15px
-        15px
-        22px;
-      column-gap: 2px;
+        13px
+        13px
+        19px !important;
+      column-gap: 2px !important;
     }
   
-    /* Partidas com 1 set */
+    /* Jogos com 1 set */
     .tp-column-live .one-set-row,
     .tp-column-live .one-set-head,
     .tp-column-finished .one-set-row,
     .tp-column-finished .one-set-head {
       grid-template-columns:
         minmax(0, 1fr)
-        15px
-        22px;
-      column-gap: 2px;
+        13px
+        19px !important;
+      column-gap: 2px !important;
     }
   
-    .tp-column-live .match-player-row .score,
-    .tp-column-finished .match-player-row .score {
-      min-width: 0;
-      font-size: 11px;
-      line-height: 1;
+    /* Número do tie-break menor */
+    .tp-column-live .match-player-row .set-tb,
+    .tp-column-finished .match-player-row .set-tb {
+      margin-left: 1px !important;
+      font-size: 6px !important;
+    }
+  }
+
+  .tp-column-finished .match-player-row .player-name::after,
+.tp-column-live .match-player-row .player-name::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+}
+
+/* ========================================================= FINALIZADOS — ESPAÇAMENTO ENTRE COLUNAS DO PLACAR ========================================================= */
+
+@media (max-width: 600px) {
+    /* Jogos finalizados com 3 sets */
+    .tp-column-finished .three-set-row,
+    .tp-column-finished .three-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        20px
+        20px
+        20px
+        28px !important;
+      column-gap: 6px !important;
+    }
+  
+    /* Jogos finalizados com 2 sets */
+    .tp-column-finished .two-set-row,
+    .tp-column-finished .two-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        20px
+        20px
+        28px !important;
+      column-gap: 6px !important;
+    }
+  
+    /* Jogos finalizados com 1 set */
+    .tp-column-finished .one-set-row,
+    .tp-column-finished .one-set-head {
+      grid-template-columns:
+        minmax(0, 1fr)
+        28px
+        28px !important;
+      column-gap: 6px !important;
+    }
+  
+    /* Placar alinhado à direita dentro de cada coluna */
+    .tp-column-finished .match-player-row .score,
+    .tp-column-finished .match-player-row .score.green,
+    .tp-column-finished .match-player-row .score.gray {
+      justify-content: flex-end !important;
+      text-align: right !important;
+      min-width: 0 !important;
+      font-size: 10px !important;
     }
   }
