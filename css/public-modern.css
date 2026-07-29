@@ -783,7 +783,7 @@
     justify-content: center;
     width: 26px;
     height: 26px;
-    color: var(--tp-primary);
+    color: #000000 !important;
     border: 1px solid var(--tp-border-blue);
     border-radius: 50%;
     background: #ffffff;
@@ -3473,4 +3473,59 @@ body.public-modern-page
       15px
       24px !important;
   }
+}
+
+/* ========================================================= TAMANHO IGUAL: NOMES E NÚMEROS DO AO VIVO ========================================================= */
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-name,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.team-name-compact,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.team-name-compact-content,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.name-line,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.green,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.gray {
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+}
+
+/* Mantém o texto do jogador em uma única linha */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.name-line {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Números centralizados com o mesmo tamanho visual */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 750 !important;
 }
