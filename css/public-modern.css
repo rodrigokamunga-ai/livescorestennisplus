@@ -3061,3 +3061,102 @@ body.public-modern-page .public-stats-close-footer:hover {
   font-weight: 900;
   line-height: 1;
 }
+/* ========================================================= CORREÇÃO — NOMES COMPLETOS NO MOBILE ========================================================= */
+
+@media (max-width: 600px) {
+    .tp-column-live .match-player-row .player-name,
+    .tp-column-live .match-player-row .team-name-compact,
+    .tp-column-live .match-player-row .team-name-compact-content,
+    .tp-column-live .match-player-row .player-with-avatar,
+    .tp-column-live .match-player-row .name-line,
+  
+    .tp-column-finished .match-player-row .player-name,
+    .tp-column-finished .match-player-row .team-name-compact,
+    .tp-column-finished .match-player-row .team-name-compact-content,
+    .tp-column-finished .match-player-row .player-with-avatar,
+    .tp-column-finished .match-player-row .name-line,
+  
+    .tp-match-list .scheduled-player-line .team-name-compact,
+    .tp-match-list .scheduled-player-line .team-name-compact-content {
+      max-width: 100%;
+      min-width: 0;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      line-height: 1.2;
+    }
+  
+    .tp-column-live .match-player-row .player-with-avatar,
+    .tp-column-finished .match-player-row .player-with-avatar {
+      align-items: flex-start;
+    }
+  
+    .tp-column-live .match-player-row,
+    .tp-column-finished .match-player-row {
+      min-height: 44px;
+      height: auto;
+    }
+  }
+
+  /* ========================================================= FINALIZADOS — NOME CENTRALIZADO COM A IMAGEM E REMOÇÃO DO INDICADOR ========================================================= */
+
+.tp-column-finished .match-player-row .player-with-avatar {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+  }
+  
+  .tp-column-finished .match-player-row .name-line {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.2;
+  }
+  
+  /* Remove a bola/check/indicador do vencedor */
+  .tp-column-finished .match-player-row .player-name::after,
+  .tp-column-finished .match-player-row.winner-row .player-name::after,
+  .tp-column-finished .match-player-row .winner-row .player-name::after {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    content: none !important;
+  }
+
+  /* ========================================================= FINALIZADOS E JOGOS EM ANDAMENTO — NOME CENTRALIZADO COM A IMAGEM ========================================================= */
+
+.tp-column-finished .match-player-row .player-with-avatar,
+.tp-column-live .match-player-row .player-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tp-column-finished .match-player-row .name-line,
+.tp-column-live .match-player-row .name-line {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+/* Remove o indicador adicional dos jogadores */
+.tp-column-finished .match-player-row .player-name::after,
+.tp-column-finished .match-player-row.winner-row .player-name::after,
+.tp-column-live .match-player-row .player-name::after,
+.tp-column-live .match-player-row.winner-row .player-name::after {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  content: none !important;
+}
