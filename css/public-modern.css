@@ -3063,133 +3063,6 @@ body.public-modern-page
   display: inline-block !important;
 }
 
-/* ========================================================= JOGOS EM ANDAMENTO Números menores e nomes completos ========================================================= */
-
-/* Reduz os números da partida ao vivo */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score.green {
-  font-size: 0.66rem !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
-}
-
-/* Pontos atuais */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score.gray {
-  font-size: 0.68rem !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
-}
-
-/* Nomes do ao vivo sem reticências */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-name,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.team-name-compact,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.team-name-compact-content,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.name-line {
-  min-width: 0 !important;
-  max-width: none !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-}
-
-/* Permite que o nome ocupe mais espaço */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.team-col {
-  min-width: 0 !important;
-}
-
-/* Aproxima o nome dos números */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.match-player-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.match-table-head {
-  column-gap: 1px !important;
-}
-
-/* Reduz as colunas numéricas do ao vivo */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.one-set-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.one-set-head {
-  grid-template-columns:
-    minmax(0, 1fr)
-    22px
-    27px !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.two-set-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.two-set-head {
-  grid-template-columns:
-    minmax(0, 1fr)
-    20px
-    20px
-    27px !important;
-}
-
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.three-set-row,
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.three-set-head {
-  grid-template-columns:
-    minmax(0, 1fr)
-    19px
-    19px
-    19px
-    27px !important;
-}
-
-/* Evita que o avatar reduza excessivamente o espaço do nome */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.player-with-avatar {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  gap: 5px !important;
-}
 
 /* ========================================================= TELAS PEQUENAS ========================================================= */
 
@@ -3239,32 +3112,68 @@ body.public-modern-page
   }
 }
 
-/* ========================================================= AJUSTE FINAL DO PLACAR AO VIVO NO CELULAR ========================================================= */
+/* ========================================================= AJUSTE ÚNICO E FINAL DOS TAMANHOS ========================================================= */
 
-/* Números do ao vivo com o mesmo tamanho dos nomes */
+/* ========================================================= JOGOS FINALIZADOS Nome e pontuação exatamente com 12px ========================================================= */
+
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
+.tp-match-list
+.player-name,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.team-name-compact,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.team-name-compact-content,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.player-with-avatar,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.name-line,
+body.public-modern-page
+.tp-column-finished
 .tp-match-list
 .score,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
-.score.green {
-  font-size: 0.75rem !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
-}
-
+.score.green,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .score.gray {
-  font-size: 0.75rem !important;
-  line-height: 1 !important;
-  font-weight: 750 !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
 }
 
-/* Nomes do jogador no mesmo tamanho dos números */
+/* Tie-break dos jogos finalizados */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.set-tb {
+  font-size: 8px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Remove o indicador adicional de vencedor */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.winner-row
+.player-name::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* ========================================================= JOGOS EM ANDAMENTO Nome e números exatamente com 12px ========================================================= */
+
 body.public-modern-page
 .tp-column-live
 .tp-match-list
@@ -3276,15 +3185,32 @@ body.public-modern-page
 body.public-modern-page
 .tp-column-live
 .tp-match-list
-.name-line {
-  font-size: 0.75rem !important;
+.team-name-compact-content,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-with-avatar,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.name-line,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.green,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.gray {
+  font-size: 12px !important;
   line-height: 1.1 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
 }
 
-/* Mantém o nome R. Camara em uma única linha */
+/* Mantém os nomes em uma linha */
 body.public-modern-page
 .tp-column-live
 .tp-match-list
@@ -3294,23 +3220,32 @@ body.public-modern-page
   flex-wrap: nowrap !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  gap: 4px !important;
 }
 
 body.public-modern-page
 .tp-column-live
 .tp-match-list
-.player-with-avatar
 .name-line {
-  display: block !important;
   min-width: 0 !important;
-  flex: 1 1 auto !important;
-  white-space: nowrap !important;
+  max-width: 100% !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
-/* Coluna do jogador ocupa o espaço restante */
+/* Placar centralizado */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 750 !important;
+}
+
+/* ========================================================= COLUNAS MAIS COMPACTAS NO CELULAR ========================================================= */
+
 body.public-modern-page
 .tp-column-live
 .tp-match-list
@@ -3322,7 +3257,6 @@ body.public-modern-page
   column-gap: 0 !important;
 }
 
-/* Reduz o espaço das colunas dos sets */
 body.public-modern-page
 .tp-column-live
 .tp-match-list
@@ -3368,7 +3302,8 @@ body.public-modern-page
     25px !important;
 }
 
-/* Reduz o tamanho do avatar para liberar espaço ao nome */
+/* ========================================================= FOTOS E INDICADOR DO SACADOR ========================================================= */
+
 body.public-modern-page
 .tp-column-live
 .tp-match-list
@@ -3385,7 +3320,6 @@ body.public-modern-page
   max-height: 27px !important;
 }
 
-/* Indicador do sacador mais compacto */
 body.public-modern-page
 .tp-column-live
 .tp-match-list
@@ -3397,21 +3331,102 @@ body.public-modern-page
   width: 6px !important;
   height: 6px !important;
   min-width: 6px !important;
+  min-height: 6px !important;
   margin-right: 3px !important;
 }
 
-/* Ajuste adicional para celulares */
+/* ========================================================= X DOS JOGOS DO DIA ========================================================= */
+
+body.public-modern-page
+.tp-column-scheduled
+.tp-match-list
+.vs-separator {
+  color: #000000 !important;
+}
+
+/* ========================================================= BREAK POINTS ========================================================= */
+
+body.public-modern-page
+.tp-match-list
+.break-points-balls,
+body.public-modern-page
+.tp-insight-break-points
+.break-points-balls {
+  grid-template-columns:
+    repeat(12, minmax(0, 1fr)) !important;
+  grid-auto-flow: column !important;
+  gap: 4px !important;
+}
+
+body.public-modern-page
+.tp-match-list
+.break-point-number,
+body.public-modern-page
+.tp-insight-break-points
+.break-point-number {
+  font-size: 0.58rem !important;
+}
+
+body.public-modern-page
+.tp-match-list
+.break-point-ball,
+body.public-modern-page
+.tp-insight-break-points
+.break-point-ball {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* ========================================================= CHANCES DE VITÓRIA ========================================================= */
+
+body.public-modern-page
+.tp-match-list
+.win-probability-bar,
+body.public-modern-page
+.tp-insight-probability
+.win-probability-bar {
+  height: 13px !important;
+  min-height: 13px !important;
+}
+
+body.public-modern-page
+.tp-match-list
+.win-probability-segment {
+  font-size: 0.65rem !important;
+  font-weight: 900 !important;
+}
+
+body.public-modern-page
+.tp-match-list
+.win-probability-legend {
+  font-size: 0.72rem !important;
+}
+
+/* ========================================================= AJUSTES MOBILE ========================================================= */
+
 @media (max-width: 600px) {
   body.public-modern-page
-  .tp-column-live
+  .tp-column-finished
+  .tp-match-list
+  .player-name,
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .team-name-compact,
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .name-line,
+  body.public-modern-page
+  .tp-column-finished
   .tp-match-list
   .score,
   body.public-modern-page
-  .tp-column-live
+  .tp-column-finished
   .tp-match-list
   .score.green,
   body.public-modern-page
-  .tp-column-live
+  .tp-column-finished
   .tp-match-list
   .score.gray,
   body.public-modern-page
@@ -3425,8 +3440,27 @@ body.public-modern-page
   body.public-modern-page
   .tp-column-live
   .tp-match-list
-  .name-line {
-    font-size: 0.72rem !important;
+  .name-line,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score.green,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score.gray {
+    font-size: 12px !important;
+  }
+
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .set-tb {
+    font-size: 8px !important;
   }
 
   body.public-modern-page
@@ -3473,38 +3507,4 @@ body.public-modern-page
       15px
       24px !important;
   }
-}
-
-/* ========================================================= JOGOS FINALIZADOS Nome e pontuação com exatamente o mesmo tamanho ========================================================= */
-
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.player-name,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.team-name-compact,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.team-name-compact-content,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.name-line,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score.green,
-body.public-modern-page
-.tp-column-finished
-.tp-match-list
-.score.gray {
-  font-size: 0.88rem !important;
-  line-height: 1.1 !important;
 }
