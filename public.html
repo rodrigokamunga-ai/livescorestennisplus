@@ -1,5 +1,700 @@
 <!doctype html>
 <html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="theme-color" content="#ffffff">
+
+  <meta name="description" content="Placar público de partidas do TennisPro">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <meta name="apple-mobile-web-app-title" content="TennisPro">
+
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="icon" href="img/icon-192.png">
+
+  <link rel="apple-touch-icon" href="img/icon-192.png">
+
+  <title>Jogos públicos - TennisPro</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="stylesheet" href="css/public-modern.css?v=20260729-02">
+
+  <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js">
+  </script>
+
+  <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js">
+  </script>
+</head>
+
+<body class="public-page public-modern-page">
+
+  <main class="tp-app-shell">
+
+    <!-- Cabeçalho -->
+    <header class="tp-header">
+
+      <a href="menu.html" class="tp-header-back" aria-label="Voltar para o menu" title="Voltar para o menu">
+
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </a>
+
+      <div class="tp-brand">
+
+        <div class="tp-brand-icon">
+          <ion-icon name="tennisball-outline"></ion-icon>
+        </div>
+
+        <div class="tp-brand-content">
+          <strong>TennisPro</strong>
+          <span>Placar público</span>
+        </div>
+
+      </div>
+
+      <button id="tpSharePageButton" type="button" class="tp-header-action" aria-label="Compartilhar placar público" title="Compartilhar placar público">
+
+        <ion-icon name="share-social-outline"></ion-icon>
+      </button>
+
+    </header>
+
+
+    <!-- Apresentação -->
+    <section class="tp-hero">
+
+      <div class="tp-hero-content">
+
+        <span class="tp-eyebrow">
+          ACOMPANHE EM TEMPO REAL
+        </span>
+
+        <h1>Jogos de tênis</h1>
+
+        <p>
+          Veja partidas ao vivo, jogos do dia e resultados.
+        </p>
+
+      </div>
+
+      <div class="tp-hero-date">
+
+        <ion-icon name="calendar-outline"></ion-icon>
+
+        <div>
+          <span>Data da rodada</span>
+
+          <strong id="currentDateLabel">
+            Hoje
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Resumo -->
+    <section class="tp-summary-grid" aria-label="Resumo das partidas">
+
+      <article class="tp-summary-card tp-summary-live">
+
+        <div class="tp-summary-icon">
+          <ion-icon name="flash-outline"></ion-icon>
+        </div>
+
+        <div class="tp-summary-content">
+          <span>Ao vivo</span>
+          <strong id="tpSummaryLive">0</strong>
+        </div>
+
+      </article>
+
+      <article class="tp-summary-card tp-summary-scheduled">
+
+        <div class="tp-summary-icon">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+
+        <div class="tp-summary-content">
+          <span>Jogos do dia</span>
+          <strong id="tpSummaryScheduled">0</strong>
+        </div>
+
+      </article>
+
+      <article class="tp-summary-card tp-summary-finished">
+
+        <div class="tp-summary-icon">
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+        </div>
+
+        <div class="tp-summary-content">
+          <span>Finalizados</span>
+          <strong id="tpSummaryFinished">0</strong>
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- Filtros -->
+    <section class="tp-filter-area" aria-label="Filtro de partidas">
+
+      <div class="tp-filter-heading">
+
+        <span class="tp-filter-label">
+          <ion-icon name="filter-outline"></ion-icon>
+          Filtrar partidas
+        </span>
+
+        <span class="tp-filter-help">
+          Selecione uma categoria
+        </span>
+
+      </div>
+
+
+      <!-- Este select é necessário para o public.js atual. No desktop, os botões abaixo controlam este elemento. -->
+      <select id="liveStatusFilter" class="tp-mobile-filter-select" aria-label="Filtrar partidas">
+
+        <option value="all">
+          Todos
+        </option>
+
+        <option value="scheduled">
+          Jogos do dia
+        </option>
+
+        <option value="live">
+          Jogos em andamento
+        </option>
+
+        <option value="finished">
+          Jogos finalizados
+        </option>
+
+      </select>
+
+
+      <div class="tp-filter-tabs" role="tablist" aria-label="Categorias de partidas">
+
+        <button type="button" class="tp-filter-tab is-active" data-filter="all" role="tab" aria-selected="true">
+
+          <span>Todos</span>
+          <strong id="countAll">0</strong>
+
+        </button>
+
+        <button type="button" class="tp-filter-tab" data-filter="scheduled" role="tab" aria-selected="false">
+
+          <span>Jogos do dia</span>
+          <strong id="filterCountScheduled">0</strong>
+
+        </button>
+
+        <button type="button" class="tp-filter-tab" data-filter="live" role="tab" aria-selected="false">
+
+          <span>Ao vivo</span>
+          <strong id="filterCountLive">0</strong>
+
+        </button>
+
+        <button type="button" class="tp-filter-tab" data-filter="finished" role="tab" aria-selected="false">
+
+          <span>Finalizados</span>
+          <strong id="filterCountFinished">0</strong>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- Grade das partidas -->
+    <section id="gamesGrid" class="tp-games-layout" aria-label="Lista de partidas">
+
+
+      <!-- Ao vivo -->
+      <section class="tp-games-column tp-column-live" data-section="live">
+
+        <div class="tp-section-heading">
+
+          <div class="tp-section-title-wrapper">
+
+            <span class="tp-section-icon tp-section-icon-live">
+              <ion-icon name="flash-outline"></ion-icon>
+            </span>
+
+            <div class="tp-section-title-content">
+              <h2>Em andamento</h2>
+              <p>Partidas atualizadas em tempo real</p>
+            </div>
+
+          </div>
+
+          <span id="countLive" class="tp-section-count">
+            0
+          </span>
+
+        </div>
+
+        <div id="liveList" class="tp-match-list cards compact-cards column-scroll dashboard-list">
+        </div>
+
+      </section>
+
+
+      <!-- Jogos do dia -->
+      <section class="tp-games-column tp-column-scheduled" data-section="scheduled">
+
+        <div class="tp-section-heading">
+
+          <div class="tp-section-title-wrapper">
+
+            <span class="tp-section-icon tp-section-icon-scheduled">
+              <ion-icon name="calendar-outline"></ion-icon>
+            </span>
+
+            <div class="tp-section-title-content">
+              <h2>Jogos do dia</h2>
+              <p>Partidas programadas</p>
+            </div>
+
+          </div>
+
+          <span id="countScheduled" class="tp-section-count">
+            0
+          </span>
+
+        </div>
+
+        <div id="scheduledList" class="tp-match-list cards compact-cards column-scroll dashboard-list">
+        </div>
+
+      </section>
+
+
+      <!-- Finalizados -->
+      <section class="tp-games-column tp-column-finished" data-section="finished">
+
+        <div class="tp-section-heading">
+
+          <div class="tp-section-title-wrapper">
+
+            <span class="tp-section-icon tp-section-icon-finished">
+              <ion-icon name="checkmark-outline"></ion-icon>
+            </span>
+
+            <div class="tp-section-title-content">
+              <h2>Finalizados</h2>
+              <p>Resultados recentes</p>
+            </div>
+
+          </div>
+
+          <span id="countFinished" class="tp-section-count">
+            0
+          </span>
+
+        </div>
+
+        <div id="finishedList" class="tp-match-list cards compact-cards column-scroll dashboard-list">
+        </div>
+
+      </section>
+
+    </section>
+
+
+    <!-- Botão oculto necessário para o public.js abrir o modal de estatísticas. -->
+    <button id="statsBtn" type="button" hidden aria-hidden="true" tabindex="-1">
+
+      Stats
+    </button>
+
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+  "use strict";
+
+  let isSharingLive = false;
+    
+      async function getCurrentUserLiveMatch() {
+        try {
+          if (!window.__auth || !window.__db) {
+            return null;
+          }
+    
+          const user = window.__auth.currentUser;
+    
+          if (!user) {
+            return null;
+          }
+    
+          const snap = await window.__db
+            .collection("matches")
+            .where("ownerId", "==", user.uid)
+            .where("status", "==", "live")
+            .limit(1)
+            .get();
+    
+          if (snap.empty) {
+            return null;
+          }
+    
+          const doc = snap.docs[0];
+    
+          return {
+            id: doc.id,
+            data: doc.data()
+          };
+        } catch (error) {
+          console.error(
+            "Erro ao buscar partida ao vivo:",
+            error
+          );
+    
+          return null;
+        }
+      }
+    
+      async function buildViewerUrl() {
+        const match = await getCurrentUserLiveMatch();
+    
+        if (!match) {
+          return null;
+        }
+    
+        const url = new URL(
+          "aovivo.html",
+          window.location.href
+        );
+    
+        url.searchParams.set("id", match.id);
+        url.searchParams.set("role", "viewer");
+    
+        const shareToken = String(
+          match.data?.shareToken || ""
+        ).trim();
+    
+        if (shareToken) {
+          url.searchParams.set(
+            "shareToken",
+            shareToken
+          );
+        }
+    
+        return url.toString();
+      }
+    
+      async function buildBroadcasterUrl() {
+        const match = await getCurrentUserLiveMatch();
+    
+        if (!match) {
+          return null;
+        }
+    
+        const url = new URL(
+          "aovivo.html",
+          window.location.href
+        );
+    
+        url.searchParams.set("id", match.id);
+        url.searchParams.set("role", "broadcaster");
+    
+        const shareToken = String(
+          match.data?.shareToken || ""
+        ).trim();
+    
+        if (shareToken) {
+          url.searchParams.set(
+            "shareToken",
+            shareToken
+          );
+        }
+    
+        return url.toString();
+      }
+    
+      async function shareLiveMatch() {
+  if (isSharingLive) {
+    return;
+  }
+
+  isSharingLive = true;
+
+  const liveButtons = document.querySelectorAll(
+    '.public-action-btn[data-action="live"]'
+  );
+
+  liveButtons.forEach((button) => {
+    button.disabled = true;
+    button.classList.add("is-sharing");
+
+    const label = button.querySelector("span");
+
+    if (label) {
+      button.dataset.originalLabel =
+        label.textContent;
+
+      label.textContent = "Abrindo...";
+    }
+  });
+
+  try {
+    const shareUrl = await buildViewerUrl();
+
+    if (!shareUrl) {
+      alert(
+        "Nenhuma partida ao vivo encontrada para este usuário."
+      );
+      return;
+    }
+
+    if (
+      navigator.share &&
+      typeof navigator.canShare === "function"
+    ) {
+      const canShare = navigator.canShare({
+        url: shareUrl
+      });
+
+      if (canShare) {
+        await navigator.share({
+          title: "Partida ao vivo - TennisPro",
+          text: "Acesse a transmissão ao vivo da partida.",
+          url: shareUrl
+        });
+
+        return;
+      }
+    }
+
+    if (navigator.share) {
+      await navigator.share({
+        title: "Partida ao vivo - TennisPro",
+        text: "Acesse a transmissão ao vivo da partida.",
+        url: shareUrl
+      });
+
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareUrl);
+      alert("Link da transmissão copiado!");
+      return;
+    }
+
+    window.prompt(
+      "Copie o link da transmissão:",
+      shareUrl
+    );
+  } catch (error) {
+    /* * O usuário cancelou o compartilhamento * ou o navegador ainda estava processando * uma chamada anterior. */
+    if (
+      error?.name === "AbortError" ||
+      error?.name === "InvalidStateError"
+    ) {
+      return;
+    }
+
+    console.error(
+      "Erro ao compartilhar a transmissão:",
+      error
+    );
+
+    alert(
+      "Não foi possível compartilhar a transmissão."
+    );
+  } finally {
+    setTimeout(() => {
+      isSharingLive = false;
+
+      liveButtons.forEach((button) => {
+        button.disabled = false;
+        button.classList.remove("is-sharing");
+
+        const label = button.querySelector("span");
+
+        if (label) {
+          label.textContent =
+            button.dataset.originalLabel || "Live";
+        }
+      });
+    }, 500);
+  }
+}
+    
+      async function openBroadcaster() {
+        try {
+          const url = await buildBroadcasterUrl();
+    
+          if (!url) {
+            alert(
+              "Nenhuma partida ao vivo encontrada para este usuário."
+            );
+            return;
+          }
+    
+          window.open(url, "_blank");
+        } catch (error) {
+          console.error(
+            "Erro ao abrir transmissor:",
+            error
+          );
+    
+          alert(
+            "Não foi possível abrir o transmissor."
+          );
+        }
+      }
+    
+      function openStats() {
+        const statsButton = document.getElementById("statsBtn");
+    
+        if (statsButton) {
+          statsButton.click();
+        }
+      }
+    
+      function createActionButtons() {
+        const probabilityBlocks = document.querySelectorAll(
+          ".win-probability-chart"
+        );
+    
+        probabilityBlocks.forEach((probabilityBlock) => {
+          if (
+            probabilityBlock.nextElementSibling?.classList.contains(
+              "public-actions-section"
+            )
+          ) {
+            return;
+          }
+    
+          const actionsSection = document.createElement("section");
+          actionsSection.className = "public-actions-section";
+    
+          actionsSection.innerHTML = `
+            <div class="public-actions-row" aria-label="Ações da partida">
+              <button type="button" class="action-btn public-action-btn" data-action="live">
+                <ion-icon name="share-social-outline"></ion-icon>
+                <span>Live</span>
+              </button>
+    
+              <button type="button" class="action-btn public-action-btn" data-action="stats">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+                <span>Stats</span>
+              </button>
+    
+              <button type="button" class="action-btn public-action-btn" data-action="h2h">
+                <ion-icon name="people-outline"></ion-icon>
+                <span>H2H</span>
+              </button>
+    
+              <button type="button" class="action-btn public-action-btn" data-action="broadcast">
+                <ion-icon name="videocam-outline"></ion-icon>
+                <span>Transmitir</span>
+              </button>
+            </div>
+          `;
+    
+          probabilityBlock.insertAdjacentElement(
+            "afterend",
+            actionsSection
+          );
+        });
+      }
+    
+      document.addEventListener("click", (event) => {
+        const actionButton = event.target.closest(
+          ".public-action-btn"
+        );
+    
+        if (!actionButton) {
+          return;
+        }
+    
+        event.preventDefault();
+        event.stopPropagation();
+    
+        const action = actionButton.dataset.action || "";
+    
+        if (action === "live") {
+          shareLiveMatch();
+          return;
+        }
+    
+        if (action === "stats") {
+          openStats();
+          return;
+        }
+    
+        if (action === "broadcast") {
+          openBroadcaster();
+          return;
+        }
+      });
+    
+      const observer = new MutationObserver(() => {
+        createActionButtons();
+      });
+    
+      ["liveList", "scheduledList", "finishedList"]
+        .map((id) => document.getElementById(id))
+        .filter(Boolean)
+        .forEach((list) => {
+          observer.observe(list, {
+            childList: true,
+            subtree: true
+          });
+        });
+    
+      createActionButtons();
+    });
+    </script>
+
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
+
+  <!-- Firebase do projeto -->
+  <script src="js/firebase.js"></script>
+
+
+  <!-- Sua lógica existente -->
+  <script src="js/public.js?v=13"></script>
+  <script src="js/public-ui.js?v=1"></script>
+
+
+  <!-- Integração da nova interface -->
+  <script> document.addEventListener("DOMContentLoaded", () => { "use strict"; const filterSelect = document.getElementById("liveStatusFilter"); const filterTabs = document.querySelectorAll(".tp-filter-tab"); const sections = document.querySelectorAll(".tp-games-column"); const countLive = document.getElementById("countLive"); const countScheduled = document.getElementById("countScheduled"); const countFinished = document.getElementById("countFinished"); const countAll = document.getElementById("countAll"); const filterCountLive = document.getElementById("filterCountLive"); const filterCountScheduled = document.getElementById("filterCountScheduled"); const filterCountFinished = document.getElementById("filterCountFinished"); const summaryLive = document.getElementById("tpSummaryLive"); const summaryScheduled = document.getElementById("tpSummaryScheduled"); const summaryFinished = document.getElementById("tpSummaryFinished"); const dateLabel = document.getElementById("currentDateLabel"); const shareButton = document.getElementById("tpSharePageButton"); function numberFromElement(element) { return Number( element?.textContent || 0 ) || 0; } function updateCounters() { const live = numberFromElement(countLive); const scheduled = numberFromElement(countScheduled); const finished = numberFromElement(countFinished); const total = live + scheduled + finished; if (countAll) { countAll.textContent = total; } if (filterCountLive) { filterCountLive.textContent = live; } if (filterCountScheduled) { filterCountScheduled.textContent = scheduled; } if (filterCountFinished) { filterCountFinished.textContent = finished; } if (summaryLive) { summaryLive.textContent = live; } if (summaryScheduled) { summaryScheduled.textContent = scheduled; } if (summaryFinished) { summaryFinished.textContent = finished; } } function applyVisualFilter(value) { const selected = value || "all"; filterTabs.forEach((tab) => { const active = tab.dataset.filter === selected; tab.classList.toggle( "is-active", active ); tab.setAttribute( "aria-selected", String(active) ); }); sections.forEach((section) => { const sectionName = section.dataset.section; const shouldShow = selected === "all" || selected === sectionName; section.classList.toggle( "tp-section-hidden", !shouldShow ); }); } filterTabs.forEach((tab) => { tab.addEventListener("click", () => { const value = tab.dataset.filter || "all"; if (filterSelect) { filterSelect.value = value; filterSelect.dispatchEvent( new Event("change", { bubbles: true }) ); } applyVisualFilter(value); }); }); filterSelect?.addEventListener( "change", () => { applyVisualFilter( filterSelect.value || "all" ); } ); const counterObserver = new MutationObserver(() => { updateCounters(); }); [ countLive, countScheduled, countFinished ] .filter(Boolean) .forEach((element) => { counterObserver.observe(element, { childList: true, characterData: true, subtree: true }); }); if (dateLabel) { dateLabel.textContent = new Intl.DateTimeFormat( "pt-BR", { weekday: "long", day: "2-digit", month: "long" } ).format(new Date()); } shareButton?.addEventListener( "click", async () => { const url = window.location.href; try { if (navigator.share) { await navigator.share({ title: "Jogos públicos - TennisPro", text: "Acompanhe as partidas públicas no TennisPro.", url }); return; } if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(url); alert("Link copiado!"); return; } window.prompt( "Copie o link público:", url ); } catch (error) { console.error( "Erro ao compartilhar a página:", error ); } } ); updateCounters(); applyVisualFilter( filterSelect?.value || "all" ); }); </script>
+
+
+  <!-- Service Worker -->
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker .register("./service-worker.js") .then((registration) => { console.log( "Service Worker registrado:", registration ); }) .catch((error) => { console.error( "Erro ao registrar Service Worker:", error ); }); }); } </script>
+
+</body>
+
+</html><!doctype html>
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
