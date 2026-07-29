@@ -3475,57 +3475,36 @@ body.public-modern-page
   }
 }
 
-/* ========================================================= TAMANHO IGUAL: NOMES E NÚMEROS DO AO VIVO ========================================================= */
+/* ========================================================= JOGOS FINALIZADOS Nome e pontuação com exatamente o mesmo tamanho ========================================================= */
 
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .player-name,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .team-name-compact,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .team-name-compact-content,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .name-line,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .score,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .score.green,
 body.public-modern-page
-.tp-column-live
+.tp-column-finished
 .tp-match-list
 .score.gray {
-  font-size: 12px !important;
+  font-size: 0.88rem !important;
   line-height: 1.1 !important;
-}
-
-/* Mantém o texto do jogador em uma única linha */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.name-line {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-/* Números centralizados com o mesmo tamanho visual */
-body.public-modern-page
-.tp-column-live
-.tp-match-list
-.score {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-weight: 750 !important;
 }
