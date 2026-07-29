@@ -2979,3 +2979,262 @@ body.public-modern-page .tp-column-live
     font-size: 0.68rem !important;
   }
 }
+
+/* ========================================================= AJUSTES FINAIS DA TELA PÚBLICA ========================================================= */
+
+/* ========================================================= JOGOS FINALIZADOS Jogadores e pontuação maiores ========================================================= */
+
+/* Nomes dos jogadores finalizados */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.player-name,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.team-name-compact,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.team-name-compact-content,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.name-line {
+  font-size: 0.88rem !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+}
+
+/* Pontuação dos jogos finalizados */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.score,
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.score.green {
+  font-size: 0.90rem !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Pontuação final em cinza */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.score.gray {
+  font-size: 0.92rem !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Tie-break acima do placar */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.set-tb {
+  position: relative !important;
+  top: -0.52em !important;
+  margin-left: 2px !important;
+  font-size: 0.70em !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+/* Remove a bolinha/indicador adicional criado pelo vencedor */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.winner-row
+.player-name::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Mantém somente o indicador já existente no nome */
+body.public-modern-page
+.tp-column-finished
+.tp-match-list
+.winner-row
+.player-name
+.serve-ball {
+  display: inline-block !important;
+}
+
+/* ========================================================= JOGOS EM ANDAMENTO Números menores e nomes completos ========================================================= */
+
+/* Reduz os números da partida ao vivo */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.green {
+  font-size: 0.66rem !important;
+  line-height: 1 !important;
+  font-weight: 750 !important;
+}
+
+/* Pontos atuais */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.score.gray {
+  font-size: 0.68rem !important;
+  line-height: 1 !important;
+  font-weight: 750 !important;
+}
+
+/* Nomes do ao vivo sem reticências */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-name,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.team-name-compact,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.team-name-compact-content,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.name-line {
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+/* Permite que o nome ocupe mais espaço */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.team-col {
+  min-width: 0 !important;
+}
+
+/* Aproxima o nome dos números */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.match-player-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.match-table-head {
+  column-gap: 1px !important;
+}
+
+/* Reduz as colunas numéricas do ao vivo */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.one-set-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.one-set-head {
+  grid-template-columns:
+    minmax(0, 1fr)
+    22px
+    27px !important;
+}
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.two-set-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.two-set-head {
+  grid-template-columns:
+    minmax(0, 1fr)
+    20px
+    20px
+    27px !important;
+}
+
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.three-set-row,
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.three-set-head {
+  grid-template-columns:
+    minmax(0, 1fr)
+    19px
+    19px
+    19px
+    27px !important;
+}
+
+/* Evita que o avatar reduza excessivamente o espaço do nome */
+body.public-modern-page
+.tp-column-live
+.tp-match-list
+.player-with-avatar {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 5px !important;
+}
+
+/* ========================================================= TELAS PEQUENAS ========================================================= */
+
+@media (max-width: 760px) {
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .player-name,
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .team-name-compact,
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .name-line {
+    font-size: 0.82rem !important;
+  }
+
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .score,
+  body.public-modern-page
+  .tp-column-finished
+  .tp-match-list
+  .score.gray {
+    font-size: 0.84rem !important;
+  }
+
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score,
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score.green {
+    font-size: 0.62rem !important;
+  }
+
+  body.public-modern-page
+  .tp-column-live
+  .tp-match-list
+  .score.gray {
+    font-size: 0.64rem !important;
+  }
+}
