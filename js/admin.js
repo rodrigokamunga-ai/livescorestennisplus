@@ -1232,13 +1232,37 @@ async function renderAdminDetailedStats(match) {
       } catch (_) { return null; }
     }
 
-    function fillPlayer1Field() {
+    function isCurrentUserAdmin() {
+      return U.isAdmin(state.currentUser);
+    }
+    
+    function fillPlayer1Field(value = "") {
       if (!el.player1) return;
-      el.player1.value = state.currentProfileName || state.currentUser?.displayName || "";
-      el.player1.readOnly = true;
-      el.player1.setAttribute("readonly", "readonly");
-      el.player1.style.pointerEvents = "none";
-      el.player1.style.opacity = "0.95";
+    
+      const isAdmin = isCurrentUserAdmin();
+    
+      if (isAdmin) {
+        // Administrador pode informar qualquer jogador manualmente
+        el.player1.value = value || "";
+        el.player1.readOnly = false;
+        el.player1.removeAttribute("readonly");
+        el.player1.style.pointerEvents = "auto";
+        el.player1.style.opacity = "1";
+        el.player1.removeAttribute("aria-readonly");
+      } else {
+        // Demais usuários continuam vinculados ao próprio perfil
+        el.player1.value =
+          value ||
+          state.currentProfileName ||
+          state.currentUser?.displayName ||
+          "";
+    
+        el.player1.readOnly = true;
+        el.player1.setAttribute("readonly", "readonly");
+        el.player1.setAttribute("aria-readonly", "true");
+        el.player1.style.pointerEvents = "none";
+        el.player1.style.opacity = "0.95";
+      }
     }
 
     function setFieldVisible(wrapper, visible) {
@@ -2070,11 +2094,11 @@ async function renderAdminDetailedStats(match) {
       if (el.status) el.status.value = data?.status || "scheduled";
 
       if (el.player1) {
-        el.player1.value = data?.player1 || state.currentProfileName || "";
-        el.player1.readOnly = true;
-        el.player1.setAttribute("readonly", "readonly");
-        el.player1.style.pointerEvents = "none";
-        el.player1.style.opacity = "0.95";
+        fillPlayer1Field(
+          data?.player1 ||
+          state.currentProfileName ||
+          ""
+        );
       }
 
       if (el.player2) el.player2.value = data?.player2 || "";
@@ -3057,10 +3081,19 @@ if (statusText === "wo") {
 
         const isDoubles = selectedGameFormat === "Duplas";
         const woWinner = String(el.winnerByWO?.value || "").trim();
-        const player1Name = state.currentProfileName || state.currentUser?.displayName || "";
+        const player1Name = isCurrentUserAdmin()
+          ? String(el.player1?.value || "").trim()
+          : (
+            state.currentProfileName ||
+            state.currentUser?.displayName ||
+            ""
+          );
         const player2Name = String(el.player2?.value || "").trim();
         const player3Name = isDoubles ? String(el.player3?.value || "").trim() : "";
         const player4Name = isDoubles ? String(el.player4?.value || "").trim() : "";
+        if (!player1Name) {
+          return setMsg("Informe o nome do jogador 1.");
+        }
 
         if (!player2Name) return setMsg("Informe o nome do jogador 2.");
         if (isDoubles && !player3Name) return setMsg("Informe o nome do jogador 3.");
