@@ -1,0 +1,1226 @@
+/* ========================================================= TORNEIO.CSS Layout mobile / Ionic / Tailwind-like Sem cabeçalho e sem rodapé ========================================================= */
+
+:root {
+  --torneio-bg: #f5f7fa;
+  --torneio-card: #ffffff;
+  --torneio-soft: #f8fafc;
+  --torneio-primary: #05649a;
+  --torneio-primary-dark: #004d7a;
+  --torneio-title: #071b72;
+  --torneio-text: #17213d;
+  --torneio-muted: #617089;
+  --torneio-light: #8a97aa;
+  --torneio-border: #d2d8df;
+  --torneio-border-light: #e4e8ed;
+  --torneio-blue-soft: #eaf5fb;
+  --torneio-green: #17853a;
+  --torneio-yellow: #ad7a00;
+  --torneio-yellow-soft: #fff8df;
+  --torneio-red: #b4232d;
+  --torneio-red-soft: #fff5f5;
+  --torneio-radius: 14px;
+  --torneio-shadow: 0 3px 12px rgba(16, 38, 64, 0.07);
+}
+
+/* ========================================================= RESET DA PÁGINA ========================================================= */
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--torneio-bg);
+}
+
+body.tournament-page,
+body.admin-page.tournament-page {
+  min-height: 100vh;
+  color: var(--torneio-text) !important;
+  background: var(--torneio-bg) !important;
+  background-image: none !important;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body.tournament-page *,
+body.tournament-page *::before,
+body.tournament-page *::after {
+  box-sizing: border-box;
+}
+
+body.tournament-page button,
+body.tournament-page input,
+body.tournament-page select {
+  font: inherit;
+}
+
+body.tournament-page button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+body.tournament-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Remove efeitos escuros herdados do admin.css */
+body.tournament-page .container,
+body.tournament-page .stack,
+body.tournament-page main {
+  color: var(--torneio-text) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* ========================================================= CONTAINER PRINCIPAL ========================================================= */
+
+.tournament-main,
+.tournament-clean-main {
+  width: min(100% - 24px, 760px);
+  margin: 0 auto;
+  padding-top: 16px !important;
+  padding-bottom: 28px !important;
+}
+
+.tournament-clean-main {
+  min-height: 100vh;
+}
+
+/* ========================================================= CABEÇALHO DAS SEÇÕES ========================================================= */
+
+.tournament-form-wrapper,
+.tournament-list-section {
+  margin: 0 0 18px;
+  padding: 16px;
+  color: var(--torneio-text) !important;
+  border: 1px solid var(--torneio-border);
+  border-radius: var(--torneio-radius);
+  background: var(--torneio-card) !important;
+  box-shadow: var(--torneio-shadow);
+}
+
+.tournament-form-wrapper[hidden] {
+  display: none !important;
+}
+
+.tournament-form-wrapper .section-head {
+  margin-bottom: 16px;
+}
+
+.tournament-form-wrapper .section-kicker,
+.tournament-list-section .section-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--torneio-primary) !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tournament-form-wrapper h2,
+.tournament-list-section h2 {
+  margin: 4px 0 6px;
+  color: var(--torneio-title) !important;
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.tournament-form-wrapper p,
+.tournament-list-section p {
+  margin: 0;
+  color: var(--torneio-muted) !important;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.tournament-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+/* ========================================================= FORMULÁRIO ========================================================= */
+
+.tournament-form {
+  display: grid;
+  gap: 12px;
+}
+
+.tournament-form-card {
+  width: 100%;
+  padding: 13px;
+  color: var(--torneio-text) !important;
+  border: 1px solid var(--torneio-border-light);
+  border-radius: 12px;
+  background: var(--torneio-soft) !important;
+}
+
+.tournament-participants-card {
+  grid-column: 1 / -1;
+}
+
+.tournament-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tournament-label {
+  display: block;
+  color: var(--torneio-text) !important;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.tournament-field-help {
+  margin: -2px 0 2px;
+  color: var(--torneio-muted) !important;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+/* ========================================================= INPUTS E SELECTS ========================================================= */
+
+.tournament-input {
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  color: var(--torneio-text) !important;
+  border: 1px solid #cbd5df !important;
+  border-radius: 9px;
+  outline: none;
+  background: #ffffff !important;
+  font-size: 16px;
+  line-height: 1.2;
+  -webkit-text-fill-color: var(--torneio-text) !important;
+}
+
+.tournament-input::placeholder {
+  color: var(--torneio-light) !important;
+  opacity: 1;
+}
+
+.tournament-input:focus {
+  border-color: var(--torneio-primary) !important;
+  box-shadow: 0 0 0 3px rgba(5, 100, 154, 0.13);
+}
+
+.tournament-input:disabled,
+.tournament-input[readonly] {
+  color: var(--torneio-muted) !important;
+  background: #eef2f5 !important;
+}
+
+/* ========================================================= BOTÕES ========================================================= */
+
+.tournament-btn,
+.tournament-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 13px;
+  border-radius: 9px;
+  font-size: 0.75rem;
+  font-weight: 850;
+  line-height: 1;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.tournament-btn:active,
+.tournament-search-btn:active {
+  transform: scale(0.98);
+}
+
+.tournament-btn ion-icon,
+.tournament-search-btn ion-icon {
+  flex: 0 0 auto;
+  font-size: 18px;
+}
+
+.tournament-btn-primary {
+  color: #ffffff !important;
+  border: 1px solid var(--torneio-primary) !important;
+  background: var(--torneio-primary) !important;
+}
+
+.tournament-btn-primary:hover {
+  color: #ffffff !important;
+  background: var(--torneio-primary-dark) !important;
+  box-shadow: 0 4px 12px rgba(5, 100, 154, 0.2);
+}
+
+.tournament-btn-secondary {
+  color: var(--torneio-primary) !important;
+  border: 1px solid var(--torneio-primary) !important;
+  background: #ffffff !important;
+}
+
+.tournament-btn-secondary:hover {
+  color: #ffffff !important;
+  background: var(--torneio-primary) !important;
+}
+
+.tournament-btn-danger {
+  color: var(--torneio-red) !important;
+  border: 1px solid #d77b82 !important;
+  background: var(--torneio-red-soft) !important;
+}
+
+.tournament-btn-danger:hover {
+  color: #ffffff !important;
+  background: var(--torneio-red) !important;
+}
+
+.tournament-search-btn {
+  width: 100%;
+  margin-top: 2px;
+  color: var(--torneio-primary) !important;
+  border: 1px solid var(--torneio-primary) !important;
+  background: #ffffff !important;
+}
+
+.tournament-search-btn:hover {
+  color: #ffffff !important;
+  background: var(--torneio-primary) !important;
+}
+
+.tournament-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 3px;
+}
+
+.tournament-actions .tournament-btn {
+  width: 100%;
+}
+
+/* ========================================================= MENSAGENS ========================================================= */
+
+.tournament-message {
+  min-height: 20px;
+  margin-top: 12px;
+  color: var(--torneio-muted) !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.tournament-message.success {
+  color: var(--torneio-green) !important;
+}
+
+.tournament-message.error {
+  color: var(--torneio-red) !important;
+}
+
+/* ========================================================= LISTA DE TORNEIOS ========================================================= */
+
+.tournament-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 13px;
+}
+
+.tournament-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
+  color: var(--torneio-text) !important;
+  border: 1px solid var(--torneio-border);
+  border-radius: var(--torneio-radius);
+  background: #ffffff !important;
+  box-shadow: var(--torneio-shadow);
+}
+
+.tournament-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--torneio-border-light);
+}
+
+.tournament-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  color: var(--torneio-primary);
+  border-radius: 10px;
+  background: var(--torneio-blue-soft);
+}
+
+.tournament-card-icon ion-icon {
+  font-size: 21px;
+}
+
+.tournament-card-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+.tournament-card-heading h3 {
+  margin: 2px 0 4px;
+  overflow-wrap: anywhere;
+  color: var(--torneio-title) !important;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.tournament-card-heading span {
+  color: var(--torneio-muted) !important;
+  font-size: 0.7rem;
+}
+
+.tournament-status-badge {
+  flex: 0 0 auto;
+  max-width: 120px;
+  padding: 5px 8px;
+  overflow-wrap: anywhere;
+  color: var(--torneio-yellow) !important;
+  border: 1px solid #ecd994;
+  border-radius: 999px;
+  background: var(--torneio-yellow-soft) !important;
+  font-size: 0.58rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tournament-card-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  padding: 13px 0;
+}
+
+.tournament-card-info div {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--torneio-border-light);
+  border-radius: 9px;
+  background: var(--torneio-soft);
+}
+
+.tournament-card-info span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--torneio-muted) !important;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tournament-card-info strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--torneio-text) !important;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.tournament-card-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 13px;
+}
+
+.tournament-player-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  color: var(--torneio-primary) !important;
+  border: 1px solid #b4d2e3;
+  border-radius: 999px;
+  background: var(--torneio-blue-soft) !important;
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.tournament-player-chip ion-icon {
+  flex: 0 0 auto;
+  font-size: 15px;
+}
+
+.tournament-empty-players {
+  color: var(--torneio-light) !important;
+  font-size: 0.72rem;
+}
+
+.tournament-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--torneio-border-light);
+}
+
+.tournament-card-actions .tournament-btn {
+  min-height: 40px;
+  padding: 0 5px;
+  font-size: 0.66rem;
+}
+
+.tournament-card-actions .tournament-btn ion-icon {
+  font-size: 16px;
+}
+
+/* ========================================================= LISTA VAZIA ========================================================= */
+
+.tournament-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 160px;
+  padding: 20px;
+  color: var(--torneio-muted) !important;
+  border: 1px dashed #b9c4cf;
+  border-radius: var(--torneio-radius);
+  background: var(--torneio-soft) !important;
+  text-align: center;
+}
+
+.tournament-empty-card ion-icon {
+  color: var(--torneio-primary);
+  font-size: 32px;
+}
+
+.tournament-empty-card strong {
+  color: var(--torneio-text) !important;
+  font-size: 0.85rem;
+}
+
+.tournament-empty-card span {
+  color: var(--torneio-muted) !important;
+  font-size: 0.72rem;
+}
+
+/* ========================================================= LISTA DE JOGADORES ADICIONADOS ========================================================= */
+
+.tournament-selected-players {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tournament-selected-empty {
+  padding: 14px;
+  color: var(--torneio-muted) !important;
+  border: 1px dashed #b9c4cf;
+  border-radius: 10px;
+  background: #ffffff !important;
+  font-size: 0.74rem;
+  text-align: center;
+}
+
+.tournament-selected-player {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 7px 8px;
+  color: var(--torneio-primary) !important;
+  border: 1px solid #b4d2e3;
+  border-radius: 10px;
+  background: var(--torneio-blue-soft) !important;
+}
+
+.tournament-selected-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 27px;
+  height: 27px;
+  color: #ffffff !important;
+  border-radius: 50%;
+  background: var(--torneio-primary) !important;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.tournament-selected-name {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+  color: var(--torneio-primary) !important;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.tournament-remove-player {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  color: var(--torneio-red) !important;
+  border: 1px solid #d77b82;
+  border-radius: 8px;
+  background: #ffffff !important;
+}
+
+.tournament-remove-player ion-icon {
+  font-size: 18px;
+}
+
+/* ========================================================= MODAIS ========================================================= */
+
+.tournament-modal {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(15, 23, 38, 0.42) !important;
+  backdrop-filter: blur(4px);
+}
+
+.tournament-modal[hidden] {
+  display: none !important;
+}
+
+.tournament-modal-card {
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 17px;
+  color: var(--torneio-text) !important;
+  border: 1px solid var(--torneio-border);
+  border-radius: 17px 17px 0 0;
+  background: #ffffff !important;
+  box-shadow: 0 -10px 40px rgba(15, 23, 38, 0.2);
+}
+
+.tournament-modal-card * {
+  color: inherit;
+}
+
+.tournament-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.tournament-modal-head h3 {
+  margin: 0;
+  color: var(--torneio-title) !important;
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.tournament-modal-head p {
+  margin: 4px 0 0;
+  color: var(--torneio-muted) !important;
+  font-size: 0.72rem;
+}
+
+.tournament-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  color: var(--torneio-primary) !important;
+  border: 1px solid var(--torneio-primary);
+  border-radius: 8px;
+  background: #ffffff !important;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.tournament-modal-close:hover {
+  color: #ffffff !important;
+  background: var(--torneio-primary) !important;
+}
+
+.tournament-modal-body {
+  min-width: 0;
+}
+
+.tournament-search-status {
+  min-height: 22px;
+  margin: 10px 0;
+  color: var(--torneio-muted) !important;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.tournament-search-results {
+  display: grid;
+  gap: 8px;
+}
+
+.tournament-search-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  color: var(--torneio-text) !important;
+  border: 1px solid var(--torneio-border);
+  border-radius: 10px;
+  background: #ffffff !important;
+  text-align: left;
+}
+
+.tournament-search-result:hover,
+.tournament-search-result:active {
+  background: var(--torneio-blue-soft) !important;
+}
+
+.tournament-search-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  color: #ffffff !important;
+  border-radius: 50%;
+  background: var(--torneio-primary) !important;
+  font-weight: 900;
+}
+
+.tournament-search-result-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.tournament-search-result-main strong {
+  overflow-wrap: anywhere;
+  color: var(--torneio-primary) !important;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.tournament-search-result-main small {
+  overflow-wrap: anywhere;
+  color: var(--torneio-muted) !important;
+  font-size: 0.63rem;
+  line-height: 1.25;
+}
+
+.tournament-search-result > ion-icon {
+  flex: 0 0 auto;
+  color: var(--torneio-light) !important;
+  font-size: 18px;
+}
+
+.tournament-search-empty {
+  padding: 18px 10px;
+  color: var(--torneio-muted) !important;
+  border: 1px dashed #b9c4cf;
+  border-radius: 10px;
+  background: var(--torneio-soft) !important;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+/* ========================================================= CADASTRO MANUAL DE JOGADOR ========================================================= */
+
+.tournament-manual-player-box {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 12px;
+  color: var(--torneio-text) !important;
+  border: 1px solid #ecd994;
+  border-radius: 10px;
+  background: var(--torneio-yellow-soft) !important;
+}
+
+.tournament-manual-player-box[hidden] {
+  display: none !important;
+}
+
+.tournament-manual-player-box .tournament-btn {
+  width: 100%;
+}
+
+.tournament-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+/* ========================================================= RESPONSIVIDADE ========================================================= */
+
+@media (min-width: 769px) {
+  .tournament-main {
+    max-width: 920px;
+  }
+
+  .tournament-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tournament-form-card:first-child,
+  .tournament-participants-card,
+  .tournament-actions,
+  .tournament-message {
+    grid-column: 1 / -1;
+  }
+
+  .tournament-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tournament-modal {
+    align-items: center;
+    padding: 20px;
+  }
+
+  .tournament-modal-card {
+    width: min(100%, 540px);
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tournament-main,
+  .tournament-clean-main {
+    width: calc(100% - 20px);
+    padding-top: 12px !important;
+  }
+
+  .tournament-section-head {
+    flex-direction: column;
+  }
+
+  .tournament-section-head .tournament-btn {
+    width: 100%;
+  }
+
+  .tournament-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-card-actions .tournament-btn {
+    width: 100%;
+    min-height: 43px;
+  }
+}
+
+@media (max-width: 500px) {
+  .tournament-form-wrapper,
+  .tournament-list-section {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .tournament-card {
+    padding: 12px;
+  }
+
+  .tournament-card-top {
+    gap: 8px;
+  }
+
+  .tournament-card-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .tournament-card-heading h3 {
+    font-size: 0.92rem;
+  }
+
+  .tournament-status-badge {
+    max-width: 90px;
+    font-size: 0.52rem;
+  }
+
+  .tournament-card-info {
+    gap: 6px;
+  }
+
+  .tournament-card-info div {
+    padding: 7px;
+  }
+
+  .tournament-card-info strong {
+    font-size: 0.68rem;
+  }
+
+  .tournament-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-modal-card {
+    padding: 14px;
+  }
+}
+
+/* ========================================================= ACESSIBILIDADE ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================================= PERÍODO DO TORNEIO ========================================================= */
+
+.tournament-date-range {
+  min-height: 88px !important;
+  resize: vertical;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+/* ========================================================= MOSTRAR E OCULTAR JOGADORES ========================================================= */
+
+.tournament-toggle-players-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  color: var(--torneio-primary);
+  border: 1px solid var(--torneio-primary);
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.tournament-toggle-players-btn:hover {
+  color: #ffffff;
+  background: var(--torneio-primary);
+}
+
+.tournament-toggle-players-btn ion-icon {
+  font-size: 17px;
+}
+
+.tournament-selected-players.is-collapsed {
+  display: none !important;
+}
+
+/* ========================================================= BOTÕES DOS CARDS NA MESMA LINHA ========================================================= */
+
+.tournament-card-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  padding-top: 12px;
+  border-top: 1px solid var(--torneio-border-light);
+  scrollbar-width: none;
+}
+
+.tournament-card-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.tournament-card-actions .tournament-btn {
+  display: inline-flex !important;
+  flex: 1 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-width: 76px !important;
+  min-height: 39px !important;
+  padding: 0 7px !important;
+  white-space: nowrap !important;
+  font-size: 0.62rem !important;
+}
+
+.tournament-card-actions .tournament-btn ion-icon {
+  font-size: 15px !important;
+}
+
+/* ========================================================= EDITAR DESABILITADO ========================================================= */
+
+.tournament-btn-disabled,
+.tournament-card-actions
+.tournament-btn:disabled {
+  color: #8a97aa !important;
+  border-color: #d2d8df !important;
+  background: #eef2f5 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
+.tournament-btn-disabled:hover,
+.tournament-card-actions
+.tournament-btn:disabled:hover {
+  color: #8a97aa !important;
+  border-color: #d2d8df !important;
+  background: #eef2f5 !important;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .tournament-card-actions {
+    flex-wrap: nowrap !important;
+  }
+
+  .tournament-card-actions .tournament-btn {
+    flex: 0 0 auto !important;
+    min-width: 78px !important;
+  }
+}
+
+/* ========================================================= JOGADORES OCULTOS NO CARD ========================================================= */
+
+.tournament-card-player-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+
+.tournament-card-player-list.is-hidden {
+  display: none !important;
+}
+
+.tournament-toggle-card-players {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 36px;
+  margin: 10px 0 0;
+  padding: 0 10px;
+  color: var(--torneio-primary);
+  border: 1px solid var(--torneio-border);
+  border-radius: 8px;
+  background: var(--torneio-soft);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.tournament-toggle-card-players:hover {
+  color: #ffffff;
+  border-color: var(--torneio-primary);
+  background: var(--torneio-primary);
+}
+
+.tournament-toggle-card-players ion-icon {
+  font-size: 16px;
+}
+
+.tournament-player-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 6px 8px;
+  color: var(--torneio-primary) !important;
+  border: 1px solid #b4d2e3;
+  border-radius: 999px;
+  background: var(--torneio-blue-soft) !important;
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.tournament-player-chip-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+  border-radius: 50%;
+  background: var(--torneio-primary);
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+/* ========================================================= BOTÕES DO CARD NA MESMA LINHA ========================================================= */
+
+.tournament-card-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--torneio-border-light);
+  scrollbar-width: none;
+}
+
+.tournament-card-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.tournament-card-actions .tournament-btn {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-width: 76px !important;
+  min-height: 39px !important;
+  padding: 0 7px !important;
+  white-space: nowrap !important;
+  font-size: 0.62rem !important;
+}
+
+.tournament-card-actions .tournament-btn ion-icon {
+  font-size: 15px !important;
+}
+
+/* Editar desabilitado */
+.tournament-btn-disabled,
+.tournament-card-actions
+.tournament-btn:disabled {
+  color: #8a97aa !important;
+  border-color: #d2d8df !important;
+  background: #eef2f5 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
+.tournament-btn-disabled:hover,
+.tournament-card-actions
+.tournament-btn:disabled:hover {
+  color: #8a97aa !important;
+  border-color: #d2d8df !important;
+  background: #eef2f5 !important;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .tournament-card-actions {
+    flex-wrap: nowrap !important;
+  }
+
+  .tournament-card-actions .tournament-btn {
+    flex: 0 0 auto !important;
+    min-width: 78px !important;
+  }
+}
+
+/* ========================================================= BOTÕES DOS CARDS SEMPRE VISÍVEIS ========================================================= */
+
+.tournament-card-actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--torneio-border-light) !important;
+  scrollbar-width: none !important;
+}
+
+.tournament-card-actions::-webkit-scrollbar {
+  display: none !important;
+}
+
+.tournament-card-actions .tournament-btn {
+  display: inline-flex !important;
+  flex: 1 1 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  min-height: 40px !important;
+  padding: 0 6px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  font-size: 0.62rem !important;
+}
+
+.tournament-card-actions .tournament-btn span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.tournament-card-actions .tournament-btn ion-icon {
+  flex: 0 0 auto !important;
+  font-size: 16px !important;
+}
+
+.tournament-btn-start {
+  color: #ffffff !important;
+  border: 1px solid #17853a !important;
+  background: #17853a !important;
+}
+
+.tournament-btn-start:hover {
+  color: #ffffff !important;
+  border-color: #11682d !important;
+  background: #11682d !important;
+}
+
+/* Remove qualquer bloqueio visual anterior */
+.tournament-card-actions button:disabled,
+.tournament-card-actions
+.tournament-btn-disabled {
+  color: inherit !important;
+  border-color: initial !important;
+  background: initial !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 600px) {
+  .tournament-card-actions {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+
+  .tournament-card-actions .tournament-btn {
+    flex: 0 0 auto !important;
+    min-width: 76px !important;
+    font-size: 0.62rem !important;
+  }
+}
+
