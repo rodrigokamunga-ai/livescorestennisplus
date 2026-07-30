@@ -3,19 +3,35 @@
 
 <head>
   <meta charset="utf-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1" >
+
+  <meta name="apple-mobile-web-app-capable" content="yes" >
+
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" >
+
+  <meta name="mobile-web-app-capable" content="yes" >
 
   <meta name="theme-color" content="#f5f7fa" >
 
-  <meta name="description" content="Chave do torneio - TennisPro" >
+  <meta name="description" content="Cadastro e gerenciamento de torneios - TennisPro" >
 
-  <title>Chave do torneio | TennisPro</title>
+  <link rel="manifest" href="manifest.json" >
+
+  <link rel="icon" href="img/icon-192.png" >
+
+  <link rel="apple-touch-icon" href="img/icon-192.png" >
+
+  <title>Torneios | TennisPro</title>
 
   <link rel="stylesheet" href="css/style.css" >
 
   <link rel="stylesheet" href="css/admin.css" >
 
-  <link rel="stylesheet" href="css/chave-torneio.css" >
+  <link rel="stylesheet" href="css/torneio.css" >
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Ionicons -->
   <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js" ></script>
@@ -23,241 +39,308 @@
   <script nomodule src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js" ></script>
 </head>
 
-<body class="bracket-page">
+<body class="admin-page tournament-page">
 
-  <main class="bracket-main">
+  <main class="container stack tournament-main tournament-clean-main">
 
-    <!-- ===================================================== CABEÇALHO ===================================================== -->
+    
 
-    <section class="bracket-header-card">
+    <!-- ===================================================== FORMULÁRIO DO TORNEIO ===================================================== -->
 
-      <div>
-        <span class="bracket-kicker">
-          Chave do torneio
-        </span>
+    <section id="tournamentFormWrapper" class="tournament-form-wrapper" hidden >
 
-        <h1 id="bracketTournamentName">
-          Carregando...
-        </h1>
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">
+            Cadastro do torneio
+          </span>
 
-        <p id="bracketTournamentMeta">
-          Carregando dados...
-        </p>
+          <h2 id="tournamentFormTitle">
+            Novo torneio
+          </h2>
+
+          <p class="muted">
+            Cadastre o torneio e os jogadores participantes.
+          </p>
+        </div>
       </div>
 
-      <a href="torneio.html" class="bracket-back-btn" >
-        <ion-icon name="arrow-back-outline"></ion-icon>
-        <span>Voltar</span>
-      </a>
+      <form id="tournamentForm" class="tournament-form" >
+
+        <input type="hidden" id="tournamentDocId" >
+
+        <!-- Nome do torneio -->
+        <div class="tournament-form-card">
+
+          <label class="tournament-field">
+
+            <span class="tournament-label">
+              Nome do torneio
+            </span>
+
+            <input id="tournamentName" class="tournament-input" type="text" maxlength="120" required autocomplete="off" placeholder="Informe o nome do torneio" >
+
+          </label>
+
+        </div>
+
+        <!-- Formato do jogo -->
+        <div class="tournament-form-card">
+
+          <label class="tournament-field">
+
+            <span class="tournament-label">
+              Formato do jogo
+            </span>
+
+            <select id="tournamentGameFormat" class="tournament-input" required >
+              <option value="">
+                Selecione o formato do jogo
+              </option>
+
+              <option value="Simples">
+                Simples
+              </option>
+
+              <option value="Duplas">
+                Duplas
+              </option>
+            </select>
+
+          </label>
+
+        </div>
+
+        <!-- Formato da partida -->
+        <div class="tournament-form-card">
+
+          <label class="tournament-field">
+
+            <span class="tournament-label">
+              Formato da partida
+            </span>
+
+            <select id="tournamentMatchFormat" class="tournament-input" required >
+              <option value="">
+                Selecione o formato da partida
+              </option>
+
+              <option value="1 set">
+                1 set
+              </option>
+
+              <option value="2 sets + um super tie-break">
+                2 sets + um super tie-break
+              </option>
+
+              <option value="3 sets">
+                3 sets
+              </option>
+            </select>
+
+          </label>
+
+        </div>
+
+        <!-- Período do torneio -->
+        <div class="tournament-form-card">
+
+          <label class="tournament-field">
+
+            <span class="tournament-label">
+              Período do torneio
+            </span>
+
+            <textarea id="tournamentDateRange" class="tournament-input tournament-date-range" rows="3" required placeholder="Exemplo: 30/07/2026 - 01/08/2026 08/09/2026 - 10/09/2026" ></textarea>
+
+            <small class="tournament-field-help">
+              Informe um período por linha.
+            </small>
+
+          </label>
+
+        </div>
+
+        <!-- Jogadores -->
+        <div class="tournament-form-card tournament-participants-card">
+
+          <div class="tournament-field">
+
+            <span class="tournament-label">
+              Jogadores do torneio
+            </span>
+
+            <p class="tournament-field-help">
+              Pesquise um jogador cadastrado ou adicione manualmente caso ele não seja encontrado.
+            </p>
+
+            <button id="openTournamentPlayerSearchBtn" type="button" class="tournament-search-btn" >
+              <ion-icon name="search-outline"></ion-icon>
+              <span>Pesquisar jogador</span>
+            </button>
+
+            <div id="tournamentSelectedPlayers" class="tournament-selected-players" >
+              <div class="tournament-selected-empty">
+                Nenhum jogador adicionado ao torneio.
+              </div>
+            </div>
+
+            <button id="toggleTournamentPlayersBtn" type="button" class="tournament-toggle-players-btn" aria-expanded="true" >
+              <ion-icon name="eye-off-outline"></ion-icon>
+              <span>Ocultar jogadores</span>
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- Ações -->
+        <div class="tournament-actions">
+
+          <button type="submit" class="tournament-btn tournament-btn-primary" >
+            <ion-icon name="save-outline"></ion-icon>
+            <span>Salvar torneio</span>
+          </button>
+
+          <button id="cancelTournamentBtn" type="button" class="tournament-btn tournament-btn-secondary" >
+            <ion-icon name="close-outline"></ion-icon>
+            <span>Cancelar</span>
+          </button>
+
+        </div>
+
+      </form>
+
+      <div id="tournamentMessage" class="tournament-message" role="status" aria-live="polite" ></div>
 
     </section>
 
-    <!-- ===================================================== FILTROS ===================================================== -->
+    <!-- ===================================================== LISTA DE TORNEIOS ===================================================== -->
 
-    <section class="bracket-toolbar-card">
+    <section class="tournament-list-section">
 
-      <div class="bracket-toggle-group" aria-label="Formato do torneio" >
-        <button type="button" class="bracket-toggle is-active" data-format="Simples" >
-          Simples
+      <div class="tournament-section-head">
+
+        <div>
+          <span class="section-kicker">
+            Gerenciamento
+          </span>
+
+          <h2>
+            Torneios cadastrados
+          </h2>
+
+          <p>
+            Consulte e gerencie os torneios cadastrados.
+          </p>
+        </div>
+
+        <button id="newTournamentBtn" type="button" class="tournament-btn tournament-btn-primary" >
+          <ion-icon name="add-circle-outline"></ion-icon>
+          <span>Novo torneio</span>
         </button>
 
-        <button type="button" class="bracket-toggle" data-format="Duplas" >
-          Duplas
-        </button>
+        <a href="menu.html" class="tournament-menu-back-btn" aria-label="Voltar para o menu" title="Voltar para o menu" >
+      <ion-icon name="arrow-back-outline"></ion-icon>
+      <span>Menu principal</span>
+    </a>
+
       </div>
 
-      <div class="bracket-rounds" aria-label="Fases do torneio" >
-        <button type="button" class="bracket-round is-active" data-round="all" >
-          Todos
-        </button>
-
-        <button type="button" class="bracket-round" data-round="r64" >
-          R64
-        </button>
-
-        <button type="button" class="bracket-round" data-round="r32" >
-          R32
-        </button>
-
-        <button type="button" class="bracket-round" data-round="r16" >
-          R16
-        </button>
-
-        <button type="button" class="bracket-round" data-round="qf" >
-          QF
-        </button>
-
-        <button type="button" class="bracket-round" data-round="sf" >
-          SF
-        </button>
-
-        <button type="button" class="bracket-round" data-round="final" >
-          F
-        </button>
-      </div>
+      <div id="tournamentList" class="tournament-list" ></div>
 
     </section>
-
-    <!-- ===================================================== AÇÕES DA CHAVE ===================================================== -->
-
-    <div class="bracket-save-row bracket-actions" >
-
-      <button id="saveBracketBtn" type="button" class="bracket-save-btn" >
-        <ion-icon name="save-outline"></ion-icon>
-        <span>Salvar chave</span>
-      </button>
-
-      <button id="finishBracketBtn" type="button" class="bracket-finish-btn" >
-        <ion-icon name="checkmark-done-outline"></ion-icon>
-        <span>Finalizar chave</span>
-      </button>
-
-      <button id="finishTournamentBtn" type="button" class="bracket-finish-tournament-btn" >
-        <ion-icon name="flag-outline"></ion-icon>
-        <span>Finalizar torneio</span>
-      </button>
-
-      <button id="generateBracketPdfBtn" type="button" class="bracket-pdf-btn" >
-        <ion-icon name="document-text-outline"></ion-icon>
-        <span>Gerar PDF</span>
-      </button>
-
-      <button id="shareBracketBtn" type="button" class="bracket-share-btn" >
-        <ion-icon name="share-social-outline"></ion-icon>
-        <span>Compartilhar chave</span>
-      </button>
-
-    </div>
-
-    <!-- ===================================================== CHAVE ===================================================== -->
-
-    <section id="bracketBoard" class="bracket-board" aria-label="Chave do torneio" ></section>
-
-    <div id="bracketMessage" class="bracket-message" role="status" aria-live="polite" ></div>
 
   </main>
 
-  <!-- ===================================================== MODAL DE POSIÇÃO DO JOGADOR ===================================================== -->
+  <!-- ===================================================== MODAL DE PESQUISA DE JOGADOR ===================================================== -->
 
-  <div id="bracketPlayerModal" class="bracket-modal" hidden aria-hidden="true" >
+  <div id="tournamentSearchModal" class="tournament-modal" hidden aria-hidden="true" >
 
-    <div class="bracket-modal-card" role="dialog" aria-modal="true" aria-labelledby="bracketModalTitle" >
+    <div class="tournament-modal-card" role="dialog" aria-modal="true" aria-labelledby="tournamentSearchTitle" >
 
-      <div class="bracket-modal-head">
+      <div class="tournament-modal-head">
 
         <div>
-          <span class="bracket-kicker">
-            Posição da chave
-          </span>
+          <h3 id="tournamentSearchTitle">
+            Pesquisar jogador
+          </h3>
 
-          <h2 id="bracketModalTitle">
-            Selecionar jogador
-          </h2>
+          <p>
+            Digite o nome de um jogador cadastrado.
+          </p>
         </div>
 
-        <button id="closeBracketModal" type="button" class="bracket-close" aria-label="Fechar" >
+        <button id="closeTournamentSearchBtn" type="button" class="tournament-modal-close" aria-label="Fechar pesquisa" >
           ×
         </button>
 
       </div>
 
-      <div id="bracketModalPlayers" class="bracket-modal-players" ></div>
+      <div class="tournament-modal-body">
+
+        <input id="tournamentSearchInput" class="tournament-input" type="text" placeholder="Digite o nome do jogador" autocomplete="off" >
+
+        <div id="tournamentSearchStatus" class="tournament-search-status" aria-live="polite" ></div>
+
+        <div id="tournamentSearchResults" class="tournament-search-results" ></div>
+
+        <!-- Cadastro manual -->
+        <div id="tournamentManualPlayerBox" class="tournament-manual-player-box" hidden >
+
+          <label class="tournament-field">
+
+            <span class="tournament-label">
+              Cadastrar jogador manualmente
+            </span>
+
+            <input id="tournamentManualPlayerInput" class="tournament-input" type="text" maxlength="120" placeholder="Digite o nome do jogador" autocomplete="off" >
+
+          </label>
+
+          <button id="addTournamentManualPlayerBtn" type="button" class="tournament-btn tournament-btn-primary" >
+            <ion-icon name="person-add-outline"></ion-icon>
+            <span>Adicionar jogador</span>
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
 
   </div>
 
-  <!-- ===================================================== MODAL DE RESULTADO DA PARTIDA ===================================================== -->
+  <!-- ===================================================== MODAL DE CONFIRMAÇÃO ===================================================== -->
 
-  <div id="bracketResultModal" class="bracket-modal" hidden aria-hidden="true" >
+  <div id="tournamentConfirmModal" class="tournament-modal" hidden aria-hidden="true" >
 
-    <div class="bracket-modal-card" role="dialog" aria-modal="true" aria-labelledby="bracketResultTitle" >
+    <div class="tournament-modal-card tournament-confirm-card" role="dialog" aria-modal="true" aria-labelledby="tournamentConfirmTitle" >
 
-      <div class="bracket-modal-head">
+      <div class="tournament-modal-head">
 
-        <div>
-          <span class="bracket-kicker">
-            Resultado da partida
-          </span>
+        <h3 id="tournamentConfirmTitle">
+          Confirmar exclusão
+        </h3>
 
-          <h2 id="bracketResultTitle">
-            Informar placar
-          </h2>
-        </div>
+      </div>
 
-        <button id="closeBracketResultModal" type="button" class="bracket-close" aria-label="Fechar resultado" >
-          ×
+      <div class="tournament-modal-body">
+
+        <p id="tournamentConfirmMessage">
+          Deseja excluir este torneio?
+        </p>
+
+      </div>
+
+      <div class="tournament-modal-actions">
+
+        <button id="tournamentConfirmNo" type="button" class="tournament-btn tournament-btn-secondary" >
+          Não
         </button>
 
-      </div>
-
-      <div class="bracket-result-players">
-
-        <strong id="resultPlayer1Name">
-          Jogador 1
-        </strong>
-
-        <span>×</span>
-
-        <strong id="resultPlayer2Name">
-          Jogador 2
-        </strong>
-
-      </div>
-
-      <div class="bracket-result-fields">
-
-        <!-- 1º SET -->
-        <div id="resultSet1Wrapper" class="bracket-result-set" >
-          <strong>1º set</strong>
-
-          <input id="resultSet1Player1" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 1" >
-
-          <input id="resultSet1Player2" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 2" >
-        </div>
-
-        <!-- 2º SET -->
-        <div id="resultSet2Wrapper" class="bracket-result-set" hidden >
-          <strong>2º set</strong>
-
-          <input id="resultSet2Player1" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 1" >
-
-          <input id="resultSet2Player2" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 2" >
-        </div>
-
-        <!-- 3º SET -->
-        <div id="resultSet3Wrapper" class="bracket-result-set" hidden >
-          <strong>3º set</strong>
-
-          <input id="resultSet3Player1" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 1" >
-
-          <input id="resultSet3Player2" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 2" >
-        </div>
-
-        <!-- SUPER TIE-BREAK -->
-        <div id="resultSuperTieWrapper" class="bracket-result-set" hidden >
-          <strong>
-            Super tie-break
-          </strong>
-
-          <input id="resultSuperTiePlayer1" type="number" min="0" inputmode="numeric" placeholder="Jogador 1" >
-
-          <input id="resultSuperTiePlayer2" type="number" min="0" inputmode="numeric" placeholder="Jogador 2" >
-        </div>
-
-      </div>
-
-      <div id="bracketResultMessage" class="bracket-message" role="status" aria-live="polite" ></div>
-
-      <div class="bracket-result-actions">
-
-        <button id="cancelBracketResultBtn" type="button" class="bracket-cancel-result-btn" >
-          Cancelar
-        </button>
-
-        <button id="saveBracketResultBtn" type="button" class="bracket-save-result-btn" >
-          <ion-icon name="save-outline"></ion-icon>
-          <span>Salvar resultado</span>
+        <button id="tournamentConfirmYes" type="button" class="tournament-btn tournament-btn-danger" >
+          Excluir
         </button>
 
       </div>
@@ -276,7 +359,11 @@
 
   <script src="js/firebase.js"></script>
 
-  <script src="js/chave-torneio.js?v=20260730-7"></script>
+  <!-- Atualização de cache -->
+  <script src="js/torneio.js?v=20260730-6"></script>
+
+  <!-- Service Worker -->
+  <script> if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker .register("./service-worker.js") .then((registration) => { console.log( "Service Worker registrado:", registration ); }) .catch((error) => { console.error( "Erro ao registrar Service Worker:", error ); }); }); } </script>
 
 </body>
 </html>
