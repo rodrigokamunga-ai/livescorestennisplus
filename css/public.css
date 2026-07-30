@@ -3908,3 +3908,239 @@ body.public-dashboard-page .public-action-btn span {
   padding-bottom: 2px !important;
 }
 
+/* ========================================================= VISUAL CLARO — PARTIDAS AO VIVO E SUSPENSAS Mantém todas as funcionalidades existentes ========================================================= */
+
+body.public-page .match-board[data-status="live"],
+body.public-page .match-board[data-status="suspended"],
+body.public-dashboard-page .match-board[data-status="live"],
+body.public-dashboard-page .match-board[data-status="suspended"] {
+  background: #ffffff !important;
+  color: #001660 !important;
+  border: 1px solid #d4d8df !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  padding: 18px 20px !important;
+}
+
+/* Cabeçalho da partida */
+body.public-page .match-board[data-status="live"] .match-board-top,
+body.public-page .match-board[data-status="suspended"] .match-board-top,
+body.public-dashboard-page .match-board[data-status="live"] .match-board-top,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-board-top {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #001660 !important;
+}
+
+/* Textos de categoria, fase e torneio */
+body.public-page .match-board[data-status="live"] .match-chip,
+body.public-page .match-board[data-status="suspended"] .match-chip,
+body.public-page .match-board[data-status="live"] .live-meta-left,
+body.public-page .match-board[data-status="suspended"] .live-meta-left,
+body.public-page .match-board[data-status="live"] .live-meta-left strong,
+body.public-page .match-board[data-status="suspended"] .live-meta-left strong,
+body.public-dashboard-page .match-board[data-status="live"] .match-chip,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-chip,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-left,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-left,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-left strong,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-left strong {
+  color: #001660 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Duração */
+body.public-page .match-board[data-status="live"] .live-meta-right,
+body.public-page .match-board[data-status="suspended"] .live-meta-right,
+body.public-page .match-board[data-status="live"] .duration-with-icon,
+body.public-page .match-board[data-status="suspended"] .duration-with-icon,
+body.public-page .match-board[data-status="live"] .duration-with-icon strong,
+body.public-page .match-board[data-status="suspended"] .duration-with-icon strong,
+body.public-dashboard-page .match-board[data-status="live"] .live-meta-right,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-meta-right,
+body.public-dashboard-page .match-board[data-status="live"] .duration-with-icon,
+body.public-dashboard-page .match-board[data-status="suspended"] .duration-with-icon,
+body.public-dashboard-page .match-board[data-status="live"] .duration-with-icon strong,
+body.public-dashboard-page .match-board[data-status="suspended"] .duration-with-icon strong {
+  color: #687080 !important;
+}
+
+/* Remove o fundo escuro das linhas */
+body.public-page .match-board[data-status="live"] .match-table-head,
+body.public-page .match-board[data-status="live"] .match-player-row,
+body.public-page .match-board[data-status="suspended"] .match-table-head,
+body.public-page .match-board[data-status="suspended"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="live"] .match-table-head,
+body.public-dashboard-page .match-board[data-status="live"] .match-player-row,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-table-head,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-player-row {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #001660 !important;
+}
+
+/* Nomes dos jogadores */
+body.public-page .match-board[data-status="live"] .player-name,
+body.public-page .match-board[data-status="suspended"] .player-name,
+body.public-dashboard-page .match-board[data-status="live"] .player-name,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-name {
+  color: #0068a9 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+/* Conteúdo interno do nome */
+body.public-page .match-board[data-status="live"] .team-name-compact-content,
+body.public-page .match-board[data-status="suspended"] .team-name-compact-content,
+body.public-dashboard-page .match-board[data-status="live"] .team-name-compact-content,
+body.public-dashboard-page .match-board[data-status="suspended"] .team-name-compact-content {
+  color: #0068a9 !important;
+}
+
+/* Placar — pontos, games e sets */
+body.public-page .match-board[data-status="live"] .score,
+body.public-page .match-board[data-status="suspended"] .score,
+body.public-page .match-board[data-status="live"] .set-col,
+body.public-page .match-board[data-status="suspended"] .set-col,
+body.public-page .match-board[data-status="live"] .points-col,
+body.public-page .match-board[data-status="suspended"] .points-col,
+body.public-dashboard-page .match-board[data-status="live"] .score,
+body.public-dashboard-page .match-board[data-status="suspended"] .score,
+body.public-dashboard-page .match-board[data-status="live"] .set-col,
+body.public-dashboard-page .match-board[data-status="suspended"] .set-col,
+body.public-dashboard-page .match-board[data-status="live"] .points-col,
+body.public-dashboard-page .match-board[data-status="suspended"] .points-col {
+  color: #001660 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 900 !important;
+}
+
+/* Cabeçalho das colunas, caso esteja sendo exibido */
+body.public-page .match-board[data-status="live"] .match-table-head > div,
+body.public-page .match-board[data-status="suspended"] .match-table-head > div,
+body.public-dashboard-page .match-board[data-status="live"] .match-table-head > div,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-table-head > div {
+  color: #687080 !important;
+}
+
+/* Bola de saque */
+body.public-page .match-board[data-status="live"] .serve-ball,
+body.public-page .match-board[data-status="suspended"] .serve-ball,
+body.public-dashboard-page .match-board[data-status="live"] .serve-ball,
+body.public-dashboard-page .match-board[data-status="suspended"] .serve-ball {
+  background: #d8ff63 !important;
+  box-shadow: 0 0 6px rgba(130, 160, 20, 0.55) !important;
+}
+
+/* Status ao vivo */
+body.public-page .match-board[data-status="live"] .match-status,
+body.public-dashboard-page .match-board[data-status="live"] .match-status {
+  color: #15803d !important;
+  background: transparent !important;
+}
+
+/* Status suspenso */
+body.public-page .match-board[data-status="suspended"] .match-status,
+body.public-dashboard-page .match-board[data-status="suspended"] .match-status {
+  color: #a16207 !important;
+  background: transparent !important;
+}
+
+/* Feed de eventos */
+body.public-page .match-board[data-status="live"] .live-feed,
+body.public-page .match-board[data-status="suspended"] .live-feed,
+body.public-dashboard-page .match-board[data-status="live"] .live-feed,
+body.public-dashboard-page .match-board[data-status="suspended"] .live-feed {
+  color: #687080 !important;
+  background: transparent !important;
+}
+
+/* Badge de partida suspensa */
+body.public-page .match-board[data-status="suspended"] .suspended-badge,
+body.public-dashboard-page .match-board[data-status="suspended"] .suspended-badge {
+  color: #a16207 !important;
+  background: #fff7db !important;
+  border: 1px solid #f0d98b !important;
+}
+
+/* Duração da partida suspensa */
+body.public-page .match-board[data-status="suspended"] .suspended-duration,
+body.public-dashboard-page .match-board[data-status="suspended"] .suspended-duration {
+  color: #a16207 !important;
+}
+
+/* Últimos pontos, break points e probabilidade */
+body.public-page .match-board[data-status="live"] .last-points-block,
+body.public-page .match-board[data-status="live"] .break-points-block,
+body.public-page .match-board[data-status="live"] .win-probability-chart,
+body.public-dashboard-page .match-board[data-status="live"] .last-points-block,
+body.public-dashboard-page .match-board[data-status="live"] .break-points-block,
+body.public-dashboard-page .match-board[data-status="live"] .win-probability-chart {
+  background: #f8fafc !important;
+  border: 1px solid #e1e6ed !important;
+  color: #001660 !important;
+  box-shadow: none !important;
+}
+
+/* Títulos desses blocos */
+body.public-page .match-board[data-status="live"] .last-points-title,
+body.public-page .match-board[data-status="live"] .break-points-title,
+body.public-page .match-board[data-status="live"] .win-probability-title,
+body.public-dashboard-page .match-board[data-status="live"] .last-points-title,
+body.public-dashboard-page .match-board[data-status="live"] .break-points-title,
+body.public-dashboard-page .match-board[data-status="live"] .win-probability-title {
+  color: #001660 !important;
+}
+
+/* Botões de ação */
+body.public-page .match-board[data-status="live"] .public-action-btn,
+body.public-page .match-board[data-status="suspended"] .public-action-btn,
+body.public-dashboard-page .match-board[data-status="live"] .public-action-btn,
+body.public-dashboard-page .match-board[data-status="suspended"] .public-action-btn {
+  color: #001660 !important;
+  background: #ffffff !important;
+  border: 1px solid #d2d7df !important;
+  box-shadow: none !important;
+}
+
+/* Hover dos botões */
+body.public-page .match-board[data-status="live"] .public-action-btn:hover,
+body.public-page .match-board[data-status="suspended"] .public-action-btn:hover,
+body.public-dashboard-page .match-board[data-status="live"] .public-action-btn:hover,
+body.public-dashboard-page .match-board[data-status="suspended"] .public-action-btn:hover {
+  background: #f1f4f8 !important;
+  border-color: #001660 !important;
+}
+
+/* Ícones e textos dos botões */
+body.public-page .match-board[data-status="live"] .public-action-btn ion-icon,
+body.public-page .match-board[data-status="live"] .public-action-btn span,
+body.public-page .match-board[data-status="suspended"] .public-action-btn ion-icon,
+body.public-page .match-board[data-status="suspended"] .public-action-btn span,
+body.public-dashboard-page .match-board[data-status="live"] .public-action-btn ion-icon,
+body.public-dashboard-page .match-board[data-status="live"] .public-action-btn span,
+body.public-dashboard-page .match-board[data-status="suspended"] .public-action-btn ion-icon,
+body.public-dashboard-page .match-board[data-status="suspended"] .public-action-btn span {
+  color: #001660 !important;
+}
+
+/* Ajuste da imagem dos jogadores */
+body.public-page .match-board[data-status="live"] .player-avatar,
+body.public-page .match-board[data-status="live"] .player-avatar-placeholder,
+body.public-page .match-board[data-status="suspended"] .player-avatar,
+body.public-page .match-board[data-status="suspended"] .player-avatar-placeholder,
+body.public-dashboard-page .match-board[data-status="live"] .player-avatar,
+body.public-dashboard-page .match-board[data-status="live"] .player-avatar-placeholder,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-avatar,
+body.public-dashboard-page .match-board[data-status="suspended"] .player-avatar-placeholder {
+  border-color: #cfd6df !important;
+  background: #eef2f6 !important;
+}
+
