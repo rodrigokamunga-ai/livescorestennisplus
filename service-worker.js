@@ -1,7 +1,12 @@
-const CACHE_NAME = "tennispro-v36";
+const CACHE_NAME = "tennispro-v41";
 
 const ASSETS_TO_CACHE = [
   "./",
+
+  // =========================================================
+  // PÁGINAS PRINCIPAIS
+  // =========================================================
+
   "./login.html",
   "./register.html",
   "./reset-password.html",
@@ -15,9 +20,19 @@ const ASSETS_TO_CACHE = [
   "./aovivo.html",
   "./users-admin.html",
   "./confronto.html",
+
+  // Torneios
+  "./torneio.html",
+  "./chave-torneio.html",
+
   "./manifest.json",
 
+  // =========================================================
+  // CSS
+  // =========================================================
+
   "./css/style.css",
+  "./css/theme.css",
   "./css/menu.css",
   "./css/perfil.css",
   "./css/player.css",
@@ -27,7 +42,16 @@ const ASSETS_TO_CACHE = [
   "./css/dashboard.css",
   "./css/confronto.css",
   "./css/public.css?v=10",
+  "./css/public-modern.css",
   "./css/aovivo.css",
+
+  // CSS dos torneios
+  "./css/torneio.css",
+  "./css/chave-torneio.css",
+
+  // =========================================================
+  // JAVASCRIPT
+  // =========================================================
 
   "./js/firebase.js",
   "./js/login.js",
@@ -46,6 +70,14 @@ const ASSETS_TO_CACHE = [
   "./js/confronto.js",
   "./js/gemini.js",
 
+  // JavaScript dos torneios
+  "./js/torneio.js?v=20260730-5",
+  "./js/chave-torneio.js?v=20260730-7",
+
+  // =========================================================
+  // IMAGENS
+  // =========================================================
+
   "./img/icon-192.png",
   "./img/icon-512.png",
   "./img/logo.png",
@@ -56,19 +88,28 @@ const ASSETS_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(CACHE_NAME);
+      const cache =
+        await caches.open(CACHE_NAME);
 
       for (const asset of ASSETS_TO_CACHE) {
         try {
-          const response = await fetch(asset, {
-            cache: "no-store"
-          });
+          const response =
+            await fetch(asset, {
+              cache: "no-store"
+            });
 
           if (response.ok) {
-            await cache.put(asset, response.clone());
+            await cache.put(
+              asset,
+              response.clone()
+            );
           }
         } catch (error) {
-          console.warn("[SW] Erro ao cachear:", asset, error);
+          console.warn(
+            "[SW] Erro ao cachear:",
+            asset,
+            error
+          );
         }
       }
 
@@ -80,12 +121,18 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      const cacheNames = await caches.keys();
+      const cacheNames =
+        await caches.keys();
 
       await Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .filter(
+            name =>
+              name !== CACHE_NAME
+          )
+          .map(name =>
+            caches.delete(name)
+          )
       );
 
       await self.clients.claim();
@@ -94,22 +141,25 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const request = event.request;
+  const request =
+    event.request;
 
   if (request.method !== "GET") {
     return;
   }
 
-  const url = new URL(request.url);
+  const url =
+    new URL(request.url);
 
-  /*
-   * Firebase, Google APIs, Chart.js/CDNs e outros arquivos externos
-   * continuam sendo solicitados diretamente pela rede.
-   */
-  if (url.origin !== self.location.origin) {
+  /* * Arquivos externos continuam sendo * carregados diretamente pela rede. */
+  if (
+    url.origin !==
+    self.location.origin
+  ) {
     return;
   }
 
+  /* * Firebase e APIs externas não devem * ser interceptados pelo cache local. */
   if (
     url.pathname.includes("/firebase") ||
     url.pathname.includes("/googleapis") ||
@@ -118,10 +168,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  /*
-   * Páginas HTML:
-   * rede primeiro; cache somente como fallback offline.
-   */
+  /* * Páginas HTML: * tenta rede primeiro e usa cache * somente se estiver offline. */
   if (
     request.mode === "navigate" ||
     request.destination === "document"
@@ -129,39 +176,75 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       (async () => {
         try {
-          const response = await fetch(request, {
-            cache: "no-store"
-          });
+          const response =
+            await fetch(request, {
+              cache: "no-store"
+            });
 
           if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            await cache.put(request.url, response.clone());
+            const cache =
+              await caches.open(
+                CACHE_NAME
+              );
+
+            await cache.put(
+              request,
+              response.clone()
+            );
           }
 
           return response;
         } catch (error) {
-          const cached = await caches.match(request);
+          const cached =
+            await caches.match(request);
 
           if (cached) {
             return cached;
           }
 
-          const dashboard = await caches.match("./dashboard.html");
+          const tournament =
+            await caches.match(
+              "./torneio.html"
+            );
+
+          if (tournament) {
+            return tournament;
+          }
+
+          const bracket =
+            await caches.match(
+              "./chave-torneio.html"
+            );
+
+          if (bracket) {
+            return bracket;
+          }
+
+          const dashboard =
+            await caches.match(
+              "./dashboard.html"
+            );
 
           if (dashboard) {
             return dashboard;
           }
 
-          const login = await caches.match("./login.html");
+          const login =
+            await caches.match(
+              "./login.html"
+            );
 
           if (login) {
             return login;
           }
 
-          return new Response("Página indisponível offline.", {
-            status: 503,
-            statusText: "Offline"
-          });
+          return new Response(
+            "Página indisponível offline.",
+            {
+              status: 503,
+              statusText: "Offline"
+            }
+          );
         }
       })()
     );
@@ -169,48 +252,65 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  /*
-   * CSS, JavaScript e imagens:
-   * cache primeiro e atualização em segundo plano.
-   */
+  /* * CSS, JavaScript e imagens: * usa cache primeiro e atualiza * em segundo plano. */
   event.respondWith(
     (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(request);
+      const cache =
+        await caches.open(
+          CACHE_NAME
+        );
 
-      const updateCache = fetch(request, {
-        cache: "no-store"
-      })
-        .then(async (response) => {
-          if (response.ok) {
-            await cache.put(request, response.clone());
-          }
+      const cached =
+        await cache.match(request);
 
-          return response;
+      const updateCache =
+        fetch(request, {
+          cache: "no-store"
         })
-        .catch(() => null);
+          .then(async response => {
+            if (response.ok) {
+              await cache.put(
+                request,
+                response.clone()
+              );
+            }
+
+            return response;
+          })
+          .catch(() => null);
 
       if (cached) {
-        event.waitUntil(updateCache);
+        event.waitUntil(
+          updateCache
+        );
+
         return cached;
       }
 
-      const networkResponse = await updateCache;
+      const networkResponse =
+        await updateCache;
 
       if (networkResponse) {
         return networkResponse;
       }
 
-      return new Response("", {
-        status: 503,
-        statusText: "Recurso indisponível offline"
-      });
+      return new Response(
+        "",
+        {
+          status: 503,
+          statusText:
+            "Recurso indisponível offline"
+        }
+      );
     })()
   );
 });
 
 self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
+  if (
+    event.data?.type ===
+    "SKIP_WAITING"
+  ) {
     self.skipWaiting();
   }
 });
