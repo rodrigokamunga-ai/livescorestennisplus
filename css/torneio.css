@@ -1490,3 +1490,160 @@ body.tournament-page
     font-size: 13px !important;
   }
 }
+
+/* ========================================================= BOTÕES DO CARD SEM SCROLL ========================================================= */
+
+body.tournament-page .tournament-card-actions {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  gap: 4px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  padding: 12px 0 0 !important;
+  border-top: 1px solid var(--torneio-border-light) !important;
+}
+
+/* Impede que regras antigas criem rolagem */
+body.tournament-page .tournament-card-actions::-webkit-scrollbar {
+  display: none !important;
+}
+
+body.tournament-page .tournament-card-actions .tournament-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 0 3px !important;
+  overflow: hidden !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  font-size: 0.56rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.tournament-page
+.tournament-card-actions
+.tournament-btn span {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 15px) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.tournament-page
+.tournament-card-actions
+.tournament-btn ion-icon {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  color: #475569 !important;
+  font-size: 14px !important;
+  visibility: visible !important;
+}
+
+/* Todos os botões com aparência neutra */
+body.tournament-page
+.tournament-card-actions
+.tournament-btn-primary,
+body.tournament-page
+.tournament-card-actions
+.tournament-btn-start,
+body.tournament-page
+.tournament-card-actions
+.tournament-btn-secondary,
+body.tournament-page
+.tournament-card-actions
+.tournament-btn-danger {
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+}
+
+body.tournament-page
+.tournament-card-actions
+.tournament-btn:hover,
+body.tournament-page
+.tournament-card-actions
+.tournament-btn:active {
+  color: #0f172a !important;
+  border-color: #64748b !important;
+  background: #f8fafc !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body.tournament-page
+.tournament-card-actions
+.tournament-btn:hover
+ion-icon {
+  color: #0f172a !important;
+}
+
+/* Mesmo desabilitado, o botão continua no espaço */
+body.tournament-page
+.tournament-card-actions
+.tournament-btn:disabled {
+  display: inline-flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  background: #f8fafc !important;
+  opacity: 0.7 !important;
+  visibility: visible !important;
+  cursor: not-allowed !important;
+}
+
+/* Ajuste para telas muito estreitas */
+@media (max-width: 360px) {
+  body.tournament-page
+  .tournament-card-actions {
+    gap: 3px !important;
+  }
+
+  body.tournament-page
+  .tournament-card-actions
+  .tournament-btn {
+    gap: 2px !important;
+    height: 35px !important;
+    min-height: 35px !important;
+    padding: 0 2px !important;
+    font-size: 0.5rem !important;
+  }
+
+  body.tournament-page
+  .tournament-card-actions
+  .tournament-btn ion-icon {
+    width: 12px !important;
+    height: 12px !important;
+    font-size: 12px !important;
+  }
+
+  body.tournament-page
+  .tournament-card-actions
+  .tournament-btn span {
+    max-width: calc(100% - 13px) !important;
+  }
+}
