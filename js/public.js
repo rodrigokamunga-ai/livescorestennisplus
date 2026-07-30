@@ -592,14 +592,28 @@
 
     function getPlayerNameFromMatch(match, which) {
       if (which === 1) {
-        const profileId = String(match?.ownerId || "").trim();
-        const data = profileId ? state.photoCache[profileId] : null;
-        return data?.name || "";
+        // O nome exibido deve ser o nome gravado na partida.
+        // Não deve usar o nome do perfil administrador.
+        return String(
+          match?.player1 ||
+          match?.player1Name ||
+          match?.ownerName ||
+          "Jogador 1"
+        ).trim();
       }
-
-      const player2Name = String(match?.player2 || "").trim();
-      const data = player2Name ? state.opponentProfileCache[player2Name] : null;
-      return data?.name || "";
+    
+      const player2Name = String(
+        match?.player2 ||
+        match?.player2Name ||
+        match?.opponentName ||
+        "Jogador 2"
+      ).trim();
+    
+      const data = player2Name
+        ? state.opponentProfileCache[player2Name]
+        : null;
+    
+      return data?.name || player2Name;
     }
 
     function renderPlayerAvatar(photoSrc, playerName = "") {
@@ -625,8 +639,12 @@
     function renderPlayerName(match, which, abbrev = false) {
       const doubles = isDoublesFormat(match);
     
-      const ownerNameFallback = String(match?.ownerName || match?.player1 || "Jogador 1").trim();
-      const p1Name = String(match?.player1 || ownerNameFallback || "Jogador 1").trim();
+      const p1Name = String(
+        match?.player1 ||
+        match?.player1Name ||
+        match?.ownerName ||
+        "Jogador 1"
+      ).trim();
       const p2Name = String(match?.player2 || "Jogador 2").trim();
       const p3Name = String(match?.player3 || "Jogador 3").trim();
       const p4Name = String(match?.player4 || "Jogador 4").trim();
@@ -759,39 +777,108 @@ const p2Name = U.escapeHtml(abbreviateName(p2Raw));
     }
 
     function normalizeBreakPointsStructure(raw) {
-      if (!raw || typeof raw !== "object") return {};
-
+      if (!raw || typeof raw !== "object") {
+        return {};
+      }
+    
       const normalized = {};
-      Object.keys(raw).forEach((k) => {
-        const key = String(k).toLowerCase().trim();
-        const setKey = key.startsWith("set") ? key : `set${key}`;
-        const setValue = raw[k] || {};
-
+    
+      Object.keys(raw).forEach((key) => {
+        const normalizedKey = String(key)
+          .toLowerCase()
+          .trim();
+    
+        const setKey = normalizedKey.startsWith("set")
+          ? normalizedKey
+          : `set${normalizedKey}`;
+    
+        const setValue = raw[key];
+    
+        if (Array.isArray(setValue)) {
+          normalized[setKey] = {
+            player1: [],
+            player2: []
+          };
+    
+          return;
+        }
+    
+        if (typeof setValue !== "object" || !setValue) {
+          return;
+        }
+    
         normalized[setKey] = {
-          player1: Array.isArray(setValue.player1) ? setValue.player1.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0) : [],
-          player2: Array.isArray(setValue.player2) ? setValue.player2.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0) : []
+          player1: Array.isArray(setValue.player1)
+            ? setValue.player1
+                .map((value) => Number(value))
+                .filter((value) => Number.isFinite(value) && value > 0)
+            : [],
+    
+          player2: Array.isArray(setValue.player2)
+            ? setValue.player2
+                .map((value) => Number(value))
+                .filter((value) => Number.isFinite(value) && value > 0)
+            : []
         };
       });
-
+    
       return normalized;
     }
 
     function getBreakPointsForSet(match, score, setNumber, playerKey) {
       const fromScore = score?.breakPointsBySet || {};
       const fromMatch = match?.breakPointsBySet || {};
-
-      const raw = {
+    
+      const stats = match?.stats || match?.statistics || {};
+      const playerStats = stats?.[playerKey] || {};
+    
+      const possibleStatsSources = [
+        playerStats.breakPointsBySet,
+        playerStats.breakPointBySet,
+        playerStats.breakPoints,
+        playerStats.breakPointGames,
+    
+        match?.stats?.breakPointsBySet,
+        match?.statistics?.breakPointsBySet
+      ];
+    
+      const merged = {
         ...normalizeBreakPointsStructure(fromMatch),
         ...normalizeBreakPointsStructure(fromScore)
       };
-
+    
+      possibleStatsSources.forEach((source) => {
+        if (!source || typeof source !== "object") return;
+    
+        const normalized = normalizeBreakPointsStructure(source);
+    
+        Object.keys(normalized).forEach((setKey) => {
+          if (!merged[setKey]) {
+            merged[setKey] = {
+              player1: [],
+              player2: []
+            };
+          }
+    
+          merged[setKey][playerKey] = [
+            ...new Set([
+              ...(merged[setKey][playerKey] || []),
+              ...(normalized[setKey][playerKey] || [])
+            ])
+          ].sort((a, b) => a - b);
+        });
+      });
+    
       const setKey = `set${setNumber}`;
-      const setData = raw?.[setKey] || raw?.[String(setNumber)] || {};
-
-      const list = Array.isArray(setData?.[playerKey]) ? setData[playerKey] : [];
+      const setData = merged?.[setKey] || merged?.[String(setNumber)] || {};
+    
+      const list = Array.isArray(setData?.[playerKey])
+        ? setData[playerKey]
+        : [];
+    
       return list
-        .map((v) => Number(v))
-        .filter((v) => Number.isFinite(v) && v > 0);
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value) && value > 0);
     }
 
     function renderBreakPointBalls(match) {
@@ -2241,6 +2328,93 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
       return ` <div class="public-stat-detail-line"> <div class="public-stat-detail-values"> <span class="public-stat-value-player1"> ${U.escapeHtml(String(player1Display ?? 0))} </span> <span class="public-stat-value-label"> ${U.escapeHtml(label)} </span> <span class="public-stat-value-player2"> ${U.escapeHtml(String(player2Display ?? 0))} </span> </div> <div class="public-stat-comparison"> <div class="public-stat-comparison-p1" style="width:${width1}%" ></div> <div class="public-stat-comparison-p2" style="width:${width2}%" ></div> </div> </div> `;
     }
 
+    function formatStatsSetScore(setObj) {
+      if (!setObj) return "";
+    
+      const games1 = Number(setObj.games1 ?? 0);
+      const games2 = Number(setObj.games2 ?? 0);
+      const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
+      const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
+      const mode = String(setObj.tieBreakMode || "").toLowerCase();
+    
+      if (
+        (mode === "tb7" || mode === "super10") &&
+        (tb1 > 0 || tb2 > 0)
+      ) {
+        return `${tb1} x ${tb2}`;
+      }
+    
+      return `${games1} x ${games2}`;
+    }
+    
+    function getStatsScoreLines(match) {
+      const score = U.normalizeScore(match?.score || {});
+      const history = Array.isArray(score.setHistory)
+        ? score.setHistory
+        : [];
+    
+      const lines = history
+        .map((setObj) => {
+          if (!setObj) return "";
+    
+          const games1 = Number(setObj.games1 ?? 0);
+          const games2 = Number(setObj.games2 ?? 0);
+    
+          const tb1 = Number(setObj.tieBreakPoints1 ?? 0);
+          const tb2 = Number(setObj.tieBreakPoints2 ?? 0);
+    
+          const mode = String(setObj.tieBreakMode || "")
+            .trim()
+            .toLowerCase();
+    
+          /* Super tie-break */
+          if (mode === "super10") {
+            return `${tb1} x ${tb2}`;
+          }
+    
+          /* Tie-break normal: mostra o valor de cada jogador */
+          if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
+            return `${games1} x ${games2}`;
+          }
+    
+          /* Resultado normal do set */
+          return `${games1} x ${games2}`;
+        })
+        .filter(Boolean);
+    
+      /* * Se ainda não houver histórico salvo, * mostra somente o valor atual dos dois jogadores. * Não mostra sets1 x sets2. */
+      if (!lines.length) {
+        if (
+          score.tieBreakMode === "super10" ||
+          score.lastTieBreakMode === "super10"
+        ) {
+          const p1 =
+            score.lastTieBreakPoints1 ||
+            score.tieBreakPoints1 ||
+            0;
+    
+          const p2 =
+            score.lastTieBreakPoints2 ||
+            score.tieBreakPoints2 ||
+            0;
+    
+          return [`${p1} x ${p2}`];
+        }
+    
+        return [
+          `${Number(score.games1 || 0)} x ${Number(score.games2 || 0)}`
+        ];
+      }
+    
+      return lines;
+    }
+    
+    function renderStatsScore(match) {
+      const scoreLines = getStatsScoreLines(match);
+    
+      return ` <div class="public-stats-score-lines"> ${scoreLines .map((line) => `<div>${U.escapeHtml(line)}</div>`) .join("")} </div> `;
+    }
+
     function renderStatsPlayerHeader(match, playerPosition) {
       const isPlayer1 = playerPosition === 1;
       const teamClass = isPlayer1 ? "player1" : "player2";
@@ -2248,7 +2422,12 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
       const players = isPlayer1
         ? [
             {
-              name: String(match?.player1 || match?.ownerName || "Jogador 1").trim(),
+              name: String(
+                match?.player1 ||
+                match?.player1Name ||
+                match?.ownerName ||
+                "Jogador 1"
+              ).trim(),
               photo: getPlayerPhotoFromMatch(match, 1)
             },
             ...(isDoublesFormat(match)
@@ -2285,10 +2464,10 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
           ? ` <img class="public-stats-player-photo" src="${U.escapeHtml(player.photo)}" alt="${safeName}" /> `
           : ` <div class="public-stats-player-photo-placeholder"> ${initial} </div> `;
     
-        return ` <div class="public-stats-player-unit"> ${imageHtml} <div class="public-stats-player-name">${safeName}</div> </div> `;
+          return ` <div class="public-stats-player-unit"> ${imageHtml} <div class="public-stats-player-name"> ${safeName} </div> </div> `;
       }).join("");
     
-      return ` <div class="public-stats-player-card ${teamClass}"> ${playersHtml} </div> `;   }
+      return ` <div class="public-stats-player-card ${teamClass}"> <div class="public-stats-player-versus"> ${playersHtml} </div> </div> `;   }
     
     function renderDetailedStats(match) {
       const stats = match?.stats || match?.statistics || {};
@@ -2326,7 +2505,16 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
         );
       };
     
-      const ratio = (won, attempts) => `${won}/${attempts}`;
+      const ratio = (won, attempts) => {
+        const total = Number(attempts || 0);
+        const converted = Number(won || 0);
+      
+        const percentage = total > 0
+          ? ((converted / total) * 100).toFixed(1)
+          : "0.0";
+      
+        return `${converted}/${total} (${percentage}%)`;
+      };
     
       const p1Winners = sumOrFallback(
         player1,
@@ -2479,114 +2667,197 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
             },
             {
               label: "Duplas faltas",
-              p1: numberStat(player1, ["doubleFault", "doubleFaults", "duplasFaltas"]),
-              p2: numberStat(player2, ["doubleFault", "doubleFaults", "duplasFaltas"])
+              p1: numberStat(player1, [
+                "doubleFault",
+                "doubleFaults",
+                "duplasFaltas"
+              ]),
+              p2: numberStat(player2, [
+                "doubleFault",
+                "doubleFaults",
+                "duplasFaltas"
+              ])
             },
             {
               label: "1º serviço vencido",
               p1: ratio(p1FirstServeWon, p1FirstServeAttempts),
               p2: ratio(p2FirstServeWon, p2FirstServeAttempts),
-              p1Bar: p1FirstServeWon,
-              p2Bar: p2FirstServeWon
+              p1Bar: p1FirstServeAttempts > 0
+                ? (p1FirstServeWon / p1FirstServeAttempts) * 100
+                : 0,
+              p2Bar: p2FirstServeAttempts > 0
+                ? (p2FirstServeWon / p2FirstServeAttempts) * 100
+                : 0
             },
             {
               label: "2º serviço vencido",
               p1: ratio(p1SecondServeWon, p1SecondServeAttempts),
               p2: ratio(p2SecondServeWon, p2SecondServeAttempts),
-              p1Bar: p1SecondServeWon,
-              p2Bar: p2SecondServeWon
-            },
-            {
-              label: "Performance",
-              p1: `${p1Performance.toFixed(1)}%`,
-              p2: `${p2Performance.toFixed(1)}%`,
-              p1Bar: p1Performance,
-              p2Bar: p2Performance
+              p1Bar: p1SecondServeAttempts > 0
+                ? (p1SecondServeWon / p1SecondServeAttempts) * 100
+                : 0,
+              p2Bar: p2SecondServeAttempts > 0
+                ? (p2SecondServeWon / p2SecondServeAttempts) * 100
+                : 0
             }
           ]
         },
+      
         {
           title: "Pontos na rede",
           rows: [
             {
               label: "Pontos na rede vencidos",
-              p1: numberStat(player1, ["netWon", "netPointsWon", "pontosNaRedeVencidos"]),
-              p2: numberStat(player2, ["netWon", "netPointsWon", "pontosNaRedeVencidos"])
+              p1: numberStat(player1, [
+                "netWon",
+                "netPointsWon",
+                "pontosNaRedeVencidos"
+              ]),
+              p2: numberStat(player2, [
+                "netWon",
+                "netPointsWon",
+                "pontosNaRedeVencidos"
+              ])
             },
             {
               label: "Pontos na rede perdidos",
-              p1: numberStat(player1, ["netLost", "netPointsLost", "pontosNaRedePerdidos"]),
-              p2: numberStat(player2, ["netLost", "netPointsLost", "pontosNaRedePerdidos"])
+              p1: numberStat(player1, [
+                "netLost",
+                "netPointsLost",
+                "pontosNaRedePerdidos"
+              ]),
+              p2: numberStat(player2, [
+                "netLost",
+                "netPointsLost",
+                "pontosNaRedePerdidos"
+              ])
             }
           ]
         },
+      
         {
           title: "Golpes e erros",
           rows: [
             {
-              label: "Winners",
-              p1: p1Winners,
-              p2: p2Winners
+              label: "Winner forehand",
+              p1: numberStat(player1, [
+                "forehandWinner",
+                "forehandWinners",
+                "winnerFH"
+              ]),
+              p2: numberStat(player2, [
+                "forehandWinner",
+                "forehandWinners",
+                "winnerFH"
+              ])
             },
             {
-              label: "Erros não forçados",
-              p1: p1UnforcedErrors,
-              p2: p2UnforcedErrors
+              label: "Winner Backhand",
+              p1: numberStat(player1, [
+                "backhandWinner",
+                "backhandWinners",
+                "winnerBH"
+              ]),
+              p2: numberStat(player2, [
+                "backhandWinner",
+                "backhandWinners",
+                "winnerBH"
+              ])
+            },
+            {
+              label: "Erros não forçados forehand",
+              p1: numberStat(player1, [
+                "enfFH",
+                "unforcedErrorFH",
+                "unforcedErrorsForehand",
+                "forehandUnforcedError"
+              ]),
+              p2: numberStat(player2, [
+                "enfFH",
+                "unforcedErrorFH",
+                "unforcedErrorsForehand",
+                "forehandUnforcedError"
+              ])
+            },
+            {
+              label: "Erros não forçados Backhand",
+              p1: numberStat(player1, [
+                "enfBH",
+                "unforcedErrorBH",
+                "unforcedErrorsBackhand",
+                "backhandUnforcedError"
+              ]),
+              p2: numberStat(player2, [
+                "enfBH",
+                "unforcedErrorBH",
+                "unforcedErrorsBackhand",
+                "backhandUnforcedError"
+              ])
             },
             {
               label: "Erros forçados",
               p1: p1ForcedErrors,
               p2: p2ForcedErrors
-            },
-            {
-              label: "Dropshot winners",
-              p1: numberStat(player1, ["dropshotWinner", "dropShotWinner"]),
-              p2: numberStat(player2, ["dropshotWinner", "dropShotWinner"])
-            },
-            {
-              label: "Dropshot erros",
-              p1: numberStat(player1, ["dropshotError", "dropShotError"]),
-              p2: numberStat(player2, ["dropshotError", "dropShotError"])
             }
           ]
         },
+      
         {
           title: "Devolução",
           rows: [
             {
               label: "Pontos de devolução vencidos",
-              p1: numberStat(player1, ["returnPoint", "returnPointsWon"]),
-              p2: numberStat(player2, ["returnPoint", "returnPointsWon"])
+              p1: numberStat(player1, [
+                "returnPoint",
+                "returnPointsWon"
+              ]),
+              p2: numberStat(player2, [
+                "returnPoint",
+                "returnPointsWon"
+              ])
             },
             {
               label: "Erros de devolução",
-              p1: numberStat(player1, ["returnError", "returnErrors"]),
-              p2: numberStat(player2, ["returnError", "returnErrors"])
-            },
-            {
-              label: "Break points vencidos",
-              p1: ratio(p1BreakWon, p1BreakChances),
-              p2: ratio(p2BreakWon, p2BreakChances),
-              p1Bar: p1BreakWon,
-              p2Bar: p2BreakWon
+              p1: numberStat(player1, [
+                "returnError",
+                "returnErrors"
+              ]),
+              p2: numberStat(player2, [
+                "returnError",
+                "returnErrors"
+              ])
             }
           ]
         },
+      
         {
           title: "Linha de base",
           rows: [
             {
               label: "Pontos vencidos na linha de base",
-              p1: numberStat(player1, ["baselinePoint", "baselinePointsWon"]),
-              p2: numberStat(player2, ["baselinePoint", "baselinePointsWon"])
+              p1: numberStat(player1, [
+                "baselinePoint",
+                "baselinePointsWon"
+              ]),
+              p2: numberStat(player2, [
+                "baselinePoint",
+                "baselinePointsWon"
+              ])
             },
             {
               label: "Erros na linha de base",
-              p1: numberStat(player1, ["baselineError", "baselineErrors"]),
-              p2: numberStat(player2, ["baselineError", "baselineErrors"])
+              p1: numberStat(player1, [
+                "baselineError",
+                "baselineErrors"
+              ]),
+              p2: numberStat(player2, [
+                "baselineError",
+                "baselineErrors"
+              ])
             }
           ]
         },
+      
         {
           title: "Resumo",
           rows: [
@@ -2596,9 +2867,18 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
               p2: p2TotalPoints
             },
             {
-              label: "Sets",
-              p1: score.sets1,
-              p2: score.sets2
+              label: "Break points vencidos",
+              p1: ratio(p1BreakWon, p1BreakChances),
+              p2: ratio(p2BreakWon, p2BreakChances),
+              p1Bar: p1BreakWon,
+              p2Bar: p2BreakWon
+            },
+            {
+              label: "Performance",
+              p1: `${p1Performance.toFixed(1)}%`,
+              p2: `${p2Performance.toFixed(1)}%`,
+              p1Bar: p1Performance,
+              p2Bar: p2Performance
             }
           ]
         }
@@ -2618,7 +2898,7 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
         return ` <section class="public-stat-detail-section"> <h3>${U.escapeHtml(section.title)}</h3> ${rowsHtml} </section> `;
       }).join("");
     
-      return ` <div class="public-stats-player-header"> ${renderStatsPlayerHeader(match, 1)} ${renderStatsPlayerHeader(match, 2)} </div> ${sectionsHtml} `;
+      return ` <div class="public-stats-score-above"> ${renderStatsScore(match)} </div> <div class="public-stats-player-header"> ${renderStatsPlayerHeader(match, 1)} ${renderStatsPlayerHeader(match, 2)} </div> ${sectionsHtml} `;
     }
 
     function formatFinalSetScore(setObj) {
@@ -2663,33 +2943,9 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
 }
 
 function getFinalMatchScore(match = {}) {
-  const score = U.normalizeScore(
-    match.score || {}
-  );
+  const scoreLines = getStatsScoreLines(match);
 
-  const sets1 = Number(
-    score.sets1 || 0
-  );
-
-  const sets2 = Number(
-    score.sets2 || 0
-  );
-
-  const history = Array.isArray(
-    score.setHistory
-  )
-    ? score.setHistory
-    : [];
-
-  const setScores = history
-    .map(formatFinalSetScore)
-    .filter(Boolean);
-
-  if (setScores.length) {
-    return `${sets1} x ${sets2} • ${setScores.join(" • ")}`;
-  }
-
-  return `${sets1} x ${sets2}`;
+  return scoreLines.join(" • ");
 }
 
 function getStatsModalMetaHtml(match = {}) {
