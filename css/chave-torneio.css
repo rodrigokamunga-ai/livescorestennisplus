@@ -1,0 +1,2375 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --soft: #f8fafc;
+    --blue: #05649a;
+    --dark: #004d7a;
+    --title: #071b72;
+    --text: #17213d;
+    --muted: #617089;
+    --border: #d2d8df;
+    --light: #e4e8ed;
+    --green: #17853a;
+    --red: #b4232d;
+  }
+  
+  body.bracket-page {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text);
+    background: var(--bg);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  .bracket-main {
+    width: min(100% - 20px, 1450px);
+    margin: 0 auto;
+    padding: 14px 0 40px;
+  }
+  
+  .bracket-header-card,
+  .bracket-toolbar-card,
+  .bracket-board {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--card);
+    box-shadow: 0 3px 12px rgba(16, 38, 64, 0.07);
+  }
+  
+  .bracket-header-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+    padding: 16px;
+  }
+  
+  .bracket-kicker {
+    display: block;
+    color: var(--blue);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  
+  .bracket-header-card h1 {
+    margin: 5px 0;
+    color: var(--title);
+    font-size: 1.35rem;
+  }
+  
+  .bracket-header-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+  
+  .bracket-back-btn,
+  .bracket-toggle,
+  .bracket-round,
+  .bracket-save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 0 12px;
+    color: var(--blue);
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .bracket-back-btn:hover,
+  .bracket-toggle.is-active,
+  .bracket-round.is-active,
+  .bracket-save-btn:hover {
+    color: #ffffff;
+    background: var(--blue);
+  }
+  
+  .bracket-toolbar-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 7px;
+    padding: 12px;
+  }
+  
+  .bracket-toggle-group,
+  .bracket-rounds {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+  }
+  
+  .bracket-toggle,
+  .bracket-round {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.66rem;
+    white-space: nowrap;
+  }
+  
+  .bracket-save-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 8px;
+  }
+  
+  .bracket-save-btn {
+    color: #ffffff;
+    border-color: var(--green);
+    background: var(--green);
+  }
+  
+  .bracket-save-btn:hover {
+    background: #11682d;
+  }
+  
+  /* Área da chave */
+  
+  .bracket-board {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-height: 400px;
+    overflow-x: auto;
+    padding: 18px;
+  }
+  
+  /* Colunas das rodadas */
+  
+  .bracket-round-column {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 220px;
+    padding: 0 15px;
+  }
+  
+  .bracket-round-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--light);
+    color: var(--title);
+    font-size: 0.78rem;
+    font-weight: 900;
+  }
+  
+  .bracket-round-title span:last-child {
+    color: var(--muted);
+    font-size: 0.62rem;
+  }
+  
+  .bracket-round-matches {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 12px;
+  }
+  
+  /* Cards dos confrontos */
+  
+  .bracket-match {
+    position: relative;
+    margin: 0;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--soft);
+  }
+  
+  /* * Linha horizontal de conexão com a próxima fase. */
+  .bracket-match::after {
+    position: absolute;
+    top: 50%;
+    right: -16px;
+    width: 16px;
+    border-top: 1px solid #9eabb8;
+    content: "";
+  }
+  
+  /* * Não desenha linha depois da última coluna. */
+  .bracket-round-column:last-child .bracket-match::after {
+    display: none;
+  }
+  
+  .bracket-match-label {
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  
+  /* Posições dos jogadores */
+  
+  .bracket-slot {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    min-height: 38px;
+    margin-top: 5px;
+    padding: 7px 8px;
+    color: var(--blue);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .bracket-slot:hover {
+    border-color: var(--blue);
+    background: #eef8fd;
+  }
+  
+  .bracket-slot.empty {
+    color: var(--muted);
+    border-style: dashed;
+  }
+  
+  .bracket-slot.bye {
+    color: #8a97aa;
+    background: #f1f3f5;
+  }
+  
+  .bracket-slot-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    color: #ffffff;
+    border-radius: 50%;
+    background: var(--blue);
+    font-size: 0.6rem;
+  }
+  
+  /* Mensagens */
+  
+  .bracket-message {
+    min-height: 24px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+  
+  .bracket-message.success {
+    color: var(--green);
+  }
+  
+  .bracket-message.error {
+    color: var(--red);
+  }
+  
+  /* Modal */
+  
+  .bracket-modal {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(15, 23, 38, 0.42);
+  }
+  
+  .bracket-modal[hidden] {
+    display: none;
+  }
+  
+  .bracket-modal-card {
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 16px;
+    border-radius: 16px 16px 0 0;
+    background: #ffffff;
+  }
+  
+  .bracket-modal-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .bracket-modal-head h2 {
+    margin: 4px 0;
+    color: var(--title);
+    font-size: 1.05rem;
+  }
+  
+  .bracket-close {
+    width: 34px;
+    height: 34px;
+    color: var(--blue);
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 22px;
+    cursor: pointer;
+  }
+  
+  .bracket-modal-players {
+    display: grid;
+    gap: 8px;
+  }
+  
+  .bracket-player-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 45px;
+    padding: 9px 11px;
+    color: var(--blue);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .bracket-player-option:hover {
+    border-color: var(--blue);
+    background: #eef8fd;
+  }
+  
+  .bracket-player-option.remove {
+    color: var(--red);
+    border-color: #d77b82;
+    background: #fff5f5;
+  }
+  
+  /* Responsividade */
+  
+  @media (max-width: 850px) {
+    .bracket-toolbar-card {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  
+    .bracket-board {
+      padding: 12px;
+    }
+  
+    .bracket-round-column {
+      flex: 0 0 220px;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .bracket-main {
+      width: calc(100% - 14px);
+    }
+  
+    .bracket-header-card {
+      flex-direction: column;
+    }
+  
+    .bracket-back-btn {
+      width: 100%;
+    }
+  
+    .bracket-board {
+      padding: 10px;
+    }
+  
+    .bracket-round-column {
+      flex-basis: 205px;
+      min-width: 205px;
+      padding: 0 10px;
+    }
+  
+    .bracket-match::after {
+      right: -11px;
+      width: 11px;
+    }
+  }
+
+  /* ========================================================= BOTÕES DE ADICIONAR E EXCLUIR JOGOS ========================================================= */
+
+.bracket-add-game {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 10px;
+    padding: 0;
+    color: #ffffff;
+    border: 1px solid #05649a;
+    border-radius: 50%;
+    background: #05649a;
+    font-size: 0;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+  
+  .bracket-add-game ion-icon {
+    width: 19px;
+    height: 19px;
+    font-size: 19px;
+    pointer-events: none;
+  }
+  
+  .bracket-add-game:hover,
+  .bracket-add-game:active {
+    background: #004d7a;
+    box-shadow: 0 3px 10px rgba(5, 100, 154, 0.25);
+    transform: scale(1.05);
+  }
+  
+  .bracket-add-game:focus-visible {
+    outline: 3px solid rgba(5, 100, 154, 0.25);
+    outline-offset: 2px;
+  }
+  
+  /* Botão de excluir jogo */
+  .bracket-remove-game {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin: 9px auto 0;
+    padding: 0;
+    color: #b4232d;
+    border: 1px solid #d77b82;
+    border-radius: 50%;
+    background: #fff5f5;
+    font-size: 0;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      background 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+  
+  .bracket-remove-game ion-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    pointer-events: none;
+  }
+  
+  .bracket-remove-game:hover,
+  .bracket-remove-game:active {
+    color: #ffffff;
+    border-color: #b4232d;
+    background: #b4232d;
+    transform: scale(1.05);
+  }
+  
+  .bracket-remove-game:focus-visible {
+    outline: 3px solid rgba(180, 35, 45, 0.22);
+    outline-offset: 2px;
+  }
+  
+  /* Mantém o botão de adicionar alinhado no título da rodada */
+  .bracket-round-column {
+    position: relative;
+  }
+  
+  .bracket-round-title {
+    position: relative;
+    padding-right: 38px;
+  }
+  
+  /* Quando o botão de adicionar estiver logo após o título */
+  .bracket-round-title + .bracket-add-game {
+    position: absolute;
+    top: 0;
+    right: 14px;
+    margin: 0;
+  }
+  
+  /* Ajuste visual dos cards */
+  .bracket-match {
+    position: relative;
+    padding-bottom: 12px;
+  }
+  
+  /* ========================================================= BOTÃO DE SALVAR CHAVE ========================================================= */
+  
+  .bracket-save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    color: #ffffff;
+    border: 1px solid #17853a;
+    border-radius: 8px;
+    background: #17853a;
+    font-size: 0.72rem;
+    font-weight: 850;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+  
+  .bracket-save-btn ion-icon {
+    font-size: 18px;
+  }
+  
+  .bracket-save-btn:hover,
+  .bracket-save-btn:active {
+    background: #11682d;
+    box-shadow: 0 3px 10px rgba(23, 133, 58, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  /* ========================================================= BOTÃO PREPARAR CHAVE ========================================================= */
+  
+  .bracket-prepare-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    color: #ffffff;
+    border: 1px solid #05649a;
+    border-radius: 8px;
+    background: #05649a;
+    font-size: 0.72rem;
+    font-weight: 850;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+  
+  .bracket-prepare-btn ion-icon {
+    font-size: 18px;
+  }
+  
+  .bracket-prepare-btn:hover,
+  .bracket-prepare-btn:active {
+    background: #004d7a;
+    box-shadow: 0 3px 10px rgba(5, 100, 154, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  /* ========================================================= BOTÃO DE RETIRAR JOGADOR NO MODAL ========================================================= */
+  
+  .bracket-player-option.remove {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    min-height: 45px;
+    margin-bottom: 10px;
+    padding: 9px 11px;
+    color: #b4232d;
+    border: 1px solid #d77b82;
+    border-radius: 9px;
+    background: #fff5f5;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .bracket-player-option.remove ion-icon {
+    flex: 0 0 auto;
+    font-size: 19px;
+  }
+  
+  .bracket-player-option.remove:hover,
+  .bracket-player-option.remove:active {
+    color: #ffffff;
+    border-color: #b4232d;
+    background: #b4232d;
+  }
+  
+  /* ========================================================= RESPONSIVO PARA CELULAR ========================================================= */
+  
+  @media (max-width: 700px) {
+    .bracket-add-game {
+      width: 34px;
+      height: 34px;
+    }
+  
+    .bracket-add-game ion-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+    }
+  
+    .bracket-remove-game {
+      width: 32px;
+      height: 32px;
+    }
+  
+    .bracket-remove-game ion-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+  
+    .bracket-round-title + .bracket-add-game {
+      right: 9px;
+    }
+  
+    .bracket-save-btn,
+    .bracket-prepare-btn {
+      min-height: 43px;
+      font-size: 0.74rem;
+    }
+  }
+
+  .bracket-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  
+  .bracket-finish-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    color: #ffffff;
+    border: 1px solid #05649a;
+    border-radius: 8px;
+    background: #05649a;
+    font-size: 0.72rem;
+    font-weight: 850;
+  }
+  
+  .bracket-finish-btn:hover {
+    background: #004d7a;
+  }
+  
+  .bracket-match-date {
+    margin-top: 9px;
+    padding-top: 8px;
+    border-top: 1px solid #e4e8ed;
+  }
+  
+  .bracket-match-date label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .bracket-match-date span {
+    color: #617089;
+    font-size: 0.62rem;
+    font-weight: 800;
+  }
+  
+  .bracket-match-date-input {
+    width: 100%;
+    min-height: 34px;
+    padding: 6px 8px;
+    color: #17213d;
+    border: 1px solid #d2d8df;
+    border-radius: 7px;
+    background: #ffffff;
+    font-size: 0.68rem;
+  }
+  
+  .bracket-match-date-input:focus {
+    border-color: #05649a;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(5, 100, 154, 0.12);
+  }
+  
+  .bracket-match-date-input:disabled {
+    color: #617089;
+    background: #eef2f5;
+  }
+  
+  .tournament-btn-start {
+    color: #ffffff !important;
+    border-color: #17853a !important;
+    background: #17853a !important;
+  }
+  
+  .tournament-btn-start:hover {
+    background: #11682d !important;
+  }
+  
+  @media (max-width: 600px) {
+    .bracket-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+  
+    .bracket-actions button {
+      width: 100%;
+    }
+  
+    .bracket-match-date-input {
+      min-height: 40px;
+      font-size: 16px;
+    }
+  }
+
+  /* ========================================================= AJUSTES DA FASE EM ANDAMENTO ========================================================= */
+
+/* * Durante o torneio em andamento, * os espaços vazios ficam ocultos. */
+.bracket-page .bracket-slot.empty {
+    display: none !important;
+  }
+  
+  /* * Remove números das posições quando * o torneio está em andamento ou finalizado. */
+  .bracket-page .bracket-slot:not(.show-position)
+  .bracket-slot-number,
+  .bracket-page .bracket-slot.empty
+  .bracket-slot-number {
+    display: none !important;
+  }
+  
+  /* * Remove qualquer texto visual de posição vazia. */
+  .bracket-page .bracket-slot.empty {
+    font-size: 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    visibility: hidden !important;
+  }
+  
+  /* * Caso algum texto residual seja renderizado * dentro de um espaço vazio. */
+  .bracket-page .bracket-slot.empty span {
+    display: none !important;
+  }
+  
+  /* ========================================================= DATA DA PARTIDA ========================================================= */
+  
+  /* * Remove o texto "Data e horário da partida" * e qualquer ícone relacionado à data. */
+  .bracket-page .bracket-match-date {
+    display: block !important;
+    margin-top: 7px !important;
+    padding-top: 0 !important;
+    border-top: 0 !important;
+  }
+  
+  .bracket-page .bracket-match-date span,
+  .bracket-page .bracket-match-date ion-icon {
+    display: none !important;
+  }
+  
+  /* * Campo de data sem legenda. */
+  .bracket-page .bracket-match-date-input {
+    display: block !important;
+    width: 100% !important;
+    min-height: 34px !important;
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    color: #17213d !important;
+    border: 1px solid #d2d8df !important;
+    border-radius: 7px !important;
+    outline: none !important;
+    background: #ffffff !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .bracket-page .bracket-match-date-input:focus {
+    border-color: #05649a !important;
+    box-shadow: 0 0 0 3px rgba(5, 100, 154, 0.13) !important;
+  }
+  
+  .bracket-page .bracket-match-date-input:disabled {
+    color: #617089 !important;
+    background: #eef2f5 !important;
+  }
+  
+  /* ========================================================= RESULTADO SALVO ========================================================= */
+  
+  .bracket-page .bracket-match-result {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    min-height: 31px !important;
+    margin-top: 7px !important;
+    padding: 5px 7px !important;
+    color: #17853a !important;
+    border-top: 1px solid #e4e8ed !important;
+    background: transparent !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+  }
+  
+  .bracket-page .bracket-match-result span {
+    color: #617089 !important;
+    font-size: 0.67rem !important;
+    font-weight: 800 !important;
+  }
+  
+  .bracket-page .bracket-match-result strong {
+    color: #17853a !important;
+    font-size: 0.75rem !important;
+    font-weight: 900 !important;
+  }
+  
+  /* * Remove qualquer texto "Vencedor:" * caso ainda esteja vindo de uma versão antiga. */
+  .bracket-page .bracket-match-result strong::first-line {
+    text-transform: none !important;
+  }
+  
+  /* ========================================================= BOTÃO INFORMAR RESULTADO ========================================================= */
+  
+  .bracket-page .bracket-result-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-height: 36px !important;
+    margin-top: 8px !important;
+    padding: 0 8px !important;
+    color: #05649a !important;
+    border: 1px solid #05649a !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+  }
+  
+  .bracket-page .bracket-result-btn ion-icon {
+    flex: 0 0 auto !important;
+    font-size: 17px !important;
+  }
+  
+  .bracket-page .bracket-result-btn:hover,
+  .bracket-page .bracket-result-btn:active {
+    color: #ffffff !important;
+    background: #05649a !important;
+  }
+  
+  .bracket-page .bracket-result-btn:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.55 !important;
+  }
+  
+  /* ========================================================= BOTÃO SALVAR CHAVE ========================================================= */
+  
+  .bracket-page .bracket-save-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-height: 46px !important;
+    margin: 10px 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .bracket-page .bracket-save-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    color: #ffffff !important;
+    border: 1px solid #17853a !important;
+    border-radius: 8px !important;
+    background: #17853a !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    cursor: pointer !important;
+  }
+  
+  .bracket-page .bracket-save-btn ion-icon {
+    font-size: 18px !important;
+  }
+  
+  .bracket-page .bracket-save-btn:hover,
+  .bracket-page .bracket-save-btn:active {
+    color: #ffffff !important;
+    border-color: #11682d !important;
+    background: #11682d !important;
+  }
+  
+  /* ========================================================= BOTÃO FINALIZAR TORNEIO ========================================================= */
+  
+  .bracket-page .bracket-finish-tournament-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    color: #ffffff !important;
+    border: 1px solid #b4232d !important;
+    border-radius: 8px !important;
+    background: #b4232d !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    cursor: pointer !important;
+  }
+  
+  .bracket-page .bracket-finish-tournament-btn ion-icon {
+    font-size: 18px !important;
+  }
+  
+  .bracket-page .bracket-finish-tournament-btn:hover,
+  .bracket-page .bracket-finish-tournament-btn:active {
+    color: #ffffff !important;
+    border-color: #8e1b24 !important;
+    background: #8e1b24 !important;
+  }
+  
+  /* ========================================================= BOTÃO FINALIZAR CHAVE ========================================================= */
+  
+  .bracket-page .bracket-finish-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    color: #ffffff !important;
+    border: 1px solid #05649a !important;
+    border-radius: 8px !important;
+    background: #05649a !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    cursor: pointer !important;
+  }
+  
+  .bracket-page .bracket-finish-btn:hover {
+    color: #ffffff !important;
+    border-color: #004d7a !important;
+    background: #004d7a !important;
+  }
+  
+  /* ========================================================= MODAL DE RESULTADO ========================================================= */
+  
+  .bracket-page .bracket-result-players {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+    color: #05649a !important;
+    font-size: 0.85rem !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+  }
+  
+  .bracket-page .bracket-result-players strong {
+    overflow-wrap: anywhere !important;
+    line-height: 1.2 !important;
+  }
+  
+  .bracket-page .bracket-result-fields {
+    display: grid !important;
+    gap: 9px !important;
+    margin-top: 12px !important;
+  }
+  
+  .bracket-page .bracket-result-set {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 7px !important;
+    padding: 10px !important;
+    border: 1px solid #d2d8df !important;
+    border-radius: 9px !important;
+    background: #f8fafc !important;
+  }
+  
+  .bracket-page .bracket-result-set[hidden] {
+    display: none !important;
+  }
+  
+  .bracket-page .bracket-result-set strong {
+    grid-column: 1 / -1 !important;
+    color: #071b72 !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .bracket-page .bracket-result-set input {
+    min-height: 42px !important;
+    padding: 8px !important;
+    color: #17213d !important;
+    border: 1px solid #d2d8df !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    font-size: 16px !important;
+    text-align: center !important;
+  }
+  
+  .bracket-page .bracket-result-set input:focus {
+    border-color: #05649a !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(5, 100, 154, 0.13) !important;
+  }
+  
+  .bracket-page .bracket-result-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-top: 15px !important;
+  }
+  
+  .bracket-page .bracket-save-result-btn,
+  .bracket-page .bracket-cancel-result-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 42px !important;
+    border-radius: 8px !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    cursor: pointer !important;
+  }
+  
+  .bracket-page .bracket-save-result-btn {
+    color: #ffffff !important;
+    border: 1px solid #17853a !important;
+    background: #17853a !important;
+  }
+  
+  .bracket-page .bracket-save-result-btn:hover {
+    background: #11682d !important;
+  }
+  
+  .bracket-page .bracket-cancel-result-btn {
+    color: #05649a !important;
+    border: 1px solid #05649a !important;
+    background: #ffffff !important;
+  }
+  
+  .bracket-page .bracket-cancel-result-btn:hover {
+    color: #ffffff !important;
+    background: #05649a !important;
+  }
+  
+  /* ========================================================= RESPONSIVO ========================================================= */
+  
+  @media (max-width: 700px) {
+    .bracket-page .bracket-save-row {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 8px !important;
+    }
+  
+    .bracket-page .bracket-save-row button {
+      width: 100% !important;
+    }
+  
+    .bracket-page .bracket-result-actions {
+      grid-template-columns: 1fr !important;
+    }
+  
+    .bracket-page .bracket-result-players {
+      font-size: 0.76rem !important;
+    }
+  
+    .bracket-page .bracket-match-date-input {
+      min-height: 40px !important;
+      font-size: 16px !important;
+    }
+  
+    .bracket-page .bracket-result-btn {
+      min-height: 40px !important;
+    }
+  }
+
+  .bracket-slot.empty {
+    min-height: 38px;
+    color: transparent;
+    border: 1px dashed #b9c4cf;
+    background: #ffffff;
+  }
+  
+  .bracket-slot.empty span {
+    visibility: hidden;
+  }
+  
+  .bracket-slot.empty .bracket-slot-number {
+    visibility: visible;
+  }
+
+  .bracket-player-option.disabled,
+.bracket-player-option:disabled {
+  color: #8793a2 !important;
+  border-color: #d9dee4 !important;
+  background: #eef1f4 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
+.bracket-player-option.disabled ion-icon,
+.bracket-player-option:disabled ion-icon {
+  color: #17853a !important;
+}
+
+.bracket-player-option.disabled:hover,
+.bracket-player-option:disabled:hover {
+  color: #8793a2 !important;
+  border-color: #d9dee4 !important;
+  background: #eef1f4 !important;
+}
+
+/* ========================================================= CORREÇÃO FINAL DAS POSIÇÕES VAZIAS DA CHAVE ========================================================= */
+
+/* * A posição vazia precisa continuar aparecendo * e continuar clicável para inclusão do jogador. */
+.bracket-page .bracket-slot.empty,
+.bracket-page .bracket-slot.empty:hover,
+.bracket-page .bracket-slot.empty:active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  margin-top: 5px !important;
+  padding: 7px 8px !important;
+  color: #05649a !important;
+  border: 1px dashed #8fb5c9 !important;
+  border-radius: 7px !important;
+  background: #f8fcff !important;
+  font-size: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+/* * Remove qualquer texto de posição vazia, * mantendo somente o ícone de inclusão. */
+.bracket-page .bracket-slot.empty span {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* * Ícone de inclusão na posição vazia. */
+.bracket-page .bracket-slot.empty .bracket-empty-add-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 23px !important;
+  height: 23px !important;
+  color: #05649a !important;
+  font-size: 23px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+/* * Caso o HTML do slot ainda esteja usando * um span sem a classe bracket-empty-add-icon, * o ícone Ionic continuará visível. */
+.bracket-page .bracket-slot.empty ion-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 23px !important;
+  height: 23px !important;
+  color: #05649a !important;
+  font-size: 23px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+/* * Estado ao tocar ou passar o mouse. */
+.bracket-page .bracket-slot.empty:hover,
+.bracket-page .bracket-slot.empty:active {
+  color: #ffffff !important;
+  border-color: #05649a !important;
+  background: #05649a !important;
+}
+
+.bracket-page .bracket-slot.empty:hover ion-icon,
+.bracket-page .bracket-slot.empty:active ion-icon,
+.bracket-page .bracket-slot.empty:hover
+.bracket-empty-add-icon,
+.bracket-page .bracket-slot.empty:active
+.bracket-empty-add-icon {
+  color: #ffffff !important;
+}
+
+/* * Remove números das posições vazias. */
+.bracket-page .bracket-slot.empty
+.bracket-slot-number {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* ========================================================= JOGADORES JÁ UTILIZADOS NO MODAL ========================================================= */
+
+.bracket-page .bracket-player-option.disabled,
+.bracket-page .bracket-player-option:disabled {
+  color: #8793a2 !important;
+  border-color: #d9dee4 !important;
+  background: #eef1f4 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
+.bracket-page .bracket-player-option.disabled ion-icon,
+.bracket-page .bracket-player-option:disabled ion-icon {
+  color: #17853a !important;
+}
+
+.bracket-page .bracket-player-option.disabled:hover,
+.bracket-page .bracket-player-option:disabled:hover {
+  color: #8793a2 !important;
+  border-color: #d9dee4 !important;
+  background: #eef1f4 !important;
+}
+
+/* ========================================================= RESULTADO SALVO ========================================================= */
+
+.bracket-page .bracket-match-result {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-height: 30px !important;
+  margin-top: 7px !important;
+  padding: 5px 7px !important;
+  color: #17853a !important;
+  border-top: 1px solid #e4e8ed !important;
+  background: transparent !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+}
+
+.bracket-page .bracket-match-result span {
+  color: #617089 !important;
+  font-size: 0.67rem !important;
+  font-weight: 800 !important;
+}
+
+.bracket-page .bracket-match-result strong {
+  color: #17853a !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+}
+
+/* ========================================================= DATA DA PARTIDA SEM TEXTO E SEM ÍCONE ========================================================= */
+
+.bracket-page .bracket-match-date {
+  display: block !important;
+  margin-top: 8px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.bracket-page .bracket-match-date span,
+.bracket-page .bracket-match-date ion-icon {
+  display: none !important;
+}
+
+.bracket-page .bracket-match-date-input {
+  display: block !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  padding: 6px 8px !important;
+  color: #17213d !important;
+  border: 1px solid #d2d8df !important;
+  border-radius: 7px !important;
+  background: #ffffff !important;
+  font-size: 0.7rem !important;
+}
+
+.bracket-page .bracket-match-date-input:focus {
+  border-color: #05649a !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(5, 100, 154, 0.13) !important;
+}
+
+.bracket-page .bracket-match-date-input:disabled {
+  color: #617089 !important;
+  background: #eef2f5 !important;
+}
+
+/* ========================================================= BOTÃO INFORMAR RESULTADO ========================================================= */
+
+.bracket-page .bracket-result-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  margin-top: 8px !important;
+  padding: 0 8px !important;
+  color: #05649a !important;
+  border: 1px solid #05649a !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  font-size: 0.68rem !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+
+.bracket-page .bracket-result-btn ion-icon {
+  font-size: 17px !important;
+  pointer-events: none !important;
+}
+
+.bracket-page .bracket-result-btn:hover,
+.bracket-page .bracket-result-btn:active {
+  color: #ffffff !important;
+  background: #05649a !important;
+}
+
+/* ========================================================= BOTÃO SALVAR CHAVE ========================================================= */
+
+.bracket-page .bracket-save-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-height: 46px !important;
+  margin: 10px 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.bracket-page .bracket-save-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  color: #ffffff !important;
+  border: 1px solid #17853a !important;
+  border-radius: 8px !important;
+  background: #17853a !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+
+.bracket-page .bracket-save-btn:hover {
+  background: #11682d !important;
+}
+
+/* ========================================================= BOTÃO FINALIZAR TORNEIO ========================================================= */
+
+.bracket-page .bracket-finish-tournament-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  color: #ffffff !important;
+  border: 1px solid #b4232d !important;
+  border-radius: 8px !important;
+  background: #b4232d !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+
+.bracket-page .bracket-finish-tournament-btn:hover {
+  border-color: #8e1b24 !important;
+  background: #8e1b24 !important;
+}
+
+/* ========================================================= RESPONSIVO ========================================================= */
+
+@media (max-width: 700px) {
+  .bracket-page .bracket-save-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .bracket-page .bracket-save-row button {
+    width: 100% !important;
+  }
+
+  .bracket-page .bracket-slot.empty {
+    min-height: 42px !important;
+    height: 42px !important;
+  }
+
+  .bracket-page .bracket-empty-add-icon,
+  .bracket-page .bracket-slot.empty ion-icon {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 25px !important;
+  }
+
+  .bracket-page .bracket-result-btn {
+    min-height: 40px !important;
+  }
+
+  .bracket-page .bracket-match-date-input {
+    min-height: 40px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* ========================================================= JOGADORES E PLACAR NO CARD ========================================================= */
+
+.bracket-slot {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-height: 46px !important;
+    padding: 8px 9px !important;
+    text-align: left !important;
+  }
+  
+  .bracket-slot-content {
+    display: flex !important;
+    flex: 1 !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    gap: 5px !important;
+  }
+  
+  .bracket-player-line {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  
+  .bracket-slot-name {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: #05649a !important;
+    font-size: 0.76rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  .bracket-slot.is-winner .bracket-slot-name {
+    color: #17853a !important;
+    font-weight: 950 !important;
+  }
+  
+  .bracket-winner-icon {
+    flex: 0 0 auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #17853a !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+  }
+  
+  .bracket-score-line {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding-top: 3px !important;
+    border-top: 1px solid #e4e8ed !important;
+  }
+  
+  .bracket-score-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    color: #617089 !important;
+    font-size: 0.65rem !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+  
+  .bracket-score-item small {
+    color: #8a97aa !important;
+    font-size: 0.58rem !important;
+    font-weight: 700 !important;
+  }
+  
+  .bracket-score-item strong {
+    color: #17213d !important;
+    font-size: 0.74rem !important;
+    font-weight: 950 !important;
+  }
+  
+  .bracket-score-super {
+    padding-left: 6px !important;
+    border-left: 1px solid #d2d8df !important;
+  }
+  
+  .bracket-score-super strong {
+    color: #b06e00 !important;
+  }
+  
+  .bracket-slot.empty {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 40px !important;
+    color: #05649a !important;
+    border: 1px dashed #8fb5c9 !important;
+    background: #f8fcff !important;
+    font-size: 0 !important;
+  }
+  
+  .bracket-slot.empty .bracket-slot-content {
+    display: none !important;
+  }
+  
+  .bracket-slot.empty .bracket-empty-add-icon {
+    display: inline-flex !important;
+    width: 23px !important;
+    height: 23px !important;
+    color: #05649a !important;
+    font-size: 23px !important;
+  }
+  
+  .bracket-slot.empty:hover {
+    color: #ffffff !important;
+    border-color: #05649a !important;
+    background: #05649a !important;
+  }
+  
+  .bracket-slot.empty:hover
+  .bracket-empty-add-icon {
+    color: #ffffff !important;
+  }
+  
+  /* ========================================================= REMOVE TEXTO DE VENCEDOR SE EXISTIR EM VERSÃO ANTIGA ========================================================= */
+  
+  .bracket-match-result {
+    display: none !important;
+  }
+  
+  /* ========================================================= DATA SEM TEXTO ========================================================= */
+  
+  .bracket-match-date {
+    margin-top: 8px !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  
+  .bracket-match-date-input {
+    width: 100% !important;
+    min-height: 34px !important;
+    color: #17213d !important;
+    border: 1px solid #d2d8df !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    font-size: 0.7rem !important;
+  }
+  
+  @media (max-width: 600px) {
+    .bracket-slot {
+      min-height: 50px !important;
+    }
+  
+    .bracket-slot-name {
+      font-size: 0.74rem !important;
+    }
+  
+    .bracket-score-line {
+      gap: 6px !important;
+    }
+  
+    .bracket-score-item {
+      font-size: 0.61rem !important;
+    }
+  
+    .bracket-score-item small {
+      font-size: 0.55rem !important;
+    }
+  
+    .bracket-score-item strong {
+      font-size: 0.7rem !important;
+    }
+  
+    .bracket-score-super {
+      border-left: 0 !important;
+      padding-left: 0 !important;
+    }
+  }
+
+  /* ========================================================= NOME E PLACAR ALINHADOS NO CARD ========================================================= */
+
+.bracket-slot {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 7px 8px !important;
+    text-align: left !important;
+  }
+  
+  .bracket-slot-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  
+  .bracket-player-name-wrap {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+  }
+  
+  .bracket-slot-name {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: #05649a !important;
+    font-size: 0.76rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  .bracket-slot.is-winner .bracket-slot-name {
+    color: #17853a !important;
+    font-weight: 950 !important;
+  }
+  
+  .bracket-winner-icon {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #17853a !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+  }
+  
+  .bracket-slot-score {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    min-width: 48px !important;
+    color: #17213d !important;
+    font-size: 0.84rem !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1 !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+  
+  .bracket-slot.is-winner .bracket-slot-score {
+    color: #17853a !important;
+  }
+  
+  /* ========================================================= POSIÇÃO VAZIA ========================================================= */
+  
+  .bracket-slot.empty {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 40px !important;
+    color: #05649a !important;
+    border: 1px dashed #8fb5c9 !important;
+    background: #f8fcff !important;
+    font-size: 0 !important;
+  }
+  
+  .bracket-slot.empty .bracket-slot-content,
+  .bracket-slot.empty .bracket-slot-number {
+    display: none !important;
+  }
+  
+  .bracket-slot.empty .bracket-empty-add-icon {
+    display: inline-flex !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #05649a !important;
+    font-size: 22px !important;
+  }
+  
+  .bracket-slot.empty:hover {
+    color: #ffffff !important;
+    border-color: #05649a !important;
+    background: #05649a !important;
+  }
+  
+  .bracket-slot.empty:hover
+  .bracket-empty-add-icon {
+    color: #ffffff !important;
+  }
+  
+  /* Remove qualquer resultado antigo separado */
+  .bracket-match-result {
+    display: none !important;
+  }
+  
+  /* ========================================================= MOBILE ========================================================= */
+  
+  @media (max-width: 600px) {
+    .bracket-slot-content {
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 5px !important;
+    }
+  
+    .bracket-slot-name {
+      font-size: 0.72rem !important;
+    }
+  
+    .bracket-slot-score {
+      min-width: 42px !important;
+      font-size: 0.78rem !important;
+      letter-spacing: 0.05em !important;
+    }
+  
+    .bracket-winner-icon {
+      width: 16px !important;
+      height: 16px !important;
+      font-size: 16px !important;
+    }
+  }
+
+  /* ========================================================= AJUSTE FINAL DOS CARDS DA CHAVE ========================================================= */
+
+/* ========================================================= JOGADOR, ÍCONE DE VITÓRIA E PLACAR ========================================================= */
+
+.bracket-page .bracket-slot {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  margin-top: 5px !important;
+  padding: 7px 8px !important;
+  overflow: visible !important;
+  color: #05649a !important;
+  border: 1px solid #d2d8df !important;
+  border-radius: 7px !important;
+  background: #ffffff !important;
+  text-align: left !important;
+}
+
+.bracket-page .bracket-slot-content {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.bracket-page .bracket-player-name-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+.bracket-page .bracket-slot-name {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  color: #05649a !important;
+  font-size: 0.76rem !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+.bracket-page .bracket-slot.is-winner .bracket-slot-name {
+  color: #17853a !important;
+  font-weight: 950 !important;
+}
+
+.bracket-page .bracket-winner-icon {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #17853a !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  visibility: visible !important;
+}
+
+.bracket-page .bracket-slot-score {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 48px !important;
+  color: #17213d !important;
+  font-size: 0.84rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1 !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+}
+
+.bracket-page .bracket-slot.is-winner .bracket-slot-score {
+  color: #17853a !important;
+}
+
+.bracket-page .bracket-slot-number {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  background: #05649a !important;
+  font-size: 0.6rem !important;
+}
+
+/* ========================================================= POSIÇÃO VAZIA COM BOTÃO + ========================================================= */
+
+.bracket-page .bracket-slot.empty,
+.bracket-page .bracket-slot.empty:hover,
+.bracket-page .bracket-slot.empty:active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  margin-top: 5px !important;
+  padding: 7px 8px !important;
+  overflow: visible !important;
+  color: #05649a !important;
+  border: 1px dashed #8fb5c9 !important;
+  border-radius: 7px !important;
+  background: #f8fcff !important;
+  font-size: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+.bracket-page .bracket-slot.empty span {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.bracket-page .bracket-slot.empty .bracket-slot-number {
+  display: none !important;
+}
+
+.bracket-page .bracket-slot.empty ion-icon,
+.bracket-page .bracket-slot.empty .bracket-empty-add-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: #05649a !important;
+  font-size: 24px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.bracket-page .bracket-slot.empty:hover,
+.bracket-page .bracket-slot.empty:active {
+  color: #ffffff !important;
+  border-color: #05649a !important;
+  background: #05649a !important;
+}
+
+.bracket-page .bracket-slot.empty:hover ion-icon,
+.bracket-page .bracket-slot.empty:active ion-icon,
+.bracket-page .bracket-slot.empty:hover .bracket-empty-add-icon,
+.bracket-page .bracket-slot.empty:active .bracket-empty-add-icon {
+  color: #ffffff !important;
+}
+
+/* ========================================================= RESULTADO DO JOGO ========================================================= */
+
+.bracket-page .bracket-match-result {
+  display: none !important;
+}
+
+.bracket-page .bracket-match-result strong {
+  display: none !important;
+}
+
+/* ========================================================= DATA DA PARTIDA ========================================================= */
+
+.bracket-page .bracket-match-date {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 8px !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.bracket-page .bracket-match-date span,
+.bracket-page .bracket-match-date label > span,
+.bracket-page .bracket-match-date ion-icon {
+  display: none !important;
+}
+
+.bracket-page .bracket-match-date-input {
+  display: block !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  color: #17213d !important;
+  border: 1px solid #d2d8df !important;
+  border-radius: 7px !important;
+  outline: none !important;
+  background: #ffffff !important;
+  font-size: 0.7rem !important;
+}
+
+.bracket-page .bracket-match-date-input:focus {
+  border-color: #05649a !important;
+  box-shadow: 0 0 0 3px rgba(5, 100, 154, 0.13) !important;
+}
+
+.bracket-page .bracket-match-date-input:disabled {
+  color: #617089 !important;
+  background: #eef2f5 !important;
+}
+
+/* ========================================================= BOTÃO DE RESULTADO ========================================================= */
+
+.bracket-page .bracket-result-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  margin-top: 8px !important;
+  padding: 0 8px !important;
+  color: #05649a !important;
+  border: 1px solid #05649a !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  font-size: 0.68rem !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+
+.bracket-page .bracket-result-btn ion-icon {
+  flex: 0 0 auto !important;
+  font-size: 17px !important;
+  pointer-events: none !important;
+}
+
+.bracket-page .bracket-result-btn:hover,
+.bracket-page .bracket-result-btn:active {
+  color: #ffffff !important;
+  background: #05649a !important;
+}
+
+/* ========================================================= JOGADORES DESABILITADOS NO MODAL ========================================================= */
+
+.bracket-page .bracket-player-option.disabled,
+.bracket-page .bracket-player-option:disabled {
+  color: #8793a2 !important;
+  border-color: #d9dee4 !important;
+  background: #eef1f4 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
+.bracket-page .bracket-player-option.disabled ion-icon,
+.bracket-page .bracket-player-option:disabled ion-icon {
+  color: #17853a !important;
+}
+
+.bracket-page .bracket-player-option.disabled:hover,
+.bracket-page .bracket-player-option:disabled:hover {
+  color: #8793a2 !important;
+  border-color: #d9dee4 !important;
+  background: #eef1f4 !important;
+}
+
+/* ========================================================= RESPONSIVO MOBILE ========================================================= */
+
+@media (max-width: 600px) {
+  .bracket-page .bracket-slot {
+    min-height: 46px !important;
+    padding: 7px 6px !important;
+  }
+
+  .bracket-page .bracket-slot-name {
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
+  }
+
+  .bracket-page .bracket-slot-score {
+    min-width: 44px !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .bracket-page .bracket-winner-icon {
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 17px !important;
+  }
+
+  .bracket-page .bracket-slot.empty {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .bracket-page .bracket-slot.empty ion-icon,
+  .bracket-page .bracket-slot.empty .bracket-empty-add-icon {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 25px !important;
+  }
+}
+
+.bracket-round-title {
+  justify-content: flex-start !important;
+}
+
+/* ========================================================= PLACAR ALINHADO EM COLUNAS ========================================================= */
+
+.bracket-slot-score {
+    display: grid !important;
+    grid-template-columns:
+      repeat(3, minmax(22px, 1fr)) !important;
+    align-items: center !important;
+    justify-items: center !important;
+    min-width: 88px !important;
+    gap: 4px !important;
+    color: #17213d !important;
+    font-size: 0.84rem !important;
+    font-weight: 950 !important;
+    letter-spacing: 0 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+  
+  .bracket-score-value {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 22px !important;
+    color: #17213d !important;
+    font-size: 0.84rem !important;
+    font-weight: 950 !important;
+    text-align: center !important;
+  }
+  
+  .bracket-slot.is-winner
+  .bracket-score-value {
+    color: #17853a !important;
+  }
+  
+  @media (max-width: 600px) {
+    .bracket-slot-score {
+      grid-template-columns:
+        repeat(3, minmax(18px, 1fr)) !important;
+      min-width: 72px !important;
+      gap: 2px !important;
+      font-size: 0.76rem !important;
+    }
+  
+    .bracket-score-value {
+      min-width: 18px !important;
+      font-size: 0.76rem !important;
+    }
+  }
+
+  /* ========================================================= BOTÃO GERAR PDF ========================================================= */
+
+.bracket-pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    color: #ffffff;
+    border: 1px solid #6b50a9;
+    border-radius: 8px;
+    background: #6b50a9;
+    font-size: 0.72rem;
+    font-weight: 850;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+  
+  .bracket-pdf-btn ion-icon {
+    flex: 0 0 auto;
+    font-size: 18px;
+    pointer-events: none;
+  }
+  
+  .bracket-pdf-btn:hover {
+    color: #ffffff;
+    border-color: #514080;
+    background: #514080;
+    box-shadow: 0 3px 10px rgba(107, 80, 169, 0.25);
+    transform: translateY(-1px);
+  }
+  
+  .bracket-pdf-btn:active {
+    color: #ffffff;
+    border-color: #45366f;
+    background: #45366f;
+    transform: scale(0.98);
+  }
+  
+  .bracket-pdf-btn:focus-visible {
+    outline: 3px solid rgba(107, 80, 169, 0.25);
+    outline-offset: 2px;
+  }
+  
+  /* Mantém os botões da chave alinhados */
+  .bracket-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  
+  /* Celular */
+  @media (max-width: 700px) {
+    .bracket-actions {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      width: 100% !important;
+    }
+  
+    .bracket-pdf-btn {
+      width: 100% !important;
+      min-height: 43px !important;
+    }
+  }
+
+  /* ========================================================= BOTÕES DA CHAVE — QUADRADOS, NEUTROS E HORIZONTAIS ========================================================= */
+
+.bracket-page .bracket-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 10px 0 !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+  
+  .bracket-page .bracket-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  /* Todos os botões da área de ações */
+  .bracket-page .bracket-actions > button {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    width: auto !important;
+    min-width: 92px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 10px !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    transition:
+      background 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+  
+  /* Ícones */
+  .bracket-page .bracket-actions > button ion-icon {
+    flex: 0 0 auto !important;
+    width: 17px !important;
+    height: 17px !important;
+    color: #475569 !important;
+    font-size: 17px !important;
+    pointer-events: none !important;
+  }
+  
+  /* Hover neutro */
+  .bracket-page .bracket-actions > button:hover {
+    color: #0f172a !important;
+    border-color: #64748b !important;
+    background: #f8fafc !important;
+    box-shadow: none !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  .bracket-page .bracket-actions > button:hover ion-icon {
+    color: #0f172a !important;
+  }
+  
+  /* Clique */
+  .bracket-page .bracket-actions > button:active {
+    background: #f1f5f9 !important;
+    transform: scale(0.98) !important;
+  }
+  
+  /* Foco */
+  .bracket-page .bracket-actions > button:focus-visible {
+    outline: 3px solid rgba(100, 116, 139, 0.22) !important;
+    outline-offset: 2px !important;
+  }
+  
+  /* Botão Compartilhar */
+  .bracket-page .bracket-share-btn {
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+  
+  .bracket-page .bracket-share-btn ion-icon {
+    color: #475569 !important;
+  }
+  
+  /* Botão PDF */
+  .bracket-page .bracket-pdf-btn {
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+  
+  /* Salvar chave */
+  .bracket-page .bracket-save-btn {
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+  
+  /* Finalizar chave */
+  .bracket-page .bracket-finish-btn {
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+  
+  /* Finalizar torneio */
+  .bracket-page .bracket-finish-tournament-btn {
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+  
+  /* Remove cores antigas dos estados */
+  .bracket-page .bracket-save-btn:hover,
+  .bracket-page .bracket-finish-btn:hover,
+  .bracket-page .bracket-finish-tournament-btn:hover,
+  .bracket-page .bracket-pdf-btn:hover,
+  .bracket-page .bracket-share-btn:hover {
+    color: #0f172a !important;
+    border-color: #64748b !important;
+    background: #f8fafc !important;
+  }
+  
+  /* Modo público: compartilhar oculto */
+  .bracket-page.bracket-public-mode
+  .bracket-share-btn {
+    display: none !important;
+  }
+  
+  /* Mobile: continua tudo na mesma linha, com rolagem horizontal se necessário */
+  @media (max-width: 700px) {
+    .bracket-page .bracket-actions {
+      justify-content: flex-start !important;
+      flex-wrap: nowrap !important;
+      gap: 6px !important;
+      overflow-x: auto !important;
+    }
+  
+    .bracket-page .bracket-actions > button {
+      min-width: 86px !important;
+      width: auto !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 0 8px !important;
+      font-size: 0.63rem !important;
+    }
+  
+    .bracket-page .bracket-actions > button ion-icon {
+      width: 16px !important;
+      height: 16px !important;
+      font-size: 16px !important;
+    }
+  }
