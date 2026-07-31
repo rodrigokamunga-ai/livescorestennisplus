@@ -13,6 +13,10 @@
     tournaments: [],
     categories: [],
     activeCategoryId: null,
+  
+    /* * Jogadores selecionados para formar uma dupla. */
+    selectedPairPlayers: [],
+  
     unsubscribe: null,
     searchTimer: null
   };
@@ -304,9 +308,14 @@
           ""
         ).trim(),
   
-      jogadores:
+        jogadores:
         readPlayersFromTournament(category),
-  
+      
+      duplas:
+        Array.isArray(category.duplas)
+          ? category.duplas
+          : [],
+      
       chave:
         category.chave || null,
   
@@ -367,6 +376,7 @@
       : [];
 
     state.activeCategoryId = null;
+    state.selectedPairPlayers = [];
 
     if (el.name) {
       el.name.value = data?.nome || "";
@@ -396,6 +406,7 @@
 
     state.categories = [];
     state.activeCategoryId = null;
+    state.selectedPairPlayers = [];
 
     renderCategories();
     message("");
@@ -410,18 +421,7 @@
       return;
     }
 
-    const exists = state.categories.some(
-      category =>
-        U.norm(category.nome) === U.norm(name)
-    );
-
-    if (exists) {
-      message(
-        "Esta categoria já foi adicionada.",
-        "error"
-      );
-      return;
-    }
+    
 
     state.categories.push({
       id: U.id(name),
@@ -429,7 +429,8 @@
       formatoJogo: "",
       formatoPartida: "",
       dataPeriodo: "",
-      jogadores: []
+      jogadores: [],
+      duplas: []
     });
 
     if (el.categoryName) {
@@ -470,44 +471,387 @@
     category[field] = value;
   }
 
-  function renderCategoryPlayers(category) {
-    const players = category.jogadores || [];
-
-    if (!players.length) {
-      return `
-        <div class="tournament-selected-empty">
-          Nenhum jogador adicionado.
-        </div>
-      `;
+  function validateCategoryPairs(category) {
+    if (
+      category.formatoJogo !== "Duplas"
+    ) {
+      return true;
     }
+  
+    const players =
+      Array.isArray(category.jogadores)
+        ? category.jogadores
+        : [];
+  
+    const pairs =
+      Array.isArray(category.duplas)
+        ? category.duplas
+        : [];
+  
+    if (players.length % 2 !== 0) {
+      message(
+        `A categoria "${category.nome}" precisa ter uma quantidade par de jogadores.`,
+        "error"
+      );
+  
+      return false;
+    }
+  
+    if (
+      pairs.length !== players.length / 2
+    ) {
+      message(
+        `Crie todas as duplas da categoria "${category.nome}" antes de salvar.`,
+        "error"
+      );
+  
+      return false;
+    }
+  
+    const usedPlayers =
+      new Set();
+  
+    for (const dupla of pairs) {
+      const player1 =
+        dupla.jogador1 || {};
+  
+      const player2 =
+        dupla.jogador2 || {};
+  
+      const player1Key =
+        String(
+          player1.uid ||
+          U.norm(player1.nome || "")
+        );
+  
+      const player2Key =
+        String(
+          player2.uid ||
+          U.norm(player2.nome || "")
+        );
+  
+      if (
+        !player1Key ||
+        !player2Key
+      ) {
+        message(
+          `Existe uma dupla incompleta na categoria "${category.nome}".`,
+          "error"
+        );
+  
+        return false;
+      }
+  
+      if (
+        usedPlayers.has(player1Key) ||
+        usedPlayers.has(player2Key)
+      ) {
+        message(
+          `Um jogador foi incluído em mais de uma dupla na categoria "${category.nome}".`,
+          "error"
+        );
+  
+        return false;
+      }
+  
+      usedPlayers.add(player1Key);
+      usedPlayers.add(player2Key);
+    }
+  
+    if (
+      usedPlayers.size !== players.length
+    ) {
+      message(
+        `Todos os jogadores da categoria "${category.nome}" precisam estar em uma dupla.`,
+        "error"
+      );
+  
+      return false;
+    }
+  
+    return true;
+  }
 
+  function renderCategoryPlayers(category) {
+    const players =
+      Array.isArray(category.jogadores)
+        ? category.jogadores
+        : [];
+  
+    const duplas =
+      Array.isArray(category.duplas)
+        ? category.duplas
+        : [];
+  
+    const isDoubles =
+      U.norm(category.formatoJogo) ===
+      "duplas";
+  
+    const pairedPlayerIds =
+      new Set();
+  
+    const pairedPlayerNames =
+      new Set();
+  
+    duplas.forEach(dupla => {
+      if (dupla.jogador1?.uid) {
+        pairedPlayerIds.add(
+          String(dupla.jogador1.uid)
+        );
+      }
+  
+      if (dupla.jogador2?.uid) {
+        pairedPlayerIds.add(
+          String(dupla.jogador2.uid)
+        );
+      }
+  
+      if (dupla.jogador1?.nome) {
+        pairedPlayerNames.add(
+          U.norm(dupla.jogador1.nome)
+        );
+      }
+  
+      if (dupla.jogador2?.nome) {
+        pairedPlayerNames.add(
+          U.norm(dupla.jogador2.nome)
+        );
+      }
+    });
+  
+    if (!players.length) {
+      return ` <div class="tournament-selected-empty"> Nenhum jogador adicionado. </div> `;
+    }
+  
     return players
+      .map((player, index) => {
+        const playerKey =
+          player.uid ||
+          player.nome;
+  
+        const isPaired =
+          (
+            player.uid &&
+            pairedPlayerIds.has(
+              String(player.uid)
+            )
+          ) ||
+          pairedPlayerNames.has(
+            U.norm(player.nome)
+          );
+  
+        /* * Formato Simples: * não exibe checkbox. */
+        if (!isDoubles) {
+          return ` <div class="tournament-selected-player"> <span class="tournament-selected-number"> ${index + 1} </span> <span class="tournament-selected-name"> ${U.esc(player.nome)} </span> <button type="button" class="tournament-remove-player" data-remove-category-player="${U.esc(category.id)}" data-player-key="${U.esc(playerKey)}" aria-label="Remover jogador" > <ion-icon name="close-outline"></ion-icon> </button> </div> `;
+        }
+  
+        /* * Formato Duplas: * exibe checkbox para formar a dupla. */
+        return ` <div class="tournament-category-player-option ${ isPaired ? "is-paired" : "" }" > <input type="checkbox" class="category-player-checkbox" data-category-id="${U.esc(category.id)}" data-player-key="${U.esc(playerKey)}" ${isPaired ? "disabled" : ""} > <span class="tournament-selected-number"> ${index + 1} </span> <span class="tournament-selected-name"> ${U.esc(player.nome)} </span> ${ isPaired ? ` <span class="tournament-player-paired-label"> Já está em uma dupla </span> ` : "" } <button type="button" class="tournament-remove-player" data-remove-category-player="${U.esc(category.id)}" data-player-key="${U.esc(playerKey)}" aria-label="Remover jogador" > <ion-icon name="close-outline"></ion-icon> </button> </div> `;
+      })
+      .join("");
+  }
+
+  function renderCategoryPairs(category) {
+    const duplas =
+      Array.isArray(category.duplas)
+        ? category.duplas
+        : [];
+  
+    if (!duplas.length) {
+      return ` <div class="tournament-selected-empty"> Nenhuma dupla criada. </div> `;
+    }
+  
+    return duplas
       .map(
-        (player, index) => `
-          <div class="tournament-selected-player">
-            <span class="tournament-selected-number">
-              ${index + 1}
-            </span>
-
-            <span class="tournament-selected-name">
-              ${U.esc(player.nome)}
-            </span>
-
-            <button
-              type="button"
-              class="tournament-remove-player"
-              data-remove-category-player="${U.esc(category.id)}"
-              data-player-key="${U.esc(
-                player.uid || player.nome
-              )}"
-              aria-label="Remover jogador"
-            >
-              <ion-icon name="close-outline"></ion-icon>
-            </button>
-          </div>
-        `
+        (dupla, index) => ` <div class="tournament-pair-card" data-pair-id="${U.esc(dupla.id || "")}" > <div class="tournament-pair-name"> <span class="tournament-pair-number"> ${index + 1} </span> <strong> ${U.esc( dupla.nome || `${dupla.jogador1?.nome || ""} / ${dupla.jogador2?.nome || ""}` )} </strong> </div> <button type="button" class="tournament-remove-pair-btn" data-remove-pair="${U.esc(category.id)}" data-pair-id="${U.esc(dupla.id || "")}" aria-label="Desfazer dupla" > <ion-icon name="close-outline"></ion-icon> <span> Desfazer </span> </button> </div> `
       )
       .join("");
+  }
+
+
+
+  function createPair(categoryId) {
+    const category =
+      findCategory(categoryId);
+  
+    if (!category) {
+      message(
+        "Categoria não encontrada.",
+        "error"
+      );
+  
+      return;
+    }
+  
+    const selectedKeys =
+      state.selectedPairPlayers.filter(
+        key =>
+          key.startsWith(
+            `${categoryId}::`
+          )
+      );
+  
+    if (selectedKeys.length !== 2) {
+      message(
+        "Selecione exatamente dois jogadores para criar uma dupla.",
+        "error"
+      );
+  
+      return;
+    }
+  
+    const selectedPlayers =
+      selectedKeys
+        .map(selectionKey => {
+          const playerKey =
+            selectionKey.substring(
+              `${categoryId}::`.length
+            );
+  
+          return category.jogadores.find(
+            player =>
+              String(
+                player.uid ||
+                player.nome
+              ) === String(playerKey)
+          );
+        })
+        .filter(Boolean);
+  
+    if (selectedPlayers.length !== 2) {
+      message(
+        "Não foi possível localizar os jogadores selecionados.",
+        "error"
+      );
+  
+      return;
+    }
+  
+    if (!Array.isArray(category.duplas)) {
+      category.duplas = [];
+    }
+  
+    const alreadyPaired =
+      category.duplas.some(dupla =>
+        selectedPlayers.some(player => {
+          const playerUid =
+            String(player.uid || "");
+  
+          const playerName =
+            U.norm(player.nome);
+  
+          return (
+            (
+              playerUid &&
+              (
+                String(
+                  dupla.jogador1?.uid || ""
+                ) === playerUid ||
+                String(
+                  dupla.jogador2?.uid || ""
+                ) === playerUid
+              )
+            ) ||
+            U.norm(
+              dupla.jogador1?.nome || ""
+            ) === playerName ||
+            U.norm(
+              dupla.jogador2?.nome || ""
+            ) === playerName
+          );
+        })
+      );
+  
+    if (alreadyPaired) {
+      message(
+        "Um dos jogadores já pertence a uma dupla.",
+        "error"
+      );
+  
+      return;
+    }
+  
+    const jogador1 =
+      selectedPlayers[0];
+  
+    const jogador2 =
+      selectedPlayers[1];
+  
+    const dupla = {
+      id: U.id(
+        `${jogador1.nome}_${jogador2.nome}`
+      ),
+  
+      nome:
+        `${jogador1.nome} / ${jogador2.nome}`,
+  
+      jogador1: {
+        uid:
+          jogador1.uid || "",
+  
+        nome:
+          jogador1.nome
+      },
+  
+      jogador2: {
+        uid:
+          jogador2.uid || "",
+  
+        nome:
+          jogador2.nome
+      }
+    };
+  
+    category.duplas.push(
+      dupla
+    );
+  
+    state.selectedPairPlayers =
+      state.selectedPairPlayers.filter(
+        key =>
+          !key.startsWith(
+            `${categoryId}::`
+          )
+      );
+  
+    renderCategories();
+  
+    message(
+      `Dupla "${dupla.nome}" criada com sucesso.`,
+      "success"
+    );
+  }
+
+  function removePair( categoryId, pairId ) {
+    const category =
+      findCategory(categoryId);
+  
+    if (!category) {
+      return;
+    }
+  
+    category.duplas =
+      Array.isArray(category.duplas)
+        ? category.duplas.filter(
+            dupla =>
+              dupla.id !== pairId
+          )
+        : [];
+  
+    state.selectedPairPlayers =
+      state.selectedPairPlayers.filter(
+        key =>
+          !key.startsWith(
+            `${categoryId}::`
+          )
+      );
+  
+    renderCategories();
+  
+    message(
+      "Dupla desfeita com sucesso.",
+      "success"
+    );
   }
 
   function renderCategories() {
@@ -689,8 +1033,19 @@
               </button>
 
               <div class="category-selected-players">
-                ${renderCategoryPlayers(category)}
-              </div>
+  ${renderCategoryPlayers(category)}
+</div>
+
+${
+  category.formatoJogo === "Duplas"
+    ? ` <button
+    type="button"
+    class="tournament-btn tournament-btn-primary tournament-create-pair-btn"
+    data-create-pair="${U.esc(category.id)}"
+    disabled
+  > <ion-icon name="people-outline"></ion-icon> <span> Criar dupla com selecionados </span> </button> <div class="tournament-category-pairs"> ${renderCategoryPairs(category)} </div> `
+    : ""
+}
 
             </div>
 
@@ -940,24 +1295,35 @@
     closeSearch();
   }
 
-  function removeCategoryPlayer(
-    categoryId,
-    playerKey
-  ) {
-    const category = findCategory(categoryId);
-
-    if (!category) return;
-
-    category.jogadores = category.jogadores
-      .filter(
-        player =>
-          (player.uid || player.nome) !== playerKey
-      )
-      .map((player, index) => ({
-        ...player,
-        posicao: index + 1
-      }));
-
+  function removeCategoryPlayer( categoryId, playerKey ) {
+    const category =
+      findCategory(categoryId);
+  
+    if (!category) {
+      return;
+    }
+  
+    category.jogadores =
+      category.jogadores
+        .filter(
+          player =>
+            String(
+              player.uid ||
+              player.nome
+            ) !== String(playerKey)
+        )
+        .map((player, index) => ({
+          ...player,
+          posicao: index + 1
+        }));
+  
+    state.selectedPairPlayers =
+      state.selectedPairPlayers.filter(
+        key =>
+          key !==
+          `${categoryId}::${playerKey}`
+      );
+  
     renderCategories();
   }
 
@@ -997,6 +1363,31 @@
             Boolean(player.manual)
         })
       ),
+
+      duplas:
+  Array.isArray(category.duplas)
+    ? category.duplas.map(dupla => ({
+        id: dupla.id,
+
+        nome: dupla.nome,
+
+        jogador1: {
+          uid:
+            dupla.jogador1?.uid || "",
+
+          nome:
+            dupla.jogador1?.nome || ""
+        },
+
+        jogador2: {
+          uid:
+            dupla.jogador2?.uid || "",
+
+          nome:
+            dupla.jogador2?.nome || ""
+        }
+      }))
+    : [],
 
     chave:
       category.chave || null,
@@ -1290,12 +1681,26 @@
         const selectId =
           `tournamentCategory_${item.id}`;
 
-        const statusValue = U.norm(data.status);
-
+          const statusValue =
+          U.norm(data.status);
+        
+        const finalized =
+          isFinalizedTournament(data);
+        
         const openLabel =
           statusValue === "preparada"
             ? "Iniciar"
             : "Abrir";
+        
+        const finalizedButtonClass =
+          finalized
+            ? "tournament-btn-disabled"
+            : "";
+        
+        const finalizedDisabled =
+          finalized
+            ? "disabled"
+            : "";
 
         return `
           <article
@@ -1398,25 +1803,28 @@
   <span>Chave</span>
 </button>
 
-              <button
-                type="button"
-                class="tournament-btn tournament-btn-start"
-                data-action="start"
-                data-id="${U.esc(item.id)}"
-              >
-                <ion-icon name="play-outline"></ion-icon>
-                <span>${openLabel}</span>
-              </button>
+<button
+type="button"
+class="tournament-btn tournament-btn-start ${finalizedButtonClass}"
+data-action="start"
+data-id="${U.esc(item.id)}"
+${finalizedDisabled}
+>
+<ion-icon name="play-outline"></ion-icon>
+<span> ${finalized ? "Finalizado" : openLabel} </span>
+</button>
 
-              <button
-                type="button"
-                class="tournament-btn tournament-btn-secondary"
-                data-action="edit"
-                data-id="${U.esc(item.id)}"
-              >
-                <ion-icon name="pencil-outline"></ion-icon>
-                <span>Editar</span>
-              </button>
+<button
+type="button"
+class="tournament-btn tournament-btn-secondary ${finalizedButtonClass}"
+data-action="edit"
+data-id="${U.esc(item.id)}"
+${finalizedDisabled}
+>
+<ion-icon name="pencil-outline"></ion-icon>
+
+<span> ${finalized ? "Bloqueado" : "Editar"} </span>
+</button>
 
               <button
                 type="button"
@@ -1820,11 +2228,88 @@
     el.categories?.addEventListener(
       "change",
       event => {
+        /* * Checkbox para selecionar jogadores * que formarão uma dupla. */
+        const checkbox =
+          event.target.closest(
+            ".category-player-checkbox"
+          );
+    
+        if (checkbox) {
+          const categoryId =
+            checkbox.dataset.categoryId || "";
+    
+          const playerKey =
+            checkbox.dataset.playerKey || "";
+    
+          const selectionKey =
+            `${categoryId}::${playerKey}`;
+    
+          if (checkbox.checked) {
+            if (
+              !state.selectedPairPlayers.includes(
+                selectionKey
+              )
+            ) {
+              state.selectedPairPlayers.push(
+                selectionKey
+              );
+            }
+          } else {
+            state.selectedPairPlayers =
+              state.selectedPairPlayers.filter(
+                key =>
+                  key !== selectionKey
+              );
+          }
+    
+          const selectedCount =
+            state.selectedPairPlayers.filter(
+              key =>
+                key.startsWith(
+                  `${categoryId}::`
+                )
+            ).length;
+    
+          /* * Limita a seleção a dois jogadores. */
+          if (selectedCount > 2) {
+            checkbox.checked = false;
+    
+            state.selectedPairPlayers =
+              state.selectedPairPlayers.filter(
+                key =>
+                  key !== selectionKey
+              );
+    
+            message(
+              "Selecione somente dois jogadores para formar uma dupla.",
+              "error"
+            );
+    
+            return;
+          }
+    
+          /* * Habilita o botão somente quando * exatamente dois jogadores forem selecionados. */
+          const pairButton =
+            el.categories.querySelector(
+              `[data-create-pair="${categoryId}"]`
+            );
+    
+          if (pairButton) {
+            pairButton.disabled =
+              selectedCount !== 2;
+          }
+    
+          return;
+        }
+    
+        /* * Alteração do formato Simples/Duplas. */
         const categoryId =
-          event.target.dataset.categoryId;
-
-        if (!categoryId) return;
-
+          event.target.dataset.categoryId || "";
+    
+        if (!categoryId) {
+          return;
+        }
+    
         if (
           event.target.classList.contains(
             "category-game"
@@ -1835,8 +2320,14 @@
             "formatoJogo",
             event.target.value
           );
+    
+          /* * Atualiza a visualização: * - Simples: remove os checkboxes; * - Duplas: mostra os checkboxes e o botão. */
+          renderCategories();
+    
+          return;
         }
-
+    
+        /* * Alteração do formato da partida. */
         if (
           event.target.classList.contains(
             "category-match"
@@ -1847,6 +2338,8 @@
             "formatoPartida",
             event.target.value
           );
+    
+          return;
         }
       }
     );
@@ -1854,37 +2347,66 @@
     el.categories?.addEventListener(
       "click",
       event => {
+        const createPairButton =
+          event.target.closest(
+            "[data-create-pair]"
+          );
+    
+        if (createPairButton) {
+          createPair(
+            createPairButton.dataset.createPair
+          );
+    
+          return;
+        }
+    
+        const removePairButton =
+          event.target.closest(
+            "[data-remove-pair]"
+          );
+    
+        if (removePairButton) {
+          removePair(
+            removePairButton.dataset.removePair,
+            removePairButton.dataset.pairId
+          );
+    
+          return;
+        }
+    
         const removeCategoryButton =
           event.target.closest(
             "[data-remove-category]"
           );
-
+    
         if (removeCategoryButton) {
           removeCategory(
             removeCategoryButton.dataset.removeCategory
           );
+    
           return;
         }
-
+    
         const removePlayerButton =
           event.target.closest(
             "[data-remove-category-player]"
           );
-
+    
         if (removePlayerButton) {
           removeCategoryPlayer(
             removePlayerButton.dataset
               .removeCategoryPlayer,
             removePlayerButton.dataset.playerKey
           );
+    
           return;
         }
-
+    
         const searchButton =
           event.target.closest(
             ".category-search-btn"
           );
-
+    
         if (searchButton) {
           openSearch(
             searchButton.dataset.categoryId
@@ -1956,6 +2478,8 @@
           "[data-action]"
         );
 
+        
+
         if (!button) return;
 
         const id = button.dataset.id || "";
@@ -1966,6 +2490,21 @@
         );
 
         if (!item) return;
+
+        if (
+          isFinalizedTournament(item.data) &&
+          (
+            action === "start" ||
+            action === "edit"
+          )
+        ) {
+          message(
+            "Este torneio está finalizado e não pode mais ser aberto ou editado.",
+            "error"
+          );
+        
+          return;
+        }
 
         if (action === "bracket") {
           const card =
