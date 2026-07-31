@@ -1,22 +1,36 @@
 (() => {
   "use strict";
 
-  const params = new URLSearchParams(
-    window.location.search
-  );
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
 
   const tournamentId =
     params.get("id") || "";
 
-  const db = window.__db;
-  const auth = window.__auth;
+  const initialCategoryId =
+    params.get("categoryId") || "";
+
+    const publicMode =
+  params.get("public") === "1";
+
+  const db =
+    window.__db;
+
+  const auth =
+    window.__auth;
 
   const state = {
     user: null,
     tournament: null,
+    categories: [],
+    category: null,
+    categoryId: initialCategoryId,
     players: [],
     bracket: {},
     round: "all",
+    format: "Simples",
 
     activeRound: "",
     activeMatch: 0,
@@ -33,6 +47,15 @@
 
     meta: document.getElementById(
       "bracketTournamentMeta"
+    ),
+
+    categorySelect: document.getElementById(
+      "bracketCategorySelect"
+    ),
+
+    
+    backButton: document.querySelector(
+      ".bracket-back-btn"
     ),
 
     board: document.getElementById(
@@ -61,10 +84,6 @@
 
     resultModal: document.getElementById(
       "bracketResultModal"
-    ),
-
-    resultTitle: document.getElementById(
-      "bracketResultTitle"
     ),
 
     closeResultModal: document.getElementById(
@@ -153,11 +172,15 @@
 
     generatePdf: document.getElementById(
       "generateBracketPdfBtn"
+    ),
+
+    shareBracket: document.getElementById(
+      "shareBracketBtn"
     )
   };
 
   function esc(value = "") {
-    return String(value ?? "")
+        return String(value ?? "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
@@ -165,52 +188,7 @@
       .replace(/'/g, "&#039;");
   }
 
-  function getBracketShortName(name = "") {
-    const text = String(name || "")
-      .trim()
-      .replace(/\s+/g, " ");
-  
-    if (!text) {
-      return "";
-    }
-  
-    const parts =
-      text
-        .split(" ")
-        .filter(Boolean);
-  
-    if (parts.length === 1) {
-      return parts[0];
-    }
-  
-    const firstName =
-      parts[0];
-  
-    const lastName =
-      parts[parts.length - 1];
-  
-    const initial =
-      Array.from(firstName)[0]
-        .toUpperCase();
-  
-    return `${initial}. ${lastName}`;
-  }
-
-  function showMessage(text = "", type = "") {
-    if (!el.message) return;
-
-    el.message.textContent = text;
-    el.message.className =
-      `bracket-message ${type}`.trim();
-  }
-
-  function showResultMessage(text = "") {
-    if (!el.resultMessage) return;
-
-    el.resultMessage.textContent = text;
-  }
-
-  function normalizeStatus(value = "") {
+  function normalize(value = "") {
     return String(value || "")
       .trim()
       .toLowerCase()
@@ -219,10 +197,54 @@
       .replace(/\s+/g, "_");
   }
 
+  function showMessage( text = "", type = "" ) {
+    if (!el.message) {
+      return;
+    }
+
+    el.message.textContent = text;
+
+    el.message.className =
+      `bracket-message ${type}`.trim();
+  }
+
+  function showResultMessage(text = "") {
+    if (el.resultMessage) {
+      el.resultMessage.textContent = text;
+    }
+  }
+
+  function shortName(name = "") {
+    const value =
+      String(name || "")
+        .trim()
+        .replace(/\s+/g, " ");
+
+    if (!value) {
+      return "";
+    }
+
+    const parts =
+      value.split(" ").filter(Boolean);
+
+    if (parts.length === 1) {
+      return parts[0];
+    }
+
+    return `${Array.from(parts[0])[0].toUpperCase()}. ${ parts[parts.length - 1] }`;
+  }
+
   function getStatus() {
-    return normalizeStatus(
+    return normalize(
       state.tournament?.status || ""
     );
+  }
+
+  function isPreparing() {
+    return [
+      "preparacao",
+      "em_preparacao"
+    ].includes(getStatus());
   }
 
   function isPrepared() {
@@ -248,11 +270,128 @@
   }
 
   function canEditBracket() {
-    return !isLive() && !isFinished();
+    return (
+      !publicMode &&
+      !isFinished() &&
+      !isLive()
+    );
   }
 
-  function roundsForCount(count) {
-    const total = Number(count || 0);
+  function readPlayers(data = {}) {
+    const source =
+      Array.isArray(data.jogadores)
+        ? data.jogadores
+        : Array.isArray(data.players)
+          ? data.players
+          : [];
+
+    return source
+      .map((player, index) => {
+        if (typeof player === "string") {
+          const nome =
+            player.trim();
+
+          return nome
+            ? {
+                posicao: index + 1,
+                nome,
+                uid: "",
+                manual: true
+              }
+            : null;
+        }
+
+        const nome =
+          String(
+            player?.nome ||
+            player?.name ||
+            player?.displayName ||
+            player?.nomeJogador ||
+            ""
+          ).trim();
+
+        if (!nome) {
+          return null;
+        }
+
+        const uid =
+          String(
+            player?.uid ||
+            player?.userId ||
+            ""
+          ).trim();
+
+        return {
+          posicao:
+            Number(
+              player?.posicao ||
+              index + 1
+            ),
+
+          nome,
+          uid,
+
+          manual:
+            Boolean(player?.manual) ||
+            !uid
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function normalizeCategory( category = {}, index = 0 ) {
+    return {
+      id:
+        String(
+          category.id || ""
+        ).trim() ||
+        `categoria_${index + 1}`,
+
+      nome:
+        String(
+          category.nome ||
+          category.name ||
+          `Categoria ${index + 1}`
+        ).trim(),
+
+      formatoJogo:
+        String(
+          category.formatoJogo ||
+          category.gameFormat ||
+          ""
+        ).trim(),
+
+      formatoPartida:
+        String(
+          category.formatoPartida ||
+          category.matchFormat ||
+          ""
+        ).trim(),
+
+      dataPeriodo:
+        String(
+          category.dataPeriodo ||
+          category.dataHora ||
+          ""
+        ).trim(),
+
+      jogadores:
+        readPlayers(category),
+
+      chave:
+        category.chave &&
+        typeof category.chave === "object"
+          ? category.chave
+          : null,
+
+      chavePreparada:
+        Boolean(category.chavePreparada)
+    };
+  }
+
+  function getRounds() {
+    const total =
+      Number(state.players.length || 0);
 
     if (total <= 2) {
       return ["final"];
@@ -291,143 +430,72 @@
   }
 
   function roundLabel(round) {
-    const labels = {
+    return {
       r64: "R64",
       r32: "R32",
       r16: "R16",
       qf: "QF",
       sf: "SF",
-      final: "F"
-    };
-
-    return labels[round] || round;
+      final: "Final"
+    }[round] || round;
   }
 
   function matchCount(round) {
-    const counts = {
+    return {
       r64: 32,
       r32: 16,
       r16: 8,
       qf: 4,
       sf: 2,
       final: 1
-    };
-
-    return counts[round] || 1;
+    }[round] || 1;
   }
 
-  function getInitialRound() {
-    return roundsForCount(
-      state.players.length
-    )[0] || "final";
-  }
-
-  function getGlobalMatchNumber( round, localIndex ) {
+  function roundBaseNumber(round) {
     let number = 1;
 
-    for (const currentRound of roundsForCount(
-      state.players.length
-    )) {
-      if (currentRound === round) {
-        return number + localIndex;
-      }
-
-      number += matchCount(currentRound);
-    }
-
-    return number + localIndex;
-  }
-
-  function normalizePlayer(player) {
-    if (!player || !player.nome) {
-      return null;
-    }
-
-    return {
-      nome: String(
-        player.nome || ""
-      ).trim(),
-
-      uid: String(
-        player.uid || ""
-      ).trim(),
-
-      manual: Boolean(player.manual)
-    };
-  }
-
-  function getRoundBaseNumber(round) {
-    const rounds =
-      roundsForCount(
-        state.players.length
-      );
-  
-    let number = 1;
-  
-    for (const currentRound of rounds) {
-      if (currentRound === round) {
+    for (const current of getRounds()) {
+      if (current === round) {
         return number;
       }
-  
-      number += matchCount(currentRound);
+
+      number += matchCount(current);
     }
-  
+
     return number;
   }
-  
-  function getNextMatchNumber() {
-    let highest = 0;
-  
-    Object.values(state.bracket)
-      .flat()
-      .forEach((match) => {
-        const number =
-          Number(match?.matchNumber || 0);
-  
-        if (number > highest) {
-          highest = number;
-        }
-      });
-  
-    return highest + 1;
-  }
-  
+
   function getMatchNumber( round, index, match ) {
-    if (match?.matchNumber) {
-      return Number(match.matchNumber);
-    }
-  
-    return (
-      getRoundBaseNumber(round) +
-      index
+    return Number(
+      match?.matchNumber ||
+      roundBaseNumber(round) + index
     );
   }
 
   function createEmptyBracket() {
     const bracket = {};
-  
-    const rounds =
-      roundsForCount(
-        state.players.length
-      );
-  
-    rounds.forEach((round) => {
-      bracket[round] = Array.from(
-        {
-          length: matchCount(round)
-        },
-        (_, index) => ({
-          enabled: true,
-          matchNumber:
-            getRoundBaseNumber(round) + index,
-          player1: null,
-          player2: null,
-          matchDateTime: "",
-          resultado: null
-        })
-      );
-    });
-  
+
+    for (const round of getRounds()) {
+      bracket[round] =
+        Array.from(
+          {
+            length: matchCount(round)
+          },
+          (_, index) => ({
+            enabled: true,
+
+            matchNumber:
+              roundBaseNumber(round) +
+              index,
+
+            player1: null,
+            player2: null,
+            matchDateTime: "",
+            resultado: null
+          })
+        );
+    }
+
     return bracket;
   }
 
@@ -436,238 +504,199 @@
       createEmptyBracket();
 
     const initialRound =
-      getInitialRound();
-
-    const players =
-      state.players
-        .map(normalizePlayer)
-        .filter(Boolean);
+      getRounds()[0];
 
     const matches =
       bracket[initialRound] || [];
 
     for (
       let index = 0;
-      index < players.length;
+      index < state.players.length;
       index += 2
     ) {
-      const matchIndex =
-        Math.floor(index / 2);
+      const match =
+        matches[Math.floor(index / 2)];
 
-      if (!matches[matchIndex]) {
+      if (!match) {
         break;
       }
 
-      matches[matchIndex].player1 =
-        players[index] || null;
+      match.player1 =
+        state.players[index] || null;
 
-      matches[matchIndex].player2 =
-        players[index + 1] || null;
+      match.player2 =
+        state.players[index + 1] || null;
     }
-
-    propagateInitialRoundByes(bracket);
 
     return bracket;
   }
 
   function normalizeBracket(raw = {}) {
-    const expectedRounds =
-      roundsForCount(
-        state.players.length
-      );
-  
-    const rawRounds =
-      Object.keys(raw || {})
-        .filter((round) =>
-          [
-            "r64",
-            "r32",
-            "r16",
-            "qf",
-            "sf",
-            "final"
-          ].includes(round)
-        );
-  
-    const rounds = [
-      ...new Set([
-        ...expectedRounds,
-        ...rawRounds
-      ])
-    ];
-  
-    const bracket = {};
-  
-    rounds.forEach((round) => {
-      const rawMatches =
+    const bracket =
+      createEmptyBracket();
+
+    for (const round of getRounds()) {
+      const saved =
         Array.isArray(raw[round])
           ? raw[round]
           : [];
-  
-      const minimum =
-        matchCount(round);
-  
-      const total =
-        Math.max(
-          minimum,
-          rawMatches.length
+
+      bracket[round] =
+        bracket[round].map(
+          (emptyMatch, index) => {
+            const savedMatch =
+              saved[index] || {};
+
+            return {
+              enabled:
+                savedMatch.enabled !== false,
+
+              matchNumber:
+                Number(
+                  savedMatch.matchNumber ||
+                  emptyMatch.matchNumber
+                ),
+
+              player1:
+                savedMatch.player1 || null,
+
+              player2:
+                savedMatch.player2 || null,
+
+              matchDateTime:
+                savedMatch.matchDateTime || "",
+
+              resultado:
+                savedMatch.resultado || null
+            };
+          }
         );
-  
-      bracket[round] = Array.from(
-        {
-          length: total
-        },
-        (_, index) => {
-          const match =
-            rawMatches[index] || {};
-  
-          return {
-            enabled:
-              match.enabled !== false,
-  
-            matchNumber:
-              Number(
-                match.matchNumber ||
-                getRoundBaseNumber(round) +
-                  index
-              ),
-  
-            player1:
-              match.player1 || null,
-  
-            player2:
-              match.player2 || null,
-  
-            matchDateTime:
-              String(
-                match.matchDateTime || ""
-              ),
-  
-            resultado:
-              match.resultado || null
-          };
-        }
-      );
-    });
-  
+    }
+
     return bracket;
   }
 
-  function isByePlayer(player) {
-    return player?.source === "bye";
+  function renderCategorySelector() {
+    if (!el.categorySelect) {
+      return;
+    }
+
+    if (!state.categories.length) {
+      el.categorySelect.innerHTML = ` <option value=""> Nenhuma categoria cadastrada </option> `;
+
+      el.categorySelect.disabled = true;
+      return;
+    }
+
+    el.categorySelect.disabled = false;
+
+    el.categorySelect.innerHTML =
+      state.categories
+        .map(
+          category => ` <option value="${esc(category.id)}" ${ String(category.id) === String(state.categoryId) ? "selected" : "" } > ${esc(category.nome)} </option> `
+        )
+        .join("");
+  }
+
+  function changeCategory(event) {
+    const selectedId =
+      event.target.value || "";
+
+    if (!selectedId) {
+      return;
+    }
+
+    const url =
+      new URL(window.location.href);
+
+    url.searchParams.set(
+      "id",
+      tournamentId
+    );
+
+    url.searchParams.set(
+      "categoryId",
+      selectedId
+    );
+
+    window.location.href =
+      url.toString();
   }
 
   function renderSlot( round, matchIndex, slot, player, match ) {
-    const empty = !player;
-    const bye = isByePlayer(player);
-  
     const position =
-      slot === "player1"
-        ? 1
-        : 2;
-  
-    const showNumber =
-      !isLive() &&
-      !isFinished();
-  
-    const fullName =
-      player?.nome || "";
-  
-    const name =
-      getBracketShortName(
-        fullName
-      );
-  
+      slot === "player1" ? 1 : 2;
+
+    const empty =
+      !player;
+
     const result =
-      match?.resultado || null;
-  
+      match?.resultado || {};
+
     const winnerPosition =
       Number(
-        result?.winnerPosition ||
-        result?.vencedorPosicao ||
-        0
+        result.winnerPosition || 0
       );
-  
+
     const isWinner =
       winnerPosition === position;
-  
-    // restante da função...
-  
-  
-    const scoreValues = [];
-  
+
+    const scores = [];
+
     const sets =
-      Array.isArray(result?.sets)
+      Array.isArray(result.sets)
         ? result.sets
         : [];
-  
-    /* * Mostra somente os números dos sets, * sem os textos "1º set", "2º set" etc. */
-    sets.forEach((set) => {
+
+    sets.forEach(set => {
       const value =
         position === 1
           ? set.player1
           : set.player2;
-  
+
       if (
         value !== undefined &&
         value !== null &&
         value !== ""
       ) {
-        scoreValues.push(
-          String(value)
-        );
+        scores.push(value);
       }
     });
-  
-    /* * Adiciona o super tie-break somente * se ele realmente tiver sido salvo. */
-    if (result?.superTieBreak) {
+
+    if (result.superTieBreak) {
       const value =
         position === 1
           ? result.superTieBreak.player1
           : result.superTieBreak.player2;
-  
+
       if (
         value !== undefined &&
         value !== null &&
         value !== ""
       ) {
-        scoreValues.push(
-          String(value)
-        );
+        scores.push(value);
       }
     }
-  
-    const scoreText =
-  scoreValues
-    .map(
-      value => ` <span class="bracket-score-value"> ${esc(value)} </span> `
-    )
-    .join("");
-  
+
     const classes = [
       "bracket-slot",
       empty ? "empty" : "",
-      bye ? "bye" : "",
       isWinner ? "is-winner" : ""
     ]
       .filter(Boolean)
       .join(" ");
-  
-    return ` <button type="button" class="${classes}" data-round="${esc(round)}" data-match="${matchIndex}" data-slot="${esc(slot)}" aria-label="${ empty ? "Adicionar jogador" : `Jogador ${player.nome}` }" > ${ showNumber && !empty ? ` <span class="bracket-slot-number"> ${position} </span> ` : "" } ${ empty ? ` <ion-icon name="add-outline" class="bracket-empty-add-icon" ></ion-icon> ` : ` <span class="bracket-slot-content"> <span class="bracket-player-name-wrap"> <span class="bracket-slot-name">  ${esc(name)} </span> ${ isWinner ? ` <ion-icon name="checkmark-outline" class="bracket-winner-icon" title="Vencedor" ></ion-icon> ` : "" } </span> ${
-      scoreText
-        ? ` <span class="bracket-slot-score"> ${scoreText} </span> `
-        : ""
-    } </span> ` } </button> `;
+
+    return ` <button type="button" class="${classes}" data-round="${esc(round)}" data-match="${matchIndex}" data-slot="${esc(slot)}" aria-label="${ empty ? "Adicionar jogador" : `Jogador ${esc(player.nome)}` }" > ${ empty ? ` <ion-icon name="add-outline" class="bracket-empty-add-icon" ></ion-icon> ` : ` <span class="bracket-slot-number"> ${position} </span> <span class="bracket-slot-content"> <span class="bracket-player-name-wrap"> <span class="bracket-slot-name"> ${esc(shortName(player.nome))} </span> ${ isWinner ? ` <ion-icon name="checkmark-outline" class="bracket-winner-icon" ></ion-icon> ` : "" } </span> ${ scores.length ? ` <span class="bracket-slot-score"> ${scores .map( score => ` <span class="bracket-score-value"> ${esc(score)} </span> ` ) .join("")} </span> ` : "" } </span> ` } </button> `;
   }
 
   function renderMatchDate( round, matchIndex, match ) {
     if (isFinished()) {
       return match.matchDateTime
-        ? ` <div class="bracket-match-date"> <input type="datetime-local" class="bracket-match-date-input" value="${esc( match.matchDateTime )}" disabled > </div> `
+        ? ` <div class="bracket-match-date"> <input type="datetime-local" class="bracket-match-date-input" value="${esc(match.matchDateTime)}" disabled > </div> `
         : "";
     }
 
-    return ` <div class="bracket-match-date"> <input type="datetime-local" class="bracket-match-date-input" data-date-round="${esc(round)}" data-date-match="${matchIndex}" value="${esc( match.matchDateTime || "" )}" > </div> `;
+    return ` <div class="bracket-match-date"> <input type="datetime-local" class="bracket-match-date-input" data-date-round="${esc(round)}" data-date-match="${matchIndex}" value="${esc(match.matchDateTime || "")}" > </div> `;
   }
 
   function formatSavedResult(result) {
@@ -675,25 +704,25 @@
       return "";
     }
 
-    const sets = Array.isArray(
-      result.sets
-    )
-      ? result.sets
-      : [];
+    const sets =
+      Array.isArray(result.sets)
+        ? result.sets
+        : [];
 
-    const setText = sets
-      .map(
-        set =>
-          `${set.player1 ?? 0} x ${ set.player2 ?? 0 }`
-      )
-      .join(" · ");
+    const text =
+      sets
+        .map(
+          set =>
+            `${set.player1 ?? 0} x ${set.player2 ?? 0}`
+        )
+        .join(" · ");
 
-    const superText =
+    const tieBreak =
       result.superTieBreak
-        ? ` · STB ${ result.superTieBreak.player1 } x ${ result.superTieBreak.player2 }`
+        ? ` · STB ${result.superTieBreak.player1} x ${result.superTieBreak.player2}`
         : "";
 
-    return `${setText}${superText}`;
+    return `${text}${tieBreak}`;
   }
 
   function renderMatchResult(match) {
@@ -701,14 +730,10 @@
       return "";
     }
 
-    const winner =
-      match.resultado.vencedor?.nome ||
-      "";
-
-    return ` <div class="bracket-match-result"> <span> ${esc( formatSavedResult( match.resultado ) )} </span> ${ winner ? ` <strong> ${esc(winner)} </strong> ` : "" } </div> `;
+    return ` <div class="bracket-match-result"> <span> ${esc( formatSavedResult( match.resultado ) )} </span> <strong> ${esc( match.resultado.vencedor?.nome || "" )} </strong> </div> `;
   }
 
-  function renderResultButton( round, matchIndex, match ) {
+  function renderResultButton( round, index, match ) {
     if (
       !isLive() ||
       isFinished() ||
@@ -718,7 +743,7 @@
       return "";
     }
 
-    return ` <button type="button" class="bracket-result-btn" data-result-round="${esc(round)}" data-result-match="${matchIndex}" > <ion-icon name="stats-chart-outline"></ion-icon> <span> ${ match.resultado ? "Editar resultado" : "Informar resultado" } </span> </button> `;
+    return ` <button type="button" class="bracket-result-btn" data-result-round="${esc(round)}" data-result-match="${index}" > <ion-icon name="stats-chart-outline"></ion-icon> <span> ${ match.resultado ? "Editar resultado" : "Informar resultado" } </span> </button> `;
   }
 
   function renderBoard() {
@@ -726,10 +751,14 @@
       return;
     }
 
+    if (!state.players.length) {
+      el.board.innerHTML = ` <div class="bracket-message"> Nenhum jogador cadastrado nesta categoria. </div> `;
+
+      return;
+    }
+
     const allRounds =
-      roundsForCount(
-        state.players.length
-      );
+      getRounds();
 
     const rounds =
       state.round === "all"
@@ -738,12 +767,6 @@
             round =>
               round === state.round
           );
-
-    if (!state.players.length) {
-      el.board.innerHTML = ` <div class="bracket-message"> Nenhum jogador cadastrado neste torneio. </div> `;
-
-      return;
-    }
 
     el.board.innerHTML =
       rounds
@@ -757,93 +780,47 @@
                 match.enabled !== false
             );
 
-          return ` <section class="bracket-round-column" data-round-column="${esc(round)}" > <div class="bracket-round-title">
-          <span> ${esc( roundLabel(round) )} </span>
-        </div> ${ canEditBracket() ? ` <button type="button" class="bracket-add-game" data-add-round="${esc(round)}" title="Adicionar jogo" > <ion-icon name="add-outline"></ion-icon> </button> ` : "" } <div class="bracket-round-matches"> ${activeMatches .map(match => { const index = matches.indexOf(match); return ` <article class="bracket-match"> <div class="bracket-match-label"> Jogo ${
-  getMatchNumber(
-    round,
-    index,
-    match
-  )
-} </div>${renderSlot(
-  round,
-  index,
-  "player1",
-  match.player1,
-  match
-)}
-
-${renderSlot(
-  round,
-  index,
-  "player2",
-  match.player2,
-  match
-)} ${renderMatchDate( round, index, match )}  ${renderResultButton( round, index, match )} ${ canEditBracket() ? ` <button type="button" class="bracket-remove-game" data-remove-round="${esc(round)}" data-remove-match="${index}" title="Excluir jogo" > <ion-icon name="trash-outline"></ion-icon> </button> ` : "" } </article> `; }) .join("")} </div> </section> `;
+          return ` <section class="bracket-round-column" data-round-column="${esc(round)}" > <div class="bracket-round-title"> <span> ${esc(roundLabel(round))} </span> </div> ${ canEditBracket() ? ` <button type="button" class="bracket-add-game" data-add-round="${esc(round)}" title="Adicionar jogo" > <ion-icon name="add-outline"></ion-icon> </button> ` : "" } <div class="bracket-round-matches"> ${ activeMatches .map(match => { const index = matches.indexOf(match); return ` <article class="bracket-match"> <div class="bracket-match-label"> Jogo ${getMatchNumber( round, index, match )} </div> ${renderSlot( round, index, "player1", match.player1, match )} ${renderSlot( round, index, "player2", match.player2, match )} ${renderMatchDate( round, index, match )} ${renderMatchResult(match)} ${renderResultButton( round, index, match )} ${ canEditBracket() ? ` <button type="button" class="bracket-remove-game" data-remove-round="${esc(round)}" data-remove-match="${index}" title="Excluir jogo" > <ion-icon name="trash-outline"></ion-icon> </button> ` : "" } </article> `; }) .join("") } </div> </section> `;
         })
         .join("");
   }
 
-  function isPlayerAlreadyUsed( player, currentRound = "", currentMatch = 0, currentSlot = "" ) {
-    if (!player) {
-      return false;
-    }
-  
+  function playerAlreadyUsed( player, currentRound = "", currentMatch = 0, currentSlot = "" ) {
     return Object.entries(
       state.bracket
     ).some(([round, matches]) =>
       matches.some((match, matchIndex) => {
-        if (
-          match.enabled === false
-        ) {
+        if (match.enabled === false) {
           return false;
         }
-  
-        const positions = [
-          {
-            player: match.player1,
-            slot: "player1"
-          },
-          {
-            player: match.player2,
-            slot: "player2"
-          }
-        ];
-  
-        return positions.some((position) => {
-          const existing =
-            position.player;
-  
+
+        return [
+          ["player1", match.player1],
+          ["player2", match.player2]
+        ].some(([slot, existing]) => {
           if (!existing) {
             return false;
           }
-  
-          const sameCurrentPosition =
+
+          if (
             round === currentRound &&
             matchIndex === currentMatch &&
-            position.slot === currentSlot;
-  
-          if (sameCurrentPosition) {
+            slot === currentSlot
+          ) {
             return false;
           }
-  
+
           if (
             player.uid &&
             existing.uid
           ) {
-            return (
-              player.uid ===
-              existing.uid
-            );
+            return player.uid === existing.uid;
           }
-  
-          return (
-            String(existing.nome || "")
-              .trim()
-              .toLowerCase() ===
-            String(player.nome || "")
-              .trim()
-              .toLowerCase()
+
+          return normalize(
+            player.nome
+          ) === normalize(
+            existing.nome
           );
         });
       })
@@ -851,7 +828,10 @@ ${renderSlot(
   }
 
   function openPlayerModal( round, matchIndex, slot ) {
-    if (isFinished()) {
+    if (
+      publicMode ||
+      isFinished()
+    ) {
       return;
     }
 
@@ -862,41 +842,33 @@ ${renderSlot(
       return;
     }
 
-    if (isByePlayer(match[slot])) {
-      showMessage(
-        "Este jogador avançou por BYE e não pode ser substituído.",
-        "error"
-      );
-
-      return;
-    }
-
     state.activeRound = round;
     state.activeMatch = matchIndex;
     state.activeSlot = slot;
 
     if (el.playerModalTitle) {
       el.playerModalTitle.textContent =
-        `${roundLabel(round)} · Jogo ${ getGlobalMatchNumber( round, matchIndex ) }`;
+        `${roundLabel(round)} · Jogo ${getMatchNumber( round, matchIndex, match )}`;
     }
 
     if (el.playerModalPlayers) {
-      const playersHtml =
-      state.players
-        .map((player, index) => {
-          const alreadyUsed =
-            isPlayerAlreadyUsed(
-              player,
-              round,
-              matchIndex,
-              slot
-            );
-    
-          return ` <button type="button" class="bracket-player-option ${ alreadyUsed ? "disabled" : "" }" data-player-index="${index}" ${alreadyUsed ? "disabled" : ""} > <span> ${index + 1}. ${esc(player.nome)} </span> ${ alreadyUsed ? ` <ion-icon name="checkmark-circle-outline" ></ion-icon> ` : ` <ion-icon name="add-outline" ></ion-icon> ` } </button> `;
-        })
-        .join("");
-    
-    el.playerModalPlayers.innerHTML = ` <button type="button" class="bracket-player-option remove" data-action="remove" > <span> Retirar jogador </span> <ion-icon name="trash-outline"></ion-icon> </button> ${playersHtml} `;    }
+      const players =
+        state.players
+          .map((player, index) => {
+            const used =
+              playerAlreadyUsed(
+                player,
+                round,
+                matchIndex,
+                slot
+              );
+
+            return ` <button type="button" class="bracket-player-option ${ used ? "disabled" : "" }" data-player-index="${index}" ${used ? "disabled" : ""} > <span> ${index + 1}. ${esc(player.nome)} </span> <ion-icon name="${ used ? "checkmark-circle-outline" : "add-outline" }" ></ion-icon> </button> `;
+          })
+          .join("");
+
+      el.playerModalPlayers.innerHTML = ` <button type="button" class="bracket-player-option remove" data-action="remove" > <span>Retirar jogador</span> <ion-icon name="trash-outline"></ion-icon> </button> ${players} `;
+    }
 
     if (el.playerModal) {
       el.playerModal.hidden = false;
@@ -919,90 +891,64 @@ ${renderSlot(
     );
   }
 
-  function addGameToRound(round) {
-    if (!canEditBracket()) {
+  function assignPlayer(index) {
+    if (publicMode) {
       return;
     }
   
-    if (!state.bracket[round]) {
-      state.bracket[round] = [];
-    }
-  
-    state.bracket[round].push({
-      enabled: true,
-  
-      matchNumber:
-        getNextMatchNumber(),
-  
-      player1: null,
-      player2: null,
-      matchDateTime: "",
-      resultado: null
-    });
-  
-    renderBoard();
-  
-    showMessage(
-      "Jogo adicionado. Clique em Salvar chave.",
-      "success"
-    );
-  }
+    const player =
+      state.players[index];
 
-  function updateRoundFilters() {
-    const rounds =
-      roundsForCount(
-        state.players.length
-      );
-  
-    document
-      .querySelectorAll(".bracket-round")
-      .forEach((button) => {
-        const round =
-          button.dataset.round;
-  
-        if (round === "all") {
-          button.style.display =
-            "inline-flex";
-  
-          return;
-        }
-  
-        button.style.display =
-          rounds.includes(round)
-            ? "inline-flex"
-            : "none";
-      });
-  }
-
-  function removeGameFromRound( round, matchIndex ) {
-    if (!canEditBracket()) {
+    if (!player) {
       return;
     }
 
     const match =
-      state.bracket?.[round]?.[matchIndex];
+      state.bracket?.[
+        state.activeRound
+      ]?.[state.activeMatch];
 
     if (!match) {
       return;
     }
 
-    match.enabled = false;
-    match.player1 = null;
-    match.player2 = null;
-    match.matchDateTime = "";
-    match.resultado = null;
+    if (
+      playerAlreadyUsed(
+        player,
+        state.activeRound,
+        state.activeMatch,
+        state.activeSlot
+      )
+    ) {
+      showMessage(
+        "Este jogador já está em outra posição da chave.",
+        "error"
+      );
 
+      closePlayerModal();
+      return;
+    }
+
+    match[state.activeSlot] = {
+      nome: player.nome,
+      uid: player.uid || "",
+      manual: Boolean(player.manual)
+    };
+
+    closePlayerModal();
     renderBoard();
-    updateRoundFilters();
-    
 
     showMessage(
-      "Jogo excluído da chave.",
+      "Jogador selecionado. Clique em Salvar chave.",
       "success"
     );
   }
 
-  function removePlayerFromPosition() {
+  function removePlayer() {
+    if (publicMode) {
+      return;
+    }
+  
     const match =
       state.bracket?.[
         state.activeRound
@@ -1024,84 +970,151 @@ ${renderSlot(
     );
   }
 
-  function assignPlayer(index) {
-    if (isFinished()) {
+  function addGameToRound(round) {
+    if (!canEditBracket()) {
       return;
     }
 
-    const player =
-      state.players[index];
-
-    if (!player) {
-      return;
+    if (!state.bracket[round]) {
+      state.bracket[round] = [];
     }
 
-    const match =
-      state.bracket?.[
-        state.activeRound
-      ]?.[state.activeMatch];
-
-    if (!match) {
-      closePlayerModal();
-      return;
-    }
-
-    const used =
+    const highest =
       Object.values(state.bracket)
         .flat()
-        .some(otherMatch => {
-          if (
-            otherMatch.enabled === false
-          ) {
-            return false;
-          }
+        .reduce(
+          (value, match) =>
+            Math.max(
+              value,
+              Number(match.matchNumber || 0)
+            ),
+          0
+        );
 
-          return [
-            otherMatch.player1,
-            otherMatch.player2
-          ].some(existing => {
-            if (
-              !existing?.uid ||
-              !player.uid
-            ) {
-              return false;
-            }
+    state.bracket[round].push({
+      enabled: true,
+      matchNumber: highest + 1,
+      player1: null,
+      player2: null,
+      matchDateTime: "",
+      resultado: null
+    });
 
-            return (
-              existing.uid === player.uid &&
-              existing !==
-                match[state.activeSlot]
-            );
-          });
-        });
-
-    if (used) {
-      showMessage(
-        "Este jogador já está em outra posição da chave.",
-        "error"
-      );
-
-      closePlayerModal();
-      return;
-    }
-
-    match[state.activeSlot] = {
-      nome: player.nome,
-      uid: player.uid || "",
-      manual: Boolean(player.manual)
-    };
-
-    closePlayerModal();
     renderBoard();
-    updateRoundFilters();
 
     showMessage(
-      "Jogador selecionado.",
+      "Jogo adicionado. Clique em Salvar chave.",
       "success"
     );
   }
 
+  function removeGameFromRound( round, index ) {
+    if (!canEditBracket()) {
+      return;
+    }
+
+    const match =
+      state.bracket?.[round]?.[index];
+
+    if (!match) {
+      return;
+    }
+
+    match.enabled = false;
+    match.player1 = null;
+    match.player2 = null;
+    match.matchDateTime = "";
+    match.resultado = null;
+
+    renderBoard();
+
+    showMessage(
+      "Jogo removido da chave.",
+      "success"
+    );
+  }
+
+  async function saveCategoryData( changes = {} ) {
+    const reference =
+      db
+        .collection("torneio")
+        .doc(tournamentId);
+
+    const snapshot =
+      await reference.get();
+
+    if (!snapshot.exists) {
+      throw new Error(
+        "Torneio não encontrado."
+      );
+    }
+
+    const data =
+      snapshot.data() || {};
+
+    const categories =
+      Array.isArray(data.categorias)
+        ? data.categorias
+        : [];
+
+    const found =
+      categories.some(
+        category =>
+          String(category.id) ===
+          String(state.categoryId)
+      );
+
+    if (!found) {
+      throw new Error(
+        "Categoria não encontrada."
+      );
+    }
+
+    const updated =
+      categories.map(category => {
+        if (
+          String(category.id) !==
+          String(state.categoryId)
+        ) {
+          return category;
+        }
+
+        return {
+          ...category,
+          ...changes
+        };
+      });
+
+    await reference.update({
+      categorias: updated,
+
+      updatedAt:
+        firebase.firestore
+          .FieldValue
+          .serverTimestamp()
+    });
+
+    state.tournament.categorias =
+      updated;
+
+    state.category =
+      updated.find(
+        category =>
+          String(category.id) ===
+          String(state.categoryId)
+      );
+  }
+
   async function saveBracket() {
+
+    if (publicMode) {
+      showMessage(
+        "A consulta pública não permite salvar alterações.",
+        "error"
+      );
+    
+      return;
+    }
     if (!state.user?.uid) {
       showMessage(
         "Usuário não autenticado.",
@@ -1121,19 +1134,12 @@ ${renderSlot(
     }
 
     try {
-      await db
-        .collection("torneio")
-        .doc(tournamentId)
-        .update({
-          chave: state.bracket,
-          updatedAt:
-            firebase.firestore
-              .FieldValue
-              .serverTimestamp()
-        });
+      await saveCategoryData({
+        chave: state.bracket
+      });
 
       showMessage(
-        "Chave salva com sucesso.",
+        "Chave da categoria salva com sucesso.",
         "success"
       );
     } catch (error) {
@@ -1143,110 +1149,200 @@ ${renderSlot(
       );
 
       showMessage(
-        "Não foi possível salvar a chave.",
+        error.message ||
+          "Não foi possível salvar a chave.",
         "error"
       );
     }
   }
 
-  async function finishTournament() {
-    if (!state.user?.uid) {
-      showMessage(
-        "Usuário não autenticado.",
-        "error"
-      );
-
-      return;
+  function configureResultFields() {
+    const format =
+      String(
+        state.category?.formatoPartida ||
+        state.tournament?.formatoPartida ||
+        ""
+      ).toLowerCase();
+  
+    const twoSets =
+      format.includes("2 sets");
+  
+    const threeSets =
+      format.includes("3 sets");
+  
+    if (el.resultSet2Wrapper) {
+      el.resultSet2Wrapper.hidden =
+        !twoSets && !threeSets;
     }
-
-    if (isFinished()) {
-      return;
+  
+    /* * Para 3 sets, o terceiro set começa oculto. * Ele será exibido somente se os dois primeiros * sets forem vencidos por jogadores diferentes. */
+    if (el.resultSet3Wrapper) {
+      el.resultSet3Wrapper.hidden =
+        true;
     }
-
-    const confirmed =
-      window.confirm(
-        "Deseja finalizar o torneio?"
-      );
-
-    if (!confirmed) {
-      return;
+  
+    if (el.resultSuperTieWrapper) {
+      el.resultSuperTieWrapper.hidden =
+        true;
     }
-
-    try {
-      await db
-        .collection("torneio")
-        .doc(tournamentId)
-        .update({
-          status: "finalizado",
-          statusLabel: "Finalizado",
-
-          finishedAt:
-            firebase.firestore
-              .FieldValue
-              .serverTimestamp(),
-
-          updatedAt:
-            firebase.firestore
-              .FieldValue
-              .serverTimestamp()
-        });
-
-      state.tournament.status =
-        "finalizado";
-
-      state.tournament.statusLabel =
-        "Finalizado";
-
-      updateActionVisibility();
-      renderBoard();
-
-      showMessage(
-        "Torneio finalizado com sucesso!",
-        "success"
-      );
-    } catch (error) {
-      console.error(
-        "Erro ao finalizar torneio:",
-        error
-      );
-
-      showMessage(
-        "Não foi possível finalizar o torneio.",
-        "error"
-      );
-    }
+  
+    updateThirdSetVisibility();
   }
 
-  function updateActionVisibility() {
-    const status =
-      getStatus();
-  
-    const isPreparing =
-      status === "preparacao" ||
-      status === "em_preparacao";
-  
-    if (el.saveBracket) {
-      el.saveBracket.style.display =
-        isFinished()
-          ? "none"
-          : "inline-flex";
+  function updateThirdSetVisibility() {
+    if (!el.resultSet3Wrapper) {
+      return;
     }
   
-    /* * Finalizar chave aparece durante * Em preparação. */
-    if (el.finishBracket) {
-      el.finishBracket.style.display =
-        isPreparing
-          ? "inline-flex"
-          : "none";
+    const format =
+      String(
+        state.category?.formatoPartida ||
+        state.tournament?.formatoPartida ||
+        ""
+      ).toLowerCase();
+  
+    const isThreeSets =
+      format.includes("3 sets");
+  
+    /* * Para partidas que não são de 3 sets, * o terceiro set permanece oculto. */
+    if (!isThreeSets) {
+      el.resultSet3Wrapper.hidden =
+        true;
+  
+      return;
     }
   
-    /* * Finalizar torneio aparece durante * Em andamento. */
-    if (el.finishTournament) {
-      el.finishTournament.style.display =
-        isLive()
-          ? "inline-flex"
-          : "none";
+    const set1Player1 =
+      el.resultSet1Player1?.value || "";
+  
+    const set1Player2 =
+      el.resultSet1Player2?.value || "";
+  
+    const set2Player1 =
+      el.resultSet2Player1?.value || "";
+  
+    const set2Player2 =
+      el.resultSet2Player2?.value || "";
+  
+    /* * Enquanto o 1º ou o 2º set estiver incompleto, * o 3º set permanece oculto. */
+    if (
+      set1Player1 === "" ||
+      set1Player2 === "" ||
+      set2Player1 === "" ||
+      set2Player2 === ""
+    ) {
+      el.resultSet3Wrapper.hidden =
+        true;
+  
+      return;
     }
+  
+    const p1Set1 =
+      Number(set1Player1);
+  
+    const p2Set1 =
+      Number(set1Player2);
+  
+    const p1Set2 =
+      Number(set2Player1);
+  
+    const p2Set2 =
+      Number(set2Player2);
+  
+    /* * Empate não define vencedor do set. * A validação final tratará esse erro. */
+    if (
+      p1Set1 === p2Set1 ||
+      p1Set2 === p2Set2
+    ) {
+      el.resultSet3Wrapper.hidden =
+        true;
+  
+      return;
+    }
+  
+    const winnerSet1 =
+      p1Set1 > p2Set1
+        ? 1
+        : 2;
+  
+    const winnerSet2 =
+      p1Set2 > p2Set2
+        ? 1
+        : 2;
+  
+    /* * Se o mesmo jogador ganhou os dois primeiros sets, * o 3º set não deve ser preenchido. */
+    if (
+      winnerSet1 === winnerSet2
+    ) {
+      el.resultSet3Wrapper.hidden =
+        true;
+  
+      /* * Limpa valores antigos do terceiro set, * caso o usuário tenha alterado os dois primeiros sets. */
+      if (el.resultSet3Player1) {
+        el.resultSet3Player1.value =
+          "";
+      }
+  
+      if (el.resultSet3Player2) {
+        el.resultSet3Player2.value =
+          "";
+      }
+  
+      return;
+    }
+  
+    /* * Se cada jogador ganhou um dos dois primeiros sets, * exibe o terceiro set. */
+    el.resultSet3Wrapper.hidden =
+      false;
+  }
+
+  function updateSuperTieVisibility() {
+    if (!el.resultSuperTieWrapper) {
+      return;
+    }
+
+    const format =
+      String(
+        state.category?.formatoPartida ||
+        state.tournament?.formatoPartida ||
+        ""
+      ).toLowerCase();
+
+    if (!format.includes("2 sets")) {
+      el.resultSuperTieWrapper.hidden =
+        true;
+
+      return;
+    }
+
+    const values = [
+      el.resultSet1Player1?.value,
+      el.resultSet1Player2?.value,
+      el.resultSet2Player1?.value,
+      el.resultSet2Player2?.value
+    ];
+
+    if (values.some(value => value === "")) {
+      el.resultSuperTieWrapper.hidden =
+        true;
+
+      return;
+    }
+
+    const set1Winner =
+      Number(el.resultSet1Player1.value) >
+      Number(el.resultSet1Player2.value)
+        ? 1
+        : 2;
+
+    const set2Winner =
+      Number(el.resultSet2Player1.value) >
+      Number(el.resultSet2Player2.value)
+        ? 1
+        : 2;
+
+    el.resultSuperTieWrapper.hidden =
+      set1Winner === set2Winner;
   }
 
   function clearResultFields() {
@@ -1268,223 +1364,6 @@ ${renderSlot(
     showResultMessage("");
   }
 
-  function configureResultFields() {
-    const format =
-      String(
-        state.tournament?.formatoPartida || ""
-      ).toLowerCase();
-  
-    const isTwoSets =
-      format.includes("2 sets");
-  
-    const isThreeSets =
-      format.includes("3 sets");
-  
-    if (el.resultSet2Wrapper) {
-      el.resultSet2Wrapper.hidden =
-        !isTwoSets && !isThreeSets;
-    }
-  
-    if (el.resultSet3Wrapper) {
-      el.resultSet3Wrapper.hidden =
-        !isThreeSets;
-    }
-  
-    /* * Sempre começa oculto. */
-    if (el.resultSuperTieWrapper) {
-      el.resultSuperTieWrapper.hidden =
-        true;
-    }
-  
-    updateSuperTieVisibility();
-  }
-
-  function updateSuperTieVisibility() {
-    if (!el.resultSuperTieWrapper) {
-      return;
-    }
-  
-    /* * Primeiro esconde sempre. * Só será exibido se houver 1 set para cada jogador. */
-    el.resultSuperTieWrapper.hidden =
-      true;
-  
-    const format =
-      String(
-        state.tournament?.formatoPartida || ""
-      ).toLowerCase();
-  
-    if (!format.includes("2 sets")) {
-      return;
-    }
-  
-    const set1Player1 =
-      el.resultSet1Player1?.value;
-  
-    const set1Player2 =
-      el.resultSet1Player2?.value;
-  
-    const set2Player1 =
-      el.resultSet2Player1?.value;
-  
-    const set2Player2 =
-      el.resultSet2Player2?.value;
-  
-    /* * Não calcula vencedor enquanto * algum set ainda estiver vazio. */
-    if (
-      set1Player1 === "" ||
-      set1Player2 === "" ||
-      set2Player1 === "" ||
-      set2Player2 === ""
-    ) {
-      return;
-    }
-  
-    const p1Set1 =
-      Number(set1Player1);
-  
-    const p2Set1 =
-      Number(set1Player2);
-  
-    const p1Set2 =
-      Number(set2Player1);
-  
-    const p2Set2 =
-      Number(set2Player2);
-  
-    const winnerSet1 =
-      p1Set1 > p2Set1
-        ? 1
-        : p2Set1 > p1Set1
-          ? 2
-          : null;
-  
-    const winnerSet2 =
-      p1Set2 > p2Set2
-        ? 1
-        : p2Set2 > p1Set2
-          ? 2
-          : null;
-  
-    /* * Só exibe quando cada jogador * venceu exatamente um set. */
-    const needsSuperTie =
-      winnerSet1 &&
-      winnerSet2 &&
-      winnerSet1 !== winnerSet2;
-  
-    el.resultSuperTieWrapper.hidden =
-      !needsSuperTie;
-  }
-
-  function fillResultFields(result = {}) {
-    const sets =
-      Array.isArray(result.sets)
-        ? result.sets
-        : [];
-
-    if (sets[0]) {
-      el.resultSet1Player1.value =
-        sets[0].player1 ?? "";
-
-      el.resultSet1Player2.value =
-        sets[0].player2 ?? "";
-    }
-
-    if (sets[1]) {
-      el.resultSet2Player1.value =
-        sets[1].player1 ?? "";
-
-      el.resultSet2Player2.value =
-        sets[1].player2 ?? "";
-    }
-
-    if (sets[2]) {
-      el.resultSet3Player1.value =
-        sets[2].player1 ?? "";
-
-      el.resultSet3Player2.value =
-        sets[2].player2 ?? "";
-    }
-
-    if (result.superTieBreak) {
-      el.resultSuperTiePlayer1.value =
-        result.superTieBreak.player1 ?? "";
-
-      el.resultSuperTiePlayer2.value =
-        result.superTieBreak.player2 ?? "";
-    }
-  }
-
-  function openResultModal( round, matchIndex ) {
-    if (
-      !isLive() ||
-      isFinished()
-    ) {
-      return;
-    }
-
-    const match =
-      state.bracket?.[round]?.[matchIndex];
-
-    if (
-      !match ||
-      !match.player1 ||
-      !match.player2
-    ) {
-      showMessage(
-        "Os dois jogadores precisam estar preenchidos.",
-        "error"
-      );
-
-      return;
-    }
-
-    state.resultRound = round;
-    state.resultMatch = matchIndex;
-
-    if (el.resultPlayer1Name) {
-      el.resultPlayer1Name.textContent =
-        match.player1.nome;
-    }
-
-    if (el.resultPlayer2Name) {
-      el.resultPlayer2Name.textContent =
-        match.player2.nome;
-    }
-
-    clearResultFields();
-
-configureResultFields();
-
-if (match.resultado) {
-  fillResultFields(
-    match.resultado
-  );
-}
-
-/* * Necessário chamar depois de preencher * os valores salvos. Caso contrário, * o super tie-break continua oculto. */
-updateSuperTieVisibility();
-
-    if (el.resultModal) {
-      el.resultModal.hidden = false;
-      el.resultModal.setAttribute(
-        "aria-hidden",
-        "false"
-      );
-    }
-  }
-
-  function closeResultModal() {
-    if (!el.resultModal) {
-      return;
-    }
-
-    el.resultModal.hidden = true;
-    el.resultModal.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-  }
-
   function readNumber(input) {
     if (!input) {
       return null;
@@ -1497,7 +1376,11 @@ updateSuperTieVisibility();
       return null;
     }
 
-    return Number(value);
+    const number = Number(value);
+
+    return Number.isFinite(number)
+      ? number
+      : null;
   }
 
   function validateSet(set, label) {
@@ -1537,47 +1420,32 @@ updateSuperTieVisibility();
   }
 
   function calculateWinner(result) {
-    let sets1 = 0;
-    let sets2 = 0;
+    let player1Sets = 0;
+    let player2Sets = 0;
 
     result.sets.forEach(set => {
-      if (
-        Number(set.player1) >
-        Number(set.player2)
-      ) {
-        sets1++;
+      if (set.player1 > set.player2) {
+        player1Sets++;
       }
 
-      if (
-        Number(set.player2) >
-        Number(set.player1)
-      ) {
-        sets2++;
+      if (set.player2 > set.player1) {
+        player2Sets++;
       }
     });
 
-    if (sets1 > sets2) {
+    if (player1Sets > player2Sets) {
       return 1;
     }
 
-    if (sets2 > sets1) {
+    if (player2Sets > player1Sets) {
       return 2;
     }
 
     if (result.superTieBreak) {
-      if (
-        result.superTieBreak.player1 >
+      return result.superTieBreak.player1 >
         result.superTieBreak.player2
-      ) {
-        return 1;
-      }
-
-      if (
-        result.superTieBreak.player2 >
-        result.superTieBreak.player1
-      ) {
-        return 2;
-      }
+        ? 1
+        : 2;
     }
 
     return null;
@@ -1586,7 +1454,7 @@ updateSuperTieVisibility();
   function buildResult() {
     const result = {
       formato:
-        state.tournament?.formatoPartida ||
+        state.category?.formatoPartida ||
         "",
 
       sets: [
@@ -1670,41 +1538,41 @@ updateSuperTieVisibility();
         readNumber(
           el.resultSuperTiePlayer1
         );
-    
+
       const player2 =
         readNumber(
           el.resultSuperTiePlayer2
         );
-    
+
       if (
         player1 === null ||
         player2 === null
       ) {
         showResultMessage(
-          "Informe o placar do super tie-break."
+          "Informe o super tie-break."
         );
-    
+
         return null;
       }
-    
+
       if (player1 === player2) {
         showResultMessage(
           "O super tie-break não pode terminar empatado."
         );
-    
+
         return null;
       }
-    
+
       result.superTieBreak = {
         player1,
         player2
       };
     }
 
-    const winnerPosition =
+    const winner =
       calculateWinner(result);
 
-    if (!winnerPosition) {
+    if (!winner) {
       showResultMessage(
         "Não foi possível identificar o vencedor."
       );
@@ -1713,66 +1581,152 @@ updateSuperTieVisibility();
     }
 
     result.winnerPosition =
-      winnerPosition;
+      winner;
 
     return result;
   }
 
-  /* * Avança o vencedor para a posição * correta da próxima fase. * * Se a posição 1 da próxima fase contém * um jogador que veio de BYE, o vencedor * entra na posição 2. * * Se a posição 2 contém BYE, o vencedor * entra na posição 1. */
+  function fillResultFields(result = {}) {
+    const sets =
+      Array.isArray(result.sets)
+        ? result.sets
+        : [];
+
+    if (sets[0]) {
+      el.resultSet1Player1.value =
+        sets[0].player1 ?? "";
+
+      el.resultSet1Player2.value =
+        sets[0].player2 ?? "";
+    }
+
+    if (sets[1]) {
+      el.resultSet2Player1.value =
+        sets[1].player1 ?? "";
+
+      el.resultSet2Player2.value =
+        sets[1].player2 ?? "";
+    }
+
+    if (sets[2]) {
+      el.resultSet3Player1.value =
+        sets[2].player1 ?? "";
+
+      el.resultSet3Player2.value =
+        sets[2].player2 ?? "";
+    }
+
+    if (result.superTieBreak) {
+      el.resultSuperTiePlayer1.value =
+        result.superTieBreak.player1 ?? "";
+
+      el.resultSuperTiePlayer2.value =
+        result.superTieBreak.player2 ?? "";
+    }
+  }
+
+  function openResultModal( round, matchIndex ) {
+    if (
+      publicMode ||
+      !isLive() ||
+      isFinished()
+    ) {
+      return;
+    }
+
+    const match =
+      state.bracket?.[round]?.[matchIndex];
+
+    if (
+      !match ||
+      !match.player1 ||
+      !match.player2
+    ) {
+      showMessage(
+        "Os dois jogadores precisam estar preenchidos.",
+        "error"
+      );
+
+      return;
+    }
+
+    state.resultRound = round;
+    state.resultMatch = matchIndex;
+
+    if (el.resultPlayer1Name) {
+      el.resultPlayer1Name.textContent =
+        match.player1.nome;
+    }
+
+    if (el.resultPlayer2Name) {
+      el.resultPlayer2Name.textContent =
+        match.player2.nome;
+    }
+
+    clearResultFields();
+
+configureResultFields();
+
+if (match.resultado) {
+  fillResultFields(
+    match.resultado
+  );
+}
+
+/* * Recalcula a visibilidade depois de preencher * os placares salvos. */
+updateThirdSetVisibility();
+updateSuperTieVisibility();
+
+    if (el.resultModal) {
+      el.resultModal.hidden = false;
+      el.resultModal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+    }
+  }
+
+  function closeResultModal() {
+    if (!el.resultModal) {
+      return;
+    }
+
+    el.resultModal.hidden = true;
+    el.resultModal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
   function advanceWinner( round, matchIndex, winner ) {
     const rounds =
-      roundsForCount(
-        state.players.length
-      );
-  
+      getRounds();
+
     const currentIndex =
       rounds.indexOf(round);
-  
+
     if (
       currentIndex < 0 ||
       currentIndex >= rounds.length - 1
     ) {
-      return {
-        advanced: false,
-        isLastRound: true
-      };
+      return false;
     }
-  
+
     const nextRound =
       rounds[currentIndex + 1];
-  
-    const preferredIndex =
+
+    const nextIndex =
       Math.floor(matchIndex / 2);
-  
-    const nextMatches =
-      state.bracket[nextRound] || [];
-  
-    let nextMatch =
-      nextMatches[preferredIndex];
-  
-    if (
-      !nextMatch ||
-      nextMatch.enabled === false
-    ) {
-      nextMatch =
-        nextMatches.find(
-          item =>
-            item &&
-            item.enabled !== false &&
-            (
-              !item.player1 ||
-              !item.player2
-            )
-        );
-    }
-  
+
+    const nextMatch =
+      state.bracket?.[
+        nextRound
+      ]?.[nextIndex];
+
     if (!nextMatch) {
-      return {
-        advanced: false,
-        isLastRound: false
-      };
+      return false;
     }
-  
+
     const winnerData = {
       nome: winner.nome,
       uid: winner.uid || "",
@@ -1781,241 +1735,186 @@ updateSuperTieVisibility();
       sourceRound: round,
       sourceMatch: matchIndex
     };
-  
-    /* * Se existe jogador em cima, * o vencedor entra embaixo. */
-    if (
-      nextMatch.player1 &&
-      !nextMatch.player2
-    ) {
-      nextMatch.player2 =
-        winnerData;
-  
-      return {
-        advanced: true,
-        isLastRound: false
-      };
-    }
-  
-    /* * Se existe jogador embaixo, * o vencedor entra em cima. */
-    if (
-      !nextMatch.player2 &&
-      !nextMatch.player1
-    ) {
-      nextMatch.player1 =
-        winnerData;
-  
-      return {
-        advanced: true,
-        isLastRound: false
-      };
-    }
-  
+
     if (!nextMatch.player1) {
       nextMatch.player1 =
         winnerData;
-  
-      return {
-        advanced: true,
-        isLastRound: false
-      };
+
+      return true;
     }
-  
+
     if (!nextMatch.player2) {
       nextMatch.player2 =
         winnerData;
-  
-      return {
-        advanced: true,
-        isLastRound: false
-      };
+
+      return true;
     }
-  
-    return {
-      advanced: false,
-      isLastRound: false
-    };
+
+    return false;
   }
 
   async function saveResult() {
+    if (publicMode) {
+      showResultMessage(
+        "A consulta pública não permite informar resultados."
+      );
+    
+      return;
+    }
     const match =
       state.bracket?.[
         state.resultRound
       ]?.[state.resultMatch];
-  
+
     if (!match) {
       return;
     }
-  
+
     const result =
       buildResult();
-  
+
     if (!result) {
       return;
     }
-  
+
     const winner =
       result.winnerPosition === 1
         ? match.player1
         : match.player2;
-  
+
     if (!winner) {
       showResultMessage(
         "Vencedor não encontrado."
       );
-  
+
       return;
     }
-  
+
     result.vencedor = {
       nome: winner.nome,
       uid: winner.uid || ""
     };
-  
+
     match.resultado =
       result;
-  
+
     const rounds =
-      roundsForCount(
-        state.players.length
-      );
-  
-    const lastRound =
+      getRounds();
+
+    const finalRound =
       rounds[rounds.length - 1];
-  
-    const isLastRound =
-      state.resultRound === lastRound;
-  
-    /* * Só tenta avançar o jogador se * ainda existir uma próxima fase. */
-    let advanceResult = {
-      advanced: false,
-      isLastRound
-    };
-  
-    if (!isLastRound) {
-      advanceResult =
+
+    const isFinal =
+      state.resultRound === finalRound;
+
+    if (!isFinal) {
+      const advanced =
         advanceWinner(
           state.resultRound,
           state.resultMatch,
           winner
         );
-    }
-  
-    /* * Se não for a final e não houver * posição na próxima rodada, interrompe. * * Na final, continua normalmente. */
-    if (
-      !isLastRound &&
-      !advanceResult.advanced
-    ) {
-      showResultMessage(
-        "Não foi possível encontrar uma posição vazia na próxima fase."
-      );
-  
-      return;
-    }
-  
-    try {
-      await db
-        .collection("torneio")
-        .doc(tournamentId)
-        .update({
-          chave: state.bracket,
-  
-          updatedAt:
-            firebase.firestore
-              .FieldValue
-              .serverTimestamp()
-        });
-  
-      closeResultModal();
-  
-      renderBoard();
-  
-      if (isLastRound) {
-        showMessage(
-          "Resultado da final salvo com sucesso!",
-          "success"
+
+      if (!advanced) {
+        showResultMessage(
+          "Não foi possível avançar o vencedor."
         );
-      } else {
-        showMessage(
-          `${winner.nome} avançou para a próxima fase.`,
-          "success"
-        );
+
+        return;
       }
+    }
+
+    try {
+      await saveCategoryData({
+        chave: state.bracket
+      });
+
+      closeResultModal();
+      renderBoard();
+
+      showMessage(
+        isFinal
+          ? "Resultado da final salvo com sucesso."
+          : `${winner.nome} avançou para a próxima fase.`,
+        "success"
+      );
     } catch (error) {
       console.error(
         "Erro ao salvar resultado:",
         error
       );
-  
+
       showResultMessage(
         "Não foi possível salvar o resultado."
       );
     }
   }
+
   async function finishBracket() {
+    if (publicMode) {
+      showMessage(
+        "A consulta pública não permite finalizar a chave.",
+        "error"
+      );
+    
+      return;
+    }
     if (!state.user?.uid) {
       showMessage(
         "Usuário não autenticado.",
         "error"
       );
-  
+
       return;
     }
-  
-    const status =
-      getStatus();
-  
-    const isPreparing =
-      status === "preparacao" ||
-      status === "em_preparacao";
-  
-    if (!isPreparing) {
+
+    if (!isPreparing()) {
       showMessage(
         "A chave não está em preparação.",
         "error"
       );
-  
+
       return;
     }
-  
+
     const confirmed =
       window.confirm(
-        "Podemos finalizar a chave do torneio?"
+        `Finalizar a chave da categoria "${state.category?.nome || ""}"?`
       );
-  
+
     if (!confirmed) {
       return;
     }
-  
+
     try {
+      await saveCategoryData({
+        chave: state.bracket,
+        chavePreparada: true
+      });
+
       await db
         .collection("torneio")
         .doc(tournamentId)
         .update({
-          chave: state.bracket,
-          chavePreparada: true,
           status: "preparada",
           statusLabel: "Preparada",
-  
+
           updatedAt:
             firebase.firestore
               .FieldValue
               .serverTimestamp()
         });
-  
-      state.tournament.chavePreparada =
-        true;
-  
+
       state.tournament.status =
         "preparada";
-  
+
       state.tournament.statusLabel =
         "Preparada";
-  
-      updateActionVisibility();
-      renderBoard();
-  
+
+      updateActions();
+
       showMessage(
-        "Chave finalizada com sucesso!",
+        "Chave da categoria finalizada com sucesso.",
         "success"
       );
     } catch (error) {
@@ -2023,15 +1922,24 @@ updateSuperTieVisibility();
         "Erro ao finalizar chave:",
         error
       );
-  
+
       showMessage(
-        "Não foi possível finalizar a chave.",
+        error.message ||
+          "Não foi possível finalizar a chave.",
         "error"
       );
     }
   }
 
   async function finishTournament() {
+    if (publicMode) {
+      showMessage(
+        "A consulta pública não permite finalizar o torneio.",
+        "error"
+      );
+    
+      return;
+    }
     if (!state.user?.uid) {
       showMessage(
         "Usuário não autenticado.",
@@ -2083,7 +1991,7 @@ updateSuperTieVisibility();
       renderBoard();
 
       showMessage(
-        "Torneio finalizado com sucesso!",
+        "Torneio finalizado com sucesso.",
         "success"
       );
     } catch (error) {
@@ -2100,255 +2008,78 @@ updateSuperTieVisibility();
   }
 
   function updateActions() {
+    const locked =
+      publicMode ||
+      isFinished();
+  
+    /* * Salvar chave */
     if (el.saveBracket) {
-      el.saveBracket.style.display =
-        isFinished()
-          ? "none"
-          : "inline-flex";
+      el.saveBracket.disabled =
+        locked;
+  
+      el.saveBracket.setAttribute(
+        "aria-disabled",
+        String(locked)
+      );
     }
-
+  
+    /* * Finalizar chave */
     if (el.finishBracket) {
-      el.finishBracket.style.display =
-        isPrepared()
-          ? "inline-flex"
-          : "none";
+      el.finishBracket.disabled =
+        locked;
+  
+      el.finishBracket.setAttribute(
+        "aria-disabled",
+        String(locked)
+      );
     }
-
+  
+    /* * Finalizar torneio */
     if (el.finishTournament) {
-      el.finishTournament.style.display =
-        isLive()
-          ? "inline-flex"
-          : "none";
+      el.finishTournament.disabled =
+        locked;
+  
+      el.finishTournament.setAttribute(
+        "aria-disabled",
+        String(locked)
+      );
     }
-  }
-
-  function clearResultFields() {
-    [
-      el.resultSet1Player1,
-      el.resultSet1Player2,
-      el.resultSet2Player1,
-      el.resultSet2Player2,
-      el.resultSet3Player1,
-      el.resultSet3Player2,
-      el.resultSuperTiePlayer1,
-      el.resultSuperTiePlayer2
-    ].forEach(input => {
-      if (input) {
-        input.value = "";
+  
+    /* * Botão Voltar. * Links não possuem disabled nativo, * por isso usamos classe e aria-disabled. */
+    if (el.backButton) {
+      el.backButton.classList.toggle(
+        "is-disabled",
+        publicMode
+      );
+  
+      el.backButton.setAttribute(
+        "aria-disabled",
+        String(publicMode)
+      );
+  
+      if (publicMode) {
+        el.backButton.setAttribute(
+          "tabindex",
+          "-1"
+        );
+      } else {
+        el.backButton.removeAttribute(
+          "tabindex"
+        );
       }
-    });
-
-    showResultMessage("");
-  }
-
-  function configureResultFields() {
-    const format =
-      String(
-        state.tournament?.formatoPartida ||
-        ""
-      ).toLowerCase();
-  
-    const isTwoSets =
-      format.includes("2 sets");
-  
-    const isThreeSets =
-      format.includes("3 sets");
-  
-    if (el.resultSet2Wrapper) {
-      el.resultSet2Wrapper.hidden =
-        !isTwoSets && !isThreeSets;
     }
   
-    if (el.resultSet3Wrapper) {
-      el.resultSet3Wrapper.hidden =
-        !isThreeSets;
-    }
-  
-    if (el.resultSuperTieWrapper) {
-      el.resultSuperTieWrapper.hidden =
-        true;
-    }
-  
-    updateSuperTieVisibility();
-  }
-
-  function fillResultFields(result = {}) {
-    const sets =
-      Array.isArray(result.sets)
-        ? result.sets
-        : [];
-
-    if (sets[0]) {
-      el.resultSet1Player1.value =
-        sets[0].player1 ?? "";
-
-      el.resultSet1Player2.value =
-        sets[0].player2 ?? "";
-    }
-
-    if (sets[1]) {
-      el.resultSet2Player1.value =
-        sets[1].player1 ?? "";
-
-      el.resultSet2Player2.value =
-        sets[1].player2 ?? "";
-    }
-
-    if (sets[2]) {
-      el.resultSet3Player1.value =
-        sets[2].player1 ?? "";
-
-      el.resultSet3Player2.value =
-        sets[2].player2 ?? "";
-    }
-
-    if (result.superTieBreak) {
-      el.resultSuperTiePlayer1.value =
-        result.superTieBreak.player1 ?? "";
-
-      el.resultSuperTiePlayer2.value =
-        result.superTieBreak.player2 ?? "";
-    }
-  }
-
-  function openResultModal( round, matchIndex ) {
-    if (
-      !isLive() ||
-      isFinished()
-    ) {
-      return;
-    }
-  
-    const match =
-      state.bracket?.[round]?.[matchIndex];
-  
-    if (
-      !match ||
-      !match.player1 ||
-      !match.player2
-    ) {
-      showMessage(
-        "Os dois jogadores precisam estar preenchidos.",
-        "error"
-      );
-  
-      return;
-    }
-  
-    state.resultRound = round;
-    state.resultMatch = matchIndex;
-  
-    if (el.resultPlayer1Name) {
-      el.resultPlayer1Name.textContent =
-        match.player1.nome;
-    }
-  
-    if (el.resultPlayer2Name) {
-      el.resultPlayer2Name.textContent =
-        match.player2.nome;
-    }
-  
-    clearResultFields();
-
-configureResultFields();
-
-if (match.resultado) {
-  fillResultFields(
-    match.resultado
-  );
-}
-
-updateSuperTieVisibility();
-  
-    updateSuperTieVisibility();
-  
-    if (el.resultModal) {
-      el.resultModal.hidden = false;
-      el.resultModal.setAttribute(
-        "aria-hidden",
-        "false"
-      );
-    }
-  }
-
-  function closeResultModal() {
-    if (!el.resultModal) {
-      return;
-    }
-
-    el.resultModal.hidden = true;
-    el.resultModal.setAttribute(
-      "aria-hidden",
-      "true"
+    /* * Marca visualmente a página pública. */
+    document.body.classList.toggle(
+      "is-public-view",
+      publicMode
     );
-  }
-
-  function readTournamentPlayers(data = {}) {
-    const source =
-      Array.isArray(data.jogadores)
-        ? data.jogadores
-        : Array.isArray(data.jjogadores)
-          ? data.jjogadores
-          : Array.isArray(data.players)
-            ? data.players
-            : [];
   
-    return source
-      .map((player, index) => {
-        if (typeof player === "string") {
-          const nome =
-            String(player).trim();
-  
-          if (!nome) {
-            return null;
-          }
-  
-          return {
-            posicao: index + 1,
-            nome,
-            uid: "",
-            manual: true
-          };
-        }
-  
-        const nome =
-          String(
-            player?.nome ||
-            player?.name ||
-            player?.displayName ||
-            player?.nomeJogador ||
-            ""
-          ).trim();
-  
-        if (!nome) {
-          return null;
-        }
-  
-        return {
-          posicao:
-            Number(
-              player?.posicao ||
-              index + 1
-            ),
-  
-          nome,
-  
-          uid: String(
-            player?.uid ||
-            player?.userId ||
-            ""
-          ).trim(),
-  
-          manual: Boolean(
-            player?.manual) ||
-            !String(
-              player?.uid ||
-              player?.userId ||
-              ""
-            ).trim()
-        };
-      })
-      .filter(Boolean);
+    /* * Marca visualmente torneio finalizado. */
+    document.body.classList.toggle(
+      "is-finished-view",
+      isFinished()
+    );
   }
 
   async function loadTournament() {
@@ -2380,15 +2111,73 @@ updateSuperTieVisibility();
       state.tournament =
         snapshot.data() || {};
 
-        state.players =
-        readTournamentPlayers(
-          state.tournament
+      state.categories =
+        Array.isArray(
+          state.tournament.categorias
+        )
+          ? state.tournament.categorias.map(
+              normalizeCategory
+            )
+          : [];
+
+      renderCategorySelector();
+
+      if (!state.categoryId) {
+        if (el.name) {
+          el.name.textContent =
+            state.tournament.nome ||
+            "Torneio";
+        }
+
+        if (el.meta) {
+          el.meta.textContent =
+            "Selecione uma categoria para montar a chave.";
+        }
+
+        if (el.board) {
+          el.board.innerHTML = ` <div class="bracket-message"> Selecione uma categoria acima para visualizar a chave. </div> `;
+        }
+
+        return;
+      }
+
+      state.category =
+        state.categories.find(
+          category =>
+            String(category.id) ===
+            String(state.categoryId)
         );
 
-      state.bracket =
-        normalizeBracket(
-          state.tournament.chave || {}
+      if (!state.category) {
+        showMessage(
+          "Categoria não encontrada neste torneio.",
+          "error"
         );
+
+        return;
+      }
+
+      state.format =
+  state.category.formatoJogo ||
+  "Simples";
+
+state.players =
+  readPlayers(
+    state.category
+  );
+
+updateFormatButtons();
+state.bracket =
+state.category.chave
+  ? normalizeBracket(
+      state.category.chave
+    )
+  : buildInitialBracket();
+
+      if (el.categorySelect) {
+        el.categorySelect.value =
+          state.categoryId;
+      }
 
       if (el.name) {
         el.name.textContent =
@@ -2398,13 +2187,16 @@ updateSuperTieVisibility();
 
       if (el.meta) {
         el.meta.textContent =
-          `${state.tournament.formatoJogo || "Simples"} · ` +
+          `${state.category.nome} · ` +
+          `${state.category.formatoJogo || "Formato não informado"} · ` +
+          `${state.category.formatoPartida || "Partida não informada"} · ` +
           `${state.players.length} jogador(es) · ` +
           `${state.tournament.statusLabel || "Em preparação"}`;
       }
 
       updateActions();
       renderBoard();
+
     } catch (error) {
       console.error(
         "Erro ao carregar torneio:",
@@ -2412,7 +2204,116 @@ updateSuperTieVisibility();
       );
 
       showMessage(
-        "Não foi possível carregar o torneio.",
+        error.message ||
+          "Não foi possível carregar o torneio.",
+        "error"
+      );
+    }
+  }
+
+  async function shareBracket() {
+    if (!state.categoryId) {
+      showMessage(
+        "Selecione uma categoria antes de compartilhar.",
+        "error"
+      );
+  
+      return;
+    }
+  
+    try {
+      await db
+        .collection("torneio")
+        .doc(tournamentId)
+        .update({
+          shareEnabled: true,
+  
+          sharedAt:
+            firebase.firestore
+              .FieldValue
+              .serverTimestamp()
+        });
+    } catch (error) {
+      console.error(
+        "Erro ao habilitar compartilhamento:",
+        error
+      );
+  
+      showMessage(
+        "Não foi possível liberar o acesso público.",
+        "error"
+      );
+  
+      return;
+    }
+  
+    const url =
+      new URL(
+        window.location.href
+      );
+  
+    url.searchParams.set(
+      "id",
+      tournamentId
+    );
+  
+    url.searchParams.set(
+      "categoryId",
+      state.categoryId
+    );
+  
+    url.searchParams.set(
+      "public",
+      "1"
+    );
+  
+    const shareUrl =
+      url.toString();
+  
+    const title =
+      `${state.tournament?.nome || "Torneio"} - ${ state.category?.nome || "Categoria" }`;
+  
+    try {
+      if (
+        navigator.share &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share({
+          title,
+          text: title,
+          url: shareUrl
+        });
+  
+        return;
+      }
+  
+      if (
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+      ) {
+        await navigator.clipboard.writeText(
+          shareUrl
+        );
+  
+        showMessage(
+          "Link público copiado.",
+          "success"
+        );
+  
+        return;
+      }
+  
+      window.prompt(
+        "Copie o link público:",
+        shareUrl
+      );
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        return;
+      }
+  
+      showMessage(
+        "Não foi possível compartilhar a chave.",
         "error"
       );
     }
@@ -2423,13 +2324,12 @@ updateSuperTieVisibility();
       state.tournament?.nome ||
       "Torneio";
   
-    const rounds =
-      roundsForCount(
-        state.players.length
-      );
+    const categoryName =
+      state.category?.nome ||
+      "Categoria";
   
-    const reportHtml =
-      rounds
+    const content =
+      getRounds()
         .map(round => {
           const matches =
             state.bracket?.[round] || [];
@@ -2444,7 +2344,7 @@ updateSuperTieVisibility();
             return "";
           }
   
-          return ` <section class="pdf-round"> <h2>${esc( roundLabel(round) )}</h2> ${activeMatches .map((match, index) => { const p1 = match.player1?.nome || ""; const p2 = match.player2?.nome || ""; const result = formatSavedResult( match.resultado ); const winner = match.resultado ?.vencedor?.nome || ""; return ` <article class="pdf-match"> <strong> Jogo ${ getMatchNumber( round, index, match ) } </strong> <div class="pdf-player"> <span> ${esc(p1)} </span> ${ winner === p1 ? "<b>✓</b>" : "" } </div> <div class="pdf-player"> <span> ${esc(p2)} </span> ${ winner === p2 ? "<b>✓</b>" : "" } </div> ${ result ? ` <div class="pdf-score"> ${esc(result)} </div> ` : "" } ${ match.matchDateTime ? ` <div class="pdf-date"> ${esc( match.matchDateTime )} </div> ` : "" } </article> `; }) .join("")} </section> `;
+          return ` <section class="pdf-round"> <h2> ${esc(roundLabel(round))} </h2> ${ activeMatches .map((match, index) => ` <article class="pdf-match"> <strong> Jogo ${getMatchNumber( round, index, match )} </strong> <div class="pdf-player"> ${esc( match.player1?.nome || "A definir" )} </div> <div class="pdf-player"> ${esc( match.player2?.nome || "A definir" )} </div> ${ match.resultado ? ` <div class="pdf-score"> ${esc( formatSavedResult( match.resultado ) )} </div> ` : "" } </article> `) .join("") } </section> `;
         })
         .join("");
   
@@ -2457,17 +2357,16 @@ updateSuperTieVisibility();
   
     if (!printWindow) {
       showMessage(
-        "Permita a abertura de pop-ups para gerar o PDF.",
+        "Permita pop-ups para gerar o PDF.",
         "error"
       );
   
       return;
     }
   
-    printWindow.document.write(` <!doctype html> <html lang="pt-BR"> <head> <meta charset="utf-8"> <title> Chave - ${esc(tournamentName)} </title> <style> * { box-sizing: border-box; } body { margin: 0; padding: 24px; color: #17213d; background: #ffffff; font-family: Arial, Helvetica, sans-serif; } h1 { margin: 0 0 6px; color: #071b72; font-size: 24px; } .pdf-subtitle { margin-bottom: 24px; color: #617089; font-size: 13px; } .pdf-round { margin-bottom: 24px; page-break-inside: avoid; } .pdf-round h2 { margin: 0 0 10px; padding-bottom: 7px; color: #05649a; border-bottom: 2px solid #05649a; font-size: 17px; } .pdf-match { display: inline-block; vertical-align: top; width: 220px; min-height: 110px; margin: 0 10px 12px 0; padding: 11px; border: 1px solid #d2d8df; border-radius: 9px; background: #f8fafc; } .pdf-match > strong { display: block; margin-bottom: 7px; color: #617089; font-size: 11px; text-transform: uppercase; } .pdf-player { display: flex; align-items: center; justify-content: space-between; min-height: 25px; padding: 4px 6px; border: 1px solid #d2d8df; border-radius: 5px; background: #ffffff; font-size: 12px; font-weight: 700; } .pdf-player + .pdf-player { margin-top: 5px; } .pdf-player b { color: #17853a; font-size: 16px; } .pdf-score { margin-top: 8px; color: #17213d; font-size: 12px; font-weight: 900; text-align: right; } .pdf-date { margin-top: 7px; color: #617089; font-size: 10px; } @media print { body { padding: 0; } } </style> </head> <body> <h1> Nome do Torneio: ${esc(tournamentName)} </h1> <div class="pdf-subtitle"> Chave do torneio </div> ${reportHtml} </body> </html> `);
+    printWindow.document.write(` <!doctype html> <html lang="pt-BR"> <head> <meta charset="utf-8"> <title> ${esc(tournamentName)} </title> <style> body { margin: 0; padding: 24px; color: #17213d; font-family: Arial, sans-serif; } h1 { color: #071b72; } .subtitle { margin-bottom: 24px; color: #617089; } .pdf-round { margin-bottom: 24px; page-break-inside: avoid; } .pdf-round h2 { padding-bottom: 8px; color: #05649a; border-bottom: 2px solid #05649a; } .pdf-match { display: inline-block; width: 220px; min-height: 100px; margin: 0 10px 12px 0; padding: 11px; vertical-align: top; border: 1px solid #d2d8df; border-radius: 8px; background: #f8fafc; } .pdf-match strong { display: block; margin-bottom: 8px; color: #617089; font-size: 11px; } .pdf-player { margin-top: 5px; padding: 7px; border: 1px solid #d2d8df; border-radius: 5px; background: #ffffff; font-size: 12px; font-weight: bold; } .pdf-score { margin-top: 8px; font-size: 12px; font-weight: bold; text-align: right; } </style> </head> <body> <h1> ${esc(tournamentName)} </h1> <div class="subtitle"> Categoria: ${esc(categoryName)} </div> ${content} </body> </html> `);
   
     printWindow.document.close();
-  
     printWindow.focus();
   
     setTimeout(() => {
@@ -2475,35 +2374,129 @@ updateSuperTieVisibility();
     }, 500);
   }
 
+  function updateFormatButtons() {
+    const currentFormat =
+      state.category?.formatoJogo ||
+      state.format ||
+      "Simples";
+  
+    document
+      .querySelectorAll(".bracket-toggle")
+      .forEach(button => {
+        button.classList.toggle(
+          "is-active",
+          button.dataset.format ===
+            currentFormat
+        );
+      });
+  }
+
   function bindEvents() {
+    el.backButton?.addEventListener(
+      "click",
+      event => {
+        if (!publicMode) {
+          return;
+        }
+  
+        event.preventDefault();
+  
+        showMessage(
+          "O botão Voltar está desabilitado na consulta pública.",
+          "error"
+        );
+      }
+    );
+  
+    el.categorySelect?.addEventListener(
+      "change",
+      changeCategory
+    );
+  
+    el.generatePdf?.addEventListener(
+      "click",
+      event => {
+        event.preventDefault();
+        generateBracketPdf();
+      }
+    );
+  
+    el.shareBracket?.addEventListener(
+      "click",
+      event => {
+        event.preventDefault();
+        shareBracket();
+      }
+    );
+  
+    /* * Filtro Simples/Duplas */
+    document
+      .querySelectorAll(".bracket-toggle")
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            const selectedFormat =
+              button.dataset.format ||
+              "Simples";
+  
+            state.format =
+              selectedFormat;
+  
+            document
+              .querySelectorAll(
+                ".bracket-toggle"
+              )
+              .forEach(item => {
+                item.classList.toggle(
+                  "is-active",
+                  item === button
+                );
+              });
+  
+            renderBoard();
+          }
+        );
+      });
+  
+    /* * Filtro das fases da chave */
     document
       .querySelectorAll(".bracket-round")
       .forEach(button => {
         button.addEventListener(
           "click",
           () => {
+            const selectedRound =
+              button.dataset.round || "all";
+  
+            state.round =
+              selectedRound;
+  
             document
               .querySelectorAll(
                 ".bracket-round"
               )
-              .forEach(item =>
-                item.classList.remove(
-                  "is-active"
-                )
-              );
-
-            button.classList.add(
-              "is-active"
-            );
-
-            state.round =
-              button.dataset.round ||
-              "all";
-
+              .forEach(item => {
+                item.classList.toggle(
+                  "is-active",
+                  item === button
+                );
+              });
+  
             renderBoard();
           }
         );
       });
+  
+    /* * Eventos da área da chave */
+    el.board?.addEventListener(
+      "click",
+      event => {
+        // restante do código
+      }
+    );
+  
+    // restante dos eventos...
 
     el.board?.addEventListener(
       "click",
@@ -2512,7 +2505,7 @@ updateSuperTieVisibility();
           event.target.closest(
             "[data-result-round]"
           );
-
+  
         if (resultButton) {
           openResultModal(
             resultButton.dataset.resultRound,
@@ -2520,28 +2513,28 @@ updateSuperTieVisibility();
               resultButton.dataset.resultMatch
             )
           );
-
+  
           return;
         }
-
+  
         const addButton =
           event.target.closest(
             "[data-add-round]"
           );
-
+  
         if (addButton) {
           addGameToRound(
             addButton.dataset.addRound
           );
-
+  
           return;
         }
-
+  
         const removeButton =
           event.target.closest(
             "[data-remove-round]"
           );
-
+  
         if (removeButton) {
           removeGameFromRound(
             removeButton.dataset.removeRound,
@@ -2549,19 +2542,19 @@ updateSuperTieVisibility();
               removeButton.dataset.removeMatch
             )
           );
-
+  
           return;
         }
-
+  
         const slotButton =
           event.target.closest(
             "[data-round][data-match][data-slot]"
           );
-
+  
         if (!slotButton) {
           return;
         }
-
+  
         openPlayerModal(
           slotButton.dataset.round,
           Number(
@@ -2571,11 +2564,7 @@ updateSuperTieVisibility();
         );
       }
     );
-
-    el.generatePdf?.addEventListener(
-      "click",
-      generateBracketPdf
-    );
+  
 
     el.board?.addEventListener(
       "change",
@@ -2593,9 +2582,7 @@ updateSuperTieVisibility();
           state.bracket?.[
             input.dataset.dateRound
           ]?.[
-            Number(
-              input.dataset.dateMatch
-            )
+            Number(input.dataset.dateMatch)
           ];
 
         if (!match) {
@@ -2621,7 +2608,7 @@ updateSuperTieVisibility();
           );
 
         if (removeButton) {
-          removePlayerFromPosition();
+          removePlayer();
           return;
         }
 
@@ -2633,8 +2620,7 @@ updateSuperTieVisibility();
         if (playerButton) {
           assignPlayer(
             Number(
-              playerButton.dataset
-                .playerIndex
+              playerButton.dataset.playerIndex
             )
           );
         }
@@ -2661,21 +2647,24 @@ updateSuperTieVisibility();
       el.resultSet1Player2,
       el.resultSet2Player1,
       el.resultSet2Player2
-    ].forEach((input) => {
+    ].forEach(input => {
       input?.addEventListener(
         "input",
-        updateSuperTieVisibility
+        () => {
+          updateThirdSetVisibility();
+          updateSuperTieVisibility();
+        }
       );
     });
-
-    el.saveResult?.addEventListener(
-      "click",
-      saveResult
-    );
 
     el.saveBracket?.addEventListener(
       "click",
       saveBracket
+    );
+
+    el.saveResult?.addEventListener(
+      "click",
+      saveResult
     );
 
     el.finishBracket?.addEventListener(
@@ -2709,32 +2698,30 @@ updateSuperTieVisibility();
 
   function waitForAuth() {
     return new Promise(resolve => {
-      if (auth.currentUser) {
+      if (auth?.currentUser) {
         resolve(auth.currentUser);
         return;
       }
 
-      let resolved = false;
+      let finished = false;
 
       const unsubscribe =
         auth.onAuthStateChanged(user => {
-          if (resolved) {
+          if (finished) {
             return;
           }
 
-          resolved = true;
+          finished = true;
           unsubscribe();
-          resolve(user || 
-
-null);
+          resolve(user || null);
         });
 
       setTimeout(() => {
-        if (resolved) {
+        if (finished) {
           return;
         }
 
-        resolved = true;
+        finished = true;
         unsubscribe();
         resolve(auth.currentUser || null);
       }, 5000);
@@ -2742,32 +2729,55 @@ null);
   }
 
   async function init() {
-    if (!db || !auth) {
+    if (!db) {
       showMessage(
         "Firebase não foi carregado corretamente.",
         "error"
       );
-
+  
       return;
     }
-
+  
+    if (publicMode) {
+      state.user = null;
+  
+      bindEvents();
+  
+      await loadTournament();
+  
+      updateActions();
+  
+      return;
+    }
+  
+    if (!auth) {
+      showMessage(
+        "Firebase Auth não foi carregado corretamente.",
+        "error"
+      );
+  
+      return;
+    }
+  
     const user =
       await waitForAuth();
-
+  
     if (!user?.uid) {
       showMessage(
         "Usuário não autenticado.",
         "error"
       );
-
+  
       return;
     }
-
+  
     state.user = user;
-
+  
     bindEvents();
-
+  
     await loadTournament();
+  
+    updateActions();
   }
 
   document.addEventListener(
