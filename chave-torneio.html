@@ -3,13 +3,16 @@
 
 <head>
   <meta charset="utf-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1" >
 
   <meta name="theme-color" content="#f5f7fa" >
 
   <meta name="description" content="Chave do torneio - TennisPro" >
 
-  <title>Chave do torneio | TennisPro</title>
+  <title>
+    Chave do torneio | TennisPro
+  </title>
 
   <link rel="stylesheet" href="css/style.css" >
 
@@ -27,11 +30,14 @@
 
   <main class="bracket-main">
 
-    <!-- ===================================================== CABEÇALHO ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- CABEÇALHO -->
+    <!-- ===================================================== -->
 
     <section class="bracket-header-card">
 
-      <div>
+      <div class="bracket-header-content">
+
         <span class="bracket-kicker">
           Chave do torneio
         </span>
@@ -43,20 +49,49 @@
         <p id="bracketTournamentMeta">
           Carregando dados...
         </p>
+
+        <!-- ===================================================== -->
+        <!-- CATEGORIA DA CHAVE -->
+        <!-- ===================================================== -->
+
+        <div class="bracket-category-selector">
+
+          <label for="bracketCategorySelect" class="bracket-category-label" >
+            Categoria da chave
+          </label>
+
+          <select id="bracketCategorySelect" class="bracket-category-select" aria-label="Selecionar categoria para montar a chave" >
+            <option value="">
+              Carregando categorias...
+            </option>
+          </select>
+
+          <small class="bracket-category-help">
+            Selecione a categoria que deseja montar ou consultar.
+          </small>
+
+        </div>
+
       </div>
 
       <a href="torneio.html" class="bracket-back-btn" >
         <ion-icon name="arrow-back-outline"></ion-icon>
-        <span>Voltar</span>
+
+        <span>
+          Voltar
+        </span>
       </a>
 
     </section>
 
-    <!-- ===================================================== FILTROS ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- FILTROS -->
+    <!-- ===================================================== -->
 
     <section class="bracket-toolbar-card">
 
       <div class="bracket-toggle-group" aria-label="Formato do torneio" >
+
         <button type="button" class="bracket-toggle is-active" data-format="Simples" >
           Simples
         </button>
@@ -64,9 +99,11 @@
         <button type="button" class="bracket-toggle" data-format="Duplas" >
           Duplas
         </button>
+
       </div>
 
       <div class="bracket-rounds" aria-label="Fases do torneio" >
+
         <button type="button" class="bracket-round is-active" data-round="all" >
           Todos
         </button>
@@ -94,42 +131,62 @@
         <button type="button" class="bracket-round" data-round="final" >
           F
         </button>
+
       </div>
 
     </section>
 
-    <!-- ===================================================== AÇÕES DA CHAVE ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- AÇÕES DA CHAVE -->
+    <!-- ===================================================== -->
 
-    <div class="bracket-save-row bracket-actions" >
+    <div class="bracket-save-row bracket-actions">
 
       <button id="saveBracketBtn" type="button" class="bracket-save-btn" >
         <ion-icon name="save-outline"></ion-icon>
-        <span>Salvar chave</span>
+
+        <span>
+          Salvar chave
+        </span>
       </button>
 
       <button id="finishBracketBtn" type="button" class="bracket-finish-btn" >
         <ion-icon name="checkmark-done-outline"></ion-icon>
-        <span>Finalizar chave</span>
+
+        <span>
+          Finalizar chave
+        </span>
       </button>
 
       <button id="finishTournamentBtn" type="button" class="bracket-finish-tournament-btn" >
         <ion-icon name="flag-outline"></ion-icon>
-        <span>Finalizar torneio</span>
+
+        <span>
+          Finalizar torneio
+        </span>
       </button>
 
       <button id="generateBracketPdfBtn" type="button" class="bracket-pdf-btn" >
         <ion-icon name="document-text-outline"></ion-icon>
-        <span>Gerar PDF</span>
+
+        <span>
+          Gerar PDF
+        </span>
       </button>
 
       <button id="shareBracketBtn" type="button" class="bracket-share-btn" >
         <ion-icon name="share-social-outline"></ion-icon>
-        <span>Compartilhar chave</span>
+
+        <span>
+          Compartilhar chave
+        </span>
       </button>
 
     </div>
 
-    <!-- ===================================================== CHAVE ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- CHAVE -->
+    <!-- ===================================================== -->
 
     <section id="bracketBoard" class="bracket-board" aria-label="Chave do torneio" ></section>
 
@@ -137,7 +194,9 @@
 
   </main>
 
-  <!-- ===================================================== MODAL DE POSIÇÃO DO JOGADOR ===================================================== -->
+  <!-- ===================================================== -->
+  <!-- MODAL DE POSIÇÃO DO JOGADOR -->
+  <!-- ===================================================== -->
 
   <div id="bracketPlayerModal" class="bracket-modal" hidden aria-hidden="true" >
 
@@ -146,6 +205,7 @@
       <div class="bracket-modal-head">
 
         <div>
+
           <span class="bracket-kicker">
             Posição da chave
           </span>
@@ -153,6 +213,7 @@
           <h2 id="bracketModalTitle">
             Selecionar jogador
           </h2>
+
         </div>
 
         <button id="closeBracketModal" type="button" class="bracket-close" aria-label="Fechar" >
@@ -167,7 +228,9 @@
 
   </div>
 
-  <!-- ===================================================== MODAL DE RESULTADO DA PARTIDA ===================================================== -->
+  <!-- ===================================================== -->
+  <!-- MODAL DE RESULTADO DA PARTIDA -->
+  <!-- ===================================================== -->
 
   <div id="bracketResultModal" class="bracket-modal" hidden aria-hidden="true" >
 
@@ -176,6 +239,7 @@
       <div class="bracket-modal-head">
 
         <div>
+
           <span class="bracket-kicker">
             Resultado da partida
           </span>
@@ -183,6 +247,7 @@
           <h2 id="bracketResultTitle">
             Informar placar
           </h2>
+
         </div>
 
         <button id="closeBracketResultModal" type="button" class="bracket-close" aria-label="Fechar resultado" >
@@ -197,7 +262,9 @@
           Jogador 1
         </strong>
 
-        <span>×</span>
+        <span>
+          ×
+        </span>
 
         <strong id="resultPlayer2Name">
           Jogador 2
@@ -208,34 +275,51 @@
       <div class="bracket-result-fields">
 
         <!-- 1º SET -->
+
         <div id="resultSet1Wrapper" class="bracket-result-set" >
-          <strong>1º set</strong>
+
+          <strong>
+            1º set
+          </strong>
 
           <input id="resultSet1Player1" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 1" >
 
           <input id="resultSet1Player2" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 2" >
+
         </div>
 
         <!-- 2º SET -->
+
         <div id="resultSet2Wrapper" class="bracket-result-set" hidden >
-          <strong>2º set</strong>
+
+          <strong>
+            2º set
+          </strong>
 
           <input id="resultSet2Player1" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 1" >
 
           <input id="resultSet2Player2" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 2" >
+
         </div>
 
         <!-- 3º SET -->
+
         <div id="resultSet3Wrapper" class="bracket-result-set" hidden >
-          <strong>3º set</strong>
+
+          <strong>
+            3º set
+          </strong>
 
           <input id="resultSet3Player1" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 1" >
 
           <input id="resultSet3Player2" type="number" min="0" max="7" inputmode="numeric" placeholder="Jogador 2" >
+
         </div>
 
         <!-- SUPER TIE-BREAK -->
+
         <div id="resultSuperTieWrapper" class="bracket-result-set" hidden >
+
           <strong>
             Super tie-break
           </strong>
@@ -243,6 +327,7 @@
           <input id="resultSuperTiePlayer1" type="number" min="0" inputmode="numeric" placeholder="Jogador 1" >
 
           <input id="resultSuperTiePlayer2" type="number" min="0" inputmode="numeric" placeholder="Jogador 2" >
+
         </div>
 
       </div>
@@ -257,7 +342,10 @@
 
         <button id="saveBracketResultBtn" type="button" class="bracket-save-result-btn" >
           <ion-icon name="save-outline"></ion-icon>
-          <span>Salvar resultado</span>
+
+          <span>
+            Salvar resultado
+          </span>
         </button>
 
       </div>
@@ -266,7 +354,9 @@
 
   </div>
 
-  <!-- ===================================================== FIREBASE ===================================================== -->
+  <!-- ===================================================== -->
+  <!-- FIREBASE -->
+  <!-- ===================================================== -->
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 
@@ -276,7 +366,8 @@
 
   <script src="js/firebase.js"></script>
 
-  <script src="js/chave-torneio.js?v=20260730-7"></script>
+  <script src="js/chave-torneio.js?v=20260731-13"></script>
 
 </body>
+
 </html>
