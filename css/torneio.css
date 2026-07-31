@@ -1647,3 +1647,443 @@ body.tournament-page
     max-width: calc(100% - 13px) !important;
   }
 }
+
+/* ========================================================= AJUSTES PARA CATEGORIAS DO TORNEIO ========================================================= */
+
+/* Área de cadastro de categorias */
+
+.tournament-categories-card {
+  grid-column: 1 / -1;
+}
+
+.tournament-category-create {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.tournament-category-create .tournament-input {
+  min-width: 0;
+}
+
+.tournament-category-create .tournament-btn {
+  min-width: 170px;
+  white-space: nowrap;
+}
+
+.tournament-categories {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* Editor de cada categoria */
+
+.tournament-category-editor {
+  display: grid;
+  gap: 11px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
+  color: var(--torneio-text) !important;
+  border: 1px solid var(--torneio-border);
+  border-radius: 12px;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(16, 38, 64, 0.04);
+}
+
+.tournament-category-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--torneio-border-light);
+}
+
+.tournament-category-editor-head > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.tournament-category-editor-head strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--torneio-title) !important;
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.tournament-category-editor-head small {
+  display: block;
+  margin-top: 4px;
+  color: var(--torneio-muted) !important;
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.tournament-remove-category {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 35px;
+  height: 35px;
+  color: var(--torneio-red) !important;
+  border: 1px solid #d77b82;
+  border-radius: 8px;
+  background: var(--torneio-red-soft) !important;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.tournament-remove-category ion-icon {
+  font-size: 18px;
+}
+
+.tournament-remove-category:hover {
+  color: #ffffff !important;
+  border-color: var(--torneio-red);
+  background: var(--torneio-red) !important;
+}
+
+.tournament-remove-category:active {
+  transform: scale(0.96);
+}
+
+/* Jogadores dentro da categoria */
+
+.tournament-category-players {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid var(--torneio-border-light);
+}
+
+.tournament-category-players .tournament-label {
+  margin-bottom: -2px;
+}
+
+.tournament-category-players .tournament-search-btn {
+  margin-top: 0;
+}
+
+.category-selected-players {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.category-selected-players .tournament-selected-player {
+  min-width: 0;
+}
+
+.category-selected-players .tournament-selected-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Select de categoria no card do torneio */
+
+.tournament-card-category {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px solid #b4d2e3;
+  border-radius: 10px;
+  background: var(--torneio-blue-soft) !important;
+}
+
+.tournament-card-category label {
+  display: block;
+  color: var(--torneio-primary) !important;
+  font-size: 0.67rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.tournament-card-category .tournament-input {
+  min-height: 43px;
+  color: var(--torneio-text) !important;
+  border-color: #b4d2e3 !important;
+  background: #ffffff !important;
+}
+
+/* Conteúdo da categoria selecionada */
+
+.tournament-category-content {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin-top: 2px;
+}
+
+.tournament-category-content .tournament-card-info {
+  margin-top: 0;
+}
+
+.tournament-category-content
+.tournament-toggle-card-players {
+  margin-top: 0;
+}
+
+.tournament-category-content
+.tournament-card-player-list {
+  margin-bottom: 12px;
+}
+
+/* Botão Mostrar jogadores */
+
+.tournament-toggle-card-players {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 38px;
+  margin: 10px 0 0;
+  padding: 0 10px;
+  color: var(--torneio-primary) !important;
+  border: 1px solid var(--torneio-border);
+  border-radius: 8px;
+  background: var(--torneio-soft) !important;
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.tournament-toggle-card-players ion-icon {
+  flex: 0 0 auto;
+  font-size: 17px;
+}
+
+.tournament-toggle-card-players:hover {
+  color: #ffffff !important;
+  border-color: var(--torneio-primary);
+  background: var(--torneio-primary) !important;
+}
+
+.tournament-toggle-card-players:active {
+  transform: scale(0.985);
+}
+
+.tournament-card-player-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  margin: 10px 0 12px;
+}
+
+.tournament-card-player-list.is-hidden {
+  display: none !important;
+}
+
+/* Chips dos jogadores */
+
+.tournament-player-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  color: var(--torneio-primary) !important;
+  border: 1px solid #b4d2e3;
+  border-radius: 999px;
+  background: var(--torneio-blue-soft) !important;
+  font-size: 0.66rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.tournament-player-chip > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tournament-player-chip-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: #ffffff !important;
+  border-radius: 50%;
+  background: var(--torneio-primary) !important;
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+/* Estados vazios */
+
+.tournament-categories
+.tournament-selected-empty {
+  margin-top: 0;
+}
+
+.tournament-empty-players {
+  display: block;
+  width: 100%;
+  color: var(--torneio-light) !important;
+  font-size: 0.72rem;
+}
+
+/* Layout para desktop */
+
+@media (min-width: 769px) {
+
+  .tournament-categories-card {
+    grid-column: 1 / -1;
+  }
+
+  .tournament-category-editor {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .tournament-category-editor-head,
+  .tournament-category-players {
+    grid-column: 1 / -1;
+  }
+
+  .tournament-category-editor-head {
+    align-self: stretch;
+  }
+
+  .tournament-category-editor
+  .tournament-field:first-of-type {
+    grid-column: 1;
+  }
+
+  .tournament-category-editor
+  .tournament-field:nth-of-type(2) {
+    grid-column: 2;
+  }
+
+  .tournament-category-editor
+  .tournament-field:nth-of-type(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Responsividade para tablet e celular */
+
+@media (max-width: 768px) {
+
+  .tournament-category-create {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-category-create .tournament-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .tournament-category-editor {
+    padding: 12px;
+  }
+
+  .tournament-card-category {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 500px) {
+
+  .tournament-category-editor-head {
+    gap: 8px;
+  }
+
+  .tournament-category-editor-head strong {
+    font-size: 0.82rem;
+  }
+
+  .tournament-remove-category {
+    width: 33px;
+    height: 33px;
+  }
+
+  .tournament-card-category {
+    padding: 9px;
+  }
+
+  .tournament-toggle-card-players {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+
+  .tournament-category-editor {
+    padding: 10px;
+  }
+
+  .tournament-category-editor-head strong {
+    font-size: 0.78rem;
+  }
+
+  .tournament-category-editor-head small {
+    font-size: 0.63rem;
+  }
+
+  .tournament-player-chip {
+    max-width: 100%;
+    font-size: 0.62rem;
+  }
+}
+
+/* Acessibilidade */
+
+.tournament-category-create
+.tournament-btn:focus-visible,
+
+.tournament-remove-category:focus-visible,
+
+.tournament-category-select:focus-visible,
+
+.tournament-toggle-card-players:focus-visible {
+  outline: 3px solid rgba(5, 100, 154, 0.28);
+  outline-offset: 2px;
+}
+
+.bracket-save-btn:disabled,
+.bracket-finish-btn:disabled,
+.bracket-finish-tournament-btn:disabled {
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+  pointer-events: none !important;
+}
+
+.is-public-view .bracket-slot,
+.is-public-view .bracket-add-game,
+.is-public-view .bracket-remove-game,
+.is-public-view .bracket-result-btn {
+  pointer-events: none !important;
+  cursor: default !important;
+}
