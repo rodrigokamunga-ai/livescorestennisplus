@@ -2463,3 +2463,210 @@
   pointer-events: none !important;
   opacity: 0.7 !important;
 }
+
+.bracket-toggle:disabled {
+  color: #94a3b8 !important;
+  border-color: #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+  pointer-events: none !important;
+}
+
+.bracket-toggle.is-active {
+  color: #ffffff !important;
+  border-color: var(--bracket-primary, #05649a) !important;
+  background: var(--bracket-primary, #05649a) !important;
+  opacity: 1 !important;
+}
+
+/* ========================================================= DUPLAS EM DUAS LINHAS NA CHAVE ========================================================= */
+
+.bracket-slot-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 7px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.bracket-player-name-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.bracket-slot-name {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  color: inherit !important;
+  font-weight: 850 !important;
+  line-height: 1.05 !important;
+}
+
+.bracket-double-line {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  line-height: 1.1 !important;
+}
+
+.bracket-single-line {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.bracket-slot-score {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 0 0 auto !important;
+  min-width: 22px !important;
+  margin-left: auto !important;
+  white-space: nowrap !important;
+  font-weight: 900 !important;
+}
+
+/* Vencedor */
+
+.bracket-slot.is-winner
+.bracket-slot-name {
+  color: #17853a !important;
+}
+
+.bracket-slot.is-winner
+.bracket-slot-score {
+  color: #17853a !important;
+}
+
+/* Ajuste do ícone de vencedor */
+
+.bracket-player-name-wrap
+.bracket-winner-icon {
+  flex: 0 0 auto !important;
+  margin-left: 3px !important;
+}
+
+/* Telas menores */
+
+@media (max-width: 600px) {
+  .bracket-slot-content {
+    gap: 4px !important;
+  }
+
+  .bracket-slot-name {
+    font-size: 0.68rem !important;
+  }
+
+  .bracket-double-line {
+    line-height: 1.05 !important;
+  }
+
+  .bracket-slot-score {
+    min-width: 19px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+/* ========================================================= CARDS MAIORES PARA PARTIDAS COM MAIS SETS ========================================================= */
+
+.bracket-match-long {
+  min-height: 245px !important;
+  padding-bottom: 16px !important;
+}
+
+.bracket-match-long
+.bracket-slot {
+  min-height: 55px !important;
+}
+
+.bracket-match-long
+.bracket-slot-content {
+  min-height: 45px !important;
+}
+
+.bracket-match-long
+.bracket-slot-name {
+  line-height: 1.12 !important;
+}
+
+.bracket-match-long
+.bracket-match-date {
+  margin-top: 10px !important;
+}
+
+.bracket-match-long
+.bracket-result-btn {
+  min-height: 42px !important;
+  margin-top: 8px !important;
+}
+
+.bracket-match-long
+.bracket-match-result {
+  min-height: 32px !important;
+  margin-top: 8px !important;
+  line-height: 1.25 !important;
+}
+
+/* Duplas em duas linhas dentro do card maior */
+
+.bracket-match-long
+.bracket-double-line {
+  line-height: 1.15 !important;
+}
+
+/* Card ainda maior para nomes longos de duplas */
+
+.bracket-match-long
+.bracket-slot-name {
+  max-width: 170px !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.bracket-match-long
+.bracket-double-line {
+  max-width: 170px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Ajuste para celular */
+
+@media (max-width: 600px) {
+  .bracket-match-long {
+    min-height: 235px !important;
+    padding: 10px !important;
+    padding-bottom: 15px !important;
+  }
+
+  .bracket-match-long
+  .bracket-slot {
+    min-height: 58px !important;
+  }
+
+  .bracket-match-long
+  .bracket-slot-name {
+    max-width: 135px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .bracket-match-long
+  .bracket-double-line {
+    max-width: 135px !important;
+  }
+}
