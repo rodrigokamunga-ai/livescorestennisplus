@@ -3488,3 +3488,131 @@ body.public-modern-page .public-stats-close-footer:hover {
       font-size: 9px !important;
     }
   }
+
+  /* ========================================================= ANÁLISE COMPLETA — AJUSTES DOS NOMES E PLACAR ========================================================= */
+
+.public-stats-player-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+  }
+  
+  .public-stats-score-lines {
+    width: 100%;
+    color: #071b72;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.25;
+    text-align: center;
+  }
+  
+  .public-stats-player-versus {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .public-stats-player-unit {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  .public-stats-player-name {
+    width: 100% !important;
+    max-width: 180px !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+  }
+  
+  .public-stat-value-label {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.15 !important;
+  }
+  
+  @media (max-width: 600px) {
+    .public-stats-player-versus {
+      gap: 7px;
+    }
+  
+    .public-stats-player-name {
+      max-width: 120px !important;
+      font-size: 0.75rem !important;
+    }
+  
+    .public-stats-score-lines {
+      font-size: 0.9rem;
+    }
+  
+    .public-stats-player-photo,
+    .public-stats-player-photo-placeholder {
+      width: 54px !important;
+      height: 54px !important;
+    }
+  
+    .public-stat-detail-values {
+      grid-template-columns: 52px minmax(0, 1fr) 52px !important;
+      gap: 5px !important;
+    }
+  }
+
+  /* ========================================================= ANÁLISE COMPLETA — PLACAR ACIMA DOS JOGADORES ========================================================= */
+
+.public-stats-score-above {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0 0 16px;
+    color: #071b72;
+    font-size: 1.15rem;
+    font-weight: 900;
+    line-height: 1.35;
+    text-align: center;
+  }
+  
+  .public-stats-score-above .public-stats-score-lines {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+  }
+  
+  .public-stats-score-above .public-stats-score-lines div {
+    white-space: nowrap;
+  }
+  
+  .public-stats-player-card {
+    gap: 8px !important;
+  }
+  
+  .public-stats-player-versus {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+  }
+  
+  @media (max-width: 600px) {
+    .public-stats-score-above {
+      margin-bottom: 13px;
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+  }
