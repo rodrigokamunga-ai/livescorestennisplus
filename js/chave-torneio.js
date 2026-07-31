@@ -219,19 +219,96 @@
       String(name || "")
         .trim()
         .replace(/\s+/g, " ");
-
+  
     if (!value) {
       return "";
     }
-
+  
     const parts =
       value.split(" ").filter(Boolean);
-
+  
     if (parts.length === 1) {
       return parts[0];
     }
+  
+    const firstName =
+      parts[0];
+  
+    const lastName =
+      parts[parts.length - 1];
+  
+    const initial =
+      Array.from(firstName)[0]
+        .toUpperCase();
+  
+    return `${initial}.${lastName}`;
+  }
 
-    return `${Array.from(parts[0])[0].toUpperCase()}. ${ parts[parts.length - 1] }`;
+  
+  function participantName( participant = {} ) {
+    /* * Estrutura de uma dupla: * * { * nome: "Rodrigo Camara / Renata Leal", * jogador1: { * nome: "Rodrigo Camara" * }, * jogador2: { * nome: "Renata Leal" * } * } */
+  
+    if (
+      participant.jogador1 &&
+      participant.jogador2
+    ) {
+      return [
+        shortName(
+          participant.jogador1.nome
+        ),
+        shortName(
+          participant.jogador2.nome
+        )
+      ]
+        .filter(Boolean)
+        .join("/");
+    }
+  
+    /* * Compatibilidade caso a dupla esteja salva * somente no campo nome. */
+    const rawName =
+      String(
+        participant.nome ||
+        participant.name ||
+        ""
+      ).trim();
+  
+    if (rawName.includes("/")) {
+      return rawName
+        .split("/")
+        .map(name =>
+          shortName(name.trim())
+        )
+        .filter(Boolean)
+        .join("/");
+    }
+  
+    return shortName(rawName);
+  }
+
+  function participantMarkup( participant = {} ) {
+    if (
+      participant.jogador1 &&
+      participant.jogador2
+    ) {
+      const player1 =
+        shortName(
+          participant.jogador1.nome || ""
+        );
+  
+      const player2 =
+        shortName(
+          participant.jogador2.nome || ""
+        );
+  
+      return ` <span class="bracket-double-line"> ${esc(player1)}/ </span> <span class="bracket-double-line"> ${esc(player2)} </span> `;
+    }
+  
+    const name =
+      participantName(
+        participant
+      );
+  
+    return ` <span class="bracket-single-line"> ${esc(name)} </span> `;
   }
 
   function getStatus() {
@@ -346,49 +423,75 @@
           category.id || ""
         ).trim() ||
         `categoria_${index + 1}`,
-
+  
       nome:
         String(
           category.nome ||
           category.name ||
           `Categoria ${index + 1}`
         ).trim(),
-
+  
       formatoJogo:
         String(
           category.formatoJogo ||
           category.gameFormat ||
           ""
         ).trim(),
-
+  
       formatoPartida:
         String(
           category.formatoPartida ||
           category.matchFormat ||
           ""
         ).trim(),
-
+  
       dataPeriodo:
         String(
           category.dataPeriodo ||
           category.dataHora ||
           ""
         ).trim(),
-
+  
       jogadores:
         readPlayers(category),
-
+  
+      duplas:
+        Array.isArray(category.duplas)
+          ? category.duplas.map(dupla => ({
+              id:
+                String(dupla.id || "").trim(),
+  
+              nome:
+                dupla.nome ||
+                `${dupla.jogador1?.nome || ""} / ${dupla.jogador2?.nome || ""}`,
+  
+              jogador1: {
+                uid:
+                  dupla.jogador1?.uid || "",
+  
+                nome:
+                  dupla.jogador1?.nome || ""
+              },
+  
+              jogador2: {
+                uid:
+                  dupla.jogador2?.uid || "",
+  
+                nome:
+                  dupla.jogador2?.nome || ""
+              },
+  
+              tipo: "dupla"
+            }))
+          : [],
+  
       chave:
-        category.chave &&
-        typeof category.chave === "object"
-          ? category.chave
-          : null,
-
+        category.chave || null,
+  
       chavePreparada:
         Boolean(category.chavePreparada)
     };
   }
-
   function getRounds() {
     const total =
       Number(state.players.length || 0);
@@ -580,21 +683,37 @@
     if (!el.categorySelect) {
       return;
     }
-
+  
     if (!state.categories.length) {
       el.categorySelect.innerHTML = ` <option value=""> Nenhuma categoria cadastrada </option> `;
-
+  
       el.categorySelect.disabled = true;
+  
       return;
     }
-
+  
     el.categorySelect.disabled = false;
-
+  
     el.categorySelect.innerHTML =
       state.categories
-        .map(
-          category => ` <option value="${esc(category.id)}" ${ String(category.id) === String(state.categoryId) ? "selected" : "" } > ${esc(category.nome)} </option> `
-        )
+        .map(category => {
+          const categoryName =
+            String(
+              category.nome || ""
+            ).trim();
+  
+          const categoryFormat =
+            String(
+              category.formatoJogo || ""
+            ).trim();
+  
+          const label =
+            categoryFormat
+              ? `${categoryName} — ${categoryFormat}`
+              : categoryName;
+  
+          return ` <option value="${esc(category.id)}" ${ String(category.id) === String(state.categoryId) ? "selected" : "" } > ${esc(label)} </option> `;
+        })
         .join("");
   }
 
@@ -686,7 +805,7 @@
       .filter(Boolean)
       .join(" ");
 
-    return ` <button type="button" class="${classes}" data-round="${esc(round)}" data-match="${matchIndex}" data-slot="${esc(slot)}" aria-label="${ empty ? "Adicionar jogador" : `Jogador ${esc(player.nome)}` }" > ${ empty ? ` <ion-icon name="add-outline" class="bracket-empty-add-icon" ></ion-icon> ` : ` <span class="bracket-slot-number"> ${position} </span> <span class="bracket-slot-content"> <span class="bracket-player-name-wrap"> <span class="bracket-slot-name"> ${esc(shortName(player.nome))} </span> ${ isWinner ? ` <ion-icon name="checkmark-outline" class="bracket-winner-icon" ></ion-icon> ` : "" } </span> ${ scores.length ? ` <span class="bracket-slot-score"> ${scores .map( score => ` <span class="bracket-score-value"> ${esc(score)} </span> ` ) .join("")} </span> ` : "" } </span> ` } </button> `;
+    return ` <button type="button" class="${classes}" data-round="${esc(round)}" data-match="${matchIndex}" data-slot="${esc(slot)}" aria-label="${ empty ? "Adicionar jogador" : `Participante ${esc( participantName(player) )}` }" > ${ empty ? ` <ion-icon name="add-outline" class="bracket-empty-add-icon" ></ion-icon> ` : ` <span class="bracket-slot-number"> ${position} </span> <span class="bracket-slot-content"> <span class="bracket-player-name-wrap"> <span class="bracket-slot-name"> ${participantMarkup(player)}</span> ${ isWinner ? ` <ion-icon name="checkmark-outline" class="bracket-winner-icon" ></ion-icon> ` : "" } </span> ${ scores.length ? ` <span class="bracket-slot-score"> ${scores .map( score => ` <span class="bracket-score-value"> ${esc(score)} </span> ` ) .join("")} </span> ` : "" } </span> ` } </button> `;
   }
 
   function renderMatchDate( round, matchIndex, match ) {
@@ -746,6 +865,19 @@
     return ` <button type="button" class="bracket-result-btn" data-result-round="${esc(round)}" data-result-match="${index}" > <ion-icon name="stats-chart-outline"></ion-icon> <span> ${ match.resultado ? "Editar resultado" : "Informar resultado" } </span> </button> `;
   }
 
+  function isLongMatchFormat() {
+    const format =
+      normalize(
+        state.category?.formatoPartida ||
+        ""
+      );
+  
+    return (
+      format.includes("3_sets") ||
+      format.includes("2_sets")
+    );
+  }
+
   function renderBoard() {
     if (!el.board) {
       return;
@@ -780,7 +912,7 @@
                 match.enabled !== false
             );
 
-          return ` <section class="bracket-round-column" data-round-column="${esc(round)}" > <div class="bracket-round-title"> <span> ${esc(roundLabel(round))} </span> </div> ${ canEditBracket() ? ` <button type="button" class="bracket-add-game" data-add-round="${esc(round)}" title="Adicionar jogo" > <ion-icon name="add-outline"></ion-icon> </button> ` : "" } <div class="bracket-round-matches"> ${ activeMatches .map(match => { const index = matches.indexOf(match); return ` <article class="bracket-match"> <div class="bracket-match-label"> Jogo ${getMatchNumber( round, index, match )} </div> ${renderSlot( round, index, "player1", match.player1, match )} ${renderSlot( round, index, "player2", match.player2, match )} ${renderMatchDate( round, index, match )} ${renderMatchResult(match)} ${renderResultButton( round, index, match )} ${ canEditBracket() ? ` <button type="button" class="bracket-remove-game" data-remove-round="${esc(round)}" data-remove-match="${index}" title="Excluir jogo" > <ion-icon name="trash-outline"></ion-icon> </button> ` : "" } </article> `; }) .join("") } </div> </section> `;
+          return ` <section class="bracket-round-column" data-round-column="${esc(round)}" > <div class="bracket-round-title"> <span> ${esc(roundLabel(round))} </span> </div> ${ canEditBracket() ? ` <button type="button" class="bracket-add-game" data-add-round="${esc(round)}" title="Adicionar jogo" > <ion-icon name="add-outline"></ion-icon> </button> ` : "" } <div class="bracket-round-matches"> ${ activeMatches .map(match => { const index = matches.indexOf(match); return ` <article class="bracket-match ${ isLongMatchFormat() ? "bracket-match-long" : "" }"> <div class="bracket-match-label"> Jogo ${getMatchNumber( round, index, match )} </div> ${renderSlot( round, index, "player1", match.player1, match )} ${renderSlot( round, index, "player2", match.player2, match )} ${renderMatchDate( round, index, match )} ${renderMatchResult(match)} ${renderResultButton( round, index, match )} ${ canEditBracket() ? ` <button type="button" class="bracket-remove-game" data-remove-round="${esc(round)}" data-remove-match="${index}" title="Excluir jogo" > <ion-icon name="trash-outline"></ion-icon> </button> ` : "" } </article> `; }) .join("") } </div> </section> `;
         })
         .join("");
   }
@@ -818,9 +950,9 @@
           }
 
           return normalize(
-            player.nome
+            participantName(player)
           ) === normalize(
-            existing.nome
+            participantName(existing)
           );
         });
       })
@@ -930,9 +1062,26 @@
     }
 
     match[state.activeSlot] = {
-      nome: player.nome,
-      uid: player.uid || "",
-      manual: Boolean(player.manual)
+      id:
+        player.id || "",
+    
+      nome:
+        player.nome || "",
+    
+      uid:
+        player.uid || "",
+    
+      manual:
+        Boolean(player.manual),
+    
+      tipo:
+        player.tipo || "simples",
+    
+      jogador1:
+        player.jogador1 || null,
+    
+      jogador2:
+        player.jogador2 || null
     };
 
     closePlayerModal();
@@ -2158,22 +2307,59 @@ updateSuperTieVisibility();
       }
 
       state.format =
-  state.category.formatoJogo ||
-  "Simples";
+  String(
+    state.category.formatoJogo ||
+    "Simples"
+  ).trim();
 
-state.players =
-  readPlayers(
-    state.category
-  );
+const isDoubles =
+  normalize(
+    state.category.formatoJogo
+  ) === "duplas";
+
+if (isDoubles) {
+  state.players =
+    Array.isArray(
+      state.category.duplas
+    )
+      ? state.category.duplas
+          .map(dupla => ({
+            id:
+              dupla.id || "",
+
+            nome:
+              dupla.nome ||
+              `${dupla.jogador1?.nome || ""} / ${dupla.jogador2?.nome || ""}`,
+
+            jogador1:
+              dupla.jogador1 || null,
+
+            jogador2:
+              dupla.jogador2 || null,
+
+            tipo: "dupla"
+          }))
+          .filter(
+            dupla =>
+              dupla.jogador1 &&
+              dupla.jogador2
+          )
+      : [];
+} else {
+  state.players =
+    readPlayers(
+      state.category
+    );
+}
 
 updateFormatButtons();
-state.bracket =
-state.category.chave
-  ? normalizeBracket(
-      state.category.chave
-    )
-  : buildInitialBracket();
 
+state.bracket =
+  state.category.chave
+    ? normalizeBracket(
+        state.category.chave
+      )
+    : buildInitialBracket();
       if (el.categorySelect) {
         el.categorySelect.value =
           state.categoryId;
@@ -2187,10 +2373,10 @@ state.category.chave
 
       if (el.meta) {
         el.meta.textContent =
-          `${state.category.nome} · ` +
+          `${state.category.nome} — ` +
           `${state.category.formatoJogo || "Formato não informado"} · ` +
           `${state.category.formatoPartida || "Partida não informada"} · ` +
-          `${state.players.length} jogador(es) · ` +
+          `${state.players.length} participante(s) · ` +
           `${state.tournament.statusLabel || "Em preparação"}`;
       }
 
@@ -2376,17 +2562,35 @@ state.category.chave
 
   function updateFormatButtons() {
     const currentFormat =
-      state.category?.formatoJogo ||
-      state.format ||
-      "Simples";
+      normalize(
+        state.category?.formatoJogo ||
+        state.format ||
+        "Simples"
+      );
   
     document
       .querySelectorAll(".bracket-toggle")
       .forEach(button => {
+        const buttonFormat =
+          normalize(
+            button.dataset.format || ""
+          );
+  
+        const isSelected =
+          buttonFormat === currentFormat;
+  
         button.classList.toggle(
           "is-active",
-          button.dataset.format ===
-            currentFormat
+          isSelected
+        );
+  
+        /* * O formato da chave é definido pela categoria. * O outro botão fica desabilitado. */
+        button.disabled =
+          !isSelected;
+  
+        button.setAttribute(
+          "aria-disabled",
+          String(!isSelected)
         );
       });
   }
@@ -2431,33 +2635,46 @@ state.category.chave
   
     /* * Filtro Simples/Duplas */
     document
-      .querySelectorAll(".bracket-toggle")
-      .forEach(button => {
-        button.addEventListener(
-          "click",
-          () => {
-            const selectedFormat =
-              button.dataset.format ||
-              "Simples";
-  
-            state.format =
-              selectedFormat;
-  
-            document
-              .querySelectorAll(
-                ".bracket-toggle"
-              )
-              .forEach(item => {
-                item.classList.toggle(
-                  "is-active",
-                  item === button
-                );
-              });
-  
-            renderBoard();
-          }
-        );
-      });
+  .querySelectorAll(".bracket-toggle")
+  .forEach(button => {
+    button.addEventListener(
+      "click",
+      () => {
+        const selectedFormat =
+          normalize(
+            button.dataset.format ||
+            ""
+          );
+
+        const categoryFormat =
+          normalize(
+            state.category?.formatoJogo ||
+            ""
+          );
+
+        if (
+          selectedFormat !==
+          categoryFormat
+        ) {
+          showMessage(
+            `Esta categoria está configurada como "${state.category?.formatoJogo || "não informado"}".`,
+            "error"
+          );
+
+          updateFormatButtons();
+
+          return;
+        }
+
+        state.format =
+          button.dataset.format ||
+          "Simples";
+
+        updateFormatButtons();
+        renderBoard();
+      }
+    );
+  });
   
     /* * Filtro das fases da chave */
     document
@@ -2488,14 +2705,7 @@ state.category.chave
         );
       });
   
-    /* * Eventos da área da chave */
-    el.board?.addEventListener(
-      "click",
-      event => {
-        // restante do código
-      }
-    );
-  
+    
     // restante dos eventos...
 
     el.board?.addEventListener(
