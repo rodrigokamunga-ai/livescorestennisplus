@@ -2087,3 +2087,380 @@ body.tournament-page
   pointer-events: none !important;
   cursor: default !important;
 }
+
+.tournament-category-player-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 7px 8px;
+  color: var(--torneio-primary);
+  border: 1px solid #b4d2e3;
+  border-radius: 10px;
+  background: var(--torneio-blue-soft);
+  cursor: pointer;
+}
+
+.tournament-category-player-option
+.category-player-checkbox {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--torneio-primary);
+}
+
+.tournament-category-player-option
+.tournament-selected-name {
+  flex: 1;
+}
+
+.tournament-category-player-option.is-paired {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.tournament-player-paired-label {
+  color: var(--torneio-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tournament-create-pair-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.tournament-category-pairs {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tournament-pair-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid #b4d2e3;
+  border-radius: 10px;
+  background: #eaf5fb;
+}
+
+.tournament-pair-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tournament-pair-name strong {
+  overflow-wrap: anywhere;
+  color: var(--torneio-primary);
+  font-size: 0.76rem;
+}
+
+.tournament-pair-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  color: #ffffff;
+  border-radius: 50%;
+  background: var(--torneio-primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.tournament-remove-pair-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  color: var(--torneio-red);
+  border: 1px solid #d77b82;
+  border-radius: 7px;
+  background: #ffffff;
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.tournament-remove-pair-btn:hover {
+  color: #ffffff;
+  background: var(--torneio-red);
+}
+
+@media (max-width: 500px) {
+  .tournament-pair-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tournament-remove-pair-btn {
+    width: 100%;
+  }
+
+  .tournament-player-paired-label {
+    display: none;
+  }
+}
+
+/* ========================================================= DUPLAS DA CATEGORIA ========================================================= */
+
+.tournament-category-pairs {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.tournament-category-pairs
+.tournament-selected-empty {
+  margin-top: 0;
+}
+
+/* Card da dupla */
+
+.tournament-pair-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  color: var(--torneio-primary) !important;
+  border: 1px solid #b4d2e3;
+  border-radius: 10px;
+  background: var(--torneio-blue-soft) !important;
+}
+
+.tournament-pair-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tournament-pair-name strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--torneio-primary) !important;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.tournament-pair-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  color: #ffffff !important;
+  border-radius: 50%;
+  background: var(--torneio-primary) !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+/* Botão Desfazer dupla */
+
+.tournament-remove-pair-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 9px;
+  color: var(--torneio-red) !important;
+  border: 1px solid #d77b82 !important;
+  border-radius: 7px;
+  background: #ffffff !important;
+  font-size: 0.63rem;
+  font-weight: 850;
+  line-height: 1;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.tournament-remove-pair-btn ion-icon {
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+.tournament-remove-pair-btn:hover {
+  color: #ffffff !important;
+  border-color: var(--torneio-red) !important;
+  background: var(--torneio-red) !important;
+}
+
+.tournament-remove-pair-btn:active {
+  transform: scale(0.97);
+}
+
+/* Botão Criar dupla */
+
+.tournament-create-pair-btn {
+  width: 100%;
+  margin-top: 9px;
+}
+
+.tournament-create-pair-btn:disabled {
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+  pointer-events: none !important;
+}
+
+/* Jogador que já pertence a uma dupla */
+
+.tournament-category-player-option.is-paired {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.tournament-category-player-option.is-paired
+.category-player-checkbox {
+  cursor: not-allowed;
+}
+
+.tournament-player-paired-label {
+  flex: 0 0 auto;
+  color: var(--torneio-muted) !important;
+  font-size: 0.61rem;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: right;
+}
+
+/* Responsividade */
+
+@media (max-width: 600px) {
+  .tournament-pair-card {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .tournament-pair-name {
+    width: 100%;
+  }
+
+  .tournament-remove-pair-btn {
+    width: 100%;
+    min-height: 39px;
+  }
+
+  .tournament-player-paired-label {
+    display: none;
+  }
+}
+
+/* ========================================================= AJUSTE DOS NOMES DE DUPLAS NA CHAVE ========================================================= */
+
+.bracket-slot-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.bracket-player-name-wrap {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.bracket-slot-name {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  line-height: 1.15 !important;
+  text-overflow: clip !important;
+}
+
+/* Mantém o placar separado do nome */
+
+.bracket-slot-score {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 0 0 auto !important;
+  min-width: 24px !important;
+  margin-left: auto !important;
+  white-space: nowrap !important;
+}
+
+/* Quando o nome for uma dupla, permite quebra entre os nomes */
+
+.bracket-slot-name {
+  overflow-wrap: anywhere !important;
+}
+
+/* Ajuste para telas menores */
+
+@media (max-width: 600px) {
+  .bracket-slot-content {
+    gap: 5px !important;
+  }
+
+  .bracket-slot-name {
+    font-size: 0.72rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .bracket-slot-score {
+    min-width: 20px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+.tournament-btn-disabled,
+.tournament-card-actions
+.tournament-btn:disabled {
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  opacity: 0.58 !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
+}
+
+.tournament-btn-disabled ion-icon,
+.tournament-card-actions
+.tournament-btn:disabled ion-icon {
+  color: #94a3b8 !important;
+}
+
+.tournament-btn-disabled:hover,
+.tournament-card-actions
+.tournament-btn:disabled:hover {
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  transform: none !important;
+}
