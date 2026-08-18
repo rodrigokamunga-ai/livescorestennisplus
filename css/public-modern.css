@@ -4145,275 +4145,468 @@ body.public-modern-page .public-stats-close-footer:hover {
   }
 }
 
+/* =========================================================
+   CORREÇÃO ÚNICA FINAL — TELA PÚBLICA MOBILE
+   ========================================================= */
+
+.public-modern-page,
+.public-modern-page * {
+  box-sizing: border-box;
+}
+
+.public-modern-page,
+.public-modern-page body {
+  color: #17213d !important;
+  background: #f5f7fa !important;
+}
+
+/* Cards principais sempre claros */
+.public-modern-page .tp-header,
+.public-modern-page .tp-filter-area,
+.public-modern-page .tp-games-column,
+.public-modern-page .tp-match-list .public-card,
+.public-modern-page .tp-match-list .match-board,
+.public-modern-page .tp-match-list .compact-match-board,
+.public-modern-page .tp-match-list .compact-row,
+.public-modern-page .tp-match-list .match-player-row {
+  color: #17213d !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #d2d8df !important;
+  box-shadow: 0 3px 12px rgba(16, 38, 64, 0.07) !important;
+}
+
+/* Fundo do bloco de partida ao vivo */
+.public-modern-page .tp-column-live .match-board,
+.public-modern-page .tp-column-live .compact-match-board,
+.public-modern-page .tp-column-live .public-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #17213d !important;
+  border-top: 3px solid #17853a !important;
+}
+
+/* Remove camadas escuras herdadas */
+.public-modern-page .match-board::before,
+.public-modern-page .match-board::after,
+.public-modern-page .compact-match-board::before,
+.public-modern-page .compact-match-board::after,
+.public-modern-page .match-player-row::before,
+.public-modern-page .match-player-row::after {
+  display: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Título da partida */
+.public-modern-page .match-board h1,
+.public-modern-page .match-board h2,
+.public-modern-page .match-board h3,
+.public-modern-page .compact-match-board h1,
+.public-modern-page .compact-match-board h2,
+.public-modern-page .compact-match-board h3 {
+  color: #071b72 !important;
+}
+
+/* Cabeçalho e metadados */
+.public-modern-page .match-chip,
+.public-modern-page .live-meta-left,
+.public-modern-page .live-meta-right,
+.public-modern-page .duration-with-icon {
+  color: #617089 !important;
+}
+
+.public-modern-page .match-status.status-live {
+  color: #17853a !important;
+  background: #e9f7ed !important;
+  border-color: #a9ddb5 !important;
+}
+
+/* Linhas de jogadores */
+.public-modern-page .match-player-row {
+  display: grid !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+  height: auto !important;
+  border-top: 1px solid #e4e8ed !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.public-modern-page .match-player-row:first-child {
+  border-top: 0 !important;
+}
+
+/* Nome, avatar e área do jogador */
+.public-modern-page .match-player-row .team-col,
+.public-modern-page .match-player-row .player-name,
+.public-modern-page .match-player-row .player-with-avatar,
+.public-modern-page .match-player-row .name-line,
+.public-modern-page .match-player-row .team-name-compact,
+.public-modern-page .match-player-row .team-name-compact-content {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.public-modern-page .match-player-row .player-name,
+.public-modern-page .match-player-row .player-with-avatar {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  overflow: visible !important;
+  color: #05649a !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+
+.public-modern-page .match-player-row .name-line {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  color: #05649a !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Fotos maiores, sem crescerem de forma irregular */
+.public-modern-page .match-player-row .player-avatar,
+.public-modern-page .match-player-row .player-avatar-placeholder {
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border: 2px solid #05649a !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+/* Indicador de saque */
+.public-modern-page .match-player-row .serve-ball {
+  flex: 0 0 7px !important;
+  width: 7px !important;
+  height: 7px !important;
+  margin: 0 2px 0 0 !important;
+  background: #17853a !important;
+}
+
+/* Números do placar */
+.public-modern-page .match-player-row .score,
+.public-modern-page .match-player-row .score.green,
+.public-modern-page .match-player-row .score.gray {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  color: #05649a !important;
+  background: transparent !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+}
+
+.public-modern-page .match-player-row .score.gray {
+  color: #17213d !important;
+}
+
+/* Cabeçalho das colunas do placar à direita */
+.public-modern-page .match-table-head {
+  text-align: right !important;
+}
+
+.public-modern-page .match-table-head .team-label {
+  text-align: left !important;
+}
+
+.public-modern-page .match-table-head > *:not(.team-label) {
+  text-align: right !important;
+}
+
+/* Grade desktop */
+.public-modern-page .one-set-row,
+.public-modern-page .one-set-head {
+  grid-template-columns: minmax(0, 1fr) 36px 46px !important;
+  column-gap: 8px !important;
+}
+
+.public-modern-page .two-set-row,
+.public-modern-page .two-set-head {
+  grid-template-columns: minmax(0, 1fr) 34px 34px 46px !important;
+  column-gap: 8px !important;
+}
+
+.public-modern-page .three-set-row,
+.public-modern-page .three-set-head {
+  grid-template-columns: minmax(0, 1fr) 32px 32px 32px 46px !important;
+  column-gap: 8px !important;
+}
+
+/* Remove check/indicador que empurra o nome e o placar */
+.public-modern-page .match-player-row .player-name::after,
+.public-modern-page .match-player-row.winner-row .player-name::after {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  content: none !important;
+}
+
+/* Botões preservando o tema claro */
+.public-modern-page .public-actions-section {
+  display: block !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e4e8ed !important;
+}
+
+.public-modern-page .public-action-btn,
+.public-modern-page .action-btn {
+  color: #05649a !important;
+  background: #ffffff !important;
+  border-color: #05649a !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 600px) {
-  body.public-modern-page .tp-column-live .match-player-row,
-  body.public-modern-page .tp-column-finished .match-player-row {
-    display: grid !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    grid-template-columns: minmax(0, 1fr) 38px 56px !important;
-    column-gap: 8px !important;
+  .public-modern-page .tp-match-list .public-card,
+  .public-modern-page .tp-match-list .match-board,
+  .public-modern-page .tp-match-list .compact-match-board {
+    padding: 10px !important;
   }
 
-  body.public-modern-page .match-player-row .name-line {
-    display: block !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    overflow: visible !important;
-    white-space: normal !important;
-    text-overflow: clip !important;
-    overflow-wrap: break-word !important;
-    word-break: normal !important;
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+  .public-modern-page .match-player-row {
+    min-height: 52px !important;
+    column-gap: 4px !important;
   }
 
-  body.public-modern-page .match-player-row .player-avatar,
-  body.public-modern-page .match-player-row .player-avatar-placeholder {
-    flex: 0 0 36px !important;
+  /* Área do jogador permanece na mesma linha: avatar + nome */
+  .public-modern-page .match-player-row .player-with-avatar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+  }
+
+  .public-modern-page .match-player-row .name-line {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .public-modern-page .match-player-row .player-avatar,
+  .public-modern-page .match-player-row .player-avatar-placeholder {
+    flex-basis: 36px !important;
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
     min-height: 36px !important;
   }
 
-  body.public-modern-page .match-player-row .score,
-  body.public-modern-page .match-player-row .score.green,
-  body.public-modern-page .match-player-row .score.gray {
-    display: flex !important;
+  /* Uma coluna final de pontos mais larga e empurrada para a direita */
+  .public-modern-page .one-set-row,
+  .public-modern-page .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 32px 42px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .two-set-row,
+  .public-modern-page .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 30px 30px 42px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .three-set-row,
+  .public-modern-page .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 28px 28px 42px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .match-player-row .score,
+  .public-modern-page .match-player-row .score.green,
+  .public-modern-page .match-player-row .score.gray {
     justify-content: flex-end !important;
-    width: 100% !important;
     font-size: 12px !important;
     text-align: right !important;
   }
+}
 
-  body.public-modern-page .one-set-row,
-  body.public-modern-page .one-set-head {
-    grid-template-columns: minmax(0, 1fr) 38px 56px !important;
+@media (max-width: 380px) {
+  .public-modern-page .match-player-row .player-avatar,
+  .public-modern-page .match-player-row .player-avatar-placeholder {
+    flex-basis: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
   }
 
-  body.public-modern-page .two-set-row,
-  body.public-modern-page .two-set-head {
-    grid-template-columns: minmax(0, 1fr) 34px 34px 56px !important;
-  }
-
-  body.public-modern-page .three-set-row,
-  body.public-modern-page .three-set-head {
-    grid-template-columns: minmax(0, 1fr) 32px 32px 32px 56px !important;
+  .public-modern-page .match-player-row .name-line {
+    font-size: 11px !important;
   }
 }
 
-/* ========================================================= MOBILE — DUPLAS COM FOTOS LADO A LADO ========================================================= */
+/* =========================================================
+   MOBILE PEQUENO — NOMES COMPLETOS SEM CORTE
+   ========================================================= */
 
-@media (max-width: 600px) {
-  /* Linha completa ocupa o card */
-  body.public-modern-page .tp-column-live .match-player-row,
-  body.public-modern-page .tp-column-finished .match-player-row {
-    display: grid !important;
+@media (max-width: 430px) {
+  body.public-modern-page .match-player-row {
     width: 100% !important;
     min-width: 100% !important;
-    align-items: center !important;
-    column-gap: 7px !important;
+    min-height: 56px !important;
+    grid-template-columns: minmax(0, 1fr) 28px 42px !important;
+    column-gap: 4px !important;
   }
 
-  /* Container principal: fotos lado a lado + nomes empilhados */
-  body.public-modern-page
-    .match-player-row
-    .player-with-avatar.doubles-wrapper {
+  body.public-modern-page .match-player-row .doubles-wrapper {
     display: flex !important;
-    flex-direction: row !important;
     align-items: center !important;
     flex-wrap: nowrap !important;
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
-    gap: 7px !important;
+    overflow: visible !important;
+    gap: 4px !important;
+  }
+
+  body.public-modern-page .match-player-row .doubles-avatar-group {
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    display: flex !important;
     overflow: visible !important;
   }
 
-  /* Grupo das duas fotos */
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    gap: 0 !important;
-  }
-
-  /* Fotos da dupla lado a lado */
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group
-    .player-avatar,
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group
-    .player-avatar-placeholder {
-    flex: 0 0 34px !important;
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    min-height: 34px !important;
-    margin-left: -8px !important;
-    border: 2px solid #05649a !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-  }
-
-  /* Primeira foto não recebe margem negativa */
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group
-    .player-avatar:first-child,
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group
-    .player-avatar-placeholder:first-child {
-    margin-left: 0 !important;
-  }
-
-  /* Nomes da dupla ficam empilhados ao lado das fotos */
-  body.public-modern-page
-    .match-player-row
-    .doubles-name-group {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    gap: 1px !important;
-    line-height: 1.1 !important;
-    overflow: visible !important;
-  }
-
-  body.public-modern-page
-    .match-player-row
-    .doubles-name-group
-    .name-line {
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    color: #05649a !important;
-    font-size: 12px !important;
-    font-weight: 800 !important;
-    line-height: 1.1 !important;
-    text-align: left !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-
-  /* Placar deslocado para a direita */
-  body.public-modern-page
-    .match-player-row
-    .score,
-  body.public-modern-page
-    .match-player-row
-    .score.green,
-  body.public-modern-page
-    .match-player-row
-    .score.gray {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    font-size: 12px !important;
-    font-weight: 900 !important;
-    text-align: right !important;
-  }
-
-  /* Partidas de 1 set */
-  body.public-modern-page
-    .tp-column-live
-    .one-set-row,
-  body.public-modern-page
-    .tp-column-finished
-    .one-set-row,
-  body.public-modern-page
-    .tp-column-live
-    .one-set-head,
-  body.public-modern-page
-    .tp-column-finished
-    .one-set-head {
-    grid-template-columns: minmax(0, 1fr) 38px 56px !important;
-    column-gap: 8px !important;
-  }
-
-  /* Partidas de 2 sets */
-  body.public-modern-page
-    .tp-column-live
-    .two-set-row,
-  body.public-modern-page
-    .tp-column-finished
-    .two-set-row,
-  body.public-modern-page
-    .tp-column-live
-    .two-set-head,
-  body.public-modern-page
-    .tp-column-finished
-    .two-set-head {
-    grid-template-columns: minmax(0, 1fr) 34px 34px 56px !important;
-    column-gap: 8px !important;
-  }
-
-  /* Partidas de 3 sets */
-  body.public-modern-page
-    .tp-column-live
-    .three-set-row,
-  body.public-modern-page
-    .tp-column-finished
-    .three-set-row,
-  body.public-modern-page
-    .tp-column-live
-    .three-set-head,
-  body.public-modern-page
-    .tp-column-finished
-    .three-set-head {
-    grid-template-columns: minmax(0, 1fr) 32px 32px 32px 56px !important;
-    column-gap: 7px !important;
-  }
-
-  /* Remove regras de quebra aplicadas anteriormente */
-  body.public-modern-page
-    .match-player-row
-    .doubles-name-group
-    .name-line {
-    white-space: nowrap !important;
-    overflow-wrap: normal !important;
-    word-break: normal !important;
-  }
-}
-
-/* Telas muito pequenas */
-@media (max-width: 380px) {
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group
-    .player-avatar,
-  body.public-modern-page
-    .match-player-row
-    .doubles-avatar-group
-    .player-avatar-placeholder {
-    flex-basis: 30px !important;
+  body.public-modern-page .match-player-row .doubles-avatar-group .player-avatar,
+  body.public-modern-page .match-player-row .doubles-avatar-group .player-avatar-placeholder {
+    flex: 0 0 30px !important;
     width: 30px !important;
     height: 30px !important;
     min-width: 30px !important;
     min-height: 30px !important;
+    margin-left: -7px !important;
   }
 
-  body.public-modern-page
-    .match-player-row
-    .doubles-name-group
-    .name-line {
+  body.public-modern-page .match-player-row .doubles-avatar-group .player-avatar:first-child,
+  body.public-modern-page .match-player-row .doubles-avatar-group .player-avatar-placeholder:first-child {
+    margin-left: 0 !important;
+  }
+
+  body.public-modern-page .match-player-row .doubles-name-group {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    gap: 0 !important;
+  }
+
+  body.public-modern-page .match-player-row .doubles-name-group .name-line,
+  body.public-modern-page .match-player-row .team-name-compact-content {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
     font-size: 11px !important;
+    line-height: 1.12 !important;
+  }
+
+  body.public-modern-page .match-player-row .score,
+  body.public-modern-page .match-player-row .score.green,
+  body.public-modern-page .match-player-row .score.gray {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: flex-end !important;
+    font-size: 11px !important;
+    text-align: right !important;
+  }
+
+  body.public-modern-page .one-set-row,
+  body.public-modern-page .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 42px !important;
+  }
+
+  body.public-modern-page .two-set-row,
+  body.public-modern-page .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 25px 25px 42px !important;
+  }
+
+  body.public-modern-page .three-set-row,
+  body.public-modern-page .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 23px 23px 23px 42px !important;
   }
 }
+
+@media (max-width: 360px) {
+  body.public-modern-page .match-player-row {
+    grid-template-columns: minmax(0, 1fr) 25px 38px !important;
+    column-gap: 3px !important;
+  }
+
+  body.public-modern-page .match-player-row .doubles-avatar-group {
+    flex-basis: 50px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+  }
+
+  body.public-modern-page .match-player-row .doubles-avatar-group .player-avatar,
+  body.public-modern-page .match-player-row .doubles-avatar-group .player-avatar-placeholder {
+    flex-basis: 27px !important;
+    width: 27px !important;
+    height: 27px !important;
+    min-width: 27px !important;
+    min-height: 27px !important;
+    margin-left: -6px !important;
+  }
+
+  body.public-modern-page .match-player-row .doubles-name-group .name-line,
+  body.public-modern-page .match-player-row .team-name-compact-content {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  body.public-modern-page .match-player-row .score,
+  body.public-modern-page .match-player-row .score.green,
+  body.public-modern-page .match-player-row .score.gray {
+    font-size: 10px !important;
+  }
+
+  body.public-modern-page .one-set-row,
+  body.public-modern-page .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 25px 38px !important;
+  }
+
+  body.public-modern-page .two-set-row,
+  body.public-modern-page .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 22px 22px 38px !important;
+  }
+
+  body.public-modern-page .three-set-row,
+  body.public-modern-page .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 20px 20px 20px 38px !important;
+  }
+}
+
