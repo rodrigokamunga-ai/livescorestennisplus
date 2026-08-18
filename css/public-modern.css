@@ -3616,3 +3616,155 @@ body.public-modern-page .public-stats-close-footer:hover {
       line-height: 1.3;
     }
   }
+
+  /* =========================================================
+   AJUSTE FINAL — AO VIVO E FINALIZADOS
+   Jogadores em uma linha + placar alinhado à direita
+   ========================================================= */
+
+/* Tamanho único para nomes e placar */
+.tp-column-live .match-player-row .player-name,
+.tp-column-live .match-player-row .team-name-compact,
+.tp-column-live .match-player-row .team-name-compact-content,
+.tp-column-live .match-player-row .player-with-avatar,
+.tp-column-live .match-player-row .name-line,
+.tp-column-live .match-player-row .score,
+.tp-column-live .match-player-row .score.green,
+.tp-column-live .match-player-row .score.gray,
+.tp-column-finished .match-player-row .player-name,
+.tp-column-finished .match-player-row .team-name-compact,
+.tp-column-finished .match-player-row .team-name-compact-content,
+.tp-column-finished .match-player-row .player-with-avatar,
+.tp-column-finished .match-player-row .name-line,
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+/* O conteúdo do jogador não quebra de linha */
+.tp-column-live .match-player-row .player-name,
+.tp-column-finished .match-player-row .player-name,
+.tp-column-live .match-player-row .player-with-avatar,
+.tp-column-finished .match-player-row .player-with-avatar,
+.tp-column-live .match-player-row .name-line,
+.tp-column-finished .match-player-row .name-line {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.tp-column-live .match-player-row .name-line,
+.tp-column-finished .match-player-row .name-line {
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Placar alinhado à direita em cada coluna */
+.tp-column-live .match-player-row .score,
+.tp-column-live .match-player-row .score.green,
+.tp-column-live .match-player-row .score.gray,
+.tp-column-finished .match-player-row .score,
+.tp-column-finished .match-player-row .score.green,
+.tp-column-finished .match-player-row .score.gray {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  text-align: right !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+/* Grade do placar — colunas fixas e alinhadas à direita */
+.tp-column-live .one-set-row,
+.tp-column-live .one-set-head,
+.tp-column-finished .one-set-row,
+.tp-column-finished .one-set-head {
+  grid-template-columns: minmax(0, 1fr) 32px 42px !important;
+  column-gap: 6px !important;
+}
+
+.tp-column-live .two-set-row,
+.tp-column-live .two-set-head,
+.tp-column-finished .two-set-row,
+.tp-column-finished .two-set-head {
+  grid-template-columns: minmax(0, 1fr) 32px 32px 42px !important;
+  column-gap: 6px !important;
+}
+
+.tp-column-live .three-set-row,
+.tp-column-live .three-set-head,
+.tp-column-finished .three-set-row,
+.tp-column-finished .three-set-head {
+  grid-template-columns: minmax(0, 1fr) 32px 32px 32px 42px !important;
+  column-gap: 6px !important;
+}
+
+/* Cabeçalho das colunas do placar também fica à direita */
+.tp-column-live .match-table-head > :not(.team-label),
+.tp-column-finished .match-table-head > :not(.team-label) {
+  text-align: right !important;
+}
+
+/* Mantém o nome do jogador à esquerda */
+.tp-column-live .match-table-head .team-label,
+.tp-column-finished .match-table-head .team-label {
+  text-align: left !important;
+}
+
+/* Avatar um pouco menor para preservar espaço */
+.tp-column-live .player-avatar,
+.tp-column-live .player-avatar-placeholder,
+.tp-column-finished .player-avatar,
+.tp-column-finished .player-avatar-placeholder {
+  flex: 0 0 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* Remove indicadores extras que possam empurrar o placar */
+.tp-column-live .match-player-row .player-name::after,
+.tp-column-finished .match-player-row .player-name::after {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  content: none !important;
+}
+
+/* Ajuste adicional para telas pequenas */
+@media (max-width: 600px) {
+  .tp-column-live .one-set-row,
+  .tp-column-live .one-set-head,
+  .tp-column-finished .one-set-row,
+  .tp-column-finished .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 26px 34px !important;
+    column-gap: 4px !important;
+  }
+
+  .tp-column-live .two-set-row,
+  .tp-column-live .two-set-head,
+  .tp-column-finished .two-set-row,
+  .tp-column-finished .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 26px 26px 34px !important;
+    column-gap: 4px !important;
+  }
+
+  .tp-column-live .three-set-row,
+  .tp-column-live .three-set-head,
+  .tp-column-finished .three-set-row,
+  .tp-column-finished .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 25px 25px 25px 34px !important;
+    column-gap: 4px !important;
+  }
+}
