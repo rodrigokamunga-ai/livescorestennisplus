@@ -3768,3 +3768,694 @@ body.public-modern-page .public-stats-close-footer:hover {
     column-gap: 4px !important;
   }
 }
+
+/* =========================================================
+   MOBILE — NOMES COMPLETOS, AVATAR MAIOR E PLACAR À DIREITA
+   ========================================================= */
+
+@media (max-width: 600px) {
+  /* A linha continua sendo uma linha de jogador:
+     avatar + nome + colunas do placar */
+  .tp-column-live .match-player-row,
+  .tp-column-finished .match-player-row {
+    align-items: center !important;
+    min-height: 54px !important;
+    height: auto !important;
+    column-gap: 5px !important;
+  }
+
+  /* Aumenta a foto do jogador */
+  .tp-column-live .match-player-row .player-avatar,
+  .tp-column-live .match-player-row .player-avatar-placeholder,
+  .tp-column-finished .match-player-row .player-avatar,
+  .tp-column-finished .match-player-row .player-avatar-placeholder {
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+
+  /* Área do jogador: não cortar o nome */
+  .tp-column-live .match-player-row .player-name,
+  .tp-column-finished .match-player-row .player-name,
+  .tp-column-live .match-player-row .player-with-avatar,
+  .tp-column-finished .match-player-row .player-with-avatar,
+  .tp-column-live .match-player-row .name-line,
+  .tp-column-finished .match-player-row .name-line {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  .tp-column-live .match-player-row .player-with-avatar,
+  .tp-column-finished .match-player-row .player-with-avatar {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+
+  .tp-column-live .match-player-row .name-line,
+  .tp-column-finished .match-player-row .name-line {
+    display: block !important;
+    flex: 1 1 auto !important;
+    line-height: 1.2 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+  }
+
+  /* Mesmo tamanho para nome e placar */
+  .tp-column-live .match-player-row .player-name,
+  .tp-column-finished .match-player-row .player-name,
+  .tp-column-live .match-player-row .score,
+  .tp-column-live .match-player-row .score.green,
+  .tp-column-live .match-player-row .score.gray,
+  .tp-column-finished .match-player-row .score,
+  .tp-column-finished .match-player-row .score.green,
+  .tp-column-finished .match-player-row .score.gray {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Placar sempre alinhado à direita */
+  .tp-column-live .match-player-row .score,
+  .tp-column-live .match-player-row .score.green,
+  .tp-column-live .match-player-row .score.gray,
+  .tp-column-finished .match-player-row .score,
+  .tp-column-finished .match-player-row .score.green,
+  .tp-column-finished .match-player-row .score.gray {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 0 !important;
+    text-align: right !important;
+    font-weight: 900 !important;
+  }
+
+  /* Espaço suficiente para o nome sem esmagar o placar */
+  .tp-column-live .one-set-row,
+  .tp-column-live .one-set-head,
+  .tp-column-finished .one-set-row,
+  .tp-column-finished .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 38px !important;
+    column-gap: 5px !important;
+  }
+
+  .tp-column-live .two-set-row,
+  .tp-column-live .two-set-head,
+  .tp-column-finished .two-set-row,
+  .tp-column-finished .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 28px 38px !important;
+    column-gap: 5px !important;
+  }
+
+  .tp-column-live .three-set-row,
+  .tp-column-live .three-set-head,
+  .tp-column-finished .three-set-row,
+  .tp-column-finished .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 26px 26px 26px 38px !important;
+    column-gap: 5px !important;
+  }
+
+  /* Retira corte forçado do nome */
+  .tp-column-live .match-player-row .name-line,
+  .tp-column-finished .match-player-row .name-line {
+    text-overflow: unset !important;
+    white-space: normal !important;
+  }
+}
+
+/* ========================================================= TEMA CLARO E LAYOUT FINAL DA PARTIDA ========================================================= */
+
+.public-modern-page {
+  color: #17213d !important;
+  background: #f5f7fa !important;
+}
+
+.public-modern-page .tp-match-list .public-card,
+.public-modern-page .tp-match-list .match-board,
+.public-modern-page .tp-match-list .compact-match-board {
+  color: #17213d !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #d2d8df !important;
+  box-shadow: 0 3px 12px rgba(16, 38, 64, 0.07) !important;
+}
+
+/* Remove fundos escuros herdados */
+.public-modern-page .match-board::before,
+.public-modern-page .match-board::after,
+.public-modern-page .compact-match-board::before,
+.public-modern-page .compact-match-board::after,
+.public-modern-page .match-player-row::before,
+.public-modern-page .match-player-row::after {
+  display: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Partida ao vivo */
+.public-modern-page .tp-column-live .compact-match-board,
+.public-modern-page .tp-column-live .match-board {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-top: 3px solid #17853a !important;
+}
+
+/* Títulos e textos da partida */
+.public-modern-page .match-board h1,
+.public-modern-page .match-board h2,
+.public-modern-page .match-board h3,
+.public-modern-page .compact-match-board h1,
+.public-modern-page .compact-match-board h2,
+.public-modern-page .compact-match-board h3 {
+  color: #071b72 !important;
+}
+
+.public-modern-page .match-chip,
+.public-modern-page .live-meta-left,
+.public-modern-page .live-meta-right,
+.public-modern-page .duration-with-icon {
+  color: #617089 !important;
+}
+
+.public-modern-page .match-status.status-live {
+  color: #17853a !important;
+  background: #e9f7ed !important;
+  border-color: #a9ddb5 !important;
+}
+
+/* Linhas dos jogadores */
+.public-modern-page .match-player-row {
+  display: grid !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+  height: auto !important;
+  color: #17213d !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border-top: 1px solid #e4e8ed !important;
+  box-shadow: none !important;
+}
+
+/* Nome e jogador */
+.public-modern-page .match-player-row .player-name,
+.public-modern-page .match-player-row .player-with-avatar,
+.public-modern-page .match-player-row .name-line,
+.public-modern-page .match-player-row .team-name-compact,
+.public-modern-page .match-player-row .team-name-compact-content {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  color: #05649a !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+
+.public-modern-page .match-player-row .player-with-avatar {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+
+.public-modern-page .match-player-row .name-line {
+  display: block !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Fotos */
+.public-modern-page .match-player-row .player-avatar,
+.public-modern-page .match-player-row .player-avatar-placeholder {
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border: 2px solid #05649a !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+/* Placar à direita */
+.public-modern-page .match-player-row .score,
+.public-modern-page .match-player-row .score.green,
+.public-modern-page .match-player-row .score.gray {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #05649a !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+}
+
+.public-modern-page .match-player-row .score.gray {
+  color: #17213d !important;
+}
+
+/* Colunas do placar */
+.public-modern-page .one-set-row,
+.public-modern-page .one-set-head {
+  grid-template-columns: minmax(0, 1fr) 36px 46px !important;
+  column-gap: 8px !important;
+}
+
+.public-modern-page .two-set-row,
+.public-modern-page .two-set-head {
+  grid-template-columns: minmax(0, 1fr) 34px 34px 46px !important;
+  column-gap: 8px !important;
+}
+
+.public-modern-page .three-set-row,
+.public-modern-page .three-set-head {
+  grid-template-columns: minmax(0, 1fr) 32px 32px 32px 46px !important;
+  column-gap: 8px !important;
+}
+
+/* Cabeçalho das colunas */
+.public-modern-page .match-table-head {
+  text-align: right !important;
+}
+
+.public-modern-page .match-table-head .team-label {
+  text-align: left !important;
+}
+
+.public-modern-page .match-table-head > *:not(.team-label) {
+  text-align: right !important;
+}
+
+/* Remove o indicador extra do vencedor */
+.public-modern-page .match-player-row .player-name::after,
+.public-modern-page .match-player-row.winner-row .player-name::after {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  content: none !important;
+}
+
+/* ========================================================= CELULAR ========================================================= */
+
+@media (max-width: 600px) {
+  .public-modern-page .tp-match-list .match-board,
+  .public-modern-page .tp-match-list .compact-match-board,
+  .public-modern-page .tp-match-list .public-card {
+    padding: 10px !important;
+  }
+
+  .public-modern-page .match-player-row {
+    min-height: 52px !important;
+    column-gap: 4px !important;
+  }
+
+  .public-modern-page .match-player-row .player-avatar,
+  .public-modern-page .match-player-row .player-avatar-placeholder {
+    flex-basis: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  .public-modern-page .match-player-row .name-line {
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Placar mais próximo da borda direita */
+  .public-modern-page .one-set-row,
+  .public-modern-page .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 30px 44px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .two-set-row,
+  .public-modern-page .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 28px 44px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .three-set-row,
+  .public-modern-page .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 26px 26px 26px 44px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .match-player-row .score,
+  .public-modern-page .match-player-row .score.green,
+  .public-modern-page .match-player-row .score.gray {
+    justify-content: flex-end !important;
+    font-size: 12px !important;
+    text-align: right !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .public-modern-page .match-player-row .player-avatar,
+  .public-modern-page .match-row .player-avatar-placeholder {
+    flex-basis: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+
+  .public-modern-page .match-player-row .name-line {
+    font-size: 11px !important;
+  }
+}
+
+/* =========================================================
+   CORREÇÃO ÚNICA FINAL — TELA PÚBLICA MOBILE
+   ========================================================= */
+
+.public-modern-page,
+.public-modern-page * {
+  box-sizing: border-box;
+}
+
+.public-modern-page,
+.public-modern-page body {
+  color: #17213d !important;
+  background: #f5f7fa !important;
+}
+
+/* Cards principais sempre claros */
+.public-modern-page .tp-header,
+.public-modern-page .tp-filter-area,
+.public-modern-page .tp-games-column,
+.public-modern-page .tp-match-list .public-card,
+.public-modern-page .tp-match-list .match-board,
+.public-modern-page .tp-match-list .compact-match-board,
+.public-modern-page .tp-match-list .compact-row,
+.public-modern-page .tp-match-list .match-player-row {
+  color: #17213d !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #d2d8df !important;
+  box-shadow: 0 3px 12px rgba(16, 38, 64, 0.07) !important;
+}
+
+/* Fundo do bloco de partida ao vivo */
+.public-modern-page .tp-column-live .match-board,
+.public-modern-page .tp-column-live .compact-match-board,
+.public-modern-page .tp-column-live .public-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #17213d !important;
+  border-top: 3px solid #17853a !important;
+}
+
+/* Remove camadas escuras herdadas */
+.public-modern-page .match-board::before,
+.public-modern-page .match-board::after,
+.public-modern-page .compact-match-board::before,
+.public-modern-page .compact-match-board::after,
+.public-modern-page .match-player-row::before,
+.public-modern-page .match-player-row::after {
+  display: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Título da partida */
+.public-modern-page .match-board h1,
+.public-modern-page .match-board h2,
+.public-modern-page .match-board h3,
+.public-modern-page .compact-match-board h1,
+.public-modern-page .compact-match-board h2,
+.public-modern-page .compact-match-board h3 {
+  color: #071b72 !important;
+}
+
+/* Cabeçalho e metadados */
+.public-modern-page .match-chip,
+.public-modern-page .live-meta-left,
+.public-modern-page .live-meta-right,
+.public-modern-page .duration-with-icon {
+  color: #617089 !important;
+}
+
+.public-modern-page .match-status.status-live {
+  color: #17853a !important;
+  background: #e9f7ed !important;
+  border-color: #a9ddb5 !important;
+}
+
+/* Linhas de jogadores */
+.public-modern-page .match-player-row {
+  display: grid !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+  height: auto !important;
+  border-top: 1px solid #e4e8ed !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.public-modern-page .match-player-row:first-child {
+  border-top: 0 !important;
+}
+
+/* Nome, avatar e área do jogador */
+.public-modern-page .match-player-row .team-col,
+.public-modern-page .match-player-row .player-name,
+.public-modern-page .match-player-row .player-with-avatar,
+.public-modern-page .match-player-row .name-line,
+.public-modern-page .match-player-row .team-name-compact,
+.public-modern-page .match-player-row .team-name-compact-content {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.public-modern-page .match-player-row .player-name,
+.public-modern-page .match-player-row .player-with-avatar {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  overflow: visible !important;
+  color: #05649a !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+
+.public-modern-page .match-player-row .name-line {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  color: #05649a !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Fotos maiores, sem crescerem de forma irregular */
+.public-modern-page .match-player-row .player-avatar,
+.public-modern-page .match-player-row .player-avatar-placeholder {
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border: 2px solid #05649a !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+/* Indicador de saque */
+.public-modern-page .match-player-row .serve-ball {
+  flex: 0 0 7px !important;
+  width: 7px !important;
+  height: 7px !important;
+  margin: 0 2px 0 0 !important;
+  background: #17853a !important;
+}
+
+/* Números do placar */
+.public-modern-page .match-player-row .score,
+.public-modern-page .match-player-row .score.green,
+.public-modern-page .match-player-row .score.gray {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  color: #05649a !important;
+  background: transparent !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: right !important;
+}
+
+.public-modern-page .match-player-row .score.gray {
+  color: #17213d !important;
+}
+
+/* Cabeçalho das colunas do placar à direita */
+.public-modern-page .match-table-head {
+  text-align: right !important;
+}
+
+.public-modern-page .match-table-head .team-label {
+  text-align: left !important;
+}
+
+.public-modern-page .match-table-head > *:not(.team-label) {
+  text-align: right !important;
+}
+
+/* Grade desktop */
+.public-modern-page .one-set-row,
+.public-modern-page .one-set-head {
+  grid-template-columns: minmax(0, 1fr) 36px 46px !important;
+  column-gap: 8px !important;
+}
+
+.public-modern-page .two-set-row,
+.public-modern-page .two-set-head {
+  grid-template-columns: minmax(0, 1fr) 34px 34px 46px !important;
+  column-gap: 8px !important;
+}
+
+.public-modern-page .three-set-row,
+.public-modern-page .three-set-head {
+  grid-template-columns: minmax(0, 1fr) 32px 32px 32px 46px !important;
+  column-gap: 8px !important;
+}
+
+/* Remove check/indicador que empurra o nome e o placar */
+.public-modern-page .match-player-row .player-name::after,
+.public-modern-page .match-player-row.winner-row .player-name::after {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  content: none !important;
+}
+
+/* Botões preservando o tema claro */
+.public-modern-page .public-actions-section {
+  display: block !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e4e8ed !important;
+}
+
+.public-modern-page .public-action-btn,
+.public-modern-page .action-btn {
+  color: #05649a !important;
+  background: #ffffff !important;
+  border-color: #05649a !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .public-modern-page .tp-match-list .public-card,
+  .public-modern-page .tp-match-list .match-board,
+  .public-modern-page .tp-match-list .compact-match-board {
+    padding: 10px !important;
+  }
+
+  .public-modern-page .match-player-row {
+    min-height: 52px !important;
+    column-gap: 4px !important;
+  }
+
+  /* Área do jogador permanece na mesma linha: avatar + nome */
+  .public-modern-page .match-player-row .player-with-avatar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+  }
+
+  .public-modern-page .match-player-row .name-line {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .public-modern-page .match-player-row .player-avatar,
+  .public-modern-page .match-player-row .player-avatar-placeholder {
+    flex-basis: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  /* Uma coluna final de pontos mais larga e empurrada para a direita */
+  .public-modern-page .one-set-row,
+  .public-modern-page .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 32px 42px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .two-set-row,
+  .public-modern-page .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 30px 30px 42px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .three-set-row,
+  .public-modern-page .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 28px 28px 42px !important;
+    column-gap: 5px !important;
+  }
+
+  .public-modern-page .match-player-row .score,
+  .public-modern-page .match-player-row .score.green,
+  .public-modern-page .match-player-row .score.gray {
+    justify-content: flex-end !important;
+    font-size: 12px !important;
+    text-align: right !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .public-modern-page .match-player-row .player-avatar,
+  .public-modern-page .match-player-row .player-avatar-placeholder {
+    flex-basis: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+
+  .public-modern-page .match-player-row .name-line {
+    font-size: 11px !important;
+  }
+}
