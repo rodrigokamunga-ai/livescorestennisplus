@@ -4610,3 +4610,546 @@ body.public-modern-page .public-stats-close-footer:hover {
   }
 }
 
+/* ========================================================= AO VIVO MOBILE — IGUAL AOS FINALIZADOS ========================================================= */
+
+@media (max-width: 600px) {
+  .public-modern-page .tp-column-live .match-player-row {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    min-height: 52px !important;
+    height: auto !important;
+    align-items: center !important;
+    column-gap: 6px !important;
+  }
+
+  /* Fotos lado a lado */
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    gap: 6px !important;
+    overflow: visible !important;
+  }
+
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-avatar-group {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
+  .public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar,
+  .public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar-placeholder {
+    flex: 0 0 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    margin-left: -7px !important;
+    border: 2px solid #05649a !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+  }
+
+  .public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar:first-child,
+  .public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar-placeholder:first-child {
+    margin-left: 0 !important;
+  }
+
+  /* Nomes da dupla ficam empilhados ao lado das fotos */
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-name-group {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-name-group
+    .name-line {
+    display: block !important;
+    flex: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    color: #05649a !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Evita que o container externo corte o nome */
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .team-name-compact-content {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+
+  /* Placar alinhado à direita */
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score,
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.green,
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.gray {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    color: #05649a !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    text-align: right !important;
+  }
+
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.gray {
+    color: #17213d !important;
+  }
+
+  /* 1 set + pontos */
+  .public-modern-page
+    .tp-column-live
+    .one-set-row,
+  .public-modern-page
+    .tp-column-live
+    .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 34px 48px !important;
+    column-gap: 7px !important;
+  }
+
+  /* 2 sets + pontos */
+  .public-modern-page
+    .tp-column-live
+    .two-set-row,
+  .public-modern-page
+    .tp-column-live
+    .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 30px 30px 48px !important;
+    column-gap: 7px !important;
+  }
+
+  /* 3 sets + pontos */
+  .public-modern-page
+    .tp-column-live
+    .three-set-row,
+  .public-modern-page
+    .tp-column-live
+    .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 28px 28px 28px 48px !important;
+    column-gap: 6px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar,
+  .public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar-placeholder {
+    flex-basis: 29px !important;
+    width: 29px !important;
+    height: 29px !important;
+    min-width: 29px !important;
+    min-height: 29px !important;
+  }
+
+  .public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-name-group
+    .name-line {
+    font-size: 11px !important;
+  }
+}
+
+/* ========================================================= CORREÇÃO FINAL — AO VIVO MOBILE Fotos lado a lado, nomes organizados e placar à direita ========================================================= */
+
+@media (max-width: 600px) {
+  /* A linha precisa ocupar toda a largura interna do card */
+  body.public-modern-page .tp-column-live .match-player-row {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    align-items: center !important;
+    height: auto !important;
+    min-height: 54px !important;
+    column-gap: 6px !important;
+  }
+
+  /* Primeira coluna ocupa todo o espaço restante */
+  body.public-modern-page .tp-column-live .match-player-row .team-col {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Mantém as duas fotos lado a lado */
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    gap: 6px !important;
+    overflow: visible !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-avatar-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex: 0 0 58px !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar,
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar-placeholder {
+    flex: 0 0 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    margin-left: -7px !important;
+    border: 2px solid #05649a !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar:first-child,
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar-placeholder:first-child {
+    margin-left: 0 !important;
+  }
+
+  /* Grupo dos nomes */
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-name-group {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    gap: 0 !important;
+    overflow: visible !important;
+    line-height: 1.08 !important;
+  }
+
+  /* Cada parceiro em uma linha, sem quebrar R. Camara/ */
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-name-group
+    .name-line {
+    display: block !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    color: #05649a !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.08 !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+  }
+
+  /* Remove corte do container que envolve o nome */
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .team-name-compact-content {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+
+  /* Colunas do placar sempre ocupam o lado direito */
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score,
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.green,
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.gray {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    color: #05649a !important;
+    background: transparent !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-align: right !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.gray {
+    color: #17213d !important;
+  }
+
+  /* Uma coluna de set + pontos */
+  body.public-modern-page
+    .tp-column-live
+    .one-set-row,
+  body.public-modern-page
+    .tp-column-live
+    .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 38px 54px !important;
+    column-gap: 8px !important;
+  }
+
+  /* Duas colunas de sets + pontos */
+  body.public-modern-page
+    .tp-column-live
+    .two-set-row,
+  body.public-modern-page
+    .tp-column-live
+    .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 34px 34px 54px !important;
+    column-gap: 8px !important;
+  }
+
+  /* Três colunas de sets + pontos */
+  body.public-modern-page
+    .tp-column-live
+    .three-set-row,
+  body.public-modern-page
+    .tp-column-live
+    .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 30px 30px 30px 54px !important;
+    column-gap: 7px !important;
+  }
+}
+
+/* Tela muito pequena */
+@media (max-width: 380px) {
+  body.public-modern-page .tp-column-live .match-player-row {
+    column-gap: 4px !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group {
+    flex-basis: 52px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar,
+  body.public-modern-page
+    .tp-column-live
+    .doubles-avatar-group
+    .player-avatar-placeholder {
+    flex-basis: 29px !important;
+    width: 29px !important;
+    height: 29px !important;
+    min-width: 29px !important;
+    min-height: 29px !important;
+    margin-left: -6px !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .doubles-name-group
+    .name-line {
+    font-size: 11px !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .one-set-row,
+  body.public-modern-page
+    .tp-column-live
+    .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 32px 48px !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .two-set-row,
+  body.public-modern-page
+    .tp-column-live
+    .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 27px 27px 48px !important;
+  }
+}
+
+/* ========================================================= AJUSTE EXCLUSIVO DO PLACAR — MOBILE Move as colunas de pontuação para a direita ========================================================= */
+
+@media (max-width: 600px) {
+  /* Mantém os números alinhados no lado direito */
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score,
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.green,
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.gray {
+    position: relative !important;
+    left: 28px !important;
+    justify-self: end !important;
+    justify-content: flex-end !important;
+    text-align: right !important;
+    z-index: 2 !important;
+  }
+
+  /* Cabeçalho das colunas acompanha o deslocamento */
+  body.public-modern-page
+    .tp-column-live
+    .match-table-head
+    .set-col,
+  body.public-modern-page
+    .tp-column-live
+    .match-table-head
+    .points-col {
+    position: relative !important;
+    left: 28px !important;
+    text-align: right !important;
+  }
+}
+
+/* Telas pequenas */
+@media (max-width: 380px) {
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score,
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.green,
+  body.public-modern-page
+    .tp-column-live
+    .match-player-row
+    .score.gray {
+    left: 20px !important;
+  }
+
+  body.public-modern-page
+    .tp-column-live
+    .match-table-head
+    .set-col,
+  body.public-modern-page
+    .tp-column-live
+    .match-table-head
+    .points-col {
+    left: 20px !important;
+  }
+}
