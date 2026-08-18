@@ -20,6 +20,7 @@
     };
 
     const FILTER_KEY = "lsts_live_status_filter";
+    const FINISHED_GRACE_MS = 2 * 60 * 1000;
 
     const el = {
       filter: document.getElementById("liveStatusFilter"),
@@ -246,6 +247,29 @@
       saveFilter(v) { localStorage.setItem(FILTER_KEY, v || "all"); },
       isMobile() { return window.matchMedia("(max-width: 768px)").matches; },
 
+      /* Mantém uma partida finalizada na área "Ao vivo"
+         durante dois minutos após finishedAt. */
+      isWithinFinishedGrace(match) {
+        const status = String(match?.status || "").trim().toLowerCase();
+
+        if (!["finished", "wo", "ret"].includes(status)) {
+          return false;
+        }
+
+        const finishedAt =
+          U.toDate(match?.finishedAt) ||
+          U.toDate(match?.completedAt) ||
+          U.toDate(match?.endedAt) ||
+          U.toDate(match?.lastAction?.finishedAt) ||
+          U.toDate(match?.updatedAt);
+
+        if (!finishedAt) {
+          return false;
+        }
+
+        return Date.now() - finishedAt.getTime() < FINISHED_GRACE_MS;
+      },
+
       getMatchSummary(match) {
         const score = U.normalizeScore(match.score || {});
         const summary = match.summary || match.matchSummary || {};
@@ -376,7 +400,12 @@
           String(match.status || "").toLowerCase() !== "finished" &&
           String(match.status || "").toLowerCase() !== "wo" &&
           String(match.status || "").toLowerCase() !== "ret"
-            ? { p1: "6", p2: "6" }
+            ? {
+                /* No super tie-break em andamento, exibir somente
+                   os pontos atuais: 1 x 1, 2 x 2, 4 x 7 etc. */
+                p1: String(score.tieBreakPoints1 ?? 0),
+                p2: String(score.tieBreakPoints2 ?? 0)
+              }
             : {
                 p1: String(score.games1 ?? 0),
                 p2: String(score.games2 ?? 0)
@@ -1087,41 +1116,165 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
     }
 
     function buildSetHead(match, setColumns) {
-  const cls = setColumns.hasThreeSets ? "three-set-head"
-    : setColumns.hasTwoSets ? "two-set-head"
-    : "one-set-head";
+      const rawStatus = String(match?.status || "").trim().toLowerCase();
+      const isFinished =
+        rawStatus === "finished" ||
+        rawStatus === "wo" ||
+        rawStatus === "ret";
 
-  const rawStatus = String(match?.status || "").trim().toLowerCase();
-  const isFinished = rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret";
-  const hideLabels = rawStatus === "live" || rawStatus === "suspended" || isFinished;
+      const score = U.normalizeScore(match?.score || {});
+      const isActiveSuperTB =
+        score.tieBreakMode === "super10" &&
+        !isFinished;
 
-  const score = U.normalizeScore(match?.score || {});
-  const historyCount = Array.isArray(score.setHistory) ? score.setHistory.length : 0;
-  const playedCount = Math.max(historyCount, Number(score.sets1 || 0) + Number(score.sets2 || 0));
+      const hideLabels =
+        rawStatus === "live" ||
+        rawStatus === "suspended" ||
+        isFinished;
 
-  const showSet2 = isFinished ? playedCount >= 2 : setColumns.currentSetNum >= 2;
-  const showSet3 = isFinished ? playedCount >= 3 : setColumns.currentSetNum >= 3;
+      const historyCount = Array.isArray(score.setHistory)
+        ? score.setHistory.length
+        : 0;
 
-  return ` <div class="match-table-head compact-head ${cls} ${hideLabels ? "head-no-labels" : ""}"> <div class="team-label team-col">${hideLabels ? "" : "JOGADOR"}</div> <div class="set-col">${hideLabels ? "" : "1º SET"}</div> ${showSet2 ? `<div class="set-col">${hideLabels ? "" : "2º SET"}</div>` : ""} ${showSet3 ? `<div class="set-col">${hideLabels ? "" : "3º SET"}</div>` : ""} ${!isFinished ? `<div class="points-col">${hideLabels ? "" : "PONTOS"}</div>` : ""} </div> `;
-}
+      const playedCount = Math.max(
+        historyCount,
+        Number(score.sets1 || 0) + Number(score.sets2 || 0)
+      );
 
-    function buildPlayerRow(teamNameHtml, setColumns, pts, playerPos, score, isWinner, isWO, isFinished = false, winnerPos = null) {
-      const rowCls = setColumns.hasThreeSets ? "three-set-row"
-        : setColumns.hasTwoSets ? "two-set-row"
+      const showSet2 = isFinished
+        ? playedCount >= 2
+        : setColumns.currentSetNum >= 2;
+
+      const showSet3 =
+        isActiveSuperTB ||
+        (isFinished
+          ? playedCount >= 3
+          : setColumns.currentSetNum >= 3);
+
+      const headClass = isActiveSuperTB
+        ? "super-tb-head"
+        : setColumns.hasThreeSets
+          ? "three-set-head"
+          : setColumns.hasTwoSets
+            ? "two-set-head"
+            : "one-set-head";
+
+      return `
+        <div class="match-table-head compact-head ${headClass} ${hideLabels ? "head-no-labels" : ""}">
+          <div class="team-label team-col"></div>
+          <div class="set-col">${hideLabels ? "" : "1º SET"}</div>
+          ${
+            showSet2
+              ? `<div class="set-col">${hideLabels ? "" : "2º SET"}</div>`
+              : ""
+          }
+          ${
+            showSet3
+              ? `<div class="set-col">${hideLabels ? "" : (isActiveSuperTB ? "SUPER TB" : "3º SET")}</div>`
+              : ""
+          }
+          ${
+            !isFinished && !isActiveSuperTB
+              ? `<div class="points-col">${hideLabels ? "" : "PONTOS"}</div>`
+              : ""
+          }
+        </div>
+      `;
+    }
+
+    function buildPlayerRow(
+      teamNameHtml,
+      setColumns,
+      pts,
+      playerPos,
+      score,
+      isWinner,
+      isWO,
+      isFinished = false,
+      winnerPos = null
+    ) {
+      const rowCls = setColumns.hasThreeSets
+        ? "three-set-row"
+        : setColumns.hasTwoSets
+          ? "two-set-row"
           : "one-set-row";
 
       const ptsDisplay = (isWO && isWinner) ? "WO" : pts;
-      const serveBall = getServeBall(score, playerPos, isFinished, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`;
-      const setP = playerPos === 1 ? "p1" : "p2";
 
+      const serveBall =
+        getServeBall(score, playerPos, isFinished, winnerPos) ||
+        `<span class="serve-ball serve-ball-placeholder"></span>`;
+
+      const setP = playerPos === 1 ? "p1" : "p2";
       const set1 = setColumns.set1 ? setColumns.set1[setP] : "";
       const set2 = setColumns.set2 ? setColumns.set2[setP] : "";
       const set3 = setColumns.set3 ? setColumns.set3[setP] : "";
 
-      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}"> ${serveBall} <span class="team-name-compact-content ${isDoublesFormat(score) ? "doubles-name" : ""}"> ${teamNameHtml} </span> </div> <div class="score green set-col">${set1 || ""}</div> ${setColumns.currentSetNum >= 2 ? `<div class="score green set-col">${set2 || ""}</div>` : ""} ${setColumns.currentSetNum >= 3 ? `<div class="score green set-col">${set3 || ""}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div> `;
+      const isActiveSuperTB =
+        score.tieBreakMode === "super10" &&
+        !isFinished;
+
+      /* Super tie-break:
+         mantém 1º set e 2º set;
+         usa a terceira coluna para os pontos do SUPER TB;
+         não cria uma quarta coluna PONTOS. */
+      if (isActiveSuperTB) {
+        const superTBPoints = playerPos === 1
+          ? String(score.tieBreakPoints1 ?? 0)
+          : String(score.tieBreakPoints2 ?? 0);
+
+        return `
+          <div class="match-player-row compact-row super-tb-active-row">
+            <div class="player-name team-name-compact team-col">
+              ${serveBall}
+              <span class="team-name-compact-content">
+                ${teamNameHtml}
+              </span>
+            </div>
+
+            <div class="score green set-col">
+              ${set1 || ""}
+            </div>
+
+            <div class="score green set-col">
+              ${set2 || ""}
+            </div>
+
+            <div class="score green set-col super-tb-score">
+              ${superTBPoints}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}">
+          <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}">
+            ${serveBall}
+            <span class="team-name-compact-content">
+              ${teamNameHtml}
+            </span>
+          </div>
+
+          <div class="score green set-col">${set1 || ""}</div>
+
+          ${
+            setColumns.currentSetNum >= 2
+              ? `<div class="score green set-col">${set2 || ""}</div>`
+              : ""
+          }
+
+          ${
+            setColumns.currentSetNum >= 3
+              ? `<div class="score green set-col">${set3 || ""}</div>`
+              : ""
+          }
+
+          <div class="score gray points-col">${ptsDisplay}</div>
+        </div>
+      `;
     }
 
-    
 
     function renderFinalizedCard(match) {
       const score = U.normalizeScore(match.score || {});
@@ -1323,7 +1476,13 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
         const rawStatus = String(m.status || "scheduled").trim().toLowerCase();
 
         if (rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret") {
-          finished.push(m);
+          /* Após finalizar, mantém a partida na área ao vivo por 2 minutos.
+             Depois desse prazo ela passa automaticamente para finalizados. */
+          if (U.isWithinFinishedGrace(m)) {
+            live.push(m);
+          } else {
+            finished.push(m);
+          }
         } else if (rawStatus === "live" || rawStatus === "suspended") {
           live.push(m);
         } else {
@@ -1332,7 +1491,19 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
       });
 
       scheduled.sort((a, b) => (U.toDate(a.matchDateTime)?.getTime() || 0) - (U.toDate(b.matchDateTime)?.getTime() || 0));
-      live.sort((a, b) => (U.getStartedAtMs(a) || 0) - (U.getStartedAtMs(b) || 0));
+      live.sort((a, b) => {
+        const aTime =
+          U.toDate(a.finishedAt)?.getTime() ||
+          U.getStartedAtMs(a) ||
+          0;
+
+        const bTime =
+          U.toDate(b.finishedAt)?.getTime() ||
+          U.getStartedAtMs(b) ||
+          0;
+
+        return aTime - bTime;
+      });
       finished.sort((a, b) => {
         const fa = U.toDate(a.finishedAt)?.getTime() || U.getStartedAtMs(a) || 0;
         const fb = U.toDate(b.finishedAt)?.getTime() || U.getStartedAtMs(b) || 0;
