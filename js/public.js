@@ -258,9 +258,6 @@
 
         const finishedAt =
           U.toDate(match?.finishedAt) ||
-          U.toDate(match?.completedAt) ||
-          U.toDate(match?.endedAt) ||
-          U.toDate(match?.lastAction?.finishedAt) ||
           U.toDate(match?.updatedAt);
 
         if (!finishedAt) {
@@ -374,19 +371,12 @@
           }
 
           if (setObj.tieBreakMode === "super10") {
-            if (!isFinished && isCurrent) {
-              return { p1: "6", p2: "6" };
-            }
-
-            if (tb1 > 0 || tb2 > 0) {
-              const p1Won = tb1 > tb2;
-              return {
-                p1: buildTB(p1Won ? 7 : 6, tb1),
-                p2: buildTB(p1Won ? 6 : 7, tb2)
-              };
-            }
-
-            return { p1: "6", p2: "6" };
+            /* Super tie-break: mostrar somente os pontos,
+               por exemplo 10 x 6, tanto ao vivo quanto finalizado. */
+            return {
+              p1: String(tb1),
+              p2: String(tb2)
+            };
           }
 
           return { p1: String(g1), p2: String(g2) };
@@ -1049,6 +1039,17 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
 
       const p1Raw = String(match.player1 || "Jogador 1").trim();
       const p2Raw = String(match.player2 || "Jogador 2").trim();
+      const p3Raw = String(match.player3 || "Jogador 3").trim();
+      const p4Raw = String(match.player4 || "Jogador 4").trim();
+
+      const feedPlayer1Name = isDoublesFormat(match)
+        ? `${p1Raw}/${p2Raw}`
+        : p1Raw;
+
+      const feedPlayer2Name = isDoublesFormat(match)
+        ? `${p3Raw}/${p4Raw}`
+        : p2Raw;
+
       const fmt = String(match.matchFormat || "").toLowerCase();
       const noAd = fmt.includes("sem vantagem") || fmt.includes("no ad");
       const hasAd = fmt.includes("com vantagem") || fmt.includes("3 sets");
@@ -1061,13 +1062,13 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
       if (isTieBreak) return "🎾 TIE-BREAK";
 
       if (hasAd && !noAd) {
-        if (score.advantage === "player1") return `VANTAGEM ${p1Raw}`;
-        if (score.advantage === "player2") return `VANTAGEM ${p2Raw}`;
+        if (score.advantage === "player1") return `VANTAGEM ${feedPlayer1Name}`;
+        if (score.advantage === "player2") return `VANTAGEM ${feedPlayer2Name}`;
         const p1 = score.points1, p2 = score.points2;
         if (p1 >= 3 && p2 >= 3) {
           if (p1 === p2) return "IGUAIS";
-          if (p1 > p2) return `VANTAGEM ${p1Raw}`;
-          if (p2 > p1) return `VANTAGEM ${p2Raw}`;
+          if (p1 > p2) return `VANTAGEM ${feedPlayer1Name}`;
+          if (p2 > p1) return `VANTAGEM ${feedPlayer2Name}`;
         }
       }
 
@@ -1077,7 +1078,7 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
 
       if (U.isBreakPoint(score, match.matchFormat)) {
         const server = score.server || "player1";
-        const rcvName = server === "player1" ? p2Raw : p1Raw;
+        const rcvName = server === "player1" ? feedPlayer2Name : feedPlayer1Name;
         return `🔴 BREAK POINT — ${rcvName}`;
       }
 
@@ -1088,16 +1089,16 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
         const prevSets1 = Number(prevScore.sets1 || 0);
         const prevSets2 = Number(prevScore.sets2 || 0);
 
-        if (nowSets1 > prevSets1) return `🏆 SET ${p1Raw}`;
-        if (nowSets2 > prevSets2) return `🏆 SET ${p2Raw}`;
+        if (nowSets1 > prevSets1) return `🏆 SET ${feedPlayer1Name}`;
+        if (nowSets2 > prevSets2) return `🏆 SET ${feedPlayer2Name}`;
 
         const nowG1 = Number(score.games1 || 0);
         const nowG2 = Number(score.games2 || 0);
         const prevG1 = Number(prevScore.games1 || 0);
         const prevG2 = Number(prevScore.games2 || 0);
 
-        if (nowG1 > prevG1) return `GAME ${p1Raw}`;
-        if (nowG2 > prevG2) return `GAME ${p2Raw}`;
+        if (nowG1 > prevG1) return `GAME ${feedPlayer1Name}`;
+        if (nowG2 > prevG2) return `GAME ${feedPlayer2Name}`;
       }
 
       return "";
@@ -1116,165 +1117,41 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
     }
 
     function buildSetHead(match, setColumns) {
-      const rawStatus = String(match?.status || "").trim().toLowerCase();
-      const isFinished =
-        rawStatus === "finished" ||
-        rawStatus === "wo" ||
-        rawStatus === "ret";
+  const cls = setColumns.hasThreeSets ? "three-set-head"
+    : setColumns.hasTwoSets ? "two-set-head"
+    : "one-set-head";
 
-      const score = U.normalizeScore(match?.score || {});
-      const isActiveSuperTB =
-        score.tieBreakMode === "super10" &&
-        !isFinished;
+  const rawStatus = String(match?.status || "").trim().toLowerCase();
+  const isFinished = rawStatus === "finished" || rawStatus === "wo" || rawStatus === "ret";
+  const hideLabels = rawStatus === "live" || rawStatus === "suspended" || isFinished;
 
-      const hideLabels =
-        rawStatus === "live" ||
-        rawStatus === "suspended" ||
-        isFinished;
+  const score = U.normalizeScore(match?.score || {});
+  const historyCount = Array.isArray(score.setHistory) ? score.setHistory.length : 0;
+  const playedCount = Math.max(historyCount, Number(score.sets1 || 0) + Number(score.sets2 || 0));
 
-      const historyCount = Array.isArray(score.setHistory)
-        ? score.setHistory.length
-        : 0;
+  const showSet2 = isFinished ? playedCount >= 2 : setColumns.currentSetNum >= 2;
+  const showSet3 = isFinished ? playedCount >= 3 : setColumns.currentSetNum >= 3;
 
-      const playedCount = Math.max(
-        historyCount,
-        Number(score.sets1 || 0) + Number(score.sets2 || 0)
-      );
+  return ` <div class="match-table-head compact-head ${cls} ${hideLabels ? "head-no-labels" : ""}"> <div class="team-label team-col">${hideLabels ? "" : "JOGADOR"}</div> <div class="set-col">${hideLabels ? "" : "1º SET"}</div> ${showSet2 ? `<div class="set-col">${hideLabels ? "" : "2º SET"}</div>` : ""} ${showSet3 ? `<div class="set-col">${hideLabels ? "" : "3º SET"}</div>` : ""} ${!isFinished ? `<div class="points-col">${hideLabels ? "" : "PONTOS"}</div>` : ""} </div> `;
+}
 
-      const showSet2 = isFinished
-        ? playedCount >= 2
-        : setColumns.currentSetNum >= 2;
-
-      const showSet3 =
-        isActiveSuperTB ||
-        (isFinished
-          ? playedCount >= 3
-          : setColumns.currentSetNum >= 3);
-
-      const headClass = isActiveSuperTB
-        ? "super-tb-head"
-        : setColumns.hasThreeSets
-          ? "three-set-head"
-          : setColumns.hasTwoSets
-            ? "two-set-head"
-            : "one-set-head";
-
-      return `
-        <div class="match-table-head compact-head ${headClass} ${hideLabels ? "head-no-labels" : ""}">
-          <div class="team-label team-col"></div>
-          <div class="set-col">${hideLabels ? "" : "1º SET"}</div>
-          ${
-            showSet2
-              ? `<div class="set-col">${hideLabels ? "" : "2º SET"}</div>`
-              : ""
-          }
-          ${
-            showSet3
-              ? `<div class="set-col">${hideLabels ? "" : (isActiveSuperTB ? "SUPER TB" : "3º SET")}</div>`
-              : ""
-          }
-          ${
-            !isFinished && !isActiveSuperTB
-              ? `<div class="points-col">${hideLabels ? "" : "PONTOS"}</div>`
-              : ""
-          }
-        </div>
-      `;
-    }
-
-    function buildPlayerRow(
-      teamNameHtml,
-      setColumns,
-      pts,
-      playerPos,
-      score,
-      isWinner,
-      isWO,
-      isFinished = false,
-      winnerPos = null
-    ) {
-      const rowCls = setColumns.hasThreeSets
-        ? "three-set-row"
-        : setColumns.hasTwoSets
-          ? "two-set-row"
+    function buildPlayerRow(teamNameHtml, setColumns, pts, playerPos, score, isWinner, isWO, isFinished = false, winnerPos = null) {
+      const rowCls = setColumns.hasThreeSets ? "three-set-row"
+        : setColumns.hasTwoSets ? "two-set-row"
           : "one-set-row";
 
       const ptsDisplay = (isWO && isWinner) ? "WO" : pts;
-
-      const serveBall =
-        getServeBall(score, playerPos, isFinished, winnerPos) ||
-        `<span class="serve-ball serve-ball-placeholder"></span>`;
-
+      const serveBall = getServeBall(score, playerPos, isFinished, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`;
       const setP = playerPos === 1 ? "p1" : "p2";
+
       const set1 = setColumns.set1 ? setColumns.set1[setP] : "";
       const set2 = setColumns.set2 ? setColumns.set2[setP] : "";
       const set3 = setColumns.set3 ? setColumns.set3[setP] : "";
 
-      const isActiveSuperTB =
-        score.tieBreakMode === "super10" &&
-        !isFinished;
-
-      /* Super tie-break:
-         mantém 1º set e 2º set;
-         usa a terceira coluna para os pontos do SUPER TB;
-         não cria uma quarta coluna PONTOS. */
-      if (isActiveSuperTB) {
-        const superTBPoints = playerPos === 1
-          ? String(score.tieBreakPoints1 ?? 0)
-          : String(score.tieBreakPoints2 ?? 0);
-
-        return `
-          <div class="match-player-row compact-row super-tb-active-row">
-            <div class="player-name team-name-compact team-col">
-              ${serveBall}
-              <span class="team-name-compact-content">
-                ${teamNameHtml}
-              </span>
-            </div>
-
-            <div class="score green set-col">
-              ${set1 || ""}
-            </div>
-
-            <div class="score green set-col">
-              ${set2 || ""}
-            </div>
-
-            <div class="score green set-col super-tb-score">
-              ${superTBPoints}
-            </div>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}">
-          <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}">
-            ${serveBall}
-            <span class="team-name-compact-content">
-              ${teamNameHtml}
-            </span>
-          </div>
-
-          <div class="score green set-col">${set1 || ""}</div>
-
-          ${
-            setColumns.currentSetNum >= 2
-              ? `<div class="score green set-col">${set2 || ""}</div>`
-              : ""
-          }
-
-          ${
-            setColumns.currentSetNum >= 3
-              ? `<div class="score green set-col">${set3 || ""}</div>`
-              : ""
-          }
-
-          <div class="score gray points-col">${ptsDisplay}</div>
-        </div>
-      `;
+      return ` <div class="match-player-row compact-row ${rowCls} ${isWinner ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${isWinner ? "winner" : ""}"> ${serveBall} <span class="team-name-compact-content ${isDoublesFormat(score) ? "doubles-name" : ""}"> ${teamNameHtml} </span> </div> <div class="score green set-col">${set1 || ""}</div> ${setColumns.currentSetNum >= 2 ? `<div class="score green set-col">${set2 || ""}</div>` : ""} ${setColumns.currentSetNum >= 3 ? `<div class="score green set-col">${set3 || ""}</div>` : ""} <div class="score gray points-col">${ptsDisplay}</div> </div> `;
     }
 
+    
 
     function renderFinalizedCard(match) {
       const score = U.normalizeScore(match.score || {});
@@ -1305,7 +1182,14 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
         const tb2 = Number(setObj.tieBreakPoints2 || 0);
         const mode = String(setObj.tieBreakMode || "").trim().toLowerCase();
     
-        if ((mode === "tb7" || mode === "super10") && (tb1 > 0 || tb2 > 0)) {
+        if (mode === "super10") {
+          return {
+            p1: String(tb1),
+            p2: String(tb2)
+          };
+        }
+
+        if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
           const p1Won = tb1 > tb2;
           return {
             p1: `${p1Won ? 7 : 6}<span class="set-tb">${tb1}</span>`,
