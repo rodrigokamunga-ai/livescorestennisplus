@@ -4145,3 +4145,218 @@ body.public-modern-page .public-stats-close-footer:hover {
   }
 }
 
+@media (max-width: 600px) {
+  body.public-modern-page .tp-column-live .match-player-row,
+  body.public-modern-page .tp-column-finished .match-player-row {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) 38px 56px !important;
+    column-gap: 8px !important;
+  }
+
+  body.public-modern-page .match-player-row .name-line {
+    display: block !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  body.public-modern-page .match-player-row .player-avatar,
+  body.public-modern-page .match-player-row .player-avatar-placeholder {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  body.public-modern-page .match-player-row .score,
+  body.public-modern-page .match-player-row .score.green,
+  body.public-modern-page .match-player-row .score.gray {
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    font-size: 12px !important;
+    text-align: right !important;
+  }
+
+  body.public-modern-page .one-set-row,
+  body.public-modern-page .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 38px 56px !important;
+  }
+
+  body.public-modern-page .two-set-row,
+  body.public-modern-page .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 34px 34px 56px !important;
+  }
+
+  body.public-modern-page .three-set-row,
+  body.public-modern-page .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 32px 32px 32px 56px !important;
+  }
+}
+
+/* =========================================================
+   CORREÇÃO DEFINITIVA MOBILE
+   Nome completo + placar no extremo direito
+   ========================================================= */
+
+@media (max-width: 600px) {
+  /* A linha inteira ocupa toda a largura do card */
+  body.public-modern-page .tp-column-live .match-player-row,
+  body.public-modern-page .tp-column-finished .match-player-row {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    align-items: center !important;
+    min-height: 58px !important;
+    height: auto !important;
+    column-gap: 6px !important;
+  }
+
+  /* Área do jogador: avatar e nome juntos */
+  body.public-modern-page .tp-column-live .match-player-row .player-name,
+  body.public-modern-page .tp-column-finished .match-player-row .player-name {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  body.public-modern-page .tp-column-live .match-player-row .player-with-avatar,
+  body.public-modern-page .tp-column-finished .match-player-row .player-with-avatar {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+    gap: 6px !important;
+  }
+
+  /* O nome pode ocupar duas linhas, mas não fica cortado */
+  body.public-modern-page .tp-column-live .match-player-row .name-line,
+  body.public-modern-page .tp-column-finished .match-player-row .name-line,
+  body.public-modern-page .tp-column-live .match-player-row .team-name-compact-content,
+  body.public-modern-page .tp-column-finished .match-player-row .team-name-compact-content {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: 2.5em !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Fotos maiores, sem reduzir a área do nome */
+  body.public-modern-page .tp-column-live .match-player-row .player-avatar,
+  body.public-modern-page .tp-column-live .match-player-row .player-avatar-placeholder,
+  body.public-modern-page .tp-column-finished .match-player-row .player-avatar,
+  body.public-modern-page .tp-column-finished .match-player-row .player-avatar-placeholder {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  /* Placar no extremo direito */
+  body.public-modern-page .tp-column-live .match-player-row .score,
+  body.public-modern-page .tp-column-live .match-player-row .score.green,
+  body.public-modern-page .tp-column-live .match-player-row .score.gray,
+  body.public-modern-page .tp-column-finished .match-player-row .score,
+  body.public-modern-page .tp-column-finished .match-player-row .score.green,
+  body.public-modern-page .tp-column-finished .match-player-row .score.gray {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    text-align: right !important;
+  }
+
+  /* Uma partida com 1 set: nome | set | pontos */
+  body.public-modern-page .tp-column-live .one-set-row,
+  body.public-modern-page .tp-column-live .one-set-head,
+  body.public-modern-page .tp-column-finished .one-set-row,
+  body.public-modern-page .tp-column-finished .one-set-head {
+    grid-template-columns: minmax(0, 1fr) 38px 56px !important;
+    width: 100% !important;
+    column-gap: 8px !important;
+  }
+
+  /* Dois sets: nome | set 1 | set 2 | pontos */
+  body.public-modern-page .tp-column-live .two-set-row,
+  body.public-modern-page .tp-column-live .two-set-head,
+  body.public-modern-page .tp-column-finished .two-set-row,
+  body.public-modern-page .tp-column-finished .two-set-head {
+    grid-template-columns: minmax(0, 1fr) 34px 34px 56px !important;
+    width: 100% !important;
+    column-gap: 8px !important;
+  }
+
+  /* Três sets: nome | set 1 | set 2 | set 3 | pontos */
+  body.public-modern-page .tp-column-live .three-set-row,
+  body.public-modern-page .tp-column-live .three-set-head,
+  body.public-modern-page .tp-column-finished .three-set-row,
+  body.public-modern-page .tp-column-finished .three-set-head {
+    grid-template-columns: minmax(0, 1fr) 32px 32px 32px 56px !important;
+    width: 100% !important;
+    column-gap: 7px !important;
+  }
+
+  /* Cabeçalho dos números acompanha o alinhamento */
+  body.public-modern-page .tp-column-live .match-table-head,
+  body.public-modern-page .tp-column-finished .match-table-head {
+    width: 100% !important;
+    text-align: right !important;
+  }
+
+  body.public-modern-page .tp-column-live .match-table-head .team-label,
+  body.public-modern-page .tp-column-finished .match-table-head .team-label {
+    text-align: left !important;
+  }
+}
+
+@media (max-width: 380px) {
+  body.public-modern-page .tp-column-live .match-player-row .player-avatar,
+  body.public-modern-page .tp-column-live .match-player-row .player-avatar-placeholder,
+  body.public-modern-page .tp-column-finished .match-player-row .player-avatar,
+  body.public-modern-page .tp-column-finished .match-player-row .player-avatar-placeholder {
+    flex-basis: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+  }
+
+  body.public-modern-page .tp-column-live .match-player-row .name-line,
+  body.public-modern-page .tp-column-finished .match-player-row .name-line {
+    font-size: 11px !important;
+  }
+}
