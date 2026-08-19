@@ -463,6 +463,60 @@
       return String(match?.gameFormat || "Simples").trim();
     }
 
+    function getTournamentName(match) {
+  return U.normalizeText(
+    match?.tournamentName || match?.tournament || "",
+    ""
+  );
+}
+
+function getCategoryName(match) {
+  return U.normalizeText(
+    match?.categoryName || match?.category || "",
+    ""
+  );
+}
+
+function abbreviateStage(stage = "") {
+  const normalized = String(stage || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (normalized === "oitavas de final" || normalized === "oitavas") {
+    return "OF";
+  }
+
+  if (normalized === "quartas de final" || normalized === "quartas") {
+    return "QF";
+  }
+
+  if (normalized === "semifinal" || normalized === "semi final") {
+    return "SF";
+  }
+
+  if (normalized === "final") {
+    return "F";
+  }
+
+  return U.normalizeText(stage, "");
+}
+
+function getCompetitionLine(match) {
+  const category = getCategoryName(match);
+  const stage = abbreviateStage(
+    match?.tournamentStage ||
+    match?.stage ||
+    match?.phase ||
+    ""
+  );
+
+  return [category, stage]
+    .filter(Boolean)
+    .join(" - ");
+}
+
     function isDoublesFormat(match) {
       const gf = getGameFormat(match);
       return gf === "Duplas" || gf === "Duplas Mistas";
@@ -1249,75 +1303,161 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
     }
 
     function renderFinalizedCard(match) {
-      const score = U.normalizeScore(match.score || {});
-      const team1Html = renderPlayerName(match, 1, true);
-      const team2Html = renderPlayerName(match, 2, true);
-    
-      const tournament = U.escapeHtml(U.normalizeText(match.tournamentName || match.tournament || "", ""));
-      const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const rawStatus = String(match.status || "").trim().toLowerCase();
-      const status = U.normalizeStatus(rawStatus);
-      const statusText = rawStatus === "ret" ? "Abandono" : U.statusLabel(rawStatus);
-    
-      const history = Array.isArray(score.setHistory) ? score.setHistory : [];
-    
-      const set1 = history[0] || null;
-      const set2 = history[1] || null;
-      const set3 = history[2] || null;
-    
-      const showSet2 = history.length >= 2;
-      const showSet3 = history.length >= 3;
-    
-      function formatFinishedSet(setObj) {
-        if (!setObj) return { p1: "", p2: "" };
-    
-        const g1 = Number(setObj.games1 || 0);
-        const g2 = Number(setObj.games2 || 0);
-        const tb1 = Number(setObj.tieBreakPoints1 || 0);
-        const tb2 = Number(setObj.tieBreakPoints2 || 0);
-        const mode = String(setObj.tieBreakMode || "").trim().toLowerCase();
-    
-        if (mode === "super10") {
-          return {
-            p1: String(tb1),
-            p2: String(tb2)
-          };
-        }
+  const score = U.normalizeScore(match.score || {});
+  const team1Html = renderPlayerName(match, 1, true);
+  const team2Html = renderPlayerName(match, 2, true);
 
-        if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
-          const p1Won = tb1 > tb2;
-          return {
-            p1: `${p1Won ? 7 : 6}<span class="set-tb">${tb1}</span>`,
-            p2: `${p1Won ? 6 : 7}<span class="set-tb">${tb2}</span>`
-          };
-        }
-    
-        return {
-          p1: String(g1),
-          p2: String(g2)
-        };
-      }
-    
-      const s1 = formatFinishedSet(set1);
-      const s2 = formatFinishedSet(set2);
-      const s3 = formatFinishedSet(set3);
-    
-      const winnerPos = U.getWinnerPosition(match, score);
-    
-      return ` <article class="public-card match-board compact-match-board" data-match-id="${U.escapeHtml(match.id || "")}" data-owner-id="${U.escapeHtml(match.ownerId || "")}" data-player1="${U.escapeHtml( match.player1 || match.player1Name || match.ownerName || "" )}" data-player2="${U.escapeHtml( match.player2 || match.player2Name || match.opponentName || "" )}" data-player3="${U.escapeHtml( match.player3 || match.player3Name || "" )}" data-player4="${U.escapeHtml( match.player4 || match.player4Name || "" )}" data-opponent-id="${U.escapeHtml( match.opponentId || match.player2Id || match.playerId2 || match.awayId || "" )}" data-status="${status}" >
-      <div class="match-board-top compact-top"> <div class="match-top-left"> ${tournament ? 
-        `<div class="live-meta-left"><span><strong>${tournament}</strong></span></div>` : ""} ${stage ? 
-          `<div class="live-meta-left"><span><strong>${stage}</strong></span></div>` : ""} 
-          </div> <div class="match-top-right"> <div class="match-status ${U.statusClass(rawStatus)}">${statusText}</div> </div> 
-          </div> <div class="match-table-head compact-head ${history.length >= 3 ? "three-set-head" : history.length >= 2 ? "two-set-head" : "one-set-head"} head-no-labels"> 
-          <div class="team-label team-col"></div> <div class="set-col"></div> ${showSet2 ? `
-          <div class="set-col"></div>` : ""} ${showSet3 ? `<div class="set-col"></div>` : ""} 
-          </div> <div class="match-player-row compact-row ${history.length >= 3 ? "three-set-row" : history.length >= 2 ? "two-set-row" : "one-set-row"} ${winnerPos === 1 ? "winner-row" : ""}"> 
-          <div class="player-name team-name-compact team-col ${winnerPos === 1 ? "winner" : ""}"> ${getServeBall(score, 1, true, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`} 
-          <span class="team-name-compact-content ${isDoublesFormat(match) ? "doubles-name" : ""}"> ${team1Html} 
-          </span> </div> <div class="score green set-col">${s1.p1 || ""}</div> ${showSet2 ? `<div class="score green set-col">${s2.p1 || ""}</div>` : ""} ${showSet3 ? `
-          <div class="score green set-col">${s3.p1 || ""}</div>` : ""} </div> <div class="match-player-row compact-row ${history.length >= 3 ? "three-set-row" : history.length >= 2 ? "two-set-row" : "one-set-row"} ${winnerPos === 2 ? "winner-row" : ""}"> <div class="player-name team-name-compact team-col ${winnerPos === 2 ? "winner" : ""}"> ${getServeBall(score, 2, true, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`} <span class="team-name-compact-content ${isDoublesFormat(match) ? "doubles-name" : ""}"> ${team2Html} </span> </div> <div class="score green set-col">${s1.p2 || ""}</div> ${showSet2 ? `<div class="score green set-col">${s2.p2 || ""}</div>` : ""} ${showSet3 ? `<div class="score green set-col">${s3.p2 || ""}</div>` : ""} </div> <div class="match-footer compact-footer match-footer-finalized"></div> </article> `;
+  const tournament = U.escapeHtml(getTournamentName(match));
+  const competitionLine = U.escapeHtml(getCompetitionLine(match));
+  const duration = U.buildDuration(match);
+
+  const rawStatus = String(match.status || "")
+    .trim()
+    .toLowerCase();
+
+  const status = U.normalizeStatus(rawStatus);
+  const statusText = rawStatus === "ret"
+    ? "Abandono"
+    : U.statusLabel(rawStatus);
+
+  const history = Array.isArray(score.setHistory)
+    ? score.setHistory
+    : [];
+
+  const set1 = history[0] || null;
+  const set2 = history[1] || null;
+  const set3 = history[2] || null;
+
+  const showSet2 = history.length >= 2;
+  const showSet3 = history.length >= 3;
+
+  function formatFinishedSet(setObj) {
+    if (!setObj) {
+      return { p1: "", p2: "" };
     }
+
+    const g1 = Number(setObj.games1 || 0);
+    const g2 = Number(setObj.games2 || 0);
+    const tb1 = Number(setObj.tieBreakPoints1 || 0);
+    const tb2 = Number(setObj.tieBreakPoints2 || 0);
+    const mode = String(setObj.tieBreakMode || "")
+      .trim()
+      .toLowerCase();
+
+    if (mode === "super10") {
+      return {
+        p1: String(tb1),
+        p2: String(tb2)
+      };
+    }
+
+    if (mode === "tb7" && (tb1 > 0 || tb2 > 0)) {
+      const p1Won = tb1 > tb2;
+
+      return {
+        p1: `${p1Won ? 7 : 6}<span class="set-tb">${tb1}</span>`,
+        p2: `${p1Won ? 6 : 7}<span class="set-tb">${tb2}</span>`
+      };
+    }
+
+    return {
+      p1: String(g1),
+      p2: String(g2)
+    };
+  }
+
+  const s1 = formatFinishedSet(set1);
+  const s2 = formatFinishedSet(set2);
+  const s3 = formatFinishedSet(set3);
+
+  const winnerPos = U.getWinnerPosition(match, score);
+
+  const rowClass = history.length >= 3
+    ? "three-set-row"
+    : history.length >= 2
+      ? "two-set-row"
+      : "one-set-row";
+
+  const headClass = history.length >= 3
+    ? "three-set-head"
+    : history.length >= 2
+      ? "two-set-head"
+      : "one-set-head";
+
+  return `
+    <article
+      class="public-card match-board compact-match-board"
+      data-match-id="${U.escapeHtml(match.id || "")}" 
+      data-owner-id="${U.escapeHtml(match.ownerId || "")}" 
+      data-player1="${U.escapeHtml(match.player1 || match.player1Name || match.ownerName || "")}" 
+      data-player2="${U.escapeHtml(match.player2 || match.player2Name || match.opponentName || "")}" 
+      data-player3="${U.escapeHtml(match.player3 || match.player3Name || "")}" 
+      data-player4="${U.escapeHtml(match.player4 || match.player4Name || "")}" 
+      data-opponent-id="${U.escapeHtml(match.opponentId || match.player2Id || match.playerId2 || match.awayId || "")}" 
+      data-status="${status}"
+    >
+      <div class="match-board-top compact-top">
+        <div class="match-top-left">
+          ${tournament
+            ? `<div class="live-meta-left"><span><strong>${tournament}</strong></span></div>`
+            : ""}
+
+          ${competitionLine
+            ? `<div class="live-meta-left"><span><strong>${competitionLine}</strong></span></div>`
+            : ""}
+        </div>
+
+        <div class="match-top-right">
+          <div class="match-status ${U.statusClass(rawStatus)}">
+            ${statusText}
+          </div>
+
+          <div class="live-meta-right">
+            <span class="duration-with-icon">
+              <ion-icon name="time-outline" class="duration-icon"></ion-icon>
+              <strong>${U.escapeHtml(duration)}</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-table-head compact-head ${headClass} head-no-labels">
+        <div class="team-label team-col"></div>
+        <div class="set-col"></div>
+        ${showSet2 ? `<div class="set-col"></div>` : ""}
+        ${showSet3 ? `<div class="set-col"></div>` : ""}
+      </div>
+
+      <div class="match-player-row compact-row ${rowClass} ${winnerPos === 1 ? "winner-row" : ""}">
+        <div class="player-name team-name-compact team-col ${winnerPos === 1 ? "winner" : ""}">
+          ${getServeBall(score, 1, true, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`}
+          <span class="team-name-compact-content ${isDoublesFormat(match) ? "doubles-name" : ""}">
+            ${team1Html}
+          </span>
+        </div>
+
+        <div class="score green set-col">${s1.p1 || ""}</div>
+        ${showSet2 ? `<div class="score green set-col">${s2.p1 || ""}</div>` : ""}
+        ${showSet3 ? `<div class="score green set-col">${s3.p1 || ""}</div>` : ""}
+      </div>
+
+      <div class="match-player-row compact-row ${rowClass} ${winnerPos === 2 ? "winner-row" : ""}">
+        <div class="player-name team-name-compact team-col ${winnerPos === 2 ? "winner" : ""}">
+          ${getServeBall(score, 2, true, winnerPos) || `<span class="serve-ball serve-ball-placeholder"></span>`}
+          <span class="team-name-compact-content ${isDoublesFormat(match) ? "doubles-name" : ""}">
+            ${team2Html}
+          </span>
+        </div>
+
+        <div class="score green set-col">${s1.p2 || ""}</div>
+        ${showSet2 ? `<div class="score green set-col">${s2.p2 || ""}</div>` : ""}
+        ${showSet3 ? `<div class="score green set-col">${s3.p2 || ""}</div>` : ""}
+      </div>
+
+      <div class="match-footer compact-footer match-footer-finalized"></div>
+    </article>
+  `;
+}
 
     
     function getStatusDot(status) {
@@ -1337,47 +1477,134 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
     
 
     function renderLiveCard(match) {
-      const team1Html = renderPlayerName(match, 1, true);
-      const team2Html = renderPlayerName(match, 2, true);
+  const team1Html = renderPlayerName(match, 1, true);
+  const team2Html = renderPlayerName(match, 2, true);
 
-      const category = U.escapeHtml(U.normalizeText(match.categoryName, ""));
-      const stage = U.escapeHtml(U.normalizeText(match.tournamentStage, ""));
-      const rawStatus = String(match.status || "live").trim().toLowerCase();
-      const status = U.normalizeStatus(rawStatus);
-      const score = U.normalizeScore(match.score || {});
-      const setColumns = U.getSetColumns(match, score);
-      const duration = U.buildDuration(match);
-      const liveFeedMsg = getLiveFeedMessage(match);
+  const tournament = U.escapeHtml(getTournamentName(match));
+  const competitionLine = U.escapeHtml(getCompetitionLine(match));
 
-      const isSuspended = rawStatus === "suspended";
-      const isSuperTBActive = score.tieBreakMode === "super10";
-      const isTB7Active = score.tieBreakMode === "tb7";
+  const rawStatus = String(match.status || "live")
+    .trim()
+    .toLowerCase();
 
-      const ptDisp = U.getPointDisplay(score, match.matchFormat, false);
+  const status = U.normalizeStatus(rawStatus);
+  const score = U.normalizeScore(match.score || {});
+  const setColumns = U.getSetColumns(match, score);
+  const duration = U.buildDuration(match);
+  const liveFeedMsg = getLiveFeedMessage(match);
 
-      const suspendedBadge = isSuspended
-        ? `<div class="suspended-badge">⏸ SUSPENSA</div>`
-        : "";
+  const isSuspended = rawStatus === "suspended";
+  const isSuperTBActive = score.tieBreakMode === "super10";
+  const isTB7Active = score.tieBreakMode === "tb7";
 
-        const suspendedDuration = isSuspended
-        ? ` <div class="suspended-duration"> <span class="duration-with-icon"> <ion-icon name="time-outline" class="duration-icon"></ion-icon> <strong>${duration}</strong> </span> </div> `
-        : "";
+  const ptDisp = U.getPointDisplay(
+    score,
+    match.matchFormat,
+    false
+  );
 
-      const tbLabel = !isSuspended && isSuperTBActive
-        ? `<div class="tb-active-label">🎾 Super Tie-break</div>`
-        : !isSuspended && isTB7Active
-          ? `<div class="tb-active-label">🎾 Tie-break</div>`
-          : "";
+  const suspendedBadge = isSuspended
+    ? `<div class="suspended-badge">⏸ SUSPENSA</div>`
+    : "";
 
-          return ` <article class="public-card match-board compact-match-board" data-match-id="${U.escapeHtml(match.id || "")}" data-owner-id="${U.escapeHtml(match.ownerId || "")}" data-player1="${U.escapeHtml(match.player1 || match.player1Name || match.ownerName || "")}" data-player2="${U.escapeHtml(match.player2 || match.player2Name || match.opponentName || "")}" data-player3="${U.escapeHtml(match.player3 || match.player3Name || "")}" data-player4="${U.escapeHtml(match.player4 || match.player4Name || "")}" data-opponent-id="${U.escapeHtml( match.opponentId || match.player2Id || match.playerId2 || match.awayId || "" )}" data-status="${isSuspended ? "suspended" : status}"> <div class="match-board-top compact-top"> <div class="match-top-left"> ${category ? `<div class="match-chip">${category}</div>` : ""} ${!isSuspended && stage ? `<div class="live-meta-left"><span><strong>${stage}</strong></span></div>` : ""} </div> <div class="match-top-right"> <div class="match-status ${U.statusClass(rawStatus)}"> ${getStatusDot(rawStatus)} <span>${U.statusLabel(rawStatus)}</span> </div> ${!isSuspended && duration ? ` <div class="live-meta-right"> <span class="duration-with-icon"> <ion-icon name="time-outline" class="duration-icon"></ion-icon> <strong>${duration}</strong> </span> </div> ` : ""} </div> </div> ${suspendedBadge} ${suspendedDuration} ${!isSuspended && liveFeedMsg ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>` : ""} ${tbLabel} ${buildSetHead(match, setColumns)} ${buildPlayerRow(team1Html, setColumns, ptDisp.p1, 1, score, false, false)} ${buildPlayerRow(team2Html, setColumns, ptDisp.p2, 2, score, false, false)} 
-      
+  const suspendedDuration = isSuspended
+    ? `
+      <div class="suspended-duration">
+        <span class="duration-with-icon">
+          <ion-icon name="time-outline" class="duration-icon"></ion-icon>
+          <strong>${U.escapeHtml(duration)}</strong>
+        </span>
+      </div>
+    `
+    : "";
+
+  const tbLabel = !isSuspended && isSuperTBActive
+    ? `<div class="tb-active-label">🎾 Super Tie-break</div>`
+    : !isSuspended && isTB7Active
+      ? `<div class="tb-active-label">🎾 Tie-break</div>`
+      : "";
+
+  return `
+    <article
+      class="public-card match-board compact-match-board"
+      data-match-id="${U.escapeHtml(match.id || "")}" 
+      data-owner-id="${U.escapeHtml(match.ownerId || "")}" 
+      data-player1="${U.escapeHtml(match.player1 || match.player1Name || match.ownerName || "")}" 
+      data-player2="${U.escapeHtml(match.player2 || match.player2Name || match.opponentName || "")}" 
+      data-player3="${U.escapeHtml(match.player3 || match.player3Name || "")}" 
+      data-player4="${U.escapeHtml(match.player4 || match.player4Name || "")}" 
+      data-opponent-id="${U.escapeHtml(match.opponentId || match.player2Id || match.playerId2 || match.awayId || "")}" 
+      data-status="${isSuspended ? "suspended" : status}"
+    >
+      <div class="match-board-top compact-top">
+        <div class="match-top-left">
+          ${tournament
+            ? `<div class="match-chip">${tournament}</div>`
+            : ""}
+
+          ${!isSuspended && competitionLine
+            ? `<div class="live-meta-left"><span><strong>${competitionLine}</strong></span></div>`
+            : ""}
+        </div>
+
+        <div class="match-top-right">
+          <div class="match-status ${U.statusClass(rawStatus)}">
+            ${getStatusDot(rawStatus)}
+            <span>${U.statusLabel(rawStatus)}</span>
+          </div>
+
+          ${!isSuspended && duration
+            ? `
+              <div class="live-meta-right">
+                <span class="duration-with-icon">
+                  <ion-icon name="time-outline" class="duration-icon"></ion-icon>
+                  <strong>${U.escapeHtml(duration)}</strong>
+                </span>
+              </div>
+            `
+            : ""}
+        </div>
+      </div>
+
+      ${suspendedBadge}
+      ${suspendedDuration}
+
+      ${!isSuspended && liveFeedMsg
+        ? `<div class="live-feed">${U.escapeHtml(liveFeedMsg)}</div>`
+        : ""}
+
+      ${tbLabel}
+
+      ${buildSetHead(match, setColumns)}
+
+      ${buildPlayerRow(
+        team1Html,
+        setColumns,
+        ptDisp.p1,
+        1,
+        score,
+        false,
+        false
+      )}
+
+      ${buildPlayerRow(
+        team2Html,
+        setColumns,
+        ptDisp.p2,
+        2,
+        score,
+        false,
+        false
+      )}
+
       ${!isSuspended ? renderLastPointsLine(match) : ""}
-${!isSuspended ? renderBreakPointBalls(match) : ""}
-${!isSuspended ? renderWinProbabilityChart(match) : ""}
-<div class="match-footer compact-footer match-footer-live"></div> 
-      
-      </article> `;
-    }
+      ${!isSuspended ? renderBreakPointBalls(match) : ""}
+      ${!isSuspended ? renderWinProbabilityChart(match) : ""}
+
+      <div class="match-footer compact-footer match-footer-live"></div>
+    </article>
+  `;
+}
 
     function createScheduledCard(match) {
       const team1Html = renderPlayerName(match, 1);
@@ -2566,59 +2793,83 @@ ${!isSuspended ? renderWinProbabilityChart(match) : ""}
     }
 
     function renderStatsPlayerHeader(match, playerPosition) {
-      const isPlayer1 = playerPosition === 1;
-      const teamClass = isPlayer1 ? "player1" : "player2";
-    
-      const players = isPlayer1
-        ? [
-            {
-              name: String(
-                match?.player1 ||
-                match?.player1Name ||
-                match?.ownerName ||
-                "Jogador 1"
-              ).trim(),
-              photo: getPlayerPhotoFromMatch(match, 1)
-            },
-            ...(isDoublesFormat(match)
-              ? [
-                  {
-                    name: String(match?.player2 || "Jogador 2").trim(),
-                    photo: state.opponentProfileCache[String(match?.player2 || "").trim()]?.photoSrc || ""
-                  }
-                ]
-              : [])
-          ]
-        : [
-            {
-              name: String(match?.player2 || "Jogador 2").trim(),
-              photo: getPlayerPhotoFromMatch(match, 2)
-            },
-            ...(isDoublesFormat(match)
-              ? [
-                  {
-                    name: String(match?.player4 || "Jogador 4").trim(),
-                    photo: state.opponentProfileCache[String(match?.player4 || "").trim()]?.photoSrc || ""
-                  }
-                ]
-              : [])
-          ];
-    
-      const playersHtml = players.map((player) => {
-        const safeName = U.escapeHtml(player.name);
-        const initial = U.escapeHtml(
-          String(player.name || "J").charAt(0).toUpperCase()
-        );
-    
-        const imageHtml = player.photo
-          ? ` <img class="public-stats-player-photo" src="${U.escapeHtml(player.photo)}" alt="${safeName}" /> `
-          : ` <div class="public-stats-player-photo-placeholder"> ${initial} </div> `;
-    
-          return ` <div class="public-stats-player-unit"> ${imageHtml} <div class="public-stats-player-name"> ${safeName} </div> </div> `;
-      }).join("");
-    
-      return ` <div class="public-stats-player-card ${teamClass}"> <div class="public-stats-player-versus"> ${playersHtml} </div> </div> `;   }
-    
+  const isPlayer1 = playerPosition === 1;
+  const teamClass = isPlayer1 ? "player1" : "player2";
+
+  function getOpponentProfile(name) {
+    const key = String(name || "").trim();
+    return key ? (state.opponentProfileCache[key] || {}) : {};
+  }
+
+  const players = isPlayer1
+    ? [
+        {
+          name: String(
+            match?.player1 ||
+            match?.player1Name ||
+            match?.ownerName ||
+            "Jogador 1"
+          ).trim(),
+          photo: getPlayerPhotoFromMatch(match, 1)
+        },
+        ...(isDoublesFormat(match)
+          ? [
+              {
+                name: String(match?.player2 || "Jogador 2").trim(),
+                photo: getOpponentProfile(match?.player2)?.photoSrc || ""
+              }
+            ]
+          : [])
+      ]
+    : [
+        {
+          name: String(
+            isDoublesFormat(match)
+              ? (match?.player3 || "Jogador 3")
+              : (match?.player2 || "Jogador 2")
+          ).trim(),
+          photo: isDoublesFormat(match)
+            ? getOpponentProfile(match?.player3)?.photoSrc || ""
+            : getPlayerPhotoFromMatch(match, 2)
+        },
+        ...(isDoublesFormat(match)
+          ? [
+              {
+                name: String(match?.player4 || "Jogador 4").trim(),
+                photo: getOpponentProfile(match?.player4)?.photoSrc || ""
+              }
+            ]
+          : [])
+      ];
+
+  const playersHtml = players
+    .map((player) => {
+      const safeName = U.escapeHtml(player.name);
+      const initial = U.escapeHtml(
+        String(player.name || "J").charAt(0).toUpperCase()
+      );
+
+      const imageHtml = player.photo
+        ? `<img class="public-stats-player-photo" src="${U.escapeHtml(player.photo)}" alt="${safeName}" />`
+        : `<div class="public-stats-player-photo-placeholder">${initial}</div>`;
+
+      return `
+        <div class="public-stats-player-unit">
+          ${imageHtml}
+          <div class="public-stats-player-name">${safeName}</div>
+        </div>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="public-stats-player-card ${teamClass}">
+      <div class="public-stats-player-versus">
+        ${playersHtml}
+      </div>
+    </div>
+  `;
+}
     function renderDetailedStats(match) {
       const stats = match?.stats || match?.statistics || {};
     
