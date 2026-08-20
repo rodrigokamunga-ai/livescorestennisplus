@@ -268,35 +268,107 @@
       },
 
       getMatchSummary(match) {
-        const score = U.normalizeScore(match.score || {});
-        const summary = match.summary || match.matchSummary || {};
-        const stats = match.stats || {};
-        const p1Stats = stats.player1 || {};
-        const p2Stats = stats.player2 || {};
+  const score = U.normalizeScore(match?.score || {});
 
-        const total1 = Number(
-          summary.totalPoints1 ??
-          score.totalPoints1 ??
-          p1Stats.totalPointsWon ??
-          0
-        );
+  const summary =
+    match?.summary ||
+    match?.matchSummary ||
+    {};
 
-        const total2 = Number(
-          summary.totalPoints2 ??
-          score.totalPoints2 ??
-          p2Stats.totalPointsWon ??
-          0
-        );
+  const stats =
+    match?.stats ||
+    match?.statistics ||
+    {};
 
-        return {
-          totalPoints1: total1,
-          totalPoints2: total2,
-          breakPointsWon1: Number(summary.breakPointsWon1 ?? score.breakPointsWon1 ?? 0),
-          breakPointsChances1: Number(summary.breakPointsChances1 ?? score.breakPointsChances1 ?? 0),
-          breakPointsWon2: Number(summary.breakPointsWon2 ?? score.breakPointsWon2 ?? 0),
-          breakPointsChances2: Number(summary.breakPointsChances2 ?? score.breakPointsChances2 ?? 0)
-        };
-      },
+  const player1Stats =
+    stats.player1 ||
+    stats.p1 ||
+    {};
+
+  const player2Stats =
+    stats.player2 ||
+    stats.p2 ||
+    {};
+
+  function readFirstPositive(values) {
+    const numbers = values
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+
+    const positive = numbers.find((value) => value > 0);
+
+    if (positive !== undefined) {
+      return positive;
+    }
+
+    return numbers[0] || 0;
+  }
+
+  const totalPoints1 = readFirstPositive([
+    summary.totalPoints1,
+    score.totalPoints1,
+    player1Stats.totalPointsWon
+  ]);
+
+  const totalPoints2 = readFirstPositive([
+    summary.totalPoints2,
+    score.totalPoints2,
+    player2Stats.totalPointsWon
+  ]);
+
+  const breakPointsWon1 = readFirstPositive([
+    summary.breakPointsWon1,
+    summary.breakPointWon1,
+    score.breakPointsWon1,
+    player1Stats.breakPointsWon,
+    player1Stats.breakPointWon,
+    player1Stats.breakWon,
+    player1Stats.breaksWon
+  ]);
+
+  const breakPointsChances1 = readFirstPositive([
+    summary.breakPointsChances1,
+    summary.breakPointChances1,
+    summary.breakChances1,
+    score.breakPointsChances1,
+    player1Stats.breakPointsChances,
+    player1Stats.breakPointChances,
+    player1Stats.breakChances,
+    player1Stats.breakPointOpportunities
+  ]);
+
+  const breakPointsWon2 = readFirstPositive([
+    summary.breakPointsWon2,
+    summary.breakPointWon2,
+    score.breakPointsWon2,
+    player2Stats.breakPointsWon,
+    player2Stats.breakPointWon,
+    player2Stats.breakWon,
+    player2Stats.breaksWon
+  ]);
+
+  const breakPointsChances2 = readFirstPositive([
+    summary.breakPointsChances2,
+    summary.breakPointChances2,
+    summary.breakChances2,
+    score.breakPointsChances2,
+    player2Stats.breakPointsChances,
+    player2Stats.breakPointChances,
+    player2Stats.breakChances,
+    player2Stats.breakPointOpportunities
+  ]);
+
+  return {
+    totalPoints1,
+    totalPoints2,
+
+    breakPointsWon1,
+    breakPointsChances1,
+
+    breakPointsWon2,
+    breakPointsChances2
+  };
+},
 
       formatBreakPoints(won, chances) {
         return `${Number(won || 0)} / ${Number(chances || 0)}`;
@@ -2490,6 +2562,10 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
         );
     
       const match = getStatsTargetMatch();
+
+      console.log("PARTIDA USADA NO MODAL:", match);
+console.log("SCORE DA PARTIDA:", match?.score);
+console.log("RESUMO CALCULADO:", U.getMatchSummary(match));
     
       if (!match) {
         body.innerHTML = ` <div class="public-stats-empty"> Nenhuma partida disponível para exibir estatísticas. </div> `;
@@ -3011,29 +3087,19 @@ const team2 = U.escapeHtml(abbreviateName(team2Raw));
         "secondServeAttempts"
       ]);
     
-      const p1BreakWon = Number(
-        score.breakPointsWon1 ??
-        player1.breakPointsWon ??
-        0
-      );
-    
-      const p2BreakWon = Number(
-        score.breakPointsWon2 ??
-        player2.breakPointsWon ??
-        0
-      );
-    
-      const p1BreakChances = Number(
-        score.breakPointsChances1 ??
-        player1.breakPointsChances ??
-        0
-      );
-    
-      const p2BreakChances = Number(
-        score.breakPointsChances2 ??
-        player2.breakPointsChances ??
-        0
-      );
+      const matchSummary = U.getMatchSummary(match);
+
+const p1BreakWon =
+  Number(matchSummary.breakPointsWon1 || 0);
+
+const p2BreakWon =
+  Number(matchSummary.breakPointsWon2 || 0);
+
+const p1BreakChances =
+  Number(matchSummary.breakPointsChances1 || 0);
+
+const p2BreakChances =
+  Number(matchSummary.breakPointsChances2 || 0);
     
       const p1Performance = numberStat(player1, [
         "serveSuccessPct",
@@ -3475,4 +3541,3 @@ function getStatsModalMetaHtml(match = {}) {
     }
   );
 })();
-
