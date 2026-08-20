@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  console.log("PLAYER.JS CARREGADO - versão break point");
+
   const PlayerApp = (() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
@@ -106,6 +108,8 @@
     let msgTimer = null;
     let undoLockTimer = null;
     let undoLockedUntilMs = null;
+    const wearCommandQueue = [];
+let wearCommandProcessing = false;
 
     function flashStatsButton(btn, playerPos) {
       if (!btn) return;
@@ -555,49 +559,112 @@
     }
 
     function defaultScore() {
-      return {
-        points1: 0, points2: 0,
-        games1: 0, games2: 0,
-        sets1: 0, sets2: 0,
-        tieBreakMode: null,
-        tieBreakPoints1: 0,
-        tieBreakPoints2: 0,
-        lastTieBreakMode: null,
-        lastTieBreakPoints1: 0,
-        lastTieBreakPoints2: 0,
-        setHistory: [],
-        lastPoints: [],
-        server: "player1",
-        advantage: null,
-        totalPoints1: 0,
-        totalPoints2: 0,
-        breakPointsWon1: 0,
-        breakPointsWon2: 0,
-        breakPointsChances1: 0,
-        breakPointsChances2: 0,
-        breakPointsBySet: {}
-      };
-    }
+  return {
+    points1: 0,
+    points2: 0,
+
+    games1: 0,
+    games2: 0,
+
+    sets1: 0,
+    sets2: 0,
+
+    tieBreakMode: null,
+    tieBreakPoints1: 0,
+    tieBreakPoints2: 0,
+
+    lastTieBreakMode: null,
+    lastTieBreakPoints1: 0,
+    lastTieBreakPoints2: 0,
+
+    setHistory: [],
+    lastPoints: [],
+
+    server: "player1",
+    advantage: null,
+
+    totalPoints1: 0,
+    totalPoints2: 0,
+
+    breakPointsWon1: 0,
+    breakPointsWon2: 0,
+    breakPointsChances1: 0,
+    breakPointsChances2: 0,
+
+    /* * Guarda quantas oportunidades de break * já foram apresentadas no game atual. */
+    breakPointsCurrentGame1: 0,
+    breakPointsCurrentGame2: 0,
+
+    breakPointsBySet: {}
+  };
+}
 
     function normalizeScore(score = {}) {
-      return {
-        ...defaultScore(),
-        ...score,
-        setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
-        lastPoints: Array.isArray(score.lastPoints) ? score.lastPoints : [],
-        tieBreakMode: score.tieBreakMode === "tb7" || score.tieBreakMode === "super10" ? score.tieBreakMode : null,
-        lastTieBreakMode: score.lastTieBreakMode === "tb7" || score.lastTieBreakMode === "super10" ? score.lastTieBreakMode : null,
-        server: score.server || "player1",
-        advantage: score.advantage || null,
-        totalPoints1: Number(score.totalPoints1 || 0),
-        totalPoints2: Number(score.totalPoints2 || 0),
-        breakPointsWon1: Number(score.breakPointsWon1 || 0),
-        breakPointsWon2: Number(score.breakPointsWon2 || 0),
-        breakPointsChances1: Number(score.breakPointsChances1 || 0),
-        breakPointsChances2: Number(score.breakPointsChances2 || 0),
-        breakPointsBySet: score.breakPointsBySet || {}
-      };
-    }
+  return {
+    ...defaultScore(),
+    ...score,
+
+    points1: Number(score.points1 || 0),
+    points2: Number(score.points2 || 0),
+
+    games1: Number(score.games1 || 0),
+    games2: Number(score.games2 || 0),
+
+    sets1: Number(score.sets1 || 0),
+    sets2: Number(score.sets2 || 0),
+
+    tieBreakMode:
+      score.tieBreakMode === "tb7" ||
+      score.tieBreakMode === "super10"
+        ? score.tieBreakMode
+        : null,
+
+    tieBreakPoints1: Number(score.tieBreakPoints1 || 0),
+    tieBreakPoints2: Number(score.tieBreakPoints2 || 0),
+
+    lastTieBreakMode:
+      score.lastTieBreakMode === "tb7" ||
+      score.lastTieBreakMode === "super10"
+        ? score.lastTieBreakMode
+        : null,
+
+    lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
+    lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
+
+    setHistory: Array.isArray(score.setHistory)
+      ? score.setHistory
+      : [],
+
+    lastPoints: Array.isArray(score.lastPoints)
+      ? score.lastPoints
+      : [],
+
+    server: score.server || "player1",
+    advantage: score.advantage || null,
+
+    totalPoints1: Number(score.totalPoints1 || 0),
+    totalPoints2: Number(score.totalPoints2 || 0),
+
+    breakPointsWon1: Number(score.breakPointsWon1 || 0),
+    breakPointsWon2: Number(score.breakPointsWon2 || 0),
+    breakPointsChances1: Number(score.breakPointsChances1 || 0),
+    breakPointsChances2: Number(score.breakPointsChances2 || 0),
+
+    breakPointsCurrentGame1: Number(
+      score.breakPointsCurrentGame1 || 0
+    ),
+
+    breakPointsCurrentGame2: Number(
+      score.breakPointsCurrentGame2 || 0
+    ),
+
+    breakPointsBySet:
+      score.breakPointsBySet &&
+      typeof score.breakPointsBySet === "object"
+        ? score.breakPointsBySet
+        : {}
+  };
+}
 
     function buildMatchScoreText(data) {
       const score = normalizeScore(data.score);
@@ -915,8 +982,195 @@
       } else {
         liveStartedAtMs = null;
         stopTimer();
-        if (el.durationEl) el.durationEl.textContent = getFinishedDurationText(data);
+
+        if (el.durationEl) {
+          el.durationEl.textContent = getFinishedDurationText(data);
+        }
       }
+
+      /* * Envia o placar atualizado para o relógio * somente enquanto a partida estiver em andamento. */
+      if (data.status === "live") {
+        notifyWearScore(data);
+      }
+    }
+
+function notifyWearScore(data) {
+      if (!data || typeof data !== "object") {
+        console.warn(
+          "notifyWearScore: dados inválidos."
+        );
+        return;
+      }
+
+      if (data.status !== "live") {
+        console.log(
+          "notifyWearScore: partida não está live:",
+          data.status
+        );
+        return;
+      }
+
+      let payload;
+
+      try {
+        payload = buildWearScorePayload(data);
+      } catch (error) {
+        console.error(
+          "Erro ao montar payload do relógio:",
+          error
+        );
+        return;
+      }
+
+      console.log(
+        "SCORE_UPDATE preparado:",
+        payload
+      );
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "tennis:score-updated",
+          {
+            detail: payload
+          }
+        )
+      );
+
+      const plugin =
+        window.Capacitor?.Plugins?.TennisWear;
+
+      if (
+        !plugin ||
+        typeof plugin.sendScoreUpdate !== "function"
+      ) {
+        console.warn(
+          "Plugin TennisWear não está disponível."
+        );
+        return;
+      }
+
+      plugin
+        .sendScoreUpdate({
+          payload
+        })
+        .then((result) => {
+          console.log(
+            "SCORE_UPDATE enviado ao relógio:",
+            result
+          );
+        })
+        .catch((error) => {
+          console.error(
+            "Erro ao enviar SCORE_UPDATE ao relógio:",
+            error
+          );
+        });
+    }
+
+    function buildWearScorePayload(data) {
+      const score = normalizeScore(data.score);
+
+      return {
+        type: "SCORE_UPDATE",
+
+        matchId: id,
+
+        status: data.status || "scheduled",
+
+        /* * Necessário para o cálculo offline no relógio. */
+        matchFormat: data.matchFormat || "",
+        gameFormat: data.gameFormat || "",
+
+        /* * Score completo para o OfflineScoreEngine. */
+        score: JSON.parse(
+          JSON.stringify(score)
+        ),
+
+        player1: {
+          name: getTeam1Name(data),
+          point: getPointTextForWear(
+            score,
+            1,
+            data
+          ),
+          games: Number(score.games1 || 0),
+          sets: Number(score.sets1 || 0)
+        },
+
+        player2: {
+          name: getTeam2Name(data),
+          point: getPointTextForWear(
+            score,
+            2,
+            data
+          ),
+          games: Number(score.games2 || 0),
+          sets: Number(score.sets2 || 0)
+        },
+
+        server:
+          score.server ||
+          data.server ||
+          "player1",
+
+        tieBreak: {
+          active:
+            score.tieBreakMode === "tb7" ||
+            score.tieBreakMode === "super10",
+
+          mode: score.tieBreakMode || null,
+
+          player1: Number(
+            score.tieBreakPoints1 || 0
+          ),
+
+          player2: Number(
+            score.tieBreakPoints2 || 0
+          )
+        },
+
+        updatedAt: Date.now()
+      };
+    }
+
+    function getPointTextForWear( score, player, data ) {
+      const isTieBreak =
+        score.tieBreakMode === "tb7" ||
+        score.tieBreakMode === "super10";
+
+      if (isTieBreak) {
+        return String(
+          player === 1
+            ? score.tieBreakPoints1 || 0
+            : score.tieBreakPoints2 || 0
+        );
+      }
+
+      const pointText =
+        typeof getPointDisplay === "function"
+          ? getPointDisplay(
+              score.points1,
+              score.points2,
+              data.matchFormat,
+              score
+            )
+          : `${score.points1}x${score.points2}`;
+
+      if (pointText.includes("AD - J1")) {
+        return player === 1 ? "AD" : "40";
+      }
+
+      if (pointText.includes("AD - J2")) {
+        return player === 1 ? "40" : "AD";
+      }
+
+      const parts = String(
+        pointText
+      ).split("x");
+
+      return player === 1
+        ? parts[0] || "0"
+        : parts[1] || "0";
     }
 
     async function ensureMatchStarted(ref, data) {
@@ -941,24 +1195,68 @@
     }
 
     function buildScorePayload(score) {
-      return {
-        ...score,
-        setHistory: Array.isArray(score.setHistory) ? score.setHistory : [],
-        lastPoints: Array.isArray(score.lastPoints) ? score.lastPoints : [],
-        tieBreakMode: score.tieBreakMode || null,
-        lastTieBreakMode: score.lastTieBreakMode || null,
-        lastTieBreakPoints1: Number(score.lastTieBreakPoints1 || 0),
-        lastTieBreakPoints2: Number(score.lastTieBreakPoints2 || 0),
-        advantage: score.advantage || null,
-        totalPoints1: Number(score.totalPoints1 || 0),
-        totalPoints2: Number(score.totalPoints2 || 0),
-        breakPointsWon1: Number(score.breakPointsWon1 || 0),
-        breakPointsWon2: Number(score.breakPointsWon2 || 0),
-        breakPointsChances1: Number(score.breakPointsChances1 || 0),
-        breakPointsChances2: Number(score.breakPointsChances2 || 0),
-        breakPointsBySet: score.breakPointsBySet || {}
-      };
-    }
+  const normalized = normalizeScore(score);
+
+  return {
+    ...normalized,
+
+    setHistory: Array.isArray(normalized.setHistory)
+      ? normalized.setHistory
+      : [],
+
+    lastPoints: Array.isArray(normalized.lastPoints)
+      ? normalized.lastPoints
+      : [],
+
+    tieBreakMode: normalized.tieBreakMode || null,
+    lastTieBreakMode: normalized.lastTieBreakMode || null,
+
+    lastTieBreakPoints1: Number(
+      normalized.lastTieBreakPoints1 || 0
+    ),
+
+    lastTieBreakPoints2: Number(
+      normalized.lastTieBreakPoints2 || 0
+    ),
+
+    advantage: normalized.advantage || null,
+
+    totalPoints1: Number(
+      normalized.totalPoints1 || 0
+    ),
+
+    totalPoints2: Number(
+      normalized.totalPoints2 || 0
+    ),
+
+    breakPointsWon1: Number(
+      normalized.breakPointsWon1 || 0
+    ),
+
+    breakPointsWon2: Number(
+      normalized.breakPointsWon2 || 0
+    ),
+
+    breakPointsChances1: Number(
+      normalized.breakPointsChances1 || 0
+    ),
+
+    breakPointsChances2: Number(
+      normalized.breakPointsChances2 || 0
+    ),
+
+    breakPointsCurrentGame1: Number(
+      normalized.breakPointsCurrentGame1 || 0
+    ),
+
+    breakPointsCurrentGame2: Number(
+      normalized.breakPointsCurrentGame2 || 0
+    ),
+
+    breakPointsBySet:
+      normalized.breakPointsBySet || {}
+  };
+}
 
     function ensureBreakPointsBySet(score) {
       if (!score.breakPointsBySet || typeof score.breakPointsBySet !== "object") {
@@ -1006,44 +1304,163 @@
       return score;
     }
 
-    function applyBreakPointStats(scoreBefore, scoreAfter, data, winnerPos, result) {
-      const server = String(scoreBefore.server || data.server || "player1");
-      const serverPos = server === "player2" ? 2 : 1;
-      const receiverPos = serverPos === 1 ? 2 : 1;
+    function getBreakPointOpportunitiesAvailable( scoreBefore, serverPos, matchFormat ) {
+  const fmt = String(matchFormat || "")
+    .trim()
+    .toLowerCase();
 
-      const isTBBefore = scoreBefore.tieBreakMode === "tb7" || scoreBefore.tieBreakMode === "super10";
-      if (isTBBefore) return;
+  const noAd =
+    fmt.includes("sem vantagem") ||
+    fmt.includes("no ad") ||
+    fmt.includes("no-ad");
 
-      const sp = serverPos === 1 ? Number(scoreBefore.points1 || 0) : Number(scoreBefore.points2 || 0);
-      const rp = serverPos === 1 ? Number(scoreBefore.points2 || 0) : Number(scoreBefore.points1 || 0);
+  const receiverPos =
+    serverPos === 1 ? 2 : 1;
 
-      const fmt = String(data.matchFormat || "").toLowerCase();
-      const noAd = fmt.includes("sem vantagem") || fmt.includes("no ad") || fmt.includes("no-ad");
+  const serverPoints =
+    serverPos === 1
+      ? Number(scoreBefore.points1 || 0)
+      : Number(scoreBefore.points2 || 0);
 
-      const isAdvantageForReceiver =
-        scoreBefore.advantage !== null &&
-        ((receiverPos === 1 && scoreBefore.advantage === "player1") ||
-         (receiverPos === 2 && scoreBefore.advantage === "player2"));
+  const receiverPoints =
+    receiverPos === 1
+      ? Number(scoreBefore.points1 || 0)
+      : Number(scoreBefore.points2 || 0);
 
-      const isDecisiveNoAd = noAd && sp === 3 && rp === 3;
+  if (
+    scoreBefore.tieBreakMode === "tb7" ||
+    scoreBefore.tieBreakMode === "super10"
+  ) {
+    return 0;
+  }
 
-      const isBreakPoint =
-        (rp === 3 && sp < 3) ||
-        isAdvantageForReceiver ||
-        isDecisiveNoAd;
+  /* * Quando o recebedor está em 40 e o sacador * ainda está abaixo de 40: * * 0 x 40 = 3 chances * 15 x 40 = 2 chances * 30 x 40 = 1 chance */
+  if (
+    receiverPoints >= 3 &&
+    serverPoints < 3
+  ) {
+    return Math.max(
+      1,
+      3 - serverPoints
+    );
+  }
 
-      if (!isBreakPoint) return;
+  /* * Em partidas com vantagem, AD do recebedor * representa uma chance de quebra. */
+  if (
+    !noAd &&
+    scoreBefore.advantage === `player${receiverPos}`
+  ) {
+    return 1;
+  }
 
-      if (receiverPos === 1) scoreAfter.breakPointsChances1++;
-      if (receiverPos === 2) scoreAfter.breakPointsChances2++;
+  /* * Em no-ad, 40 x 40 é o ponto decisivo. */
+  if (
+    noAd &&
+    serverPoints === 3 &&
+    receiverPoints === 3
+  ) {
+    return 1;
+  }
 
-      const gameEndedWithBreak = result?.gameWon === true && winnerPos === receiverPos;
+  return 0;
+}
 
-      if (gameEndedWithBreak) {
-        if (receiverPos === 1) scoreAfter.breakPointsWon1++;
-        if (receiverPos === 2) scoreAfter.breakPointsWon2++;
-      }
+    function applyBreakPointStats( scoreBefore, scoreAfter, data, winnerPos, result ) {
+  const server =
+    String(
+      scoreBefore.server ||
+      data.server ||
+      "player1"
+    ).toLowerCase();
+
+  const serverPos =
+    server === "player2"
+      ? 2
+      : 1;
+
+  const receiverPos =
+    serverPos === 1
+      ? 2
+      : 1;
+
+  const isTieBreak =
+    scoreBefore.tieBreakMode === "tb7" ||
+    scoreBefore.tieBreakMode === "super10";
+
+  if (isTieBreak) {
+    return;
+  }
+
+  /* * Calcula quantas chances de quebra existem * no estado atual do game. * * 0 x 40 = 3 chances * 15 x 40 = 2 chances * 30 x 40 = 1 chance */
+  const availableNow =
+    getBreakPointOpportunitiesAvailable(
+      scoreBefore,
+      serverPos,
+      data.matchFormat
+    );
+
+  /* * Guarda o maior número de chances apresentado * durante o game atual. * * Exemplo: * 0 x 40 -> guarda 3 * depois o game termina -> registra 3 chances */
+  if (receiverPos === 1) {
+    scoreAfter.breakPointsCurrentGame1 =
+      Math.max(
+        Number(scoreAfter.breakPointsCurrentGame1 || 0),
+        Number(availableNow || 0)
+      );
+  } else {
+    scoreAfter.breakPointsCurrentGame2 =
+      Math.max(
+        Number(scoreAfter.breakPointsCurrentGame2 || 0),
+        Number(availableNow || 0)
+      );
+  }
+
+  const gameEnded =
+    result?.gameWon === true ||
+    result?.gameEnded === true ||
+    result?.gameCompleted === true ||
+    result?.gameFinished === true;
+
+  if (!gameEnded) {
+    return;
+  }
+
+  /* * Quando o game termina, grava a quantidade * total de chances que existiu naquele game. */
+  const gameChances =
+    receiverPos === 1
+      ? Number(scoreAfter.breakPointsCurrentGame1 || 0)
+      : Number(scoreAfter.breakPointsCurrentGame2 || 0);
+
+  if (receiverPos === 1) {
+    scoreAfter.breakPointsChances1 =
+      Number(scoreAfter.breakPointsChances1 || 0) +
+      gameChances;
+  } else {
+    scoreAfter.breakPointsChances2 =
+      Number(scoreAfter.breakPointsChances2 || 0) +
+      gameChances;
+  }
+
+  /* * Se o recebedor venceu o game, * registra uma quebra convertida. */
+  if (winnerPos === receiverPos) {
+    if (receiverPos === 1) {
+      scoreAfter.breakPointsWon1 =
+        Number(scoreAfter.breakPointsWon1 || 0) + 1;
+    } else {
+      scoreAfter.breakPointsWon2 =
+        Number(scoreAfter.breakPointsWon2 || 0) + 1;
     }
+
+    registerBreakPointGame(
+      scoreAfter,
+      scoreBefore,
+      serverPos
+    );
+  }
+
+  /* * Inicia o próximo game sem chances pendentes. */
+  scoreAfter.breakPointsCurrentGame1 = 0;
+  scoreAfter.breakPointsCurrentGame2 = 0;
+}
 
     function buildFinalSetHistory(score) {
       const s = normalizeScore(score);
@@ -1142,17 +1559,31 @@
 
         pushLastPoint(score, winnerPos);
         winnerPos === 1 ? score.totalPoints1++ : score.totalPoints2++;
-        applyBreakPointStats(scoreBefore, score, data, winnerPos, result);
+        applyBreakPointStats(
+  scoreBefore,
+  score,
+  data,
+  winnerPos,
+  result
+);
 
-        if (result.gameWon) {
-          const serverPos = String(scoreBefore.server || data.server || "player1") === "player2" ? 2 : 1;
+console.log("BREAK POINT DEBUG", {
+  scoreBefore,
+  scoreAfter: score,
+  result,
+  winnerPos,
+  breakPointsWon1: score.breakPointsWon1,
+  breakPointsWon2: score.breakPointsWon2,
+  breakPointsChances1: score.breakPointsChances1,
+  breakPointsChances2: score.breakPointsChances2
+});
 
-          if (winnerPos !== serverPos) {
-            registerBreakPointGame(score, scoreBefore, serverPos);
-          }
-
-          score.server = score.server === "player1" ? "player2" : "player1";
-        }
+if (result.gameWon) {
+  score.server =
+    score.server === "player1"
+      ? "player2"
+      : "player1";
+}
 
         const finished = typeof isMatchFinished === "function"
           ? isMatchFinished(score, data.matchFormat)
@@ -2021,6 +2452,398 @@
         }
       );
     }
+
+    async function undoLastActionFromWear() {
+      if (!id) {
+        throw new Error(
+          "Partida não identificada."
+        );
+      }
+
+      const ref =
+        __db.collection("matches").doc(id);
+
+      const snap =
+        await ref.get();
+
+      if (!snap.exists) {
+        throw new Error(
+          "Partida não encontrada."
+        );
+      }
+
+      const data =
+        snap.data();
+
+      if (!data.lastAction) {
+        throw new Error(
+          "Não há ação anterior para desfazer."
+        );
+      }
+
+      const isFinished =
+        data.status === "finished" ||
+        data.status === "wo" ||
+        data.status === "ret";
+
+      if (
+        isFinished &&
+        data.finishedAt?.toDate
+      ) {
+        const finishedAt =
+          data.finishedAt.toDate();
+
+        const elapsedMs =
+          Date.now() -
+          finishedAt.getTime();
+
+        if (elapsedMs > 5 * 60 * 1000) {
+          throw new Error(
+            "O desfazer foi bloqueado após 5 minutos."
+          );
+        }
+      }
+
+      const previous =
+        data.lastAction;
+
+      await ref.update({
+        score:
+          previous.score ||
+          defaultScore(),
+
+        status:
+          previous.status ||
+          "live",
+
+        finishedAt:
+          previous.finishedAt ||
+          null,
+
+        winnerByWO:
+          previous.winnerByWO ||
+          "",
+
+        server:
+          previous.server ||
+          "player1",
+
+        durationSeconds:
+          previous.durationSeconds ||
+          0,
+
+        accumulatedSeconds:
+          previous.accumulatedSeconds ||
+          0,
+
+        startedAt:
+          previous.startedAt ||
+          null,
+
+        suspendedAt:
+          previous.suspendedAt ||
+          null,
+
+        lastAction: null,
+
+        updatedAt:
+          firebase.firestore.FieldValue
+            .serverTimestamp()
+      });
+
+      setMsg(
+        "Última ação desfeita pelo relógio.",
+        "info"
+      );
+
+      return {
+        ok: true,
+        type: "UNDO"
+      };
+    }
+
+async function handleWearCommand(command) {
+      console.log(
+        "Comando recebido do relógio:",
+        command
+      );
+
+      if (!command || typeof command !== "object") {
+        throw new Error(
+          "Comando inválido."
+        );
+      }
+
+      if (!id) {
+        throw new Error(
+          "Nenhuma partida foi carregada."
+        );
+      }
+
+      const commandMatchId =
+        String(command.matchId || "").trim();
+
+      if (!commandMatchId) {
+        throw new Error(
+          "O comando não possui matchId."
+        );
+      }
+
+      if (commandMatchId !== id) {
+        throw new Error(
+          "O comando pertence a outra partida."
+        );
+      }
+
+      switch (command.type) {
+        case "POINT": {
+          if (
+            command.player !== "player1" &&
+            command.player !== "player2"
+          ) {
+            throw new Error(
+              "Jogador inválido no comando POINT."
+            );
+          }
+
+          await registerPoint(
+            command.player === "player1" ? 1 : 2
+          );
+
+          return {
+            ok: true,
+            type: "POINT",
+            eventId: command.eventId || null
+          };
+        }
+
+        case "GAME_PLUS": {
+          if (
+            command.player !== "player1" &&
+            command.player !== "player2"
+          ) {
+            throw new Error(
+              "Jogador inválido no comando GAME_PLUS."
+            );
+          }
+
+          const snapshot = await __db
+            .collection("matches")
+            .doc(id)
+            .get();
+
+          if (!snapshot.exists) {
+            throw new Error(
+              "Partida não encontrada."
+            );
+          }
+
+          const data = snapshot.data();
+          const score = normalizeScore(
+            data.score
+          );
+
+          const currentGames =
+            command.player === "player1"
+              ? Number(score.games1 || 0)
+              : Number(score.games2 || 0);
+
+          await saveGames(
+            command.player,
+            Math.min(
+              9,
+              currentGames + 1
+            )
+          );
+
+          return {
+            ok: true,
+            type: "GAME_PLUS",
+            eventId: command.eventId || null
+          };
+        }
+
+        case "UNDO": {
+          console.log(
+            "Processando UNDO recebido do relógio."
+          );
+
+          const result =
+            await undoLastActionFromWear();
+
+          return {
+            ok: true,
+            type: "UNDO",
+            eventId: command.eventId || null,
+            result: result || null
+          };
+        }
+
+        case "REQUEST_SCORE": {
+          const snapshot = await __db
+            .collection("matches")
+            .doc(id)
+            .get();
+
+          if (!snapshot.exists) {
+            throw new Error(
+              "Partida não encontrada."
+            );
+          }
+
+          return buildWearScorePayload(
+            snapshot.data()
+          );
+        }
+
+        default:
+          throw new Error(
+            `Comando não suportado: ${command.type}`
+          );
+      }
+    }
+
+    async function sendWearCommandAck( command, ok = true, errorMessage = "" ) {
+      const plugin =
+        window.Capacitor?.Plugins?.TennisWear;
+
+      if (
+        !plugin ||
+        typeof plugin.sendCommandAck !== "function"
+      ) {
+        console.warn(
+          "Plugin sendCommandAck não está disponível."
+        );
+        return;
+      }
+
+      const payload = {
+        type: "COMMAND_ACK",
+        matchId: command.matchId || id,
+        eventId: command.eventId || "",
+        ok,
+        error: errorMessage || "",
+        updatedAt: Date.now()
+      };
+
+      try {
+        const result =
+          await plugin.sendCommandAck({
+            payload
+          });
+
+        console.log(
+          "COMMAND_ACK enviado ao relógio:",
+          result
+        );
+
+      } catch (error) {
+        console.error(
+          "Erro ao enviar COMMAND_ACK ao relógio:",
+          error
+        );
+      }
+    }
+
+    async function processWearCommandQueue() {
+      if (wearCommandProcessing) {
+        return;
+      }
+
+      wearCommandProcessing = true;
+
+      try {
+        while (wearCommandQueue.length > 0) {
+          const command =
+            wearCommandQueue.shift();
+
+          if (
+            !command ||
+            typeof command !== "object"
+          ) {
+            continue;
+          }
+
+          try {
+            console.log(
+              "Processando comando sequencial:",
+              command
+            );
+
+            const result =
+              await handleWearCommand(
+                command
+              );
+
+            console.log(
+              "Comando processado com sucesso:",
+              result
+            );
+
+            await sendWearCommandAck(
+              command,
+              true
+            );
+
+          } catch (error) {
+            console.error(
+              "Erro ao processar comando:",
+              error
+            );
+
+            await sendWearCommandAck(
+              command,
+              false,
+              error?.message ||
+                "Erro ao processar comando."
+            );
+          }
+        }
+
+      } finally {
+        wearCommandProcessing = false;
+      }
+    }
+
+    window.TennisWearBridge = {
+      handleWearCommand,
+      buildWearScorePayload,
+      getCurrentMatchId: () => id
+    };
+
+    window.addEventListener(
+      "tennis:wear-command",
+      (event) => {
+        const command =
+          event.detail;
+
+        console.log(
+          "Comando recebido do relógio:",
+          command
+        );
+
+        if (
+          !command ||
+          typeof command !== "object"
+        ) {
+          console.error(
+            "Comando inválido recebido."
+          );
+          return;
+        }
+
+        wearCommandQueue.push(
+          command
+        );
+
+        console.log(
+          "Comando adicionado à fila JS. " +
+            `Tamanho=${wearCommandQueue.length}`
+        );
+
+        processWearCommandQueue();
+      }
+    );
 
     function init() {
       bindButtons();
